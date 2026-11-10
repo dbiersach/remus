@@ -52,7 +52,9 @@ Day 5.
   six published positions and compares them with the published counts, tests the
   evaluation and a four-move search against the instructor's engine (Remus2 to
   Remus4), and talks to `uci.py` the way Lucas Chess does. At the first difference
-  it stops and names the files to look at.
+  it stops and names the files to look at. On Day 4 the student pair also runs it
+  at the end of Periods 1 to 3: it reads which period Remus4 has reached and
+  compares the engine with the instructor's Remus4 at the end of that period.
 - **Driver and navigator.** The driver types and the navigator reads the instructor's
   file aloud and checks each line. They swap at the start of every period.
 - **Run after every file.** Open the file just typed and press Run Python File. An
@@ -183,8 +185,8 @@ the lines of one period never call a function of a later period.
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). Run `uci.py` and send `position startpos moves a2a3` and `go movetime 5000` to `engines/Remus3` and to `engines/Remus2` (1. a3 is in no line of the book, so Remus3 searches): the `info` lines show how much deeper Remus3 searches in the same time, and the line it expects. |
-| 3:20 to 4:30 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Each student pair finds one game where Remus3 played a book move. |
+| 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). |
+| 3:20 to 4:30 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Once a game leaves the book, Lucas Chess shows each engine's depth and the line it expects beside its score: Remus3 searches deeper than Remus2 in the same time. Each student pair finds one game where Remus3 played a book move. |
 | If time remains | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 | If more time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
 
@@ -203,7 +205,7 @@ it in P4.
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus3` into `engines/Remus4`. |
 | 8:35 to 8:45 | Reminder of threefold repetition and the fifty-move rule. Late move reductions, principal variation search, and futility pruning: three ways to spend less time on moves that are probably bad. |
-| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `uci.py`. |
+| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 1 passes every test. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 ### P2, 10:30 to 12:00: Static exchange evaluation
@@ -212,14 +214,14 @@ it in P4.
 | --- | --- |
 | 10:30 to 10:45 | A capture is good only if the whole exchange on its square wins material: play it out on paper, cheapest attacker first. |
 | 10:45 to 11:50 | Type `exchange.py` (36 code lines): `cheapest_attacker()` and `exchange_score()`. In `quiescence()`, add delta pruning and skip the captures that lose material (about 8 code lines). |
-| 11:50 to 12:00 | Run `uci.py`. |
+| 11:50 to 12:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 2 passes every test. |
 
 ### P3, 1:00 to 2:30: The endgame evaluation
 
 | Time | Activity |
 | --- | --- |
 | 1:00 to 1:15 | Reminder of insufficient material. In the endgame the king comes to the center, and the side that is ahead drives the lone king to the edge. |
-| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `uci.py`. |
+| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 3 passes every test. |
 | 2:25 to 2:30 | Swap driver and navigator. |
 
 ### P4, 3:00 to 4:30: The pawn terms, then test Remus4

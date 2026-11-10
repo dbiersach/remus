@@ -19,7 +19,7 @@ Two endgame rules follow. A side that is ahead by 400 centipawns or more in a la
 | Time | Activity |
 | --- | --- |
 | 1:00 to 1:15 | Reminder of insufficient material. In the endgame the king comes to the center, and the side that is ahead drives the lone king to the edge. |
-| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `uci.py`. |
+| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 3 passes every test. |
 | 2:25 to 2:30 | Swap driver and navigator. |
 
 ## What changes this period
@@ -72,4 +72,4 @@ The instructor's version is [`engines_instructor/Remus4/evaluation.py`](../../en
 
 ## Done when
 
-`uci.py` runs and still plays. Send `position startpos moves a2a3` and `go movetime 5000` (1. a3 is in no line of the book, so the engine searches instead of playing a book move): it prints an `info` line for each depth, then a `bestmove`. Type `quit` to stop it.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 3 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.

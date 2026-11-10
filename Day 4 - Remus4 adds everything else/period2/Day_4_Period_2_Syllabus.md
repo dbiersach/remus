@@ -18,7 +18,7 @@ Quiescence search plays every capture, even queen takes a pawn that a pawn defen
 | --- | --- |
 | 10:30 to 10:45 | A capture is good only if the whole exchange on its square wins material: play it out on paper, cheapest attacker first. |
 | 10:45 to 11:50 | Type `exchange.py` (36 code lines): `cheapest_attacker()` and `exchange_score()`. In `quiescence()`, add delta pruning and skip the captures that lose material (about 8 code lines). |
-| 11:50 to 12:00 | Run `uci.py`. |
+| 11:50 to 12:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 2 passes every test. |
 
 ## What changes this period
 
@@ -64,4 +64,4 @@ Create `exchange.py` in `engines/Remus4`. It has 41 lines when it is done.
 
 ## Done when
 
-`uci.py` runs and still plays. Send `position startpos moves a2a3` and `go movetime 5000` (1. a3 is in no line of the book, so the engine searches instead of playing a book move): it prints an `info` line for each depth, then a `bestmove`. Type `quit` to stop it.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 2 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.

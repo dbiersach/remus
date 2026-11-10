@@ -215,8 +215,11 @@ The engine must run without Lucas Chess or `python-chess` installed.
   `remus.bat` and `verify_remus.py` in the repository. `verify_remus.py` is the
   same file in all four: run with the Run button, it tests the student pair's
   finished version (files, perft, evaluation, a depth-4 search, UCI) against the
-  instructor's numbers, which it holds. Update those numbers after any engine change
-  that moves them. On Day 1 the student pair creates every
+  instructor's numbers, which it holds. In `engines/Remus4` it also tests Remus4 as
+  it stands at the end of Day 4, Periods 1 to 3, told apart by `exchange.py`,
+  `mating_bonus()`, and `king_safety()`, with numbers measured on the period states
+  that `admin/make_code_images.py` rebuilds. Update those numbers after any engine
+  change that moves them. On Day 1 the student pair creates every
   file of Remus1 in `engines/Remus1`. At the start of Days 2, 3, and 4 it copies every
   file of the previous version's folder into the next one in File Explorer and edits
   those copies. Never put instructor code in `engines/`.

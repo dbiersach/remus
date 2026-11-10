@@ -20,7 +20,7 @@
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus3` into `engines/Remus4`. |
 | 8:35 to 8:45 | Reminder of threefold repetition and the fifty-move rule. Late move reductions, principal variation search, and futility pruning: three ways to spend less time on moves that are probably bad. |
-| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `uci.py`. |
+| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 1 passes every test. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 [`Day_4_Period_1_Syllabus.md`](period1/Day_4_Period_1_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
@@ -31,7 +31,7 @@
 | --- | --- |
 | 10:30 to 10:45 | A capture is good only if the whole exchange on its square wins material: play it out on paper, cheapest attacker first. |
 | 10:45 to 11:50 | Type `exchange.py` (36 code lines): `cheapest_attacker()` and `exchange_score()`. In `quiescence()`, add delta pruning and skip the captures that lose material (about 8 code lines). |
-| 11:50 to 12:00 | Run `uci.py`. |
+| 11:50 to 12:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 2 passes every test. |
 
 [`Day_4_Period_2_Syllabus.md`](period2/Day_4_Period_2_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
 
@@ -40,7 +40,7 @@
 | Time | Activity |
 | --- | --- |
 | 1:00 to 1:15 | Reminder of insufficient material. In the endgame the king comes to the center, and the side that is ahead drives the lone king to the edge. |
-| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `uci.py`. |
+| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 3 passes every test. |
 | 2:25 to 2:30 | Swap driver and navigator. |
 
 [`Day_4_Period_3_Syllabus.md`](period3/Day_4_Period_3_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.

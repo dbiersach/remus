@@ -1,7 +1,8 @@
 """verify_remus.py
 
 Verify the Remus in this folder without playing a game. Run this file with the Run
-Python File button once the student pair has typed every file of this version.
+Python File button once the student pair has typed every file of this version, and
+on Day 4 at the end of every period.
 
 The test runs in steps and stops at the first step that fails, naming the file
 to look at:
@@ -16,7 +17,10 @@ to look at:
 5. UCI: uci.py answers the commands Lucas Chess sends.
 
 The same file sits in engines/Remus1 to engines/Remus4. It reads the name of its
-own folder to know which version it tests.
+own folder to know which version it tests. Remus4 grows over the four periods of
+Day 4, so in engines/Remus4 the file also reads which period the student pair has
+reached and compares the engine with the instructor's Remus4 at the end of that
+period.
 """
 
 import importlib
@@ -46,6 +50,11 @@ FILES["Remus3"] = FILES["Remus2"] + [
     "opening_book.txt",
 ]
 FILES["Remus4"] = FILES["Remus3"] + ["exchange.py"]
+# Remus4 as it stands at the end of Day 4, Periods 1 to 3. exchange.py arrives in
+# Period 2.
+FILES["Remus4 after Period 1"] = FILES["Remus3"]
+FILES["Remus4 after Period 2"] = FILES["Remus4"]
+FILES["Remus4 after Period 3"] = FILES["Remus4"]
 
 # (name, position in FEN, depth, published count). FEN writes a position as
 # text: the board from rank 8 down to rank 1, the side to move, the castling
@@ -99,6 +108,9 @@ TEST_POSITIONS = (
 EXPECTED_SCORES = {
     "Remus2": [0, 0, 100, 580, 65],
     "Remus3": [0, 0, 100, 575, 185],
+    "Remus4 after Period 1": [0, 0, 100, 575, 185],
+    "Remus4 after Period 2": [0, 0, 100, 575, 185],
+    "Remus4 after Period 3": [0, -6, 110, 632, 195],
     "Remus4": [0, -6, 100, 652, 160],
 }
 
@@ -120,6 +132,27 @@ EXPECTED_SEARCHES = {
         ("e3f2", 605, 5_196),
         ("d7c8q", 490, 14_257),
     ],
+    "Remus4 after Period 1": [
+        ("g1f3", 0, 2_233),
+        ("b1c3", 0, 7_723),
+        ("e2a6", 70, 22_130),
+        ("e3f2", 605, 2_673),
+        ("d7c8q", 490, 2_743),
+    ],
+    "Remus4 after Period 2": [
+        ("g1f3", 0, 2_189),
+        ("b1c3", 0, 5_635),
+        ("e2a6", 70, 7_920),
+        ("e3f2", 605, 2_673),
+        ("d7c8q", 490, 2_151),
+    ],
+    "Remus4 after Period 3": [
+        ("e2e4", 0, 3_516),
+        ("b1c3", 0, 6_517),
+        ("e2a6", 86, 8_022),
+        ("e3d4", 695, 2_424),
+        ("d7c8q", 519, 2_166),
+    ],
     "Remus4": [
         ("g1f3", 0, 3_005),
         ("b1c3", 0, 6_619),
@@ -135,6 +168,26 @@ def fail(message: str):
     print()
     print("PROBLEM: " + message)
     sys.exit(1)
+
+
+def find_stage() -> str:
+    """
+    Return the name of the engine this folder holds: its version, or in
+    engines/Remus4 the period of Day 4 the student pair has reached.
+
+    Each period of Day 4 adds something the period before lacks: exchange.py in
+    Period 2, mating_bonus() in Period 3, and king_safety() in Period 4.
+    """
+    if VERSION != "Remus4":
+        return VERSION
+    if not (FOLDER / "exchange.py").exists():
+        return "Remus4 after Period 1"
+    evaluation_text = (FOLDER / "evaluation.py").read_text(encoding="utf-8")
+    if "def mating_bonus(" not in evaluation_text:
+        return "Remus4 after Period 2"
+    if "def king_safety(" not in evaluation_text:
+        return "Remus4 after Period 3"
+    return "Remus4"
 
 
 def from_fen(fen: str, board_module):
@@ -232,24 +285,24 @@ def search_to_depth(position, engine) -> tuple[str, int, int]:
     return move_name(move, engine["board"]), score, nodes
 
 
-def verify_files():
+def verify_files(stage: str):
     """Step 1: every file of this version is in the folder."""
-    if VERSION not in FILES:
+    if stage not in FILES:
         fail(f"this file must sit in engines/Remus1 to Remus4, not in {VERSION}")
     missing = []
-    for name in FILES[VERSION]:
+    for name in FILES[stage]:
         if not (FOLDER / name).exists():
             missing.append(name)
     if missing:
         fail(f"{VERSION} has no {missing} in {FOLDER}")
-    print(f"1. Files: all {len(FILES[VERSION])} files of {VERSION} are here")
+    print(f"1. Files: all {len(FILES[stage])} files of {stage} are here")
 
 
-def load_engine() -> dict:
+def load_engine(stage: str) -> dict:
     """Import every module of the engine in this folder, by name."""
     sys.path.insert(0, str(FOLDER))
     engine = {}
-    for name in FILES[VERSION]:
+    for name in FILES[stage]:
         if name.endswith(".py"):
             module_name = name[:-3]
             # A typo that stops a file from loading shows up here, with the
@@ -277,25 +330,25 @@ def verify_perft(engine):
             )
 
 
-def verify_evaluation(engine):
+def verify_evaluation(engine, stage: str):
     """Step 3: score five positions and compare with the instructor's engine."""
     print("3. Evaluation:")
     for index in range(len(TEST_POSITIONS)):
         name, fen = TEST_POSITIONS[index]
         score = engine["evaluation"].evaluate(from_fen(fen, engine["board"]))
-        expected = EXPECTED_SCORES[VERSION][index]
+        expected = EXPECTED_SCORES[stage][index]
         print(f"   {name:<11} score {score:>5} (expected {expected})")
         if score != expected:
             fail("the scores differ. Look at evaluation.py and its tables")
 
 
-def verify_search(engine):
+def verify_search(engine, stage: str):
     """Step 4: search five positions and compare with the instructor's engine."""
     print(f"4. Search, {SEARCH_DEPTH} moves deep:")
     for index in range(len(TEST_POSITIONS)):
         name, fen = TEST_POSITIONS[index]
         found = search_to_depth(from_fen(fen, engine["board"]), engine)
-        expected = EXPECTED_SEARCHES[VERSION][index]
+        expected = EXPECTED_SEARCHES[stage][index]
         print(
             f"   {name:<11} {found[0]} score {found[1]} nodes {found[2]:,} "
             f"(expected {expected[0]} score {expected[1]} nodes {expected[2]:,})"
@@ -304,8 +357,12 @@ def verify_search(engine):
             fail("the search differs. Look at search.py and the files it imports")
 
 
-def verify_uci():
+def verify_uci(stage: str):
     """Step 5: send uci.py the commands Lucas Chess sends."""
+    # Remus4 takes its name in Day 4, Period 4, so until then uci.py says Remus3
+    name = VERSION
+    if stage != VERSION:
+        name = "Remus3"
     commands = "uci\nisready\nposition startpos moves e2e4\ngo movetime 500\nquit\n"
     answer = subprocess.run(
         [sys.executable, "uci.py"],
@@ -317,28 +374,29 @@ def verify_uci():
         check=False,
     )
     lines = answer.stdout.split("\n")
-    if f"id name {VERSION}" not in lines:
-        fail(f"uci.py does not answer 'id name {VERSION}'. {answer.stderr}")
+    if f"id name {name}" not in lines:
+        fail(f"uci.py does not answer 'id name {name}'. {answer.stderr}")
     if "uciok" not in lines or "readyok" not in lines:
         fail("uci.py does not answer uciok and readyok")
     last = answer.stdout.strip().split("\n")[-1]
     if not last.startswith("bestmove "):
         fail(f"uci.py ends with {last!r} instead of a bestmove")
-    print(f"5. UCI: uci.py names itself {VERSION} and answers e2e4 with {last}")
+    print(f"5. UCI: uci.py names itself {name} and answers e2e4 with {last}")
 
 
 def main():
     started = time.perf_counter()
-    print(f"Verifying {VERSION} in {FOLDER}")
-    verify_files()
-    engine = load_engine()
+    stage = find_stage()
+    print(f"Verifying {stage} in {FOLDER}")
+    verify_files(stage)
+    engine = load_engine(stage)
     verify_perft(engine)
     if VERSION != "Remus1":
-        verify_evaluation(engine)
-        verify_search(engine)
-    verify_uci()
+        verify_evaluation(engine, stage)
+        verify_search(engine, stage)
+    verify_uci(stage)
     print()
-    print(f"{VERSION} passes every test")
+    print(f"{stage} passes every test")
     print(f"Total run time (sec): {time.perf_counter() - started:.3f}")
 
 

@@ -22,7 +22,7 @@ The name line in `uci.py` stays `id name Remus3` until Period 4. No new file is 
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus3` into `engines/Remus4`. |
 | 8:35 to 8:45 | Reminder of threefold repetition and the fifty-move rule. Late move reductions, principal variation search, and futility pruning: three ways to spend less time on moves that are probably bad. |
-| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `uci.py`. |
+| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 1 passes every test. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 ## What changes this period
@@ -117,4 +117,4 @@ Change the first line of `generate_moves()`'s body to `board, white, castling, e
 
 ## Done when
 
-`uci.py` runs and still plays. Send `position startpos moves a2a3` and `go movetime 5000` (1. a3 is in no line of the book, so the engine searches instead of playing a book move): it prints an `info` line for each depth, then a `bestmove`. Type `quit` to stop it.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 1 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.
