@@ -101,7 +101,7 @@ plays a random legal move, and each student plays it in Lucas Chess.
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](docs/chess_tutor/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
-| 3:10 to 3:50 | Type `search.py` of `engines_instructor/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). Run `uci.py` and talk to it by hand, as in the "Try it" part of `uci.md`. |
+| 3:10 to 3:50 | Type `search.py` of `engines_instructor/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
 | 3:50 to 4:05 | Run `verify_remus.py` in `engines/Remus1` and fix any file it names until it reports that Remus1 passes every test. |
 | 4:05 to 4:30 | One round of the student pair against their Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Every move it makes is legal, and nearly every move is bad. |
 
@@ -135,13 +135,13 @@ Remus1 and the student pair in Lucas Chess.
 | --- | --- |
 | 1:00 to 1:10 | Reminder of checkmate and stalemate: a side with no legal move has lost if in check, and draws if not. |
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
-| 2:10 to 2:30 | Run `uci.py` and send `position startpos` and `go movetime 2000`: the `info` lines show Remus2 searching one move deeper at a time. Then run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
+| 2:10 to 2:30 | Run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
 
 ### P4, 3:00 to 4:30: Remus2 against Remus1 and the student pair
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:25 | Start one round of their Remus2 against their Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Each student pair reads its results tab. |
+| 3:00 to 3:25 | Start one round of their Remus2 against their Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2's climbs one move at a time, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
 | 3:25 to 4:05 | One round of the student pair against their Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 | 4:05 to 4:30, if time remains | One round of their Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 

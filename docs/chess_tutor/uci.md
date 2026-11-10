@@ -69,12 +69,33 @@ buffer.
 - **The game history.** Remus4 keeps the position key of every position of the game
   in `game_history`, so its search can see a threefold repetition coming.
 
-## Try it
+## A whole conversation to read
 
-Open `uci.py` in an engine folder in VS Code, and click the Run Python File button
-(the triangle at the top right of the editor). Nothing appears at first, because
-Remus waits for a command. Type `uci`, then `position startpos`, then `go movetime
-2000`, pressing Enter after each one. Type `quit` to stop.
+This section is extra reading, not a task of any period. Here is everything Remus2
+says when it is asked to choose a first move with two seconds to think:
+
+```text
+Lucas Chess -> uci                          Remus -> id name Remus2
+                                            Remus -> uciok
+Lucas Chess -> isready                      Remus -> readyok
+Lucas Chess -> position startpos
+Lucas Chess -> go movetime 2000             Remus -> info depth 1 score cp 50 nodes 41
+                                            Remus -> info depth 2 score cp 0 nodes 266
+                                            Remus -> info depth 3 score cp 50 nodes 2505
+                                            Remus -> info depth 4 score cp 0 nodes 17360
+                                            Remus -> info depth 5 score cp 40 nodes 153457
+                                            Remus -> bestmove g1f3
+Lucas Chess -> quit
+```
+
+Each `info` line reports one finished depth. At depth 1 Remus2 tries each of White's
+20 first moves, and the best of them scores 50 centipawns, half a pawn. At depth 2 it
+also tries every Black reply, and the score falls to 0. The score swings up at the
+odd depths, where White makes the last move, and down at the even ones, where Black
+answers. Each depth visits six to nine times as many positions as the one before, so
+depth 5 visits 153,457. Remus2 starts a new depth only while less than half of its
+time is gone. After depth 5 more than a second has passed, so Remus2 sends its best
+move from depth 5: `g1f3`, the knight to f3.
 
 ## Puzzle questions
 

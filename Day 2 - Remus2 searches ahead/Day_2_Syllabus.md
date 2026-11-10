@@ -41,7 +41,7 @@
 | --- | --- |
 | 1:00 to 1:10 | Reminder of checkmate and stalemate: a side with no legal move has lost if in check, and draws if not. |
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
-| 2:10 to 2:30 | Run `uci.py` and send `position startpos` and `go movetime 2000`: the `info` lines show Remus2 searching one move deeper at a time. Then run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
+| 2:10 to 2:30 | Run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
 
 [`Day_2_Period_3_Syllabus.md`](period3/Day_2_Period_3_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
 
@@ -49,7 +49,7 @@
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:25 | Start one round of their Remus2 against their Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Each student pair reads its results tab. |
+| 3:00 to 3:25 | Start one round of their Remus2 against their Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2's climbs one move at a time, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
 | 3:25 to 4:05 | One round of the student pair against their Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 | 4:05 to 4:30, if time remains | One round of their Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 

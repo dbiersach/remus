@@ -19,7 +19,7 @@ The last two files of Remus1 are new files in `engines/Remus1`, like every file 
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](../../docs/chess_tutor/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
-| 3:10 to 3:50 | Type `search.py` of `engines_instructor/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). Run `uci.py` and talk to it by hand, as in the "Try it" part of `uci.md`. |
+| 3:10 to 3:50 | Type `search.py` of `engines_instructor/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
 | 3:50 to 4:05 | Run `verify_remus.py` in `engines/Remus1` and fix any file it names until it reports that Remus1 passes every test. |
 | 4:05 to 4:30 | One round of the student pair against their Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Every move it makes is legal, and nearly every move is bad. |
 

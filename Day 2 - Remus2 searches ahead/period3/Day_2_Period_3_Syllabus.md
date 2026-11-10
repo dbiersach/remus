@@ -20,7 +20,7 @@ The student pair keeps working in `engines/Remus2`. This period finishes `search
 | --- | --- |
 | 1:00 to 1:10 | Reminder of checkmate and stalemate: a side with no legal move has lost if in check, and draws if not. |
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
-| 2:10 to 2:30 | Run `uci.py` and send `position startpos` and `go movetime 2000`: the `info` lines show Remus2 searching one move deeper at a time. Then run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
+| 2:10 to 2:30 | Run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
 
 ## What changes this period
 
@@ -51,4 +51,4 @@ The copied `uci.py` works for Remus2 unchanged except for one line, the name Luc
 
 ## Done when
 
-`uci.py` answers `go movetime 2000` with `info` lines and a `bestmove`.
+The student pair's Remus2 passes every test in `verify_remus.py`.
