@@ -4,7 +4,7 @@
 
 ## Goal
 
-Remus3 shows the line it expects, and the student pair tests Remus3 with `verify_remus.py`, then it plays Remus2 and each student.
+Remus3 shows the line it expects, and the student pair tests Remus3 with `verify_remus.py`, then it plays Remus2.
 
 ## The big picture
 
@@ -17,9 +17,11 @@ The principal variation is the line of moves the engine expects both sides to pl
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). Run `uci.py` and send `position startpos moves a2a3` and `go movetime 5000` to `engines/Remus3` and to `engines/Remus2` (1. a3 is in no line of the book, so Remus3 searches): the `info` lines show how much deeper Remus3 searches in the same time, and the line it expects. |
-| 3:20 to 3:55 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Each student pair finds one game where Remus3 played a book move. |
-| 3:55 to 4:30 | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
-| If time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
+| 3:20 to 4:30 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Each student pair finds one game where Remus3 played a book move. |
+| If time remains | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If more time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
+
+Play stops at 4:30, the end of the period, even in the middle of a game.
 
 ## What changes this period
 
@@ -48,4 +50,4 @@ Remus3 is complete. Every file in `engines/Remus3` now matches the instructor's 
 
 ## Done when
 
-The student pair's Remus3 passes every test in `verify_remus.py`, it has played one round against its Remus2, and each student has played it. A round against Stockfish 1500 follows if time remains.
+The student pair's Remus3 passes every test in `verify_remus.py`, and it has played one round against its Remus2. A round against the student pair follows if time remains, then a round against Stockfish 1500.

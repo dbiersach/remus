@@ -54,6 +54,8 @@
 | 4:00 to 4:30 | One round of their Remus4 against Remus4-Rust, two 10-minute games played at once in two Lucas workers. Remus4-Rust is the instructor's Remus4 written in Rust, with the same evaluation and search and a larger table, so speed and memory alone separate the two engines. |
 | If time remains | One round of the student pair against their Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 
+Play stops at 4:30, the end of the period, even in the middle of a game.
+
 [`Day_4_Period_4_Syllabus.md`](period4/Day_4_Period_4_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
 
 ## By the end of the day

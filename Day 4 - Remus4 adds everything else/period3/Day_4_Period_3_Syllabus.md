@@ -72,4 +72,4 @@ The instructor's version is [`engines_instructor/Remus4/evaluation.py`](../../en
 
 ## Done when
 
-`uci.py` runs and still plays.
+`uci.py` runs and still plays. Send `position startpos moves a2a3` and `go movetime 5000` (1. a3 is in no line of the book, so the engine searches instead of playing a book move): it prints an `info` line for each depth, then a `bestmove`. Type `quit` to stop it.

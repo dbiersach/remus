@@ -85,9 +85,9 @@ Expected results of the finished programs:
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | Each student copies the Remus folder to a USB drive in File Explorer, leaving out `.venv`, and checks that the copy opens in VS Code. |
-| 3:10 to 3:30 | Each student pair runs both programs once more and fills in its results: measurements against random guessing, and right, wrong, and can't-tell counts for greedy and for search. The class collects every student pair's numbers on the board. |
-| 3:30 to 3:45 | Each student pair picks one powder its search named and one it answered with "can't tell", and works out which measurement would settle the second. |
-| 3:45 to 4:20 | Each student pair presents its results and its two powders in three minutes. |
+| 3:10 to 3:30 | Each student pair runs both programs once more and fills in its results: measurements against random guessing, and right, wrong, and can't-tell counts for greedy and for search, with the `PHASE_COST` and `MISSING` the student pair picked in Period 3. The class collects every student pair's numbers and its two values on the board. |
+| 3:30 to 3:45 | Each student pair compares two powders. The search names powder 0 right: silicon and zincite. Powder 12 holds anatase and silver, and the search answers "can't tell": anatase with gold, or anatase with silver. Every peak of gold lands less than 0.3 degrees from a peak of silver, inside `TOLERANCE`, and 50 of the search's 52 "can't tell" answers are this same tie. No X-ray peak in the library settles powder 12, so the student pair works out what other test would. |
+| 3:45 to 4:20 | Each student pair presents its results, its two values, and its answer for powder 12 in three minutes. |
 | 4:20 to 4:30 | What comes next: AI agents that steer real experiments at light sources such as NSLS-II. |
 
 [`Day_5_Period_4_Syllabus.md`](period4/Day_5_Period_4_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.

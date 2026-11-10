@@ -184,9 +184,11 @@ the lines of one period never call a function of a later period.
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). Run `uci.py` and send `position startpos moves a2a3` and `go movetime 5000` to `engines/Remus3` and to `engines/Remus2` (1. a3 is in no line of the book, so Remus3 searches): the `info` lines show how much deeper Remus3 searches in the same time, and the line it expects. |
-| 3:20 to 3:55 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Each student pair finds one game where Remus3 played a book move. |
-| 3:55 to 4:30 | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
-| If time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
+| 3:20 to 4:30 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Each student pair finds one game where Remus3 played a book move. |
+| If time remains | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If more time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
+
+Play stops at 4:30, the end of the period, even in the middle of a game.
 
 **Checkpoint:** Remus3 is complete, 535 code lines, and it passes every test in `verify_remus.py`.
 
@@ -228,6 +230,8 @@ it in P4.
 | 3:30 to 4:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 passes every test. Then play one round of their Remus4 against their Remus3, two 10-minute games played at once in two Lucas workers. |
 | 4:00 to 4:30 | One round of their Remus4 against Remus4-Rust, two 10-minute games played at once in two Lucas workers. Remus4-Rust is the instructor's Remus4 written in Rust, with the same evaluation and search and a larger table, so speed and memory alone separate the two engines. |
 | If time remains | One round of the student pair against their Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+
+Play stops at 4:30, the end of the period, even in the middle of a game.
 
 **Checkpoint:** Remus4 is complete, 694 code lines, and it passes every test in `verify_remus.py`.
 
@@ -281,9 +285,9 @@ they reuse the engine's ideas, not its code.
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | Each student copies the Remus folder to a USB drive in File Explorer, leaving out `.venv`, and checks that the copy opens in VS Code. |
-| 3:10 to 3:30 | Each student pair runs both programs once more and fills in its results: measurements against random guessing, and right, wrong, and can't-tell counts for greedy and for search. The class collects every student pair's numbers on the board. |
-| 3:30 to 3:45 | Each student pair picks one powder its search named and one it answered with "can't tell", and works out which measurement would settle the second. |
-| 3:45 to 4:20 | Each student pair presents its results and its two powders in three minutes. |
+| 3:10 to 3:30 | Each student pair runs both programs once more and fills in its results: measurements against random guessing, and right, wrong, and can't-tell counts for greedy and for search, with the `PHASE_COST` and `MISSING` the student pair picked in Period 3. The class collects every student pair's numbers and its two values on the board. |
+| 3:30 to 3:45 | Each student pair compares two powders. The search names powder 0 right: silicon and zincite. Powder 12 holds anatase and silver, and the search answers "can't tell": anatase with gold, or anatase with silver. Every peak of gold lands less than 0.3 degrees from a peak of silver, inside `TOLERANCE`, and 50 of the search's 52 "can't tell" answers are this same tie. No X-ray peak in the library settles powder 12, so the student pair works out what other test would. |
+| 3:45 to 4:20 | Each student pair presents its results, its two values, and its answer for powder 12 in three minutes. |
 | 4:20 to 4:30 | What comes next: AI agents that steer real experiments at light sources such as NSLS-II. |
 
 **Checkpoint:** every student pair's `choose_next_measurement()` beats random guessing,
