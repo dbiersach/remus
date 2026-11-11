@@ -121,3 +121,12 @@ Python UCI adapter continues to accept `position startpos moves ...`; it does no
 add `position fen` input. Rust retains its designer `position fen`, `go depth`,
 `go perft`, and `eval` commands. Fixed-depth and perft checks do not query Lichess.
 See [Remus6](../engines/Remus6/README.md) for timing, caching, and draw limitations.
+
+
+## Remus5 and Remus6: search-table memory
+
+Both Python and Rust use fixed search tables: 1 GiB for Remus5 and 2 GiB for
+Remus6. They advertise no UCI Hash option. Each process owns its table, so
+parallel workers require room for all engine instances. Remus6's
+`LichessTablebase` option controls online endgame advice independently of the
+native search cache.

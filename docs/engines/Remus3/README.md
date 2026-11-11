@@ -31,10 +31,53 @@ needs no SAN code to read it.
 
 ## The call tree
 
-Each box is a function, colored by its file, and each arrow runs from a function to
-a function it calls. A circle arrow after a name marks a function that calls itself.
+Start with the module overview, then open the function view for the module you
+want to follow. These diagrams describe the Python Remus3 source; they are
+not Rust call graphs or a trace of one particular search.
 
-![The call tree of Remus3](call_tree.svg)
+The diagrams use Mermaid's ELK layout. Each module has its own box color. An arrow
+points from a caller to a callee, and a loop marks recursion. A small bridge at a
+crossing means the lines cross without joining. Arrows show possible calls, not
+execution order or call frequency.
+
+### Module overview
+
+Each box is a source file. An arrow means a function or initialization in the
+first module calls a function in the second. Calls within a module are omitted;
+multiple calls between the same two modules share one arrow.
+
+![Remus3 module overview](mermaid/modules.svg)
+
+### Function views
+
+A focused view includes calls originating in the named module. External callees
+retain their module labels, but their own calls are not expanded. A function with
+no outgoing calls appears when a selected caller uses it. The complete graph
+contains all recognized connections and recursive calls, and needs more zooming
+than the focused views.
+
+| View | Boxes | Arrows | Editable source |
+| --- | ---: | ---: | --- |
+| [Complete function graph](mermaid/full_elk.svg) | 32 | 49 | [Mermaid](mermaid/full_elk.mmd) |
+| [Module overview](mermaid/modules.svg) | 9 | 14 | [Mermaid](mermaid/modules.mmd) |
+| [UCI and move selection](mermaid/uci.svg) | 12 | 13 | [Mermaid](mermaid/uci.mmd) |
+| [Search](mermaid/search.svg) | 15 | 24 | [Mermaid](mermaid/search.mmd) |
+| [Evaluation](mermaid/evaluation.svg) | 4 | 2 | [Mermaid](mermaid/evaluation.mmd) |
+
+### Viewing and editing
+
+Open an SVG in a browser to zoom without losing text quality. SVGs need no
+Mermaid installation or online account. Matching `.mmd` files contain editable
+diagram text, including layout and colors. Render them with Mermaid CLI 12.2.0
+for the supplied layout. Other Mermaid hosts can differ in version and layout
+support.
+
+The graph contains statically recognized calls to engine functions, including
+module initialization and thread targets. Standard-library internals and function
+definitions with no recognized connections are outside its scope.
+
+See [Mermaid layouts](https://mermaid.js.org/config/layouts.html) for ELK settings
+and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering.
 
 ## What each enhancement does
 

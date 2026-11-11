@@ -4,6 +4,14 @@ This is a standalone companion to every source, launcher, support, and data file
 
 Remus2 chooses moves with scored negamax alpha-beta search, iterative deepening, capture ordering, check extensions, and quiescence. Its evaluator counts material and piece-square preferences. It has no opening book, transposition table, killer moves, or history-based draw state.
 
+## Cache and call diagrams
+
+Remus2 has no transposition table and allocates no search cache.
+
+The [engine README](../../docs/engines/Remus2/README.md#the-call-tree) contains
+the Mermaid module overview and focused function diagrams. Editable `.mmd`
+sources and rendered SVGs live beside that README in `mermaid/`.
+
 ## Reading guide
 
 The tables reproduce exact source text with original line numbers. Every blank line, comment, docstring, import, constant, data row, control-flow line, and executable statement receives a row. Indentation is preserved. A multiline statement has one explanation per physical line, including its delimiters. Function sections provide navigation, while the file reviews explain assumptions that span several lines.

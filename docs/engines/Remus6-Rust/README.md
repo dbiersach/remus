@@ -16,8 +16,8 @@ lookups. The engine also plays when the network or service is unavailable.
 
 The [source folder](../../../engines_instructor/Remus6-Rust/) uses the Remus5-Rust
 bitboards, copy-make positions, search, evaluation, and a transposition table
-budgeted to half the installed physical RAM at startup.
-The native modules match Remus5-Rust. Only `main.rs` and the additional
+with a fixed 2 GiB allocation.
+The native modules match Remus5-Rust except for table capacity. Only `main.rs` and the additional
 `tablebase.rs` implement the boundary behavior.
 
 | File | Code lines | Responsibility |
@@ -31,9 +31,9 @@ The native modules match Remus5-Rust. Only `main.rs` and the additional
 | `src/evaluation.rs` | 311 | Static evaluation |
 | `src/exchange.rs` | 99 | Static exchange evaluation |
 | `src/search.rs` | 438 | Remus5-Rust native search |
-| `src/transposition_table.rs` | 179 | Half-installed-RAM search table, multiply-shift indexing, and Windows allocation |
+| `src/transposition_table.rs` | 144 | Fixed 2 GiB search table, multiply-shift indexing, and Windows allocation |
 | `src/opening_book.rs` | 48 | Embedded opening lines |
-| **Total** | **2098** | |
+| **Total** | **2063** | |
 
 Counts exclude blank lines and comments, including Rust documentation comments.
 `Cargo.toml` and `Cargo.lock` hold build settings and dependency versions;
@@ -43,7 +43,9 @@ Counts exclude blank lines and comments, including Rust documentation comments.
 The Python call tree shows the corresponding engine flow; Rust keeps adapter state
 in `Tablebase` methods and native search state in `Search`.
 
-![Corresponding Python engine call tree](../Remus6/call_tree.svg)
+![Corresponding Python module overview](../Remus6/mermaid/modules.svg)
+
+[Function call diagrams](../Remus6/README.md#the-call-tree) show the native helpers.
 
 `reqwest` supplies HTTPS with certificate validation, `serde_json` parses JSON,
 and `httpdate` handles HTTP retry dates. These dependencies do not implement chess
@@ -53,18 +55,17 @@ workspace's designer build and verification tools accept `--engine 6`.
 
 ## Transposition-table memory
 
-The engine reads installed physical RAM with the Windows API at startup, then
-budgets half of it for whole 64-byte buckets. A 24 GiB machine receives a 12 GiB
-table. Multiply-shift indexing supports that bucket count without rounding to a
-power of two. Windows virtual memory supplies zero-filled pages on first access;
-the engine releases the region when the table is dropped.
+The engine allocates a fixed 2 GiB table at startup: 33,554,432 buckets of four
+16-byte entries. Multiply-shift indexing selects the bucket. Matching keys update
+in place; full buckets replace the entry with the lowest depth minus its search
+age penalty. Windows supplies zero-filled pages on first access and releases the
+region when the table is dropped. An unsuccessful allocation disables caching
+while leaving native search available.
 
-An unsuccessful RAM query selects 512 MiB. An allocation failure retries half as
-many buckets until allocation succeeds, or disables caching if no allocation
-succeeds. These exceptional paths keep native search available. Normal capacity
-depends only on installed RAM, never on current memory usage. Each engine process
-has its own budget. The [table-memory guide](../transposition_table_memory.md)
-describes Python's approximate sizing and operating limits.
+There is no UCI Hash setting. Each engine process owns its 2 GiB allocation, and
+other process memory is additional. Python Remus6 uses the same allocation size,
+bucket dimensions, and replacement policy through standard-library `mmap` and
+`struct`; its position keys differ from Rust's keys.
 
 ## UCI and verification behavior
 

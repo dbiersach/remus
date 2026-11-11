@@ -1,7 +1,6 @@
 //! Remember searched positions in four-entry, 64-byte buckets.
 //!
-//! The table targets half the installed physical RAM, read once at startup.
-//! Multiply-shift indexing permits any bucket count. A full bucket replaces its
+//! The table holds 1 GiB of buckets, indexed with multiply-shift hashing. A full bucket replaces its
 //! least useful entry according to search age and depth.
 
 use std::ffi::c_void;
@@ -13,7 +12,8 @@ pub const EXACT: u8 = 0;
 pub const LOWER: u8 = 1;
 pub const UPPER: u8 = 2;
 
-const DEFAULT_BUCKETS: usize = 1 << 23; // 512 MiB if installed RAM is unknown
+const TABLE_BYTES: usize = 1_073_741_824; // Fixed 1 GiB cache
+const BUCKET_COUNT: usize = TABLE_BYTES / size_of::<Bucket>();
 const MEM_COMMIT: u32 = 0x1000; // Back the region with Windows commit capacity
 const MEM_RESERVE: u32 = 0x2000; // Reserve addresses for the table
 const MEM_RELEASE: u32 = 0x8000; // Release the whole allocation on drop
@@ -21,7 +21,6 @@ const PAGE_READWRITE: u32 = 0x04; // Ordinary writable, nonexecutable pages
 
 #[link(name = "kernel32")]
 unsafe extern "system" {
-    fn GetPhysicallyInstalledSystemMemory(kilobytes: *mut u64) -> i32;
     fn VirtualAlloc(
         address: *mut c_void,
         bytes: usize,
@@ -51,47 +50,20 @@ struct Bucket {
     entries: [Entry; ENTRIES_PER_BUCKET],
 }
 
-/// Return installed RAM, independent of current free or in-use memory.
-fn physical_memory_bytes() -> Option<u64> {
-    let mut kilobytes = 0;
-    // The pointer names a live u64 for the duration of this synchronous call.
-    if unsafe { GetPhysicallyInstalledSystemMemory(&mut kilobytes) } == 0 || kilobytes == 0 {
-        return None;
-    }
-    kilobytes.checked_mul(1024)
-}
-
-/// Count whole buckets within half the installed RAM and pointer arithmetic limits.
-fn bucket_count(installed_bytes: Option<u64>) -> usize {
-    match installed_bytes {
-        Some(bytes) if bytes > 0 => {
-            let count = bytes / 2 / size_of::<Bucket>() as u64;
-            count.clamp(1, (isize::MAX as usize / size_of::<Bucket>()) as u64) as usize
-        }
-        _ => DEFAULT_BUCKETS,
-    }
-}
-
-/// Map the whole 64-bit key range onto any nonzero number of buckets.
+/// Map the whole 64-bit key range onto the fixed table.
 #[inline]
-fn bucket_index(key: u64, count: usize) -> usize {
-    ((u128::from(key) * count as u128) >> 64) as usize
+fn bucket_index(key: u64) -> usize {
+    ((u128::from(key) * BUCKET_COUNT as u128) >> 64) as usize
 }
 
 /// Obtain aligned zero-filled pages without touching the whole table at startup.
-fn allocate_buckets(count: usize) -> *mut Bucket {
-    let Some(bytes) = count.checked_mul(size_of::<Bucket>()) else {
-        return ptr::null_mut();
-    };
-    if bytes == 0 || bytes > isize::MAX as usize {
-        return ptr::null_mut();
-    }
+fn allocate_buckets() -> *mut Bucket {
     // Windows aligns the base to at least a page boundary, exceeding Bucket's 64
     // bytes. Integer-only entries accept zero bits. Pages are supplied on access.
     unsafe {
         VirtualAlloc(
             ptr::null_mut(),
-            bytes,
+            TABLE_BYTES,
             MEM_RESERVE | MEM_COMMIT,
             PAGE_READWRITE,
         )
@@ -109,28 +81,14 @@ pub struct Stored {
 
 pub struct Table {
     buckets: *mut Bucket,
-    bucket_count: usize,
     age: u8,
 }
 
 impl Table {
     pub fn new() -> Table {
-        Self::with_allocator(bucket_count(physical_memory_bytes()), allocate_buckets)
-    }
-
-    /// Retry smaller allocations on failure; zero buckets disables only caching.
-    fn with_allocator(mut count: usize, allocate: fn(usize) -> *mut Bucket) -> Table {
-        let mut buckets = ptr::null_mut();
-        while count > 0 {
-            buckets = allocate(count);
-            if !buckets.is_null() {
-                break;
-            }
-            count /= 2;
-        }
+        // A null allocation disables caching while leaving native search available.
         Table {
-            buckets,
-            bucket_count: count,
+            buckets: allocate_buckets(),
             age: 0,
         }
     }
@@ -148,11 +106,11 @@ impl Table {
         } else if score < -MATE_SCORE + 1000 {
             score -= ply;
         }
-        if self.bucket_count == 0 || key == 0 {
+        if self.buckets.is_null() || key == 0 {
             return; // Zero marks an empty entry, so this key is not cached.
         }
         let age = self.age;
-        let index = bucket_index(key, self.bucket_count);
+        let index = bucket_index(key);
         // The index is inside the owned allocation; &mut self excludes other borrows.
         let entries = unsafe { &mut (*self.buckets.add(index)).entries };
         let mut chosen = 0;
@@ -181,10 +139,10 @@ impl Table {
     /// Return what the table holds for the position, or None.
     #[inline]
     pub fn probe(&self, key: u64, ply: i32) -> Option<Stored> {
-        if self.bucket_count == 0 || key == 0 {
+        if self.buckets.is_null() || key == 0 {
             return None;
         }
-        let index = bucket_index(key, self.bucket_count);
+        let index = bucket_index(key);
         // The allocation stays live while self is borrowed, and index is in bounds.
         let entries = unsafe { &(*self.buckets.add(index)).entries };
         for entry in entries {

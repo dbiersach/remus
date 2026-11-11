@@ -5,10 +5,10 @@ check-aware quiescence, stalemate detection at the search leaves, consistent en
 passant capture handling, and history ordering for quiet moves. Its evaluation,
 opening book, board representation, and copy-make move generation match Remus4.
 The Python engine uses only the standard library and speaks UCI through `remus.bat`.
-Its transposition-table budget is half the installed physical RAM, read at startup.
+Its transposition table occupies a fixed 1 GiB allocation in both Python and Rust.
 
-The [Python source](../../../engines_instructor/Remus5/) contains 760 code lines,
-66 more than Remus4's 694. This is a net difference in source length, not a count of
+The [Python source](../../../engines_instructor/Remus5/) contains 786 code lines,
+92 more than Remus4's 694. This is a net difference in source length, not a count of
 lines to type or replace. Remus5 is an experimental engine for strength comparisons;
 the five-day workshop continues to use Remus1 through Remus4.
 
@@ -22,11 +22,11 @@ the five-day workshop continues to use Remus1 through Remus4.
 | `move_generation.py` | 65 | Generate pseudo-legal moves, including castling, en passant, and promotions |
 | `evaluation.py` | 195 | Material, piece-square tables, mobility, pawn structure, king safety, and endgame terms |
 | `exchange.py` | 39 | Static exchange evaluation, including removal of the captured en passant pawn |
-| `transposition_table.py` | 43 | Store search depths, scores, bounds, and best moves |
+| `transposition_table.py` | 68 | Store search depths, scores, bounds, and best moves |
 | `opening_book.py` | 21 | Read opening lines and return candidate book moves |
-| `search.py` | 254 | Alpha-beta search, quiescence, terminal-position checks, draw handling, and move ordering |
+| `search.py` | 255 | Alpha-beta search, quiescence, terminal-position checks, draw handling, and move ordering |
 | `uci.py` | 62 | UCI commands, game history, legal book moves, and time allocation |
-| **Total** | **760** | |
+| **Total** | **786** | |
 
 Counts exclude blank lines, comments, and docstrings. `remus.bat` starts `uci.py`,
 and `opening_book.txt` supplies the opening lines. Neither file contributes to the
@@ -34,13 +34,53 @@ Python line count. The engine identifies itself as `Remus5`.
 
 ## The call tree
 
-Each box represents a function and takes the color of its module. An arrow points
-from a caller to the function it calls. A circular arrow marks recursion.
+Start with the module overview, then open the function view for the module you
+want to follow. These diagrams describe the Python Remus5 source; they are
+not Rust call graphs or a trace of one particular search.
 
-Boxes labeled "module initialization" show helper calls made during startup,
-including the installed-RAM query and table-capacity calculation at import.
+The diagrams use Mermaid's ELK layout. Each module has its own box color. An arrow
+points from a caller to a callee, and a loop marks recursion. A small bridge at a
+crossing means the lines cross without joining. Arrows show possible calls, not
+execution order or call frequency.
 
-![The call tree of Remus5](call_tree.svg)
+### Module overview
+
+Each box is a source file. An arrow means a function or initialization in the
+first module calls a function in the second. Calls within a module are omitted;
+multiple calls between the same two modules share one arrow.
+
+![Remus5 module overview](mermaid/modules.svg)
+
+### Function views
+
+A focused view includes calls originating in the named module. External callees
+retain their module labels, but their own calls are not expanded. A function with
+no outgoing calls appears when a selected caller uses it. The complete graph
+contains all recognized connections and recursive calls, and needs more zooming
+than the focused views.
+
+| View | Boxes | Arrows | Editable source |
+| --- | ---: | ---: | --- |
+| [Complete function graph](mermaid/full_elk.svg) | 42 | 69 | [Mermaid](mermaid/full_elk.mmd) |
+| [Module overview](mermaid/modules.svg) | 10 | 17 | [Mermaid](mermaid/modules.mmd) |
+| [UCI and move selection](mermaid/uci.svg) | 13 | 14 | [Mermaid](mermaid/uci.mmd) |
+| [Search](mermaid/search.svg) | 20 | 37 | [Mermaid](mermaid/search.mmd) |
+| [Evaluation](mermaid/evaluation.svg) | 7 | 5 | [Mermaid](mermaid/evaluation.mmd) |
+
+### Viewing and editing
+
+Open an SVG in a browser to zoom without losing text quality. SVGs need no
+Mermaid installation or online account. Matching `.mmd` files contain editable
+diagram text, including layout and colors. Render them with Mermaid CLI 12.2.0
+for the supplied layout. Other Mermaid hosts can differ in version and layout
+support.
+
+The graph contains statically recognized calls to engine functions, including
+module initialization and thread targets. Standard-library internals and function
+definitions with no recognized connections are outside its scope.
+
+See [Mermaid layouts](https://mermaid.js.org/config/layouts.html) for ELK settings
+and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering.
 
 ## 1. Check-aware quiescence
 
@@ -185,19 +225,18 @@ checks, history rewards, history aging, and en passant classification. Its
 `exchange.rs` removes the en passant victim during SEE, and its tactical move
 generator includes en passant captures.
 
-Python and Rust both target half the installed physical RAM, read once at startup.
-Python estimates 260 bytes per dictionary entry, allocates as the table grows, and
-clears the dictionary when it exceeds the entry threshold. Rust uses four-entry,
-64-byte buckets and multiply-shift indexing, so 24 GiB of installed RAM gives a
-12 GiB table without power-of-two rounding. Windows supplies zeroed pages as Rust
-accesses them. The capacity belongs to each process separately.
+Python and Rust each use a fixed 1 GiB search table: 16,777,216 buckets,
+with four 16-byte entries per bucket. Multiply-shift indexing selects a bucket.
+An empty slot or matching key is preferred; a full bucket replaces the entry
+with the lowest stored depth minus eight times its age in searches. Ages wrap
+after 64 searches. Mate scores are adjusted for the distance from the root.
 
-Python's estimate is not a hard memory ceiling. Rust replaces entries within full
-buckets, while Python clears its whole dictionary. These replacement differences
-and key mappings can produce different searches. Remus4-Rust uses a fixed 512 MiB
-table; this experimental engine follows the installed-RAM policy. The
-[table-memory guide](../transposition_table_memory.md) explains allocation,
-failure handling, examples, and simultaneous engines.
+Python stores packed entries in an anonymous memory mapping using only `mmap`
+and `struct`. Rust allocates the same number of bytes with Windows virtual
+memory. Both receive zero-filled pages on access and search without caching if
+the allocation fails. Position keys differ between implementations, so collisions
+can produce different searches even with the same replacement policy. The fixed
+allocation belongs to each engine process; other engine memory is additional.
 
 For Python, select
 [`engines_instructor/Remus5/remus.bat`](../../../engines_instructor/Remus5/remus.bat)
@@ -211,3 +250,10 @@ in the chess GUI's external UCI engine settings. It identifies itself as
 `Remus5-Rust`, requires no Rust installation, and embeds its opening book. The
 executable uses profile-guided optimization. For workshop designer analysis, the
 Rust UCI interface also accepts `position fen`, `go depth`, `go perft`, and `eval`.
+
+## Cache capacity in Lucas Chess
+
+Remus5 and Remus5-Rust use 1 GiB per process and advertise no UCI Hash setting.
+Select the number of tournament workers with room for both engines in each game,
+Lucas Chess, and other applications. The table capacity is independent of the
+computer's installed or available RAM.

@@ -4,7 +4,7 @@ Remus6 extends [Remus5](../Remus5/README.md) with optional online endgame advice
 With seven or fewer pieces, including both kings, it can ask Lichess for a
 Syzygy tablebase move before searching. Every accepted move passes the native
 move generator and king-safety check. When no usable answer arrives, Remus6 uses
-its opening book or the unchanged Remus5 search and evaluation.
+its opening book or the Remus5 search and evaluation, with a fixed 2 GiB table.
 
 Remus6 and [Remus6-Rust](../Remus6-Rust/README.md) are experimental instructor
 engines outside the five-day workshop. Student pairs continue to type Remus1
@@ -21,12 +21,12 @@ internet access, a Lichess account, an API key, or local tablebase files.
 | `move_generation.py` | 65 | Pseudo-legal moves, including special moves |
 | `evaluation.py` | 195 | The Remus5 static evaluation and draw material checks |
 | `exchange.py` | 39 | Static exchange evaluation |
-| `transposition_table.py` | 43 | Native search scores, bounds, depths, and moves |
+| `transposition_table.py` | 68 | Fixed bucket storage, score bounds, search age, and moves |
 | `opening_book.py` | 21 | Opening lines and candidate book moves |
-| `search.py` | 254 | The complete Remus5 search, unchanged |
+| `search.py` | 255 | The complete Remus5 search, unchanged |
 | `tablebase.py` | 158 | FEN serialization, HTTPS, response validation, cache, cooldown, and bounded waiting |
 | `uci.py` | 82 | UCI option, root lookup, game history, and remaining search time |
-| **Total** | **938** | **178 more code lines than Remus5** |
+| **Total** | **964** | **178 more code lines than Remus5** |
 
 Counts exclude blank lines, comments, and docstrings. `remus.bat` starts the Python
 engine, and `opening_book.txt` holds the same opening lines as Remus5. The
@@ -35,14 +35,54 @@ library and no downloaded tablebases.
 
 ## The call tree
 
-Each box represents a function and takes the color of its module. Arrows name
-calls; circular arrows mark recursion. The lookup starts its HTTP worker on a
-background thread, while the native search runs on the UCI thread.
+Start with the module overview, then open the function view for the module you
+want to follow. These diagrams describe the Python Remus6 source; they are
+not Rust call graphs or a trace of one particular search.
 
-Boxes labeled "module initialization" show helper calls made during startup,
-including the installed-RAM query and table-capacity calculation at import.
+The diagrams use Mermaid's ELK layout. Each module has its own box color. An arrow
+points from a caller to a callee, and a loop marks recursion. A small bridge at a
+crossing means the lines cross without joining. Arrows show possible calls, not
+execution order or call frequency.
 
-![The call tree of Remus6](call_tree.svg)
+### Module overview
+
+Each box is a source file. An arrow means a function or initialization in the
+first module calls a function in the second. Calls within a module are omitted;
+multiple calls between the same two modules share one arrow.
+
+![Remus6 module overview](mermaid/modules.svg)
+
+### Function views
+
+A focused view includes calls originating in the named module. External callees
+retain their module labels, but their own calls are not expanded. A function with
+no outgoing calls appears when a selected caller uses it. The complete graph
+contains all recognized connections and recursive calls, and needs more zooming
+than the focused views.
+
+| View | Boxes | Arrows | Editable source |
+| --- | ---: | ---: | --- |
+| [Complete function graph](mermaid/full_elk.svg) | 49 | 83 | [Mermaid](mermaid/full_elk.mmd) |
+| [Module overview](mermaid/modules.svg) | 11 | 22 | [Mermaid](mermaid/modules.mmd) |
+| [UCI and move selection](mermaid/uci.svg) | 14 | 15 | [Mermaid](mermaid/uci.mmd) |
+| [Search](mermaid/search.svg) | 20 | 37 | [Mermaid](mermaid/search.mmd) |
+| [Tablebase lookup and validation](mermaid/tablebase.svg) | 13 | 13 | [Mermaid](mermaid/tablebase.mmd) |
+| [Evaluation](mermaid/evaluation.svg) | 7 | 5 | [Mermaid](mermaid/evaluation.mmd) |
+
+### Viewing and editing
+
+Open an SVG in a browser to zoom without losing text quality. SVGs need no
+Mermaid installation or online account. Matching `.mmd` files contain editable
+diagram text, including layout and colors. Render them with Mermaid CLI 12.2.0
+for the supplied layout. Other Mermaid hosts can differ in version and layout
+support.
+
+The graph contains statically recognized calls to engine functions, including
+module initialization and thread targets. Standard-library internals and function
+definitions with no recognized connections are outside its scope.
+
+See [Mermaid layouts](https://mermaid.js.org/config/layouts.html) for ELK settings
+and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering.
 
 ## Choosing an endgame move
 
@@ -146,13 +186,18 @@ Python uses `urllib`, `json`, queues, and a daemon thread from the standard libr
 Rust uses `reqwest` for HTTPS, `serde_json` for JSON, and `httpdate` for retry dates,
 with versions recorded in `Cargo.lock`. Those crates serve only the boundary; all
 chess rules, legal moves, evaluation, and fallback search remain native. The Rust
-executable uses profile-guided optimization. Both Python and Rust share the
-Remus5 policy of budgeting half the installed physical RAM for the transposition
-table at startup. Python uses an approximate 260-byte cost per dictionary entry;
-Rust uses whole 64-byte buckets and multiply-shift indexing. The small HTTP
-response cache is separate from this native search table. See the
-[table-memory guide](../transposition_table_memory.md) for examples and failure
-handling. Each engine process receives its own budget.
+executable uses profile-guided optimization. Python and Rust each allocate a fixed
+2 GiB transposition table containing 33,554,432 four-entry, 64-byte buckets.
+Multiply-shift indexing selects a bucket. Both implementations replace entries
+within a full bucket using stored depth and age, with an age penalty of eight
+plies per search and ages wrapping after 64 searches. Python uses the standard
+library's `mmap` and `struct`; Rust uses Windows virtual memory. Their position
+keys differ, so collisions can affect their searches differently.
+
+Both allocate zero-filled memory at startup and search without caching if the
+allocation fails. The small HTTP response cache is separate from this search
+table. Each engine process owns its own allocation; total process memory also
+includes the board, search state, and runtime.
 
 Tablebase support improves access to exact endgame information when a usable
 response arrives. It does not establish an Elo gain or guarantee the shortest mate.
@@ -164,3 +209,10 @@ returns no move.
 - [Lichess API documentation](https://lichess.org/api#tag/Tablebase) describes the public service.
 - [Lichess tablebase server](https://github.com/lichess-org/lila-tablebase/blob/main/README.md) documents response categories, move ordering, and DTZ fields.
 - [Lichess API guidance](https://lichess.org/page/api-tips) specifies sequential requests and rate-limit backoff.
+
+## Cache capacity in Lucas Chess
+
+Remus6 and Remus6-Rust use 2 GiB per process and advertise no UCI Hash setting.
+One Remus4-Rust versus Remus6-Rust game allocates 2.5 GiB for search tables.
+Each additional worker starts its own engines, so select the worker count with
+room for these allocations, engine overhead, Lucas Chess, and other applications.

@@ -7,6 +7,14 @@ the Windows launcher, and the shared verifier stored beside them. It covers **78
 source lines**, including comments, docstrings, blank lines, data, and closing
 punctuation. Every code/data line has an individual explanation.
 
+## Cache and call diagrams
+
+Remus1 has no transposition table and allocates no search cache.
+
+The [engine README](../../docs/engines/Remus1/README.md#the-call-tree) contains
+the Mermaid module overview and focused function diagrams. Editable `.mmd`
+sources and rendered SVGs live beside that README in `mermaid/`.
+
 ## Reading guide
 
 Read the files in the order below: representation, attacks, move application,

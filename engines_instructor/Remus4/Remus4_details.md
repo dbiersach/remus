@@ -4,6 +4,17 @@ This is a standalone companion to every source, launcher, support, and data file
 
 Remus4 adds principal variation search, late move reductions, shallow futility pruning, delta pruning, static exchange evaluation, and a reversible-move clock with repetition-path checks. Its evaluator includes mobility, phase-dependent king placement, rook files, pawn races, pawn shields, and endgame king-conversion incentives. These selective features trade exhaustive work for practical depth.
 
+## Cache and call diagrams
+
+Python Remus4 stores transposition results in a dictionary with a fixed
+limit of 2,000,000 entries. Its memory use depends on Python object overhead;
+this is an entry limit, not a fixed 512 MiB allocation. Remus4-Rust uses
+a fixed 512 MiB table of four-entry buckets.
+
+The [engine README](../../docs/engines/Remus4/README.md#the-call-tree) contains
+the Mermaid module overview and focused function diagrams. Editable `.mmd`
+sources and rendered SVGs live beside that README in `mermaid/`.
+
 ## Reading guide
 
 The tables reproduce exact source text with original line numbers. Every blank line, comment, docstring, import, constant, data row, control-flow line, and executable statement receives a row. Indentation is preserved. A multiline statement has one explanation per physical line, including its delimiters. Function sections provide navigation, while the file reviews explain assumptions that span several lines.

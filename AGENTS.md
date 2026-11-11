@@ -138,10 +138,11 @@ ideas for the first time.
    step. Keep the shared code identical from version to version, so a student pair
    types only the new lines. A change to a shared line goes into every version that
    holds it. Remus1 is one exception: Remus2 replaces its 14-line `search.py`.
-   Another explicit exception is table capacity: only Remus5, Remus6, Remus5-Rust,
-   and Remus6-Rust size their transposition tables from half the installed physical
-   RAM. Remus3 and Remus4 retain their two-million-entry Python limits, and
-   Remus4-Rust retains its fixed 512 MiB table.
+   Another explicit exception is table capacity: Remus5 and Remus5-Rust use
+   fixed 1 GiB tables; Remus6 and Remus6-Rust use fixed 2 GiB tables. Remus3 and
+   Remus4 use two-million-entry Python dictionaries, and Remus4-Rust uses a
+   fixed 512 MiB table. Remus1 and Remus2 have no transposition table.
+
 7. **Rules before search.** Move generation must match the published perft counts
    before any search change is trusted.
 8. The opening book is a boundary feature. Validate every book move with the native
@@ -157,16 +158,16 @@ ideas for the first time.
    elapsed lookup time from the search budget, and offer the `LichessTablebase` UCI
    option (default true). Fixed-depth Rust checks bypass the service.
 
-10. Remus5 and Remus6 read installed RAM once at startup through Windows
-    `GetPhysicallyInstalledSystemMemory`, never from free or in-use memory.
-    Python uses an estimated 260 bytes per entry and keeps dictionary clearing;
-    this is an approximate memory budget. Rust uses whole 64-byte buckets and
-    multiply-shift indexing, with Windows virtual-memory allocation and release.
-    Failed RAM queries use two million Python entries or 512 MiB in Rust.
-    A failed Python table insertion clears the cache. Failed Rust allocations
-    halve the requested bucket count until allocation succeeds; if none succeeds,
-    native search proceeds without the cache. Normal sizing always uses installed
-    RAM. This policy is per process and remains Windows-only.
+10. Remus5 and Remus6 use fixed byte allocations for search caches: 1 GiB for
+    Remus5 and 2 GiB for Remus6, in both Python and Rust. Four 16-byte entries
+    occupy each 64-byte bucket. Multiply-shift indexing selects the bucket;
+    a full bucket replaces the entry with the lowest depth minus age penalty.
+    Python uses standard-library `mmap` and `struct` only inside the table module;
+    moves remain tuples everywhere else. Rust uses Windows virtual-memory
+    allocation and release. Both allocate zero-filled memory at startup and
+    proceed without caching if allocation fails. There is no UCI Hash option,
+    RAM query, dynamic resizing, or smaller-capacity retry. Each process owns
+    its own allocation. This policy applies only to Remus5 and Remus6.
 
 ## Representation conventions
 
@@ -219,8 +220,10 @@ also play without internet access or a successful tablebase response.
   `uv run admin/verify_transposition_tables.py`, rebuild both Rust engines with
   `uv run admin/build_rust.py --engine 5` and `--engine 6`, and run
   `uv run admin/verify_rust.py --engine 5` and `--engine 6`. Run large-allocation
-  checks and Rust builds sequentially. Preserve the Python fixed-depth baseline;
-  investigate Rust differences because bucket indexing can change collisions.
+  checks and Rust builds sequentially. Run `uv run admin/verify_cache_uci.py`
+  to check fixed allocations, UCI options, and native move output.
+  Compare fixed-depth nodes, scores, and moves with the baseline; investigate
+  differences because bucket indexing and replacement can affect collisions.
 - Start no engine games or matches (any time control) without David's approval
   (David, 2026-11-03). Verify with perft and fixed-depth comparisons instead.
 
@@ -241,7 +244,7 @@ also play without internet access or a successful tablebase response.
   Lucas Chess starts it in its own folder). Remus3 and Remus4 also hold
   `opening_book.txt`. Each also holds a copy of `verify_remus.py`, so the workshop
   designer can run the student pairs' test on the instructor's engine;
-  `make_call_trees.py` skips it and the tool that strips the engines copies it unchanged. Each engine's `README.md` and `call_tree.svg` live in
+  `make_mermaid_call_trees.py` skips it and the tool that strips the engines copies it unchanged. Each engine's `README.md` and Mermaid call diagrams live in
   `docs/engines/Remus1` to `docs/engines/Remus4`.
   Each engine names itself in `uci.py` (`id name Remus2`). Modules import each other
   by name (`from board import START_POSITION`), so any module runs from inside its
@@ -264,8 +267,8 @@ also play without internet access or a successful tablebase response.
   launchers, and opening books, with documentation in `docs/engines/Remus5` and
   `Remus6`. The matching `Remus5-Rust` and `Remus6-Rust` folders contain Rust source,
   locked dependencies, embedded books, and the tracked `remus5_rust.exe` and
-  `remus6_rust.exe`. Keep Remus5 native modules identical in Remus6; only the UCI
-  adapter and tablebase boundary add behavior. Mirror boundary behavior in Python
+  `remus6_rust.exe`. Keep Remus5 native modules identical in Remus6 except for the fixed table
+  capacity; the UCI adapter and tablebase boundary provide endgame advice. Mirror boundary behavior in Python
   and Rust. Student pairs do not type these experimental engines, and they have no
   copies in `engines/`. The workshop setup registers only the workshop engines;
   experimental engine documentation gives the external UCI engine paths.
@@ -289,10 +292,11 @@ also play without internet access or a successful tablebase response.
   the student pairs cannot copy it from the public repository.
 - Each engine README holds a table of its files with their code lines (blank lines,
   comments, and docstrings left out), the call tree picture, and what the version
-  adds. `uv run admin/make_call_trees.py` draws the `call_tree.svg`
-  pictures from the code; run it after any change to which functions exist or which
+  adds. `uv run admin/make_mermaid_call_trees.py --render` draws Mermaid SVGs
+  from the code and updates the call-tree section in each engine README; run it after any change to which functions exist or which
   call which. Update the line counts in the READMEs and `remus_versions.md` after any
-  code change.
+  code change. Each engine has one README in its documentation folder; its
+  `mermaid/` subfolder holds diagram sources, SVGs, and a manifest only.
 - A module keeps one file name in every version. When a later version makes a file
   smarter, the new code goes into the same file. Never add version numbers to file
   names.
@@ -314,7 +318,7 @@ also play without internet access or a successful tablebase response.
     window and the program continues. The student pair types none of the graph code.
   - `docs/`, the pages people read:
     - `docs/engines/`: `Remus1` to `Remus4`, each with its `README.md` and
-      `call_tree.svg`, and `remus_versions.md`.
+      Mermaid call diagrams, and `remus_versions.md`.
     - `docs/lucas_chess/`: `lucas_chess_guide.md` and its pictures.
     - `docs/chess_tutor/`: `learn_chess.md` (the rarer rules and chess
       notation, with its board pictures in `images/`), `uci.md`, the minimax,

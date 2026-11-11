@@ -193,13 +193,14 @@ student typing assignments. Each has a matching Rust executable.
 
 | Version | What it adds | Python code lines | Net increase |
 | --- | --- | ---: | ---: |
-| [Remus5](Remus5/README.md) | Check-aware quiescence, terminal-position handling, en passant capture accounting, quiet-move history ordering, and an installed-RAM table budget | 760 | 66 over Remus4 |
-| [Remus6](Remus6/README.md) | Root-only Lichess tablebase advice, native legality validation, bounded networking, cache, cooldown, offline option, and native-search fallback | 938 | 178 over Remus5 |
+| [Remus5](Remus5/README.md) | Check-aware quiescence, terminal-position handling, en passant capture accounting, quiet-move history ordering, and a fixed 1 GiB bucket table | 786 | 92 over Remus4 |
+| [Remus6](Remus6/README.md) | Root-only Lichess tablebase advice, native legality validation, bounded networking, cache, cooldown, offline option, and native-search fallback | 964 | 178 over Remus5 |
 
 The net increase measures source length, excluding blank lines, comments, and
-docstrings. It is not a student typing count. Remus6 retains the 254-line Remus5
+docstrings. It is not a student typing count. Remus6 retains the 255-line Remus5
 `search.py` unchanged; `tablebase.py` holds 158 code lines and `uci.py` holds 82.
-The other eight Python modules, evaluation, and opening book match Remus5.
+The other native Python modules and opening book match Remus5, with a fixed
+2 GiB table in Remus6 and 1 GiB in Remus5.
 
 Remus6 and [Remus6-Rust](Remus6-Rust/README.md) serialize FEN at the Lichess API
 boundary. They query only root positions with seven or fewer pieces and no castling
@@ -209,10 +210,11 @@ repetition concern. Unavailable or uncertain results use native search. The UCI
 option `LichessTablebase` defaults to true; false disables lookups. Rust's fixed-depth
 checks bypass the service. No Elo gain is established by tablebase or perft checks.
 
-Remus5 and Remus6, including their Rust versions, budget half the installed physical
-RAM for each engine process's native transposition table. Python estimates 260
-bytes per entry; Rust uses 64-byte buckets with multiply-shift indexing. The
-43-line Python table module is shared by both versions. Remus3 and Remus4 retain
-their two-million-entry limits, and Remus4-Rust uses a fixed 512 MiB table. See the
-[table-memory guide](transposition_table_memory.md) for exact formulas, allocation
-fallbacks, and the distinction between a budget and actual memory usage.
+Remus5 and Remus5-Rust use fixed 1 GiB transposition tables; Remus6 and
+Remus6-Rust use fixed 2 GiB tables. Both languages store four 16-byte entries
+per bucket, select buckets with multiply-shift indexing, and replace entries by
+depth and search age. Python uses `mmap` and `struct`; Rust uses Windows virtual
+memory. No UCI Hash option is advertised. An unavailable allocation disables
+caching while native search remains available. Remus3 and Remus4 Python use
+two-million-entry dictionaries, Remus4-Rust uses 512 MiB, and Remus1 and Remus2
+have no transposition table.

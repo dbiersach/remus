@@ -13,7 +13,7 @@ the "Turning a Chess Engine into Science AI" workshop.
       <a href="docs/lucas_chess/lucas_chess_guide.md"><img src="docs/lucas_chess/jpg/14_game_running.jpg" alt="Remus2 plays Remus1 in Lucas Chess, with the board, both clocks, and the score of each move" width="100%"></a>
     </td>
     <td width="61%" valign="top">
-      <a href="docs/engines/Remus2/call_tree.svg"><img src="docs/engines/Remus2/call_tree.svg" alt="The call tree of Remus2, a picture of which function calls which" width="100%"></a>
+      <a href="docs/engines/Remus2/mermaid/modules.svg"><img src="docs/engines/Remus2/mermaid/modules.svg" alt="The module call diagram of Remus2" width="100%"></a>
     </td>
   </tr>
   <tr>
@@ -64,7 +64,7 @@ Both leave out blank lines, comments, and docstrings:
 Each instructor engine folder holds only what the engine runs: its Python files, `remus.bat`,
 which Lucas Chess starts, and for Remus3 and Remus4 `opening_book.txt`, plus a copy of
 `verify_remus.py`. Each engine's
-README and `call_tree.svg`, a picture of which function calls which, live in
+README and Mermaid call diagrams live in
 `docs/engines/Remus1` to `docs/engines/Remus4`.
 The four folders in `engines/` start with only `remus.bat` and `verify_remus.py`, which tests a finished version: each student pair
 fills `engines/Remus1` on Day 1, then copies its files forward into the next folder at the start of each
@@ -84,10 +84,11 @@ native search. Remus6 adds optional Lichess endgame tablebase lookups for up to 
 pieces, with native search when the service cannot supply a usable move. Python
 uses the standard library; Remus6-Rust packages its HTTPS and JSON dependencies in
 [`remus6_rust.exe`](engines_instructor/Remus6-Rust/remus6_rust.exe). Both versions
-play offline. Remus5 and Remus6, including their Rust versions, budget half the
-installed physical RAM for each engine process's transposition table; the
-[table-memory guide](docs/engines/transposition_table_memory.md) explains Python's
-estimate, Rust's allocation, and simultaneous engines. The Remus6 documentation describes its UCI option and API boundary.
+play offline. Remus5 uses a fixed 1 GiB transposition table and Remus6 uses a fixed
+2 GiB table in both Python and Rust. Each engine process owns its allocation,
+with four entries per bucket and age/depth replacement. Their READMEs describe
+cache allocation and simultaneous engines; Remus6 also documents its tablebase
+option and API boundary.
 
 Everything else sits in the plan of the week, the day folders, `science/`, `science_instructor/`, and `docs/`:
 

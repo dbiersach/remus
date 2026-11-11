@@ -205,3 +205,18 @@ Keep the name Lucas offers, and click **Accept**.
 | Lucas shows an error when you add Remus | Open `uci.py` in the folder of `remus.bat` and press Run. A module that fails to import stops Remus before it can say `uciok`, and the error names the file and line. |
 | Remus never moves | Open `uci.py` in the folder of `remus.bat` in VS Code and press Run. In the panel that opens, type `uci` and press Enter. Remus must print `uciok`. Then type `position startpos` and `go`, and Remus must print a `bestmove` line. |
 | **Launch workers** does nothing | Quit Lucas Chess and start it again from the Start menu or the desktop icon. |
+
+
+## Experimental Remus5 and Remus6 cache capacity
+
+Remus5 and Remus5-Rust each use a fixed 1 GiB search table. Remus6 and
+Remus6-Rust each use a fixed 2 GiB table. They advertise no UCI Hash setting.
+Remus4-Rust uses a fixed 512 MiB table; Python Remus3 and Remus4 use dictionaries
+limited to two million entries rather than a fixed byte allocation. Remus1 and
+Remus2 have no transposition table.
+
+One Remus4-Rust versus Remus6-Rust game allocates 2.5 GiB for search tables.
+Four simultaneous workers allocate 10 GiB for those tables, plus other engine
+memory, Lucas Chess, and other applications. Choose the worker count accordingly.
+See the [Remus5](../engines/Remus5/README.md) and
+[Remus6](../engines/Remus6/README.md) documentation for allocation behavior.

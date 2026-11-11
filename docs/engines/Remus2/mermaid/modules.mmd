@@ -1,0 +1,46 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: "#64748b"
+    primaryTextColor: "#172033"
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    n0["attacks.py"]:::m8
+    n1["board.py"]:::m9
+    n2["evaluation.py"]:::m5
+    n3["make_move.py"]:::m7
+    n4["move_generation.py"]:::m6
+    n5["search.py"]:::m1
+    n6["uci.py"]:::m0
+    n4 --> n0
+    n4 --> n1
+    n5 --> n0
+    n5 --> n2
+    n5 --> n3
+    n5 --> n4
+    n6 --> n1
+    n6 --> n3
+    n6 --> n5
+    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;

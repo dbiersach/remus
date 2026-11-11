@@ -1,0 +1,124 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: "#64748b"
+    primaryTextColor: "#172033"
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    n0["attacks.py<br/>in_check()"]:::m8
+    n1["attacks.py<br/>is_attacked()"]:::m8
+    n2["board.py<br/>is_own()"]:::m9
+    n3["board.py<br/>move_text()"]:::m9
+    n4["board.py<br/>parse_square()"]:::m9
+    n5["board.py<br/>position_key()"]:::m9
+    n6["board.py<br/>square_name()"]:::m9
+    n7["evaluation.py<br/>module initialization"]:::m5
+    n8["evaluation.py<br/>evaluate()"]:::m5
+    n9["evaluation.py<br/>king_safety()"]:::m5
+    n10["evaluation.py<br/>mating_bonus()"]:::m5
+    n11["evaluation.py<br/>mirrored_table()"]:::m5
+    n12["evaluation.py<br/>pawn_terms()"]:::m5
+    n13["exchange.py<br/>cheapest_attacker()"]:::m4
+    n14["exchange.py<br/>exchange_score()"]:::m4
+    n15["make_move.py<br/>make_move()"]:::m7
+    n16["move_generation.py<br/>add_pawn_move()"]:::m6
+    n17["move_generation.py<br/>castling_moves()"]:::m6
+    n18["move_generation.py<br/>generate_moves()"]:::m6
+    n19["move_generation.py<br/>pawn_moves()"]:::m6
+    n20["move_generation.py<br/>piece_moves()"]:::m6
+    n21["opening_book.py<br/>book_moves()"]:::m2
+    n22["opening_book.py<br/>load_book()"]:::m2
+    n23["search.py<br/>alpha_beta()"]:::m1
+    n24["search.py<br/>count_node()"]:::m1
+    n25["search.py<br/>has_pieces()"]:::m1
+    n26["search.py<br/>is_draw()"]:::m1
+    n27["search.py<br/>ordered_moves()"]:::m1
+    n28["search.py<br/>principal_variation()"]:::m1
+    n29["search.py<br/>quiescence()"]:::m1
+    n30["search.py<br/>think()"]:::m1
+    n31["transposition_table.py<br/>probe()"]:::m3
+    n32["transposition_table.py<br/>store()"]:::m3
+    n33["uci.py<br/>module initialization"]:::m0
+    n34["uci.py<br/>legal_book_move()"]:::m0
+    n35["uci.py<br/>main()"]:::m0
+    n36["uci.py<br/>read_time()"]:::m0
+    n0 --> n1
+    n3 --> n6
+    n7 --> n11
+    n8 --> n10
+    n8 --> n12
+    n8 --> n20
+    n12 --> n9
+    n13 --> n18
+    n14 --> n13
+    n17 --> n1
+    n18 --> n2
+    n18 --> n17
+    n18 --> n19
+    n18 --> n20
+    n19 --> n2
+    n19 --> n16
+    n20 --> n2
+    n23 --> n0
+    n23 --> n5
+    n23 --> n8
+    n23 --> n15
+    n23 --> n24
+    n23 --> n25
+    n23 --> n26
+    n23 --> n27
+    n23 --> n29
+    n23 --> n31
+    n23 --> n32
+    n27 --> n18
+    n28 --> n3
+    n28 --> n5
+    n28 --> n15
+    n28 --> n31
+    n29 --> n0
+    n29 --> n8
+    n29 --> n14
+    n29 --> n15
+    n29 --> n24
+    n29 --> n27
+    n30 --> n23
+    n30 --> n28
+    n33 --> n35
+    n34 --> n0
+    n34 --> n3
+    n34 --> n15
+    n34 --> n18
+    n34 --> n21
+    n35 --> n3
+    n35 --> n4
+    n35 --> n5
+    n35 --> n15
+    n35 --> n22
+    n35 --> n30
+    n35 --> n34
+    n35 --> n36
+    n23 --> n23
+    n29 --> n29
+    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;

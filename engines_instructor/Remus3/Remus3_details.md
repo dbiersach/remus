@@ -4,6 +4,16 @@ This is a standalone companion to every source, launcher, support, and data file
 
 Remus3 adds a position cache with score bounds and mate-distance handling, two killer moves per ply, null-move pruning, aspiration windows, principal-variation display, and a variable planned time allowance. Its evaluator adds rook placement, bishop-pair bonuses, and doubled, isolated, and passed-pawn terms. An optional opening book supplies validated continuations before search.
 
+## Cache and call diagrams
+
+Python Remus3 stores transposition results in a dictionary with a fixed
+limit of 2,000,000 entries. Its memory use depends on Python object overhead;
+this is an entry limit, not a fixed 512 MiB allocation.
+
+The [engine README](../../docs/engines/Remus3/README.md#the-call-tree) contains
+the Mermaid module overview and focused function diagrams. Editable `.mmd`
+sources and rendered SVGs live beside that README in `mermaid/`.
+
 ## Reading guide
 
 The tables reproduce exact source text with original line numbers. Every blank line, comment, docstring, import, constant, data row, control-flow line, and executable statement receives a row. Indentation is preserved. A multiline statement has one explanation per physical line, including its delimiters. Function sections provide navigation, while the file reviews explain assumptions that span several lines.

@@ -292,6 +292,7 @@ def think(position, game_history, seconds, longest) -> Move | None:
     longer when the best move keeps changing, and never runs past longest.
     """
     global nodes, deadline, best_move, history
+    tt.new_search()
     start = time.perf_counter()
     deadline = start + longest
     nodes = 0
