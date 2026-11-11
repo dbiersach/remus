@@ -122,7 +122,6 @@ add `position fen` input. Rust retains its designer `position fen`, `go depth`,
 `go perft`, and `eval` commands. Fixed-depth and perft checks do not query Lichess.
 See [Remus6](../engines/Remus6/README.md) for timing, caching, and draw limitations.
 
-
 ## Remus5 and Remus6: search-table memory
 
 Both Python and Rust use fixed search tables: 1 GiB for Remus5 and 2 GiB for

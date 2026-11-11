@@ -16,9 +16,9 @@ that are specific to Claude Code. The Python style follows David's course reposi
 (qis101, scicomp101, cse101), adapted for a chess engine and for students meeting its
 ideas for the first time.
 
-# Part 1: The project
+## Part 1: The project
 
-## Why the name "Remus"
+### Why the name "Remus"
 
 - **Sargon (1978)** was the landmark microcomputer chess program by Dan and Kathe
   Spracklen. Written in Z80 assembly for the Wavemate Jupiter II, it won the first
@@ -37,14 +37,14 @@ ideas for the first time.
 - The name leaves room for the family line: a later, stronger engine could take the name
   of the next heir (Manishtushu) or grandson (Naram-Sin).
 
-## Project goals
+### Project goals
 
 - Build a legal chess engine that plays well, in code a student can read line by line.
 - A working game comes first; stronger play comes later.
 - Success means a learner can explain a move, say why a search result is legal and
   preferred, and say what each enhancement of Remus3 and Remus4 buys.
 
-## Audience and workshop format
+### Audience and workshop format
 
 - Remus is an instructional engine for a **one-week, five-day workshop** taught to
   **students who know some coding and know how to play chess, including notation**
@@ -112,7 +112,7 @@ ideas for the first time.
   for code comments. The David dates in this file record when a rule was set and
   stay here only.
 
-## Hard rules for the engine code
+### Hard rules for the engine code
 
 1. **Clarity over speed.** Plain lists, tuples, dicts, and functions. Slow is fine,
    but the engine copies a position instead of undoing a move because the copy is both
@@ -146,7 +146,13 @@ ideas for the first time.
 7. **Rules before search.** Move generation must match the published perft counts
    before any search change is trusted.
 8. The opening book is a boundary feature. Validate every book move with the native
-   generator; an absent book must never stop play.
+   generator; an absent book must never stop play. Remus opening choices come only from
+   that engine's supplied `opening_book.txt`: Python reads it and Rust embeds it
+   at build time. Disable Lucas Chess external books for every Remus entry,
+   including Remus5 and Remus6 in both languages. Tournament engine entries use
+   explicit `<None>`, not `<By default>`, so they cannot inherit a GUI book.
+   When no legal book continuation exists, use native move selection. Remus1
+   and Remus2 have no opening book and keep their native behavior.
 9. Remus6 tablebase requests belong only at the root, never inside native search.
    Query at most seven pieces, including kings, with no castling rights. Preserve
    the actual halfmove clock and en passant square in the API FEN. Keep repetition
@@ -169,7 +175,7 @@ ideas for the first time.
     RAM query, dynamic resizing, or smaller-capacity retry. Each process owns
     its own allocation. This policy applies only to Remus5 and Remus6.
 
-## Representation conventions
+### Representation conventions
 
 - Board: a list of 64 numbers, one per square. A piece is its kind, from 1 for a pawn
   to 6 for a king, plus 8 if it is White (`WHITE = 8`), so `piece & 7` gives the kind
@@ -191,7 +197,7 @@ ideas for the first time.
   retains its `position fen` UCI input for designer checks; `tablebase.rs` serializes
   outbound API FEN. The API fullmove number is 1 because it does not affect a probe.
 
-## Architecture boundaries
+### Architecture boundaries
 
 | Part | Responsibility |
 | --- | --- |
@@ -204,7 +210,7 @@ ideas for the first time.
 The engine must run without Lucas Chess or `python-chess` installed. Remus6 must
 also play without internet access or a successful tablebase response.
 
-## Verification
+### Verification
 
 - Write expected results before running.
 - `uv run admin/verify_engines.py` must pass after any engine change: perft
@@ -227,7 +233,7 @@ also play without internet access or a successful tablebase response.
 - Start no engine games or matches (any time control) without David's approval
   (David, 2026-11-03). Verify with perft and fixed-depth comparisons instead.
 
-## Project setup
+### Project setup
 
 - Remus is a `uv` project on Python 3.14 (`.python-version`, `pyproject.toml`).
   Run `uv sync` once, then `uv run ruff check .`.
@@ -338,16 +344,16 @@ also play without internet access or a successful tablebase response.
   document and comment names them "student pairs" or "the student pair", never a bare
   "pairs". A pair of games or a `(row, col)` pair keeps its plain word.
 
-# Part 2: Python style
+## Part 2: Python style
 
-## General principles
+### General principles
 
 - Code should be **clear, explicit, and readable**.
 - Prefer **teaching-oriented explanations** over compact or clever code.
 - Write as if the reader is a **student learning the concept for the first time**.
 - Avoid unnecessary abstraction unless it improves understanding.
 
-## Script and module structure
+### Script and module structure
 
 Every engine file starts with a docstring whose first line is the filename. A longer
 docstring adds a blank line and a short description of what the file teaches or does.
@@ -388,9 +394,9 @@ imports nearly all of them; a module that printed at import time would send stra
 text to Lucas Chess and break the protocol. A designer script prints what it checked
 next to the expected answer, so it never runs silently.
 
-## Python code style
+### Python code style
 
-### Type hints
+#### Type hints
 
 - Use type hints for every reusable function and class, in modern Python 3.14 syntax:
   `list[str]`, `tuple[int, int]`, `str | None`, `dict[str, int]`.
@@ -398,7 +404,7 @@ next to the expected answer, so it never runs silently.
   student reads `Square` instead of a nested bracket expression.
 - `main()` and short designer scripts may leave out hints.
 
-### Docstrings
+#### Docstrings
 
 Use **NumPy-style docstrings** for reusable functions:
 
@@ -424,7 +430,7 @@ def square_name(row: int, col: int) -> str:
 Short helper functions may use a one-line docstring:
 `"""Return True if the piece is White."""`
 
-### Names
+#### Names
 
 - Functions and variables use `snake_case` with whole words: `legal_moves`,
   `captured_piece`, `halfmove_clock`. Abbreviate only where chess itself does (`fen`,
@@ -434,7 +440,7 @@ Short helper functions may use a one-line docstring:
   `l`, `O`, or `I` as a name.
 - Do not shadow built-in names such as `sum`, `list`, `max`, or `input`.
 
-### Idioms used throughout
+#### Idioms used throughout
 
 - f-strings for all output. Self-documenting `f"{moves=}"` is fine in quick
   checks.
@@ -456,7 +462,7 @@ Short helper functions may use a one-line docstring:
   - The workshop designer scripts in `admin/` are tools no student reads, so
     they may keep the compact forms.
 
-## Comments
+### Comments
 
 Comments are **functional and explanatory**. They say what a step means in chess or why
 the code is written this way, not what the syntax already shows.
@@ -467,7 +473,7 @@ the code is written this way, not what the syntax already shows.
   restate the code (`i += 1  # add one to i`).
 - A short comment above a block beats a long comment at the end of a line.
 
-### Present tense only
+#### Present tense only
 
 Comments describe the code **as it stands now**, in the present tense. The reader
 sees only the current version, so anything about the code's past is confusing noise.
@@ -487,7 +493,7 @@ knight move," write "A move is legal only if the mover's king is not attacked af
 the move is made. Testing after the move catches pins, discovered checks, and en
 passant captures that expose the king."
 
-## File naming
+### File naming
 
 - Use lowercase `snake_case` for all files, Python and data alike.
 - File names should be **descriptive and topic-based**, for example
@@ -495,7 +501,7 @@ passant captures that expose the king."
 - No file name holds a space (David, 2026-11-01): `remus_versions.md`,
   `lucas_chess_guide.md`. Join the words of a file name with underscores.
 
-## File input and output
+### File input and output
 
 Every file a script reads or writes lives in the same folder as the script, or in a
 folder named relative to it. A bare filename resolves against the current working
@@ -514,13 +520,13 @@ Build `file_path` from `Path(__file__).parent`, never from the bare name, and pa
 handing the bare name to `open()` looks correct at a glance and silently reads or
 writes in the wrong folder.
 
-## No notebooks
+### No notebooks
 
 Remus is plain `.py` files. The workshop uses no Jupyter notebooks, so
 the notebook rules and the `nb_check.py` hook from the course repositories do not
 apply here.
 
-## Linting and formatting
+### Linting and formatting
 
 `uv run ruff check .` must pass before a commit. The settings in `pyproject.toml` match
 the course repositories: ruff's default rules plus `I` (import order), `C4`
@@ -532,11 +538,12 @@ The code must also show no type errors in VS Code's Pylance. Check an engine wit
 `uvx pyright engines_instructor/Remus2`. When a function can return `None`, such as `think()` or
 `legal_book_move()`, test for `None` before using the result.
 
-## American spelling
+### American spelling
 
 Every word in this repository uses American spelling: prose, docstrings, comments,
 Markdown, variable and function names, and printed output. Never use British spelling.
 
+<!-- cspell:disable-next-line -->
 - `traveled`, `canceled`, `modeled`, `labeled` (one `l`), not `travelled`,
   `cancelled`, `modelled`, `labelled`.
 - `color`, `favor`, `behavior`, `neighbor`, `center`, `defense`, `offense`, `gray`,
@@ -547,7 +554,7 @@ Markdown, variable and function names, and printed output. Never use British spe
 - Do not rewrite British spellings inside third-party data, quoted sources, or proper
   nouns.
 
-## Dashes
+### Dashes
 
 Never use an em dash, an en dash, a minus sign, or any other long dash character
 (U+2013, U+2014, U+2212, and their relatives) anywhere: not in prose, comments,
@@ -555,7 +562,7 @@ docstrings, Markdown, or f-strings. Use a colon, a comma, parentheses, or a plai
 hyphen-minus (`-`) instead. Write ranges as `5 to 14` or `5-14`, results as `1-0`,
 and negative numbers and scores with the ordinary hyphen.
 
-## Editorial and style guidelines
+### Editorial and style guidelines
 
 These apply to the workshop text and plan, README, docstrings, comments, and chat replies.
 
@@ -586,9 +593,9 @@ Do not vouch for the text either: words such as `honestly`, `frankly`, `to be fa
 `plainly stated`, or `it is worth stating that` spend a sentence announcing a sentence.
 Give the reason to believe a claim, such as the perft count that confirms it, instead.
 
-# Part 3: References
+## Part 3: References
 
-## Sources
+### Sources
 
 - [Sargon (chess), Wikipedia](https://en.wikipedia.org/wiki/Sargon_(chess))
 - [Dan Spracklen, Chess Programming Wiki](https://chessprogramming.org/Dan_Spracklen)

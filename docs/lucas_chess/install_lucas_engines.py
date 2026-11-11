@@ -6,7 +6,8 @@ engines list of Lucas Chess.
 Step 6 of the Day 1 setup runs this file on each class laptop, with Lucas Chess
 closed, using the Run button in VS Code. Lucas Chess keeps its list in the file ExtEngines.pk.
 This program opens that file, keeps every engine already in it, and adds each engine
-that is missing. Each one runs from engines_instructor: Remus1 to Remus4 through
+that is missing. Remus entries explicitly disable Lucas-supplied opening books.
+Each one runs from engines_instructor: Remus1 to Remus4 through
 remus.bat, and Remus4-Rust through its own remus4_rust.exe. An engine that already runs
 the right file stays as it is, so a second run adds no duplicates. An engine with the
 right name and the wrong file gets the right one, which repairs the list after the
@@ -30,22 +31,29 @@ ENGINE_FILES = {
 }
 
 
-def read_engines(file_path: Path) -> list[dict]:
+def read_engines(file_path: Path) -> list[dict | bytes]:
     """Return the engines in ExtEngines.pk, or an empty list if it does not exist."""
     engines = []
     if not file_path.is_file():
         return engines
     # The file holds a list of byte strings, and each one holds one engine's settings
     for engine_bytes in pickle.loads(file_path.read_bytes()):
-        engines.append(pickle.loads(engine_bytes))
+        try:
+            engines.append(pickle.loads(engine_bytes))
+        except ModuleNotFoundError:
+            # Some entries contain Lucas-specific option objects; preserve their bytes.
+            engines.append(engine_bytes)
     return engines
 
 
-def write_engines(engines: list[dict], file_path: Path) -> None:
+def write_engines(engines: list[dict | bytes], file_path: Path) -> None:
     """Save a list of engines in the format of ExtEngines.pk."""
     engine_list = []
     for engine in engines:
-        engine_list.append(pickle.dumps(engine, protocol=4))
+        if isinstance(engine, bytes):
+            engine_list.append(engine)
+        else:
+            engine_list.append(pickle.dumps(engine, protocol=4))
     file_path.write_bytes(pickle.dumps(engine_list, protocol=4))
 
 
@@ -57,7 +65,7 @@ def new_engine(name: str, engine_path: Path) -> dict:
         "_name": name,
         "args": [],
         "autor": "-",
-        "book": None,
+        "book": "-",  # Explicitly use the engine's own book, not a GUI book
         "book_max_plies": 0,
         "book_rr": "mp",
         "elo": 0,
@@ -85,14 +93,14 @@ def new_engine(name: str, engine_path: Path) -> dict:
 
 
 def register_engine(
-    engines: list[dict], name: str, engine_path: Path, bin_folder: Path
+    engines: list[dict | bytes], name: str, engine_path: Path, bin_folder: Path
 ) -> bool:
     """
     Make sure one engine is in the list, and report whether the list changed.
 
     Parameters
     ----------
-    engines : list[dict]
+    engines : list[dict | bytes]
         The engines from ExtEngines.pk, changed in place.
     name : str
         The name of the engine, such as "Remus1".
@@ -108,14 +116,23 @@ def register_engine(
     """
     # The same file under any name counts as registered
     for engine in engines:
+        if isinstance(engine, bytes):
+            continue
         if (bin_folder / engine["path_exe"]).resolve() == engine_path:
+            if engine.get("book") != "-":
+                engine["book"] = "-"
+                print(f"{name} uses only its own opening book")
+                return True
             print(f"{name} is already registered as {engine['key']}")
             return False
 
     for engine in engines:
+        if isinstance(engine, bytes):
+            continue
         if engine["key"] == name:
             print(f"{name} moved from {engine['path_exe']} to {engine_path}")
             engine["path_exe"] = str(engine_path)
+            engine["book"] = "-"
             return True
 
     print(f"{name} added, and it runs {engine_path}")

@@ -206,7 +206,6 @@ Keep the name Lucas offers, and click **Accept**.
 | Remus never moves | Open `uci.py` in the folder of `remus.bat` in VS Code and press Run. In the panel that opens, type `uci` and press Enter. Remus must print `uciok`. Then type `position startpos` and `go`, and Remus must print a `bestmove` line. |
 | **Launch workers** does nothing | Quit Lucas Chess and start it again from the Start menu or the desktop icon. |
 
-
 ## Experimental Remus5 and Remus6 cache capacity
 
 Remus5 and Remus5-Rust each use a fixed 1 GiB search table. Remus6 and
@@ -220,3 +219,23 @@ Four simultaneous workers allocate 10 GiB for those tables, plus other engine
 memory, Lucas Chess, and other applications. Choose the worker count accordingly.
 See the [Remus5](../engines/Remus5/README.md) and
 [Remus6](../engines/Remus6/README.md) documentation for allocation behavior.
+
+## Remus opening books
+
+Every Remus engine uses only its supplied `opening_book.txt` for opening-book
+moves. Python reads the text file; Rust embeds it when the executable is built.
+A Rust book edit therefore requires rebuilding the executable. Remus1 and Remus2
+have no opening book. Other versions use native search when the file supplies no
+legal continuation.
+
+For tournament engines, select **Engines**, the Remus entry, and **Modify**.
+Set **Opening book** to **`<None>`**, not **`<By default>`**. This disables Lucas
+Chess's external book for that engine, even if the tournament has a default book.
+It does not disable the book inside Remus. The book-selection **Mode**, such as
+**Proportional random**, has no effect without a Lucas-supplied book.
+
+This setting applies to Remus5 and Remus6 in both Python and Rust as well as the
+workshop engines. Imported tournament entries carry their saved settings, so
+check **Opening book** when importing an entry. In **Play against an engine**,
+leave the opponent's **Activate book** option unchecked and do not force an
+opening line when Remus should choose its own opening moves.

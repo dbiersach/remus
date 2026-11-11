@@ -1,4 +1,14 @@
 {
   "MD013": false,
-  "MD033": { "allowed_elements": ["table", "tr", "td", "a", "img"] }
+  "MD033": {
+    "allowed_elements": [
+      "table",
+      "tr",
+      "td",
+      "a",
+      "img",
+      "code",
+      "em"
+    ]
+  }
 }
