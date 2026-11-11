@@ -48,7 +48,7 @@ Day 5 turns the search ideas of the week into a science project.
 
 ## The engines
 
-Remus comes in four versions, each in its own folder under `engines_instructor/`. The
+The workshop uses four versions, each in its own folder under `engines_instructor/`. The
 student pairs type every line of each one into their own folders, `engines/Remus1` to
 `engines/Remus4`, copying the instructor's version file by file. New lines are the
 lines a student pair types for that version, and total lines count the whole engine.
@@ -72,10 +72,22 @@ day and edits them there.
 [`docs/engines/remus_versions.md`](docs/engines/remus_versions.md) lists every
 enhancement and the version that holds it.
 
-A fifth engine, [Remus4-Rust](docs/engines/Remus4-Rust/README.md), is the instructor's
+The compiled [Remus4-Rust](docs/engines/Remus4-Rust/README.md), is the instructor's
 Remus4 written in Rust, with a larger table. Nobody types it. In the same time it
 searches more than 100 times as many positions, so on Day 4 the class sees what speed buys
 when the algorithms stay the same.
+
+[Remus5](docs/engines/Remus5/README.md) and
+[Remus6](docs/engines/Remus6/README.md) are experimental instructor engines outside
+the five-day workshop, each with a matching Rust executable. Remus5 extends the
+native search. Remus6 adds optional Lichess endgame tablebase lookups for up to seven
+pieces, with native search when the service cannot supply a usable move. Python
+uses the standard library; Remus6-Rust packages its HTTPS and JSON dependencies in
+[`remus6_rust.exe`](engines_instructor/Remus6-Rust/remus6_rust.exe). Both versions
+play offline. Remus5 and Remus6, including their Rust versions, budget half the
+installed physical RAM for each engine process's transposition table; the
+[table-memory guide](docs/engines/transposition_table_memory.md) explains Python's
+estimate, Rust's allocation, and simultaneous engines. The Remus6 documentation describes its UCI option and API boundary.
 
 Everything else sits in the plan of the week, the day folders, `science/`, `science_instructor/`, and `docs/`:
 

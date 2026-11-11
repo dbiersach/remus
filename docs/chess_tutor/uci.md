@@ -43,7 +43,7 @@ Lucas Chess -> quit
 3. `isready` asks whether Remus is ready. Remus answers `readyok`.
 4. `position startpos moves e2e4 e7e5 ...` names the game so far. Remus starts from
    `START_POSITION` and plays every move after the word `moves`. Lucas Chess sends
-   every game from the starting position, so Remus needs no FEN.
+   every game from the starting position, so the workshop Python engines need no FEN input.
 5. `go` starts the search. `read_time()` reads the clock (`wtime` or `btime`) and the
    increment (`winc` or `binc`) of the side to move. Remus plans to spend a thirtieth
    of its clock plus half its increment, or exactly `movetime` when Lucas sends one.
@@ -102,3 +102,22 @@ move from depth 5: `g1f3`, the knight to f3.
 1. Why must every line Remus prints be a UCI line, with nothing else mixed in?
 2. What does Remus send when it has no legal move?
 3. How does Lucas Chess write the move of a knight from g1 to f3?
+
+## Remus6: optional online endgame advice
+
+The experimental Remus6 and Remus6-Rust engines advertise this UCI option:
+
+```text
+option name LichessTablebase type check default true
+```
+
+A GUI can disable network lookups with `setoption name LichessTablebase value false`
+and enable them with `setoption name LichessTablebase value true`. A successful
+lookup prints `info string Lichess tablebase`, followed by the legal `bestmove`.
+Failures use the native search and its ordinary `info depth` output.
+
+Only the HTTP boundary serializes the current position as FEN for Lichess. The
+Python UCI adapter continues to accept `position startpos moves ...`; it does not
+add `position fen` input. Rust retains its designer `position fen`, `go depth`,
+`go perft`, and `eval` commands. Fixed-depth and perft checks do not query Lichess.
+See [Remus6](../engines/Remus6/README.md) for timing, caching, and draw limitations.

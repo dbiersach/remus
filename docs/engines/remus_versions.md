@@ -19,7 +19,7 @@ and the 93 lines of its own `search.py`. Each version is the
 one before plus its enhancements, so a student pair that finishes Remus2 types only
 the new lines of Remus3, and then only the new lines of Remus4.
 
-A fifth engine, [Remus4-Rust](Remus4-Rust/README.md), is Remus4 written in Rust, with a
+The compiled [Remus4-Rust](Remus4-Rust/README.md), is Remus4 written in Rust, with a
 larger table. It adds no other enhancement and nobody types it: it searches more than
 100 times as many positions per second, to show what speed buys.
 
@@ -185,3 +185,34 @@ positions, Remus3 2,944, and Remus4 3,005, and all three choose `g1f3`.
 
 Each step should also be measured in games: the new engine plays the engine before
 it with the same clock, and keeps the step only if it wins more than it loses.
+
+## Experimental instructor engines
+
+These versions live only in `engines_instructor/` and do not add workshop days or
+student typing assignments. Each has a matching Rust executable.
+
+| Version | What it adds | Python code lines | Net increase |
+| --- | --- | ---: | ---: |
+| [Remus5](Remus5/README.md) | Check-aware quiescence, terminal-position handling, en passant capture accounting, quiet-move history ordering, and an installed-RAM table budget | 760 | 66 over Remus4 |
+| [Remus6](Remus6/README.md) | Root-only Lichess tablebase advice, native legality validation, bounded networking, cache, cooldown, offline option, and native-search fallback | 938 | 178 over Remus5 |
+
+The net increase measures source length, excluding blank lines, comments, and
+docstrings. It is not a student typing count. Remus6 retains the 254-line Remus5
+`search.py` unchanged; `tablebase.py` holds 158 code lines and `uci.py` holds 82.
+The other eight Python modules, evaluation, and opening book match Remus5.
+
+Remus6 and [Remus6-Rust](Remus6-Rust/README.md) serialize FEN at the Lichess API
+boundary. They query only root positions with seven or fewer pieces and no castling
+rights, preserve the fifty-move counter, and validate the returned move natively.
+The first ranked move is accepted only with a definite compatible result and no
+repetition concern. Unavailable or uncertain results use native search. The UCI
+option `LichessTablebase` defaults to true; false disables lookups. Rust's fixed-depth
+checks bypass the service. No Elo gain is established by tablebase or perft checks.
+
+Remus5 and Remus6, including their Rust versions, budget half the installed physical
+RAM for each engine process's native transposition table. Python estimates 260
+bytes per entry; Rust uses 64-byte buckets with multiply-shift indexing. The
+43-line Python table module is shared by both versions. Remus3 and Remus4 retain
+their two-million-entry limits, and Remus4-Rust uses a fixed 512 MiB table. See the
+[table-memory guide](transposition_table_memory.md) for exact formulas, allocation
+fallbacks, and the distinction between a budget and actual memory usage.

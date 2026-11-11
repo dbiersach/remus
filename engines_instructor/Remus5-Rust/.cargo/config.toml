@@ -1,0 +1,5 @@
+# x86-64-v2 adds the POPCNT instruction, which counts the squares of a piece's moves in
+# one step. Every computer that runs Windows 11 has it. A higher level would stop the
+# program from starting on some class laptops.
+[build]
+rustflags = ["-C", "target-cpu=x86-64-v2"]

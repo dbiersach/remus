@@ -1,0 +1,136 @@
+# Remus opening book: one opening per line, in UCI moves from the starting
+# position. Lines starting with "#" are comments, and the comment above each
+# line names its opening. Remus checks every move with its own move generator,
+# so a typo here is skipped, never played.
+#
+# A line that starts with "White:" or "Black:" shows how that side defends
+# against a trap that snags beginners. Remus plays only the defender's moves
+# from it, so Remus answers the trap at once but never sets the trap itself.
+
+# 1. e4 e5: open games
+# Ruy Lopez, Closed Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7
+# Ruy Lopez, Berlin Defense
+e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 e1g1 f6e4 d2d4 e4d6
+# Ruy Lopez, Exchange Variation
+e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5c6 d7c6 e1g1 f7f6
+# Italian Game, Giuoco Pianissimo
+e2e4 e7e5 g1f3 b8c6 f1c4 f8c5 c2c3 g8f6 d2d3 d7d6
+# Italian Game, Two Knights Defense, quiet line
+e2e4 e7e5 g1f3 b8c6 f1c4 g8f6 d2d3 f8e7 e1g1 e8g8
+# Scotch Game
+e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6
+# Four Knights Game, Spanish Variation
+e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 f1b5 f8b4 e1g1 e8g8
+# Petrov Defense
+e2e4 e7e5 g1f3 g8f6 f3e5 d7d6 e5f3 f6e4 d2d4 d6d5
+# Philidor Defense
+e2e4 e7e5 g1f3 d7d6 d2d4 g8f6 b1c3 b8d7 f1c4 f8e7
+# Vienna Game
+e2e4 e7e5 b1c3 g8f6 g2g3 d7d5 e4d5 f6d5 f1g2 d5c3
+
+# 1. e4 c5: Sicilian Defense
+# Sicilian Defense, Najdorf Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6
+# Sicilian Defense, Classical Variation
+e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 b8c6
+# Sicilian Defense, Scheveningen Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 g8f6 b1c3 d7d6
+# Sicilian Defense, Taimanov Variation
+e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7
+# Sicilian Defense, Sveshnikov (Lasker-Pelikan) Variation
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g8f6 b1c3 e7e5
+# Sicilian Defense, Accelerated Dragon
+e2e4 c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7
+# Sicilian Defense, Alapin Variation
+e2e4 c7c5 c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 b8c6
+
+# 1. e4, other defenses
+# French Defense, Classical Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 g8f6 c1g5 f8e7 e4e5 f6d7
+# French Defense, Winawer Variation
+e2e4 e7e6 d2d4 d7d5 b1c3 f8b4 e4e5 c7c5 a2a3 b4c3
+# French Defense, Tarrasch Variation
+e2e4 e7e6 d2d4 d7d5 b1d2 g8f6 e4e5 f6d7 f1d3 c7c5
+# French Defense, Advance Variation
+e2e4 e7e6 d2d4 d7d5 e4e5 c7c5 c2c3 b8c6 g1f3 d8b6
+# Caro-Kann Defense, Classical Variation
+e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 c8f5 e4g3 f5g6
+# Caro-Kann Defense, Advance Variation
+e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 c6c5
+# Pirc Defense, Classical Variation
+e2e4 d7d6 d2d4 g8f6 b1c3 g7g6 g1f3 f8g7 f1e2 e8g8
+# Scandinavian Defense
+e2e4 d7d5 e4d5 d8d5 b1c3 d5a5 d2d4 g8f6 g1f3 c7c6
+# Alekhine Defense, Modern Variation
+e2e4 g8f6 e4e5 f6d5 d2d4 d7d6 g1f3 c8g4 f1e2 e7e6
+
+# 1. d4 d5: closed games
+# Queen's Gambit Declined, Orthodox Defense
+d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c1g5 f8e7 e2e3 e8g8
+# Queen's Gambit Declined, Exchange Variation
+d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c4d5 e6d5 c1g5 f8e7
+# Queen's Gambit Accepted
+d2d4 d7d5 c2c4 d5c4 g1f3 g8f6 e2e3 e7e6 f1c4 c7c5
+# Slav Defense, Main Line
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 d5c4 a2a4 c8f5
+# Semi-Slav Defense
+d2d4 d7d5 c2c4 c7c6 g1f3 g8f6 b1c3 e7e6 e2e3 b8d7
+# London System
+d2d4 d7d5 c1f4 g8f6 e2e3 e7e6 g1f3 c7c5 c2c3 b8c6
+
+# 1. d4 Nf6: Indian defenses
+# Nimzo-Indian Defense, Rubinstein Variation
+d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 e2e3 e8g8 f1d3 d7d5
+# Queen's Indian Defense
+d2d4 g8f6 c2c4 e7e6 g1f3 b7b6 g2g3 c8a6 b2b3 f8b4
+# Bogo-Indian Defense
+d2d4 g8f6 c2c4 e7e6 g1f3 f8b4 c1d2 d8e7 g2g3 b8c6
+# Catalan Opening
+d2d4 g8f6 c2c4 e7e6 g2g3 d7d5 f1g2 f8e7 g1f3 e8g8
+# King's Indian Defense, Normal Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8
+# Grunfeld Defense, Exchange Variation
+d2d4 g8f6 c2c4 g7g6 b1c3 d7d5 c4d5 f6d5 e2e4 d5c3
+# Modern Benoni Defense
+d2d4 g8f6 c2c4 c7c5 d4d5 e7e6 b1c3 e6d5 c4d5 d7d6
+
+# 1. d4, other defenses
+# Dutch Defense, Classical Variation
+d2d4 f7f5 g2g3 g8f6 f1g2 e7e6 g1f3 f8e7 e1g1 e8g8
+
+# Flank openings
+# English Opening, Four Knights Variation
+c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5
+# English Opening, Symmetrical Variation
+c2c4 c7c5 b1c3 b8c6 g2g3 g7g6 f1g2 f8g7 g1f3 e7e6
+# Reti Opening, King's Indian Attack setup
+g1f3 d7d5 g2g3 g8f6 f1g2 c7c6 e1g1 c8g4 d2d3 b8d7
+
+# Traps that snag beginners, and how to defend against them
+# Scholar's Mate try with Qh5: g6 blocks, then Nf6 guards f7 again
+Black: e2e4 e7e5 f1c4 b8c6 d1h5 g7g6 h5f3 g8f6
+# Wayward Queen Attack: the same defense when the queen comes out first
+Black: e2e4 e7e5 d1h5 b8c6 f1c4 g7g6 h5f3 g8f6
+# Scholar's Mate try with Qf3: Nf6 blocks the queen's path to f7
+Black: e2e4 e7e5 f1c4 b8c6 d1f3 g8f6
+# Fried Liver Attack: 5... Na5 instead of 5... Nxd5, which lets White sac on f7
+Black: e2e4 e7e5 g1f3 b8c6 f1c4 g8f6 f3g5 d7d5 e4d5 c6a5 c4b5 c7c6 d5c6 b7c6 b5e2 h7h6
+# Legal's Mate: after Nxe5, Black takes the knight, never the queen on d1
+Black: e2e4 e7e5 g1f3 d7d6 f1c4 c8g4 b1c3 b8c6 f3e5 c6e5
+# Smothered mate in the Caro-Kann: 5... Ndf6, because 5... Ngf6 allows Nd6 mate
+Black: e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 b8d7 d1e2 d7f6
+# Blackburne Shilling Gambit: Nxd4, because Nxe5 runs into Qg5
+White: e2e4 e7e5 g1f3 b8c6 f1c4 c6d4 f3d4 e5d4 e1g1
+# Stafford Gambit: d3 and Be2 shut the traps on f2 and the e-file
+White: e2e4 e7e5 g1f3 g8f6 f3e5 b8c6 e5c6 d7c6 d2d3 f8c5 f1e2
+# Fishing Pole Trap: never take hxg4, which opens the h-file for Black's rook
+White: e2e4 e7e5 g1f3 b8c6 f1b5 g8f6 e1g1 f6g4 h2h3 h7h5 c2c3
+# Noah's Ark Trap: Bd5, because Qxd4 lets c5 and c4 trap the bishop
+White: e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 d7d6 d2d4 b7b5 a4b3 c6d4 f3d4 e5d4 b3d5
+# Elephant Trap: e3, because Nxd5 loses a piece to Nxd5
+White: d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c1g5 b8d7 c4d5 e6d5 e2e3
+# Lasker Trap in the Albin Countergambit: Nf3 and g3, never an early e3
+White: d2d4 d7d5 c2c4 e7e5 d4e5 d5d4 g1f3 b8c6 g2g3
+# Englund Gambit Trap: Nc3, because Bc3 loses to Bb4
+White: d2d4 e7e5 d4e5 b8c6 g1f3 d8e7 c1f4 e7b4 f4d2 b4b2 b1c3

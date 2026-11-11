@@ -6,7 +6,9 @@ the top `engines_instructor/` folder: Remus1, a random legal mover that ends Day
 Remus3, and Remus4;
 [`docs/engines/remus_versions.md`](docs/engines/remus_versions.md) lists what each
 one adds, and [`workshop_syllabus.md`](workshop_syllabus.md)
-holds the plan of the five days.
+holds the plan of the five days. Remus5 and Remus6, with matching Rust engines,
+are experimental instructor extensions outside the five-day workshop. Remus6 is
+Remus5 plus optional Lichess tablebase advice at the API boundary.
 
 This file holds every project and style rule, so that every AI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
@@ -115,10 +117,16 @@ ideas for the first time.
 1. **Clarity over speed.** Plain lists, tuples, dicts, and functions. Slow is fine,
    but the engine copies a position instead of undoing a move because the copy is both
    shorter and faster.
-2. **No third-party libraries inside the engine.** Standard library only. No bitboards,
-   magic numbers, compiled extensions, or framework machinery.
+2. **No third-party libraries inside the Python engine.** Standard library only.
+   No bitboards, magic numbers, compiled extensions, or framework machinery.
+   Remus6-Rust may use `reqwest`, `serde_json`, and `httpdate` only for HTTPS, JSON,
+   and HTTP retry dates at the tablebase boundary. Its native chess code uses no
+   external chess library.
 3. **Engine is the single source of truth** for board, rules, legal moves, search,
-   evaluation, and move choice. A GUI only sends moves and displays results.
+   evaluation, and legal move choice. A GUI only sends moves and displays results.
+   Remus6 and Remus6-Rust may use Lichess advice to choose a root move, after
+   validating that move with the native generator and king-safety check. Their
+   fallback search and evaluation remain those of Remus5 and Remus5-Rust.
 4. **`python-chess` and Lucas Chess are boundary tools only.** Lucas Chess is the
    desktop GUI, which runs Remus over UCI. `python-chess` serves as an external
    cross-check in `verify_engines.py`, never as the engine's hidden implementation.
@@ -129,11 +137,36 @@ ideas for the first time.
    steps that `remus_versions.md` gives Remus3, and Remus4 is Remus3 plus every other
    step. Keep the shared code identical from version to version, so a student pair
    types only the new lines. A change to a shared line goes into every version that
-   holds it. Remus1 is the one exception: Remus2 replaces its 14-line `search.py`.
+   holds it. Remus1 is one exception: Remus2 replaces its 14-line `search.py`.
+   Another explicit exception is table capacity: only Remus5, Remus6, Remus5-Rust,
+   and Remus6-Rust size their transposition tables from half the installed physical
+   RAM. Remus3 and Remus4 retain their two-million-entry Python limits, and
+   Remus4-Rust retains its fixed 512 MiB table.
 7. **Rules before search.** Move generation must match the published perft counts
    before any search change is trusted.
 8. The opening book is a boundary feature. Validate every book move with the native
    generator; an absent book must never stop play.
+9. Remus6 tablebase requests belong only at the root, never inside native search.
+   Query at most seven pieces, including kings, with no castling rights. Preserve
+   the actual halfmove clock and en passant square in the API FEN. Keep repetition
+   checks native: FEN does not carry game history. Unknown or uncertain results,
+   invalid moves, malformed replies, failures, and timeouts select native search.
+   Make at most one request at a time per engine process, cache by complete API FEN,
+   and wait at least 60 seconds after HTTP 429, honoring a longer Retry-After.
+   Bound the lookup wait to one second and one quarter of the move budget, subtract
+   elapsed lookup time from the search budget, and offer the `LichessTablebase` UCI
+   option (default true). Fixed-depth Rust checks bypass the service.
+
+10. Remus5 and Remus6 read installed RAM once at startup through Windows
+    `GetPhysicallyInstalledSystemMemory`, never from free or in-use memory.
+    Python uses an estimated 260 bytes per entry and keeps dictionary clearing;
+    this is an approximate memory budget. Rust uses whole 64-byte buckets and
+    multiply-shift indexing, with Windows virtual-memory allocation and release.
+    Failed RAM queries use two million Python entries or 512 MiB in Rust.
+    A failed Python table insertion clears the cache. Failed Rust allocations
+    halve the requested bucket count until allocation succeeds; if none succeeds,
+    native search proceeds without the cache. Normal sizing always uses installed
+    RAM. This policy is per process and remains Windows-only.
 
 ## Representation conventions
 
@@ -150,8 +183,12 @@ ideas for the first time.
 - Moves: the tuple `(from_square, to_square, promotion)`, with promotion 0 or a piece
   kind.
 - The engines read and write only UCI moves (`e2e4`, `e7e8q`), and only at the UCI
-  boundary. They hold no SAN and no FEN: Lucas Chess sends `position startpos moves
-  ...` for every game.
+  boundary. They hold no SAN. Workshop Python engines hold no FEN: Lucas Chess
+  sends `position startpos moves ...` for every game. Remus6 permits outbound FEN
+  serialization only in `tablebase.py`, at the HTTP API boundary. Native board,
+  move generation, evaluation, and search use the existing position tuple. Rust
+  retains its `position fen` UCI input for designer checks; `tablebase.rs` serializes
+  outbound API FEN. The API fullmove number is 1 because it does not affect a probe.
 
 ## Architecture boundaries
 
@@ -159,10 +196,12 @@ ideas for the first time.
 | --- | --- |
 | Native Python engine | Board, rules, moves, search, evaluation, move choice |
 | UCI adapter, `uci.py` | `uci`, `isready`, `position startpos moves ...`, `go`, `quit`; only protocol lines on stdout; `bestmove 0000` only with no legal move |
+| Tablebase adapter, Remus6 only | Root advice from Lichess over HTTPS; FEN/JSON boundary, cache, cooldown, bounded wait, native legality validation, and search fallback |
 | GUI | Lucas Chess, which starts `remus.bat` and hosts Remus as an external UCI engine |
 | Checks | `admin/verify_engines.py`, outside the engines |
 
-The engine must run without Lucas Chess or `python-chess` installed.
+The engine must run without Lucas Chess or `python-chess` installed. Remus6 must
+also play without internet access or a successful tablebase response.
 
 ## Verification
 
@@ -171,6 +210,17 @@ The engine must run without Lucas Chess or `python-chess` installed.
   from six published positions, ten mate puzzles, fixed-depth searches, and a short
   UCI conversation. Compare the fixed-depth node counts and moves before and after a
   change; a change that should not alter the search must leave them identical.
+- For Remus6, also run `uv run admin/verify_tablebase.py` for shared Python/Rust
+  HTTP fixtures and `uv run admin/verify_engines.py Remus5 Remus6` for unchanged
+  perft and native fixed-depth results. `--live` adds sequential live HTTPS probes.
+  Build with `uv run admin/build_rust.py --engine 6`, then run
+  `uv run admin/verify_rust.py --engine 6`. Tests stay outside engine folders.
+- After a Remus5 or Remus6 table change, run
+  `uv run admin/verify_transposition_tables.py`, rebuild both Rust engines with
+  `uv run admin/build_rust.py --engine 5` and `--engine 6`, and run
+  `uv run admin/verify_rust.py --engine 5` and `--engine 6`. Run large-allocation
+  checks and Rust builds sequentially. Preserve the Python fixed-depth baseline;
+  investigate Rust differences because bucket indexing can change collisions.
 - Start no engine games or matches (any time control) without David's approval
   (David, 2026-11-03). Verify with perft and fixed-depth comparisons instead.
 
@@ -199,17 +249,26 @@ The engine must run without Lucas Chess or `python-chess` installed.
   folder.
 - `engines_instructor/Remus4-Rust` holds Remus4 rewritten in Rust (David, 2026-11-04),
   so the class sees that speed matters, not just the algorithms. Students neither type
-  nor read it, and it lives only in this folder, with no copy in `engines/`. It is the
-  one engine with a real `remus4_rust.exe`, which git keeps, so a laptop needs no Rust
+  nor read it, and it lives only in this folder, with no copy in `engines/`. It has a
+  real `remus4_rust.exe`, which git keeps, so a laptop needs no Rust
   installed. Each `.rs` file matches the Remus4 Python file of the same name, and
   `main.rs` matches `uci.py`. Its one difference in play is a larger table (David,
   2026-11-04): 512 MB of four-entry buckets that replace their least useful entry
   instead of starting over. Until a bucket fills, it searches the same tree as Remus4.
   A change to Remus4's rules, evaluation, search, or book needs the same change here,
   then `uv run admin/build_rust.py` and a clean `uv run admin/verify_rust.py`. The rules of Part 2 and
-  the bans on bitboards, FEN, and print code apply to the Python engines only: this
+  the bans on bitboards and extra print code apply to the Python engines only: this
   engine uses bitboards, follows `cargo fmt` and `cargo clippy`, and takes the extra
   commands `position fen`, `go depth`, `go perft`, and `eval` for that check.
+- Experimental `engines_instructor/Remus5` and `Remus6` contain the Python engines,
+  launchers, and opening books, with documentation in `docs/engines/Remus5` and
+  `Remus6`. The matching `Remus5-Rust` and `Remus6-Rust` folders contain Rust source,
+  locked dependencies, embedded books, and the tracked `remus5_rust.exe` and
+  `remus6_rust.exe`. Keep Remus5 native modules identical in Remus6; only the UCI
+  adapter and tablebase boundary add behavior. Mirror boundary behavior in Python
+  and Rust. Student pairs do not type these experimental engines, and they have no
+  copies in `engines/`. The workshop setup registers only the workshop engines;
+  experimental engine documentation gives the external UCI engine paths.
 - The top `engines/` folder holds the student pair's own engines (David,
   2026-11-03): four folders, `engines/Remus1` to `engines/Remus4`, each holding only
   `remus.bat` and `verify_remus.py` in the repository. `verify_remus.py` is the

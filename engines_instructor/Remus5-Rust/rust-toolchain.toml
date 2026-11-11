@@ -1,0 +1,9 @@
+# The Rust toolchain that builds Remus5-Rust. rustup reads this file and installs the
+# stable compiler with these parts the first time cargo runs in this folder:
+#   clippy      the lint checks
+#   rustfmt     the formatter that `cargo fmt` and VS Code use
+#   llvm-tools  llvm-profdata, which the profile-guided build needs
+# Class laptops need none of this: they run the committed remus5_rust.exe.
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt", "llvm-tools"]
