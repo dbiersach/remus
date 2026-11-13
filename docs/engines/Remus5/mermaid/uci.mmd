@@ -26,24 +26,59 @@ flowchart TB
     n6["opening_book.py<br/>book_moves()"]:::m2
     n7["opening_book.py<br/>load_book()"]:::m2
     n8["search.py<br/>think()"]:::m1
-    n9["uci.py<br/>module initialization"]:::m0
-    n10["uci.py<br/>legal_book_move()"]:::m0
-    n11["uci.py<br/>main()"]:::m0
-    n12["uci.py<br/>read_time()"]:::m0
-    n9 --> n11
-    n10 --> n0
-    n10 --> n1
-    n10 --> n4
-    n10 --> n5
-    n10 --> n6
-    n11 --> n1
-    n11 --> n2
-    n11 --> n3
-    n11 --> n4
-    n11 --> n7
-    n11 --> n8
-    n11 --> n10
-    n11 --> n12
+    n9["search_control.py<br/>SearchControl()"]:::m11
+    n10["search_control.py<br/>SearchControl.begin()"]:::m11
+    n11["search_control.py<br/>SearchControl.credit_ponder()"]:::m11
+    n12["search_control.py<br/>SearchControl.log()"]:::m11
+    n13["search_control.py<br/>SearchControl.next_command()"]:::m11
+    n14["search_control.py<br/>SearchControl.ponder_credit()"]:::m11
+    n15["search_control.py<br/>SearchControl.report()"]:::m11
+    n16["search_control.py<br/>SearchControl.wait()"]:::m11
+    n17["tablebase.py<br/>lookup()"]:::m10
+    n18["transposition_table.py<br/>probe()"]:::m3
+    n19["uci.py<br/>module initialization"]:::m0
+    n20["uci.py<br/>choose_move()"]:::m0
+    n21["uci.py<br/>legal_book_move()"]:::m0
+    n22["uci.py<br/>legal_choice()"]:::m0
+    n23["uci.py<br/>main()"]:::m0
+    n24["uci.py<br/>ponder_reply()"]:::m0
+    n25["uci.py<br/>read_time()"]:::m0
+    n19 --> n23
+    n20 --> n8
+    n20 --> n12
+    n20 --> n17
+    n20 --> n21
+    n20 --> n22
+    n21 --> n0
+    n21 --> n1
+    n21 --> n4
+    n21 --> n5
+    n21 --> n6
+    n22 --> n0
+    n22 --> n4
+    n22 --> n5
+    n23 --> n1
+    n23 --> n2
+    n23 --> n3
+    n23 --> n4
+    n23 --> n7
+    n23 --> n9
+    n23 --> n10
+    n23 --> n11
+    n23 --> n12
+    n23 --> n13
+    n23 --> n14
+    n23 --> n15
+    n23 --> n16
+    n23 --> n20
+    n23 --> n24
+    n23 --> n25
+    n24 --> n1
+    n24 --> n3
+    n24 --> n4
+    n24 --> n18
+    n24 --> n21
+    n24 --> n22
     classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
@@ -55,3 +90,4 @@ flowchart TB
     classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;

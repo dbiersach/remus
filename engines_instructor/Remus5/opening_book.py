@@ -2,8 +2,8 @@
 
 Play a stored opening line while the game follows one. Each line of
 opening_book.txt is one opening in UCI moves from the starting position.
-A line that starts with "White:" or "Black:" shows how that side defends
-against a trap, and Remus plays its moves only for that side.
+A line that starts with "White:" or "Black:" holds a trap defense or an opening
+that suits only that side, and Remus plays its moves only for that side.
 """
 
 import random

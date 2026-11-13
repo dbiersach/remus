@@ -10,7 +10,7 @@ import struct
 from board import MATE_SCORE, Move
 
 EXACT, LOWER, UPPER = 0, 1, 2  # The score is exact, at least, or at most
-TABLE_BYTES = 1_073_741_824  # Fixed 1 GiB cache
+TABLE_BYTES = 536_870_912  # Fixed 512 MiB cache
 ENTRY = struct.Struct("<QiHBB")  # Key, score, packed move, depth, bound and age
 ENTRIES_PER_BUCKET = 4  # Four 16-byte entries occupy one 64-byte bucket
 BUCKET_BYTES = ENTRY.size * ENTRIES_PER_BUCKET

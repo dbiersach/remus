@@ -25,8 +25,10 @@ flowchart TB
     n5["move_generation.py"]:::m6
     n6["opening_book.py"]:::m2
     n7["search.py"]:::m1
-    n8["transposition_table.py"]:::m3
-    n9["uci.py"]:::m0
+    n8["search_control.py"]:::m11
+    n9["tablebase.py"]:::m10
+    n10["transposition_table.py"]:::m3
+    n11["uci.py"]:::m0
     n2 --> n5
     n3 --> n5
     n5 --> n0
@@ -38,12 +40,20 @@ flowchart TB
     n7 --> n4
     n7 --> n5
     n7 --> n8
+    n7 --> n10
     n9 --> n0
     n9 --> n1
     n9 --> n4
     n9 --> n5
-    n9 --> n6
-    n9 --> n7
+    n11 --> n0
+    n11 --> n1
+    n11 --> n4
+    n11 --> n5
+    n11 --> n6
+    n11 --> n7
+    n11 --> n8
+    n11 --> n9
+    n11 --> n10
     classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
@@ -55,3 +65,4 @@ flowchart TB
     classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;

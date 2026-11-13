@@ -1,0 +1,4 @@
+# Stable Rust with formatting, linting, and PGO tools.
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt", "llvm-tools"]

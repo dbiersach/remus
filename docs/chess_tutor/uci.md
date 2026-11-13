@@ -103,9 +103,9 @@ move from depth 5: `g1f3`, the knight to f3.
 2. What does Remus send when it has no legal move?
 3. How does Lucas Chess write the move of a knight from g1 to f3?
 
-## Remus6: optional online endgame advice
+## Remus5: optional online endgame advice
 
-The experimental Remus6 and Remus6-Rust engines advertise this UCI option:
+The experimental Remus5 and Remus5-Rust engines advertise this UCI option:
 
 ```text
 option name LichessTablebase type check default true
@@ -120,12 +120,22 @@ Only the HTTP boundary serializes the current position as FEN for Lichess. The
 Python UCI adapter continues to accept `position startpos moves ...`; it does not
 add `position fen` input. Rust retains its designer `position fen`, `go depth`,
 `go perft`, and `eval` commands. Fixed-depth and perft checks do not query Lichess.
-See [Remus6](../engines/Remus6/README.md) for timing, caching, and draw limitations.
+See [Remus5](../engines/Remus5/README.md) for timing, caching, and draw limitations.
 
-## Remus5 and Remus6: search-table memory
+## Search-table memory and worker counts
 
-Both Python and Rust use fixed search tables: 1 GiB for Remus5 and 2 GiB for
-Remus6. They advertise no UCI Hash option. Each process owns its table, so
-parallel workers require room for all engine instances. Remus6's
-`LichessTablebase` option controls online endgame advice independently of the
-native search cache.
+Remus4-Rust and Remus5 Python and Rust use fixed 512 MiB tables and advertise no Hash option.
+Remus6-Rust and Remus7-Rust expose Hash with default 512 MiB and
+1024/2048 MiB alternatives. Remus6-Rust and Remus7-Rust expose Threads with default
+4; all their search workers share the engine process's one table.
+
+## Pondering
+
+Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust advertise Ponder with default
+false. Enable it in Lucas Chess's external-engine and tournament entries. This
+causes the GUI to request `go ponder` while the opponent thinks. A predicted reply
+alone does not start a search. Standard `ponderhit` continues the current search;
+a matching Lucas stop-and-go handoff can retain credit for completed work. The
+hard deadline starts on the engine's clock, with a bounded post-hit time reserve.
+Pondering is independent of parallel search: Remus5 uses one chess search thread
+and a lightweight input reader.

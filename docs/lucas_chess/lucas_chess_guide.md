@@ -206,19 +206,23 @@ Keep the name Lucas offers, and click **Accept**.
 | Remus never moves | Open `uci.py` in the folder of `remus.bat` in VS Code and press Run. In the panel that opens, type `uci` and press Enter. Remus must print `uciok`. Then type `position startpos` and `go`, and Remus must print a `bestmove` line. |
 | **Launch workers** does nothing | Quit Lucas Chess and start it again from the Start menu or the desktop icon. |
 
-## Experimental Remus5 and Remus6 cache capacity
+## Experimental engine settings
 
-Remus5 and Remus5-Rust each use a fixed 1 GiB search table. Remus6 and
-Remus6-Rust each use a fixed 2 GiB table. They advertise no UCI Hash setting.
-Remus4-Rust uses a fixed 512 MiB table; Python Remus3 and Remus4 use dictionaries
-limited to two million entries rather than a fixed byte allocation. Remus1 and
-Remus2 have no transposition table.
+Remus4-Rust, Remus5, and Remus5-Rust each use a fixed 512 MiB search table without a Hash option.
+Remus6-Rust and Remus7-Rust offer Hash sizes 512, 1024, or 2048 MiB,
+with default 512 MiB. Python Remus3 and Remus4 use two-million-entry dictionaries;
+Remus1 and Remus2 have no table.
 
-One Remus4-Rust versus Remus6-Rust game allocates 2.5 GiB for search tables.
-Four simultaneous workers allocate 10 GiB for those tables, plus other engine
-memory, Lucas Chess, and other applications. Choose the worker count accordingly.
-See the [Remus5](../engines/Remus5/README.md) and
-[Remus6](../engines/Remus6/README.md) documentation for allocation behavior.
+Remus6-Rust and Remus7-Rust default to four search workers. Each engine's workers
+share one table. Two engines with Hash 512 allocate 1 GiB for search tables, plus
+other engine memory and Lucas Chess. Each simultaneous tournament game adds two
+engine allocations. A saved explicit Threads setting takes precedence over the
+engine's advertised default.
+
+Enable Ponder in the external and tournament entries for Remus5, Remus5-Rust,
+Remus6-Rust, and Remus7-Rust. Their advertised default is false, so Lucas records
+the enabled selection and starts its pondering controller. The engine only thinks
+on the opponent's time when the GUI sends `go ponder`.
 
 ## Remus opening books
 
@@ -234,7 +238,7 @@ Chess's external book for that engine, even if the tournament has a default book
 It does not disable the book inside Remus. The book-selection **Mode**, such as
 **Proportional random**, has no effect without a Lucas-supplied book.
 
-This setting applies to Remus5 and Remus6 in both Python and Rust as well as the
+This setting applies to Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust as well as the
 workshop engines. Imported tournament entries carry their saved settings, so
 check **Opening book** when importing an entry. In **Play against an engine**,
 leave the opponent's **Activate book** option unchecked and do not force an

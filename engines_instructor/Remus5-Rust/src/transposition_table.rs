@@ -1,8 +1,9 @@
 //! Remember searched positions in four-entry, 64-byte buckets.
 //!
-//! The table holds 1 GiB of buckets, indexed with multiply-shift hashing. A full bucket replaces its
+//! The table holds 512 MiB of buckets, indexed with multiply-shift hashing. A full bucket replaces its
 //! least useful entry according to search age and depth.
 
+use std::arch::x86_64::{_MM_HINT_T0, _mm_prefetch};
 use std::ffi::c_void;
 use std::ptr;
 
@@ -12,7 +13,7 @@ pub const EXACT: u8 = 0;
 pub const LOWER: u8 = 1;
 pub const UPPER: u8 = 2;
 
-const TABLE_BYTES: usize = 1_073_741_824; // Fixed 1 GiB cache
+const TABLE_BYTES: usize = 536_870_912; // Fixed 512 MiB cache
 const BUCKET_COUNT: usize = TABLE_BYTES / size_of::<Bucket>();
 const MEM_COMMIT: u32 = 0x1000; // Back the region with Windows commit capacity
 const MEM_RESERVE: u32 = 0x2000; // Reserve addresses for the table
@@ -134,6 +135,21 @@ impl Table {
             depth: depth as u8,
             bound_and_age: bound | (age << 2),
         };
+    }
+
+    /// Ask the processor to start loading the bucket of a position. The table is far
+    /// larger than the processor's cache, so a bucket takes about as long to arrive
+    /// from memory as a whole position takes to search; asking as soon as the key is
+    /// known lets the search work during that wait.
+    #[inline(always)]
+    pub fn prefetch(&self, key: u64) {
+        if !self.buckets.is_null() {
+            let bucket = self.buckets.wrapping_add(bucket_index(key));
+            // A prefetch reads nothing and cannot fault, whatever the address.
+            unsafe {
+                _mm_prefetch::<_MM_HINT_T0>(bucket.cast::<i8>());
+            }
+        }
     }
 
     /// Return what the table holds for the position, or None.

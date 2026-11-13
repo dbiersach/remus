@@ -2,16 +2,19 @@
 #
 # Each file in src/ is named after the Remus5 Python file it matches, and main.rs
 # matches uci.py. The engine searches the same tree as Remus5, position for position,
-# when table replacement does not intervene. Both languages budget half the installed
-# RAM; their storage and replacement policies differ.
+# when table replacement does not intervene. Both languages use the same fixed 512 MiB
+# table and replacement policy; their position keys differ.
 [package]
 name = "remus5_rust"
 description = "Remus5 in Rust: the same search and evaluation, many times faster"
 version = "1.0.0"
 edition = "2024"
 
-# Remus5-Rust uses the Rust standard library only, as Remus5 uses Python's.
+# HTTPS and JSON belong only to the tablebase boundary.
 [dependencies]
+reqwest = { version = "0.13", default-features = false, features = ["blocking", "rustls", "query"] }
+serde_json = "1"
+httpdate = "1"
 
 # The release profile, every switch set for speed:
 #   opt-level = 3      the highest optimization level

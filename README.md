@@ -1,8 +1,8 @@
 # Remus
 
-How many lines of code does it take to make a very strong chess player? You will
-see it only takes 694 lines of code, and the chess engine you write will likely beat
-you every time.
+How much chess can fit into 694 lines of Python? Remus4 combines legal move
+generation, evaluation, alpha-beta search, and an opening book in that space.
+Playing strength depends on the position, time control, and hardware.
 
 Remus is a chess engine written in plain Python, built one lesson at a time for
 the "Turning a Chess Engine into Science AI" workshop.
@@ -61,9 +61,9 @@ Both leave out blank lines, comments, and docstrings:
 | [Remus3](docs/engines/Remus3/README.md) | Killer moves, pawn structure, a transposition table, an opening book, aspiration windows, time management, null-move pruning, the principal variation, the bishop pair, and the rook table | 193 | 535 |
 | [Remus4](docs/engines/Remus4/README.md) | Every other enhancement: draw sense, the endgame terms, late move reductions, principal variation search, pruning margins, static exchange evaluation, and the last evaluation terms | 159 | 694 |
 
-Each instructor engine folder holds only what the engine runs: its Python files, `remus.bat`,
+Each workshop instructor engine folder holds its Python files, `remus.bat`,
 which Lucas Chess starts, and for Remus3 and Remus4 `opening_book.txt`, plus a copy of
-`verify_remus.py`. Each engine's
+`verify_remus.py`. Source explanation companions may accompany these files. Each engine's
 README and Mermaid call diagrams live in
 `docs/engines/Remus1` to `docs/engines/Remus4`.
 The four folders in `engines/` start with only `remus.bat` and `verify_remus.py`, which tests a finished version: each student pair
@@ -72,23 +72,53 @@ day and edits them there.
 [`docs/engines/remus_versions.md`](docs/engines/remus_versions.md) lists every
 enhancement and the version that holds it.
 
-The compiled [Remus4-Rust](docs/engines/Remus4-Rust/README.md), is the instructor's
-Remus4 written in Rust, with a larger table. Nobody types it. In the same time it
-searches more than 100 times as many positions, so on Day 4 the class sees what speed buys
-when the algorithms stay the same.
+The compiled [Remus4-Rust](docs/engines/Remus4-Rust/README.md) implements Remus4's
+native chess rules, evaluation, and search in Rust, with bitboards and a fixed
+512 MiB packed table. Student pairs do not type it. Search speed depends on the position,
+hardware, and build; the Rust and Python versions illustrate that implementation
+speed and search algorithms are separate considerations.
 
-[Remus5](docs/engines/Remus5/README.md) and
-[Remus6](docs/engines/Remus6/README.md) are experimental instructor engines outside
-the five-day workshop, each with a matching Rust executable. Remus5 extends the
-native search. Remus6 adds optional Lichess endgame tablebase lookups for up to seven
-pieces, with native search when the service cannot supply a usable move. Python
-uses the standard library; Remus6-Rust packages its HTTPS and JSON dependencies in
-[`remus6_rust.exe`](engines_instructor/Remus6-Rust/remus6_rust.exe). Both versions
-play offline. Remus5 uses a fixed 1 GiB transposition table and Remus6 uses a fixed
-2 GiB table in both Python and Rust. Each engine process owns its allocation,
-with four entries per bucket and age/depth replacement. Their READMEs describe
-cache allocation and simultaneous engines; Remus6 also documents its tablebase
-option and API boundary.
+The full engine family has these runtime capabilities. Remus5 through Remus7
+are instructor extensions outside the five-day workshop:
+
+| Engine | Chess search | Transposition table | Pondering and online tablebases |
+| --- | --- | --- | --- |
+| Remus1 / Remus2 Python | Random legal move / single-threaded alpha-beta | None | Neither |
+| Remus3 / Remus4 Python | Single-threaded alpha-beta | Dictionary capped at roughly two million entries; clears when exceeded | Neither |
+| [Remus4-Rust](docs/engines/Remus4-Rust/README.md) | Single-threaded alpha-beta | Fixed 512 MiB, no Hash option | Neither |
+| [Remus5 Python](docs/engines/Remus5/README.md) | Single-threaded alpha-beta with tactical and positional enhancements | Fixed 512 MiB, no Hash option | Both supported |
+| [Remus5-Rust](docs/engines/Remus5-Rust/README.md) | The same native chess algorithms as Python Remus5 | Fixed 512 MiB, no Hash option | Both supported |
+| [Remus6-Rust](docs/engines/Remus6-Rust/README.md) | Lazy SMP, 4 workers by default | Shared 512 MiB default; Hash accepts 1024 or 2048 MiB | Both supported |
+| [Remus7-Rust](docs/engines/Remus7-Rust/README.md) | YBWC with persistent workers and restricted worker helping, 4 workers by default | Shared 512 MiB default; Hash accepts 1024 or 2048 MiB | Both supported |
+
+Remus6 and Remus7 are Rust-only and are the only versions with parallel chess
+search. Each parallel engine's workers share one table. Saved GUI options override
+the advertised defaults; an existing Threads=8 selection remains eight workers.
+
+Ponder defaults to false in engines that support it. Enable it explicitly in both
+Lucas Chess's external-engine and tournament entries. Pondering starts only when
+the GUI sends `go ponder`; a correct prediction can receive credit through either
+`ponderhit` or Lucas's matching stop-and-go handoff. Pondering does not require
+parallel chess search: Python Remus5 has one search thread and an input-reader thread.
+
+`LichessTablebase` defaults to true in Remus5 and the Rust engines 5 through 7.
+Advice is root-only, bounded by the move budget, validated with native legal moves,
+and limited to eligible positions with at most seven pieces. Native search remains
+available offline. Python engines use only the standard library; Rust engines with
+tablebases package their HTTPS and JSON dependencies in their executables.
+
+Remus3 through Remus7 use their supplied `opening_book.txt`. Python reads it at
+runtime; Rust embeds it at build time, so Rust book edits require rebuilding.
+Disable Lucas's external books, including explicit `<None>` in tournament entries.
+
+Remus4-Rust, Remus6-Rust, and Remus7-Rust write search and cache measurements to
+`search_log.txt` when SearchDiagnostics is enabled (default true). Python Remus5's
+PonderDiagnostics option (default false) writes separate process/session logs in
+`engines_instructor/Remus5/ponder_logs/`, recording commands, predictions, linked
+hits, nodes, depth, and clock/CPU timing. Enable it in the GUI for tournament
+analysis. Remus5-Rust reports ponder diagnostics through UCI stdout; Remus6-Rust
+and Remus7-Rust can also append `ponder_log.txt`. See each engine README for options
+and measurement limits.
 
 Everything else sits in the plan of the week, the day folders, `science/`, `science_instructor/`, and `docs/`:
 
@@ -195,7 +225,8 @@ From here on, every file runs inside VS Code. Open a file, such as `uci.py` in
 the student pair's own `engines/Remus2`, and click the Run Python File button (the triangle at the top right
 of the editor).
 
-The engines use only the Python standard library. The development group adds
+The Python engines use only the standard library. Rust tablebase engines bundle
+their HTTPS and JSON dependencies; running their executables needs no Rust installation. The development group adds
 `python-chess`, which the workshop designer's engine checks use as an outside
 reference, and `ruff`. Lucas Chess talks to Remus over UCI.
 

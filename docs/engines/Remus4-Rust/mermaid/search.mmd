@@ -1,0 +1,12 @@
+flowchart TD
+    UCI[main: UCI commands] --> Think[Search::think]
+    UCI --> Init[Search::new]
+    Init --> Alloc[Table::new: fixed 512 MiB]
+    Think --> AB[Search::alpha_beta]
+    AB --> AB
+    AB --> Q[quiescence]
+    AB --> TT[Table::probe and store]
+    AB --> Metrics[Local TableMetrics]
+    Think --> Log[Diagnostics::report]
+    UCI --> Log
+    Log --> File[search_log.txt]

@@ -5,12 +5,14 @@
 
 mod attacks;
 mod board;
+mod diagnostics;
 mod evaluation;
 mod exchange;
 mod make_move;
 mod move_generation;
 mod opening_book;
 mod search;
+mod table_metrics;
 mod transposition_table;
 
 use std::io::{BufRead, Write};
@@ -91,6 +93,7 @@ fn run() {
 
     for line in std::io::stdin().lock().lines() {
         let Ok(line) = line else { break };
+        diagnostics::log(&format!("< {line}"));
         let words: Vec<&str> = line.split_whitespace().collect();
         if words.is_empty() {
             continue;
@@ -98,10 +101,23 @@ fn run() {
         match words[0] {
             "uci" => {
                 let _ = writeln!(out, "id name Remus4-Rust");
+                let _ = writeln!(out, "option name SearchDiagnostics type check default true");
                 let _ = writeln!(out, "uciok");
             }
             "isready" => {
                 let _ = writeln!(out, "readyok");
+            }
+            "setoption" => {
+                if words.len() == 5
+                    && words[1] == "name"
+                    && words[2].eq_ignore_ascii_case("SearchDiagnostics")
+                    && words[3] == "value"
+                {
+                    diagnostics::ENABLED.store(
+                        words[4].eq_ignore_ascii_case("true"),
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+                }
             }
             "position" => {
                 // "position startpos moves e2e4 e7e5" or "position fen ... moves e2e4"
@@ -148,12 +164,19 @@ fn run() {
                     seconds = read_number(&words, "movetime") as f64 / 1000.0;
                     longest = seconds;
                 }
+                search.diagnostics.begin();
+                search.diagnostics.report(&format!(
+                    "begin root_key={:016x} white={} halfmove={} history_plies={} plan_s={seconds:.3} hard_s={longest:.3} command={line}",
+                    position.key, position.white, position.halfmove, game_history.len()
+                ));
                 let mut mv = NO_MOVE;
+                let mut source = "book";
                 if use_book && depth_limit.is_none() {
                     let texts: Vec<&str> = played.iter().map(String::as_str).collect();
                     mv = legal_book_move(&book, &position, &texts);
                 }
                 if mv == NO_MOVE {
+                    source = "native";
                     mv = search.think(&position, &game_history, seconds, longest, depth_limit);
                 }
                 // With no legal move (checkmate or stalemate) UCI says "0000"
@@ -163,6 +186,10 @@ fn run() {
                     move_text(mv)
                 };
                 let _ = writeln!(out, "bestmove {text}");
+                let _ = out.flush();
+                search
+                    .diagnostics
+                    .report(&format!("result source={source} bestmove {text}"));
             }
             "eval" => {
                 let _ = writeln!(out, "eval {}", evaluate(&position));

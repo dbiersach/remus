@@ -93,28 +93,44 @@ pub static KING_ATTACKS: [u64; 64] = build_steps(&DIRECTIONS);
 pub static PAWN_ATTACKS: [[u64; 64]; 2] = build_pawn_attacks();
 static RAYS: [[u64; 64]; 8] = build_rays();
 
+const fn build_queen_lines() -> [u64; 64] {
+    let rays = build_rays();
+    let mut table = [0; 64];
+    let mut square = 0;
+    while square < 64 {
+        let mut direction = 0;
+        while direction < 8 {
+            table[square] |= rays[direction][square];
+            direction += 1;
+        }
+        square += 1;
+    }
+    table
+}
+
+/// For each square, the squares on its rank, file, and two diagonals. A piece that
+/// stands off the lines of its own king cannot uncover that king by moving.
+pub static QUEEN_LINES: [u64; 64] = build_queen_lines();
+
 /// The squares along a ray that raises the square number, up to the first piece.
 #[inline(always)]
 fn rising_ray(direction: usize, square: usize, occupied: u64) -> u64 {
     let ray = RAYS[direction][square];
-    let blockers = ray & occupied;
-    if blockers == 0 {
-        ray
-    } else {
-        ray ^ RAYS[direction][blockers.trailing_zeros() as usize]
-    }
+    // The top bit stands in for a piece on h1, square 63. No rising ray goes past h1,
+    // so its table entry is empty and an open ray keeps all of its squares. The
+    // lookup then needs no test for "no piece on the ray", a test the processor
+    // predicts badly.
+    let first = ((ray & occupied) | (1 << 63)).trailing_zeros() as usize;
+    ray ^ RAYS[direction][first]
 }
 
 /// The squares along a ray that lowers the square number, up to the first piece.
 #[inline(always)]
 fn falling_ray(direction: usize, square: usize, occupied: u64) -> u64 {
     let ray = RAYS[direction][square];
-    let blockers = ray & occupied;
-    if blockers == 0 {
-        ray
-    } else {
-        ray ^ RAYS[direction][63 - blockers.leading_zeros() as usize]
-    }
+    // The low bit stands in for a piece on a8, square 0: no falling ray goes past a8
+    let last = 63 - ((ray & occupied) | 1).leading_zeros() as usize;
+    ray ^ RAYS[direction][last]
 }
 
 /// The squares a rook on the square reaches, including the first piece on each line.

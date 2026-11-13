@@ -1,12 +1,12 @@
 //! Remember what the search learned about each position.
 //!
-//! The table holds 8 million buckets of four entries, 512 MB in all. Each bucket is one
+//! The table has a fixed 512 MiB capacity. Each bucket is one
 //! 64-byte cache line, so a look at all four entries costs one trip to memory. A position
 //! can live in any of its bucket's four entries. A full bucket gives up its least useful
 //! entry: the one left by the oldest search, then the shallowest one. Until a bucket
 //! fills, the table behaves exactly like the Python dict of Remus4.
 
-use std::alloc::{Layout, alloc_zeroed, handle_alloc_error};
+use std::alloc::{Layout, alloc_zeroed};
 
 use crate::board::{MATE_SCORE, Move};
 
@@ -14,8 +14,8 @@ pub const EXACT: u8 = 0;
 pub const LOWER: u8 = 1;
 pub const UPPER: u8 = 2;
 
-const BUCKETS: usize = 1 << 23;
-const MASK: usize = BUCKETS - 1;
+const MIB: usize = 1024 * 1024;
+const TABLE_BYTES: usize = 512 * MIB;
 const ENTRIES_PER_BUCKET: usize = 4;
 const AGE_LIMIT: u8 = 64; // Ages wrap around at this count of searches
 const AGE_WEIGHT: i32 = 8; // One search of age counts as much as this many plies
@@ -52,18 +52,28 @@ pub struct Table {
 
 impl Table {
     pub fn new() -> Table {
-        // Zeroed memory is an empty table. Windows supplies zeroed pages when the search
-        // first touches them, so a short search never pays for the whole table.
-        let layout = Layout::array::<Bucket>(BUCKETS).expect("the table size fits in memory");
+        let count = TABLE_BYTES / size_of::<Bucket>();
+        let layout = Layout::array::<Bucket>(count).expect("the table size fits in memory");
         let buckets = unsafe {
             let memory = alloc_zeroed(layout);
             if memory.is_null() {
-                handle_alloc_error(layout);
+                return Self::disabled();
             }
-            let slice = std::ptr::slice_from_raw_parts_mut(memory.cast::<Bucket>(), BUCKETS);
+            let slice = std::ptr::slice_from_raw_parts_mut(memory.cast::<Bucket>(), count);
             Box::from_raw(slice)
         };
         Table { buckets, age: 0 }
+    }
+
+    pub fn disabled() -> Table {
+        Table {
+            buckets: Box::new([]),
+            age: 0,
+        }
+    }
+
+    pub fn size_mib(&self) -> usize {
+        self.buckets.len() * size_of::<Bucket>() / MIB
     }
 
     /// Mark the start of a new search, so older entries give way first.
@@ -73,14 +83,26 @@ impl Table {
 
     /// Save one search result. A mate score is stored as mate from here.
     #[inline]
-    pub fn store(&mut self, key: u64, depth: i32, mut score: i32, bound: u8, mv: Move, ply: i32) {
+    pub fn store(
+        &mut self,
+        key: u64,
+        depth: i32,
+        mut score: i32,
+        bound: u8,
+        mv: Move,
+        ply: i32,
+    ) -> bool {
+        if self.buckets.is_empty() {
+            return false;
+        }
         if score > MATE_SCORE - 1000 {
             score += ply;
         } else if score < -MATE_SCORE + 1000 {
             score -= ply;
         }
         let age = self.age;
-        let entries = &mut self.buckets[key as usize & MASK].entries;
+        let index = key as usize & (self.buckets.len() - 1);
+        let entries = &mut self.buckets[index].entries;
         let mut chosen = 0;
         let mut lowest_value = i32::MAX;
         for (i, entry) in entries.iter().enumerate() {
@@ -95,6 +117,7 @@ impl Table {
                 chosen = i;
             }
         }
+        let replacement = entries[chosen].key != 0 && entries[chosen].key != key;
         entries[chosen] = Entry {
             key,
             score,
@@ -102,12 +125,16 @@ impl Table {
             depth: depth as u8,
             bound_and_age: bound | (age << 2),
         };
+        replacement
     }
 
     /// Return what the table holds for the position, or None.
     #[inline]
     pub fn probe(&self, key: u64, ply: i32) -> Option<Stored> {
-        let entries = &self.buckets[key as usize & MASK].entries;
+        if self.buckets.is_empty() {
+            return None;
+        }
+        let entries = &self.buckets[key as usize & (self.buckets.len() - 1)].entries;
         for entry in entries {
             if entry.key == key {
                 let mut score = entry.score;

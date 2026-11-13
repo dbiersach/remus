@@ -27,7 +27,8 @@ why Remus3 holds it. [Remus4](../Remus4/README.md) adds every other enhancement.
 
 The code lines leave out blank lines, comments, and docstrings. `opening_book.txt`
 holds 43 openings and 13 trap defenses in UCI moves (`e2e4 e7e5 g1f3 ...`), so Remus
-needs no SAN code to read it.
+needs no SAN code to read it. Remus plays 17 of the openings only as White, because
+Black's position at their end scores too low.
 
 ## The call tree
 

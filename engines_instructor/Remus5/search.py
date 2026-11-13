@@ -30,6 +30,7 @@ from evaluation import PIECE_VALUES, evaluate
 from exchange import exchange_score
 from make_move import make_move
 from move_generation import generate_moves
+from search_control import SearchControl
 
 FUTILITY_MARGIN = 200  # A quiet move seldom gains more than this
 DELTA_MARGIN = 200  # A capture seldom gains more than its victim plus this
@@ -42,6 +43,7 @@ class SearchTimeout(Exception):
     """Raised when the time for a move is up."""
 
 
+control: SearchControl | None = None  # Live UCI commands, or no external control
 nodes = 0  # Positions searched
 deadline = 0.0  # The clock time to stop
 best_move: Move | None = None  # The best root move so far
@@ -93,8 +95,12 @@ def count_node():
     """Count one more position, and look at the clock every 1,024."""
     global nodes
     nodes += 1
-    if nodes % 1024 == 0 and best_move is not None and time.perf_counter() > deadline:
-        raise SearchTimeout
+    if nodes % 1024 == 0:
+        if control is not None:
+            if control.poll(nodes):
+                raise SearchTimeout
+        elif best_move is not None and time.perf_counter() > deadline:
+            raise SearchTimeout
 
 
 def is_draw(position: Position, key: int) -> bool:
@@ -285,13 +291,16 @@ def principal_variation(position: Position, depth: int) -> str:
     return line
 
 
-def think(position, game_history, seconds, longest) -> Move | None:
+def think(
+    position, game_history, seconds, longest, live_control: SearchControl | None = None
+) -> Move | None:
     """
     Search one move deeper at a time and return the best move, or None
     when there is no legal move. The search plans to use seconds, takes
     longer when the best move keeps changing, and never runs past longest.
     """
-    global nodes, deadline, best_move, history
+    global nodes, deadline, best_move, history, control
+    control = live_control
     tt.new_search()
     start = time.perf_counter()
     deadline = start + longest
@@ -301,7 +310,10 @@ def think(position, game_history, seconds, longest) -> Move | None:
     for entry in quiet_history:
         quiet_history[entry] //= 2
     score = 0
+    completed_move = None
     for depth in range(1, 65):
+        if control is not None and control.poll(nodes):
+            break
         previous = best_move
         alpha, beta = -MATE_SCORE - 1, MATE_SCORE + 1
         if depth >= 4:
@@ -321,11 +333,27 @@ def think(position, game_history, seconds, longest) -> Move | None:
             break
         if best_move is None:
             break  # No legal move
+        completed_move = best_move
         line = principal_variation(position, depth)
         print(f"info depth {depth} score cp {score} nodes {nodes} pv{line}", flush=True)
         # A best move that changes needs more time to settle
         if previous is not None and best_move != previous:
             seconds = min(seconds * 1.5, longest)
-        if abs(score) > MATE_SCORE - 100 or time.perf_counter() > start + seconds / 2:
+        if control is not None:
+            control.completed(
+                depth,
+                seconds / 2,
+                score,
+                previous is not None and best_move != previous,
+            )
+        finished = time.perf_counter() - start > seconds / 2
+        if control is not None:
+            finished = control.soft_finished(seconds / 2)
+        if abs(score) > MATE_SCORE - 100 or finished:
             break
+    if control is not None:
+        control.nodes = nodes
+        if control.was_ponder and completed_move is not None:
+            best_move = completed_move
+    control = None
     return best_move

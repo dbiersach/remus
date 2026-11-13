@@ -1,0 +1,38 @@
+flowchart TD
+    UCI[main: UCI and root advice] --> Think[Search::think]
+    Think --> Deepen[Worker::think: iterative deepening]
+    Deepen --> AB[Worker::alpha_beta]
+    AB --> First[Search first legal child]
+    First --> AB
+    AB --> Split[split_remaining: reserve idle helpers]
+    Split --> Work[search_split: claim siblings]
+    Work --> Move[search_split_move: one candidate]
+    Move --> PVS[search_sibling: probe and verify]
+    Split --> Drain[drain_split: close after all participants finish]
+    Drain --> Help[help_descendant: save and restore task context]
+    Help --> Claim[Pool::try_help: strict descendant and unique claim]
+    Help --> Move
+    Drain --> Wait[Result wait or cancellation wait]
+    Wait --> Logs
+    PVS --> AB
+    AB --> Q[quiescence]
+    AB --> Table[Shared atomic table]
+    Deepen --> Control[SearchControl: commands and deadlines]
+    Work --> Cancel[Split and ancestor cancellation]
+    UCI --> Logs[SearchControl: persistent diagnostic logs]
+    Think --> Logs
+    Deepen --> Logs
+    Control --> Logs
+    UCI --> Resize[Search::set_hash: drain and recreate helpers]
+    Resize --> Allocate[Table::with_size]
+    AB --> Metrics[Worker-local TableMetrics]
+    Work --> Merge[Pool::add_table_metrics after each job]
+    Think --> Aggregate[Pool::table_metrics after work drains]
+    Aggregate --> Logs
+    AB --> Refresh[Table::refresh on useful cutoff]
+    AB --> Research[Worker::research: verification node accounting]
+    Research --> AB
+    Think --> Timing[Per-worker active and wait time]
+    Work --> Discard[Discarded and unclaimed sibling costs]
+    Merge --> WorkerMetrics[Pool::add_worker_metrics]
+    Timing --> Logs

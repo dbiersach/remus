@@ -1,27 +1,32 @@
 {
   "full_elk": {
-    "nodes": 42,
-    "arrows": 69,
+    "nodes": 74,
+    "arrows": 128,
     "layout": "elk"
   },
   "modules": {
-    "nodes": 10,
-    "arrows": 17,
+    "nodes": 12,
+    "arrows": 25,
     "layout": "elk"
   },
   "uci": {
-    "nodes": 13,
-    "arrows": 14,
+    "nodes": 26,
+    "arrows": 36,
     "layout": "elk"
   },
   "search": {
-    "nodes": 20,
-    "arrows": 37,
+    "nodes": 24,
+    "arrows": 43,
+    "layout": "elk"
+  },
+  "tablebase": {
+    "nodes": 13,
+    "arrows": 13,
     "layout": "elk"
   },
   "evaluation": {
-    "nodes": 7,
-    "arrows": 5,
+    "nodes": 10,
+    "arrows": 8,
     "layout": "elk"
   }
 }

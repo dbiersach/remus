@@ -1,0 +1,23 @@
+flowchart TD
+    UCI[main: UCI and root advice] --> Think[Search::think]
+    UCI --> Resize[Search::set_hash]
+    Resize --> Alloc[Table::with_size shared by workers]
+    Think --> Main[Main Worker::think]
+    Think --> Helpers[Scoped helper Worker::help]
+    Main --> AB[Worker::alpha_beta]
+    Helpers --> AB
+    AB --> AB
+    AB --> Q[quiescence]
+    AB --> TT[Shared Table::probe and store]
+    AB --> Metrics[Worker-local TableMetrics]
+    Think --> Join[Join helpers and sum nodes and counters]
+    Join --> Log[SearchControl::log_search]
+    Main --> Log
+    UCI --> Control[SearchControl: commands and deadlines]
+    Control --> Log
+    Log --> File[search_log.txt]
+    AB --> Refresh[Table::refresh on useful cutoff]
+    AB --> Research[Worker::research: verification node accounting]
+    Research --> AB
+    Think --> Timing[Per-worker active and wait time]
+    Timing --> Log

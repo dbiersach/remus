@@ -1,7 +1,7 @@
 //! Score a position in centipawns for the side to move. Every table and term matches
 //! evaluation.py in Remus5, and every division rounds down as Python's // does.
 
-use crate::attacks::{KNIGHT_ATTACKS, bishop_attacks, rook_attacks};
+use crate::attacks::{KNIGHT_ATTACKS, PAWN_ATTACKS, bishop_attacks, rook_attacks};
 use crate::board::{BISHOP, KING, KNIGHT, PAWN, Position, QUEEN, ROOK};
 
 /// Return a 64-square table built from files a to d of every rank.
@@ -103,6 +103,11 @@ const ROOK_OPEN_FILE: i32 = 20; // A file with no pawns
 const ROOK_HALF_OPEN_FILE: i32 = 10; // A file with only enemy pawns
 const DOUBLED_PAWN: i32 = 15; // For each extra pawn on a file
 const ISOLATED_PAWN: i32 = 15; // No friendly pawn on a file beside it
+const BACKWARD_PAWN: i32 = 18; // Unsupported pawn whose advance meets an enemy pawn attack
+const BACKWARD_OPEN_FILE: i32 = 8; // No enemy pawn screens the backward pawn's file
+const CENTRAL_HOLE: i32 = 12; // Empty central square an enemy knight can use
+const KNIGHT_OUTPOST: i32 = 15; // Advanced knight that enemy pawns cannot challenge
+const SUPPORTED_OUTPOST: i32 = 15; // Extra bonus for friendly pawn protection
 const UNSTOPPABLE_PAWN: i32 = 500; // A passed pawn the enemy king cannot catch
 const SHIELD_PAWN: i32 = 10; // For each pawn in front of a king on its back rank
 const OPEN_KING_FILE: i32 = 15; // For each file at the king with no friendly pawn
@@ -146,11 +151,108 @@ static PASSED_MASKS: [[u64; 64]; 2] = build_passed_masks();
 
 const SIGNS: [i32; 2] = [1, -1];
 
-/// Score the pawn shield of one king, larger with more pieces left.
+/// Mark pawn-controlled squares, including squares occupied by friendly pieces.
+fn pawn_attacks(pawns: &[u64; 2]) -> [u64; 2] {
+    let mut attacks = [0; 2];
+    for side in 0..2 {
+        let mut left = pawns[side];
+        while left != 0 {
+            let square = left.trailing_zeros() as usize;
+            left &= left - 1;
+            attacks[side] |= PAWN_ATTACKS[side][square];
+        }
+    }
+    attacks
+}
+
+/// Can an adjacent-file pawn attack this square, directly or after advancing?
+fn pawn_can_challenge(pawns: u64, side: usize, square: usize) -> bool {
+    let col = (square % 8) as i32;
+    let adjacent = file_mask(col - 1) | file_mask(col + 1);
+    pawns & adjacent & PASSED_MASKS[1 - side][square] != 0
+}
+
+/// Score backward pawns, central holes, and knight outposts from White's side.
+fn positional_terms(position: &Position, pawns: &[u64; 2], attacks: &[u64; 2]) -> i32 {
+    let mut score = 0;
+    let knights = position.by_kind[KNIGHT as usize];
+    for side in 0..2 {
+        let enemy = 1 - side;
+        let sign = SIGNS[side];
+        let step = if side == 0 { -8 } else { 8 };
+        let mut left = pawns[side];
+        while left != 0 {
+            let square = left.trailing_zeros() as usize;
+            left &= left - 1;
+            let target = square as i32 + step;
+            if !(0..64).contains(&target) || attacks[enemy] & (1_u64 << target) == 0 {
+                continue;
+            }
+            if attacks[side] & (1_u64 << square) != 0 {
+                continue;
+            }
+            let col = (square % 8) as i32;
+            let adjacent = file_mask(col - 1) | file_mask(col + 1);
+            let support_rows = PASSED_MASKS[1 - side][square] | (0xff_u64 << (8 * (square / 8)));
+            // Isolated pawns have their own penalty. Support can come from an
+            // adjacent-file pawn on this rank or behind it.
+            if pawns[side] & adjacent != 0 && pawns[side] & adjacent & support_rows == 0 {
+                let mut penalty = BACKWARD_PAWN;
+                if pawns[enemy] & file_mask(col) == 0 {
+                    penalty += BACKWARD_OPEN_FILE;
+                }
+                score -= sign * penalty;
+            }
+        }
+        if knights & position.by_side[enemy] != 0 {
+            // Files c to f of this side's third and fourth ranks: rows 5 and 4 for
+            // White, rows 2 and 3 for Black. One mask keeps the empty squares there
+            // that an enemy pawn attacks, so the loop visits only those.
+            let zone: u64 = if side == 0 {
+                0x0000_3C3C_0000_0000
+            } else {
+                0x0000_0000_3C3C_0000
+            };
+            let mut holes = zone & !position.occupied() & attacks[enemy];
+            while holes != 0 {
+                let square = holes.trailing_zeros() as usize;
+                holes &= holes - 1;
+                if !pawn_can_challenge(pawns[side], side, square) {
+                    score -= sign * CENTRAL_HOLE;
+                }
+            }
+        }
+        let mut left = knights & position.by_side[side];
+        while left != 0 {
+            let square = left.trailing_zeros() as usize;
+            left &= left - 1;
+            let view_row = if side == 0 {
+                square / 8
+            } else {
+                7 - square / 8
+            };
+            if (2..=4).contains(&view_row)
+                && (1..=6).contains(&(square % 8))
+                && !pawn_can_challenge(pawns[enemy], enemy, square)
+            {
+                let mut bonus = KNIGHT_OUTPOST;
+                if attacks[side] & (1_u64 << square) != 0 {
+                    bonus += SUPPORTED_OUTPOST;
+                }
+                score += sign * bonus;
+            }
+        }
+    }
+    score
+}
+
+/// Score nearby pawn cover, tapering its value as pieces leave the board.
 #[inline]
 fn king_safety(own_pawns: u64, counts: &[i32; 10], king: i32, side: usize, phase: i32) -> i32 {
-    if king / 8 != (if side == 0 { 7 } else { 0 }) {
-        return 0; // Only a king on its back rank has a shield
+    let row = king / 8;
+    let view_row = if side == 0 { row } else { 7 - row };
+    if view_row < 5 {
+        return 0; // An advanced king uses its piece-square table
     }
     let col = king % 8;
     let forward = if side == 0 { -8 } else { 8 };
@@ -158,6 +260,8 @@ fn king_safety(own_pawns: u64, counts: &[i32; 10], king: i32, side: usize, phase
     for c in (col - 1).max(0)..(col + 2).min(8) {
         if own_pawns & (1_u64 << (king + forward + c - col)) != 0 {
             score += SHIELD_PAWN;
+        } else if own_pawns & (1_u64 << (king + 2 * forward + c - col)) != 0 {
+            score += SHIELD_PAWN / 2;
         }
         if counts[(c + 1) as usize] == 0 {
             score -= OPEN_KING_FILE;
@@ -267,7 +371,11 @@ pub fn evaluate(position: &Position) -> i32 {
     let mut material = 0;
     let mut phase = 0; // 24 with every piece on the board, 0 with none left
     let mut kings = [0_i32; 2];
-    let mut pawns = [0_u64; 2];
+    let pawns = [
+        position.by_side[0] & kinds[PAWN as usize],
+        position.by_side[1] & kinds[PAWN as usize],
+    ];
+    let attacks = pawn_attacks(&pawns);
     let mut rooks = [0_u64; 2];
     let mut bishop_count = [0_u32; 2];
 
@@ -279,7 +387,6 @@ pub fn evaluate(position: &Position) -> i32 {
         let mut side_score = 0;
         let mut reach_count = 0;
 
-        pawns[side] = own & kinds[PAWN as usize];
         rooks[side] = own & kinds[ROOK as usize];
         kings[side] = (own & kinds[KING as usize]).trailing_zeros() as i32;
 
@@ -349,5 +456,6 @@ pub fn evaluate(position: &Position) -> i32 {
     }
     score += material + pawn_terms(&pawns, &rooks, &kings, phase, position.white);
     score += mating_bonus(material, &kings, phase);
+    score += positional_terms(position, &pawns, &attacks);
     if position.white { score } else { -score }
 }

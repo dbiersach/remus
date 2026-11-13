@@ -1,5 +1,6 @@
 # Python and tooling
 .venv/
+.venv-ft/
 __pycache__/
 *.py[codz]
 .pytest_cache/
@@ -39,3 +40,12 @@ dist/
 # Experimental Rust engine build directories; finished executables stay in git.
 /engines_instructor/Remus5-Rust/target/
 /engines_instructor/Remus6-Rust/target/
+/engines_instructor/Remus7-Rust/target/
+/engines_instructor/Remus7-Rust/ponder_log.txt
+
+# Runtime diagnostics belong to each local engine installation.
+/engines_instructor/*-Rust/search_log.txt
+/engines_instructor/*-Rust/ponder_log.txt
+
+# Python ponder diagnostics are local tournament evidence.
+/engines_instructor/Remus5/ponder_logs/

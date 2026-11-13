@@ -1,0 +1,57 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: "#64748b"
+    primaryTextColor: "#172033"
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    n0["attacks.py<br/>in_check()"]:::m8
+    n1["board.py<br/>move_text()"]:::m9
+    n2["board.py<br/>position_key()"]:::m9
+    n3["board.py<br/>square_name()"]:::m9
+    n4["make_move.py<br/>make_move()"]:::m7
+    n5["move_generation.py<br/>generate_moves()"]:::m6
+    n6["tablebase.py<br/>collect()"]:::m10
+    n7["tablebase.py<br/>eligible()"]:::m10
+    n8["tablebase.py<br/>fetch()"]:::m10
+    n9["tablebase.py<br/>lookup()"]:::m10
+    n10["tablebase.py<br/>position_fen()"]:::m10
+    n11["tablebase.py<br/>response_move()"]:::m10
+    n12["tablebase.py<br/>retry_delay()"]:::m10
+    n7 --> n2
+    n8 --> n12
+    n9 --> n6
+    n9 --> n7
+    n9 --> n8
+    n9 --> n10
+    n9 --> n11
+    n10 --> n3
+    n11 --> n0
+    n11 --> n1
+    n11 --> n2
+    n11 --> n4
+    n11 --> n5
+    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;

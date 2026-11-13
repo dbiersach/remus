@@ -1,9 +1,9 @@
-# Remus6-Rust: Remus6 rewritten in Rust.
+# Remus6-Rust: Remus6-Rust searching on several threads (Lazy SMP).
 #
 # Each file in src/ is named after the Remus6 Python file it matches, and main.rs
 # matches uci.py. The engine searches the same tree as Remus6, position for position,
-# when table replacement does not intervene. Both languages budget half the installed
-# RAM; their storage and replacement policies differ.
+# when table replacement does not intervene. Both languages use the same fixed 512 MiB
+# table and replacement policy; their position keys differ.
 [package]
 name = "remus6_rust"
 description = "Remus6 in Rust: the same search and evaluation, many times faster"

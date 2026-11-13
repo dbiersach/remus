@@ -188,33 +188,230 @@ it with the same clock, and keeps the step only if it wins more than it loses.
 
 ## Experimental instructor engines
 
-These versions live only in `engines_instructor/` and do not add workshop days or
-student typing assignments. Each has a matching Rust executable.
+These versions live only in `engines_instructor/` and add no workshop days or
+student typing assignments.
 
-| Version | What it adds | Python code lines | Net increase |
-| --- | --- | ---: | ---: |
-| [Remus5](Remus5/README.md) | Check-aware quiescence, terminal-position handling, en passant capture accounting, quiet-move history ordering, and a fixed 1 GiB bucket table | 786 | 92 over Remus4 |
-| [Remus6](Remus6/README.md) | Root-only Lichess tablebase advice, native legality validation, bounded networking, cache, cooldown, offline option, and native-search fallback | 964 | 178 over Remus5 |
+| Version | Language | Search and boundary features | Code lines |
+| --- | --- | --- | ---: |
+| [Remus5](Remus5/README.md) | Python | Tactical and positional enhancements, fixed 512 MiB table, optional root tablebase advice, UCI pondering | 1430 |
+| [Remus5-Rust](Remus5-Rust/README.md) | Rust | The same single-threaded search and boundary behavior | 2606 |
+| [Remus6-Rust](Remus6-Rust/README.md) | Rust only | Lazy SMP with independent root searches and one shared table | 3178 |
+| [Remus7-Rust](Remus7-Rust/README.md) | Rust only | YBWC, sibling splitting, persistent workers, and restricted descendant helping | 3784 |
 
-The net increase measures source length, excluding blank lines, comments, and
-docstrings. It is not a student typing count. Remus6 retains the 255-line Remus5
-`search.py` unchanged; `tablebase.py` holds 158 code lines and `uci.py` holds 82.
-The other native Python modules and opening book match Remus5, with a fixed
-2 GiB table in Remus6 and 1 GiB in Remus5.
+Remus5 adds check-aware quiescence, terminal-position handling, en passant capture
+accounting, quiet-move history ordering, and [positional evaluation](Remus5/README.md#positional-evaluation).
+Backward pawns, central holes, knight outposts, and nearby king cover use the same
+weights in Python and the Rust engines 5 through 7. No Elo gain is established
+for these terms. Python source counts exclude blank lines, comments, and docstrings;
+Remus5 contains 736 more code lines than Remus4, not a student typing assignment.
 
-Remus6 and [Remus6-Rust](Remus6-Rust/README.md) serialize FEN at the Lichess API
-boundary. They query only root positions with seven or fewer pieces and no castling
-rights, preserve the fifty-move counter, and validate the returned move natively.
-The first ranked move is accepted only with a definite compatible result and no
-repetition concern. Unavailable or uncertain results use native search. The UCI
-option `LichessTablebase` defaults to true; false disables lookups. Rust's fixed-depth
-checks bypass the service. No Elo gain is established by tablebase or perft checks.
+Tablebase advice is confined to root positions with at most seven pieces and no
+castling rights. The boundary preserves the halfmove clock, checks native move
+legality and repetition concerns, and falls back to native search when the service
+is unavailable or uncertain. `LichessTablebase` defaults to true. Fixed-depth Rust
+checks bypass the service. Pondering uses native search only, waits for `go ponder`,
+and handles both `ponderhit` and matching Lucas stop-and-go handoffs. `Ponder`
+defaults to false; enable it in the GUI. A post-hit time floor protects fresh
+thinking time while respecting the hard deadline. With a minute or more on the
+clock, a hit on a shallow, falling, or changing result reserves half the plan and
+tries for one more depth, in Python Remus5 and in the Rust engines 5 through 7.
+In all four, a book position answers a ponder request and a hit from the book,
+without a search.
 
-Remus5 and Remus5-Rust use fixed 1 GiB transposition tables; Remus6 and
-Remus6-Rust use fixed 2 GiB tables. Both languages store four 16-byte entries
-per bucket, select buckets with multiply-shift indexing, and replace entries by
-depth and search age. Python uses `mmap` and `struct`; Rust uses Windows virtual
-memory. No UCI Hash option is advertised. An unavailable allocation disables
-caching while native search remains available. Remus3 and Remus4 Python use
-two-million-entry dictionaries, Remus4-Rust uses 512 MiB, and Remus1 and Remus2
-have no transposition table.
+Remus5 Python and Rust each use a fixed 512 MiB table with four 16-byte entries per
+bucket, multiply-shift indexing, and depth/age replacement. Python uses `mmap` and
+`struct`; Rust uses Windows virtual memory. Neither exposes Hash. Allocation
+failure disables caching while preserving native search. Python Remus3 and Remus4
+use two-million-entry dictionaries; Remus1 and Remus2 have no table.
+
+Remus4-Rust uses a fixed 512 MiB table without Hash. Remus6-Rust and Remus7-Rust
+expose Hash sizes of 512, 1024, or 2048 MiB, defaulting to 512 MiB. All three offer
+persistent [search measurements](search_logging.md).
+The parallel engines default to four workers sharing one table. Their tables
+protect deeper results and refresh the age of useful hits. Logs include cache
+fill, hits, replacements, worker timing, and re-search/cancellation node costs.
+Remus7 separates result waiting from cancellation waiting and reports the tasks,
+nodes, and active elapsed time contributed through descendant helping. Only
+Remus6-Rust and Remus7-Rust have parallel chess search.
+
+## Speed techniques of the Rust engines 5 through 7
+
+Remus5-Rust, Remus6-Rust, and Remus7-Rust share six techniques that make each
+position cheaper to search. None of them changes which positions the search visits.
+With one worker, a fixed-depth search prints the same score, the same count of
+positions, and the same line of best play with or without them, and `evaluate()`
+returns the same score for every position. Remus4-Rust uses the plain form of every
+step below, so each of its files stays close to the Remus4 Python file of the same
+name.
+
+| Engine | Workers | Plain form | With the six techniques | Ratio |
+| --- | ---: | ---: | ---: | ---: |
+| Remus5-Rust | 1 | 4.38 | 5.59 | 1.28 |
+| Remus6-Rust | 1 | 4.45 | 5.60 | 1.26 |
+| Remus7-Rust | 1 | 4.36 | 5.72 | 1.31 |
+| Remus6-Rust | 4 | 12.5 | 16.6 | 1.33 |
+| Remus7-Rust | 4 | 11.7 | 16.9 | 1.44 |
+
+The numbers are millions of positions per second on the workshop designer's
+computer, summed over six fixed-depth searches: the starting position, an Italian
+opening, the "kiwipete" test position, a quiet middlegame, a rook ending, and a pawn
+race. With one worker both builds search the same 34 million positions, so the ratio
+is also the ratio of the two run times. With four workers the threads reach the
+shared table in a different order on every run, the two builds visit different
+positions, and only the rate compares.
+
+| Step | Technique | Code | What it saves | Gain alone |
+| --- | --- | --- | --- | ---: |
+| T1 | Branch-free ray lookup | `rising_ray()` and `falling_ray()` in `attacks.rs` | A badly predicted test in each of the four rays of every bishop, rook, and queen lookup | 8% |
+| T2 | Legal-move shortcut | `has_legal_move()` in `search.rs`, with the table `QUEEN_LINES` in `attacks.rs` | A full move generation at most quiescence positions | 10% |
+| T3 | Lazy move ordering | `place_next()` in `search.rs` | The sort of the whole move list when one of the first three moves causes the cutoff | 4% |
+| T4 | Central holes from one mask | `positional_terms()` in `evaluation.rs` | Sixteen square-by-square tests in every evaluation | 2% |
+| T5 | Evaluation on demand | `alpha_beta()` in `search.rs` | The evaluation of positions whose pruning never reads the score | 1 to 2% |
+| T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% |
+
+Each gain is that technique alone, in positions per second with one worker. T1, T2,
+and T4 are measured in Remus5-Rust. T3, T5, and T6 are measured in the move loop of
+the Remus4 search, which the three engines share. The gains overlap, so together
+they give the ratios of the first table, not their sum. The six techniques add 49
+code lines to Remus5-Rust and 51 to each of Remus6-Rust and Remus7-Rust.
+
+### T1: Branch-free ray lookup
+
+A rook on a8 looks down the a-file. `RAYS` holds that whole ray: a7, a6, a5, a4, a3,
+a2, and a1. With a piece on a5, the rook reaches a7, a6, and a5, so the lookup finds
+the first piece on the ray and removes the squares beyond it, which are the ray from
+a5 itself.
+
+The plain form first asks "is any piece on this ray?", because an empty ray has no
+first piece to look up. The answer changes from one lookup to the next with no
+pattern, the processor predicts it wrongly a large share of the time, and each wrong
+prediction costs about as much as fifteen ordinary operations. Every bishop, rook,
+or queen lookup makes that test four times, once per ray, and the engine makes those
+lookups in the mobility count of `evaluate()`, in `is_attacked()`, in move
+generation, and in the exchange evaluation.
+
+`rising_ray()` covers the four rays whose square numbers grow. It sets bit 63, the
+square h1, among the pieces on the ray before it finds the first one. No rising ray
+continues past h1, so the `RAYS` entry of h1 is empty: on an empty ray the lookup
+finds h1, removes nothing, and returns the whole ray, with no test. `falling_ray()`
+does the same for the four rays whose square numbers shrink, with bit 0, the square
+a8. The result is the same set of squares in every case.
+
+### T2: Legal-move shortcut
+
+The quiescence search of Remus5 asks at every position whether the side to move has
+a legal move, so that it scores checkmate and stalemate before it stands pat. The
+plain form generates every pseudo-legal move, about 35 in a middlegame, and makes
+them one at a time until one leaves the king safe.
+
+`has_legal_move()` takes a second argument, whether the side to move is in check,
+which `quiescence()` and `alpha_beta()` have already worked out. Out of check, a move
+can leave its own king attacked in only three ways: it moves the king, it captures
+en passant, or it takes a piece off a rank, file, or diagonal that runs through the
+king. `QUEEN_LINES[king]` holds the squares of those lines. In the starting position
+the White king stands on e1, and its lines hold the first rank, the e-file, and the
+diagonals through d2 and f2. The pawns on a2, b2, c2, g2, and h2 stand off those
+lines, and the square ahead of each is empty, so White has a legal move. Three
+bitboard operations find that: keep the pawns off the lines, shift them one row
+ahead, and keep the empty squares.
+
+When the side is in check, or no such pawn exists (a pawnless ending, or pawns that
+are all blocked or on the king's lines), the function runs the plain test, so its
+answer never changes. The gain is 13 to 17% in the four opening and middlegame
+positions and nothing in the two endings, where few pawns are left.
+
+### T3: Lazy move ordering
+
+`ordered_moves()` gives every move a priority and packs the priority and the move
+into one number. The plain form sorts all of those numbers before the search tries
+the first move. Most cutoffs come from the table move, a capture, or a killer move,
+which stand among the first few, and then the sorted order of the other 30 moves is
+never read.
+
+`ordered_moves()` leaves the entries in the order of generation. At the top of the
+move loop, `place_next(entries, index)` puts the right entry at `index`. For the
+first three indexes (`EARLY_PICKS`) it makes one pass over the entries that are
+left and swaps the largest into place. At the fourth index it sorts the rest once.
+No two entries are equal, because the move is part of each entry, so the moves come
+out in exactly the order of the full sort.
+
+Two places need every move in order at once and sort the list themselves. The check
+evasions of `quiescence()` are few and are all tried. In Remus7-Rust,
+`split_remaining()` hands every move that is left to the workers of a split, so it
+sorts those moves before it builds its list of candidates.
+
+### T4: Central holes from one mask
+
+A central hole is an empty square on files c to f of a side's third or fourth rank
+that an enemy pawn attacks and no pawn of that side can challenge. The plain form
+visits the eight squares of each side one at a time and tests each for a piece and
+for an enemy pawn attack.
+
+`positional_terms()` builds the candidates with three bitboard operations: a
+constant mask of the eight squares (c3 to f3 and c4 to f4 for White), the empty
+squares, and the squares that enemy pawns attack. The loop then visits only the
+squares that pass all three, in most positions none or one, and asks
+`pawn_can_challenge()` about each. The term adds a sum of equal penalties, so the
+order of the squares does not matter and the score is the same.
+
+### T5: Evaluation on demand
+
+`alpha_beta()` reads the static score of a position in two tests only. Null-move
+pruning reads it at depth 3 and up, out of check, away from the root, and not right
+after another null move. Futility pruning reads it at depth 1, out of check. The
+plain form calls `evaluate()` at every position before those tests. The engines 5
+through 7 compute `needs_score` from the same conditions and call `evaluate()` only
+when it is true. A position at depth 2 and a position in check never evaluate, and
+at depth 3 and up neither does the root or the position right after a null move.
+
+### T6: Table prefetch
+
+The transposition table holds 512 MiB, far more than the processor's cache, so
+reading the bucket of a position takes roughly 100 nanoseconds, about half of the
+time the engine spends on an average position. The search knows which bucket the
+next position needs as soon as `make_move()` returns that position's key.
+
+`Table::prefetch(key)` asks the processor to start loading the bucket and returns at
+once. `alpha_beta()` calls it right after `make_move()`, so the legality test and
+the check test of the move run while the bucket travels from memory, and the child's
+`probe()` waits for less. It calls prefetch only at depth 2 and up: a child of a
+depth-1 position goes to quiescence unless it is in check, quiescence does not use
+the table, and a prefetch there costs more than it saves. The null-move search prefetches its
+position the same way, and in Remus7-Rust so does `search_split_move()` when a
+worker takes a move from a split. A prefetch reads no value, so the shared table of
+the parallel engines needs no added synchronization.
+
+### Checking that the search is the same
+
+- `verify_rust.py --engine 5` compares Remus5-Rust with Python Remus5: perft from six
+  positions, `evaluate()` on 19,574 positions from random games, and every `info`
+  line and best move of fixed-depth searches with and without a game history.
+- `verify_rust.py --engine 6` and `--engine 7`, each with `--baseline`, compare
+  one-worker searches with an executable built from the plain form.
+- A second set of 22 positions (checks, en passant, promotions, stalemates, the
+  fifty-move clock, and a repeated position in the game history) gives the same
+  `info` lines in the plain form and with the six techniques in all three engines.
+- `verify_remus7.py`, `verify_remus7_helping.py`, and `verify_remus7_diagnostics.py`
+  check the parallel search of Remus7-Rust: legal results and lines of play, splits,
+  stops, and worker accounting.
+- `verify_positional_evaluation.py`, `verify_transposition_tables.py`,
+  `verify_cache_uci.py`, `verify_tablebase.py`, `verify_ponder_control.py`, and
+  `verify_pondering.py` pass on Remus5-Rust with the techniques in place.
+
+### Techniques that measure too little to keep
+
+Each of these also leaves the search unchanged. The engines 5 through 7 leave them
+out because the gain does not pay for the code.
+
+| Technique | Measured | Why it stays out |
+| --- | --- | --- |
+| Magic bitboards for bishop, rook, and queen lookups | 14% alone, 2 to 3% beyond T1 | An 860 KB table, `unsafe` statics, and 128 constants to find or store |
+| A cache of evaluations by position key | Under 1% at 256 KB to 1 MB, 5% slower at 4 MB | No gain at any size |
+| Skipping the exchange evaluation when the victim is worth at least the attacker | Under 1% | The exchange evaluation takes about 3% of the search time in all |
+| Skipping the legality test of a move by a piece off its king's lines | Under 1% | Within the error of the timing |
+| Passing the parent's "gives check" test to the child | 3% alone, under 1% with T1 to T6 | One more argument through every call of `alpha_beta()` |
+| Generating the moves in sorted order | No better than T3 with quiet-move history | Rewrites `generate_moves()` around one loop over the pieces |
+| Testing the pawn moves before generating the piece moves in the plain legal-move test | Under 1% beyond T2 | Two more functions in `move_generation.rs` |
+| Delta pruning and the exchange test before `make_move()` in quiescence | Under 1% | Within the error of the timing |
+| Selecting every move one at a time, with no sort | 6% slower | Positions that try every move pay a pass per move |
+| Prefetch at depth 1 as well | 1% slower | Those children seldom read the table |

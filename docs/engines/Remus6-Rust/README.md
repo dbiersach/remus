@@ -1,81 +1,93 @@
 # Remus6-Rust
 
-Remus6-Rust is [Remus5-Rust](../Remus5/README.md#remus5-rust-and-use) with the
-[Remus6 tablebase boundary](../Remus6/README.md): optional Lichess advice at the
-root, native move validation, a bounded wait, response caching, rate-limit
-cooldowns, and native-search fallback. It is an experimental instructor engine
-outside the five-day workshop.
+Remus6-Rust is an experimental Windows Rust engine using Lazy SMP. Its main
+worker and helpers search the same root independently and share one transposition
+table. The main worker selects the move. Native rules, evaluation, root-only
+Lichess advice, embedded opening book, and GUI-driven pondering follow Remus5's
+design. Student pairs do not type this engine.
 
-Select [`remus6_rust.exe`](../../../engines_instructor/Remus6-Rust/remus6_rust.exe)
-as an external UCI engine in the chess GUI. It identifies itself as `Remus6-Rust`
-and embeds its opening book. Windows 11 needs no Rust or Python installation to
-run the executable. Its `LichessTablebase` option defaults to true; false disables
-lookups. The engine also plays when the network or service is unavailable.
+Select `engines_instructor\Remus6-Rust\remus6_rust.exe` as an external UCI
+engine. Disable GUI opening books, including explicit `<None>` in tournament
+entries. Edit the supplied `opening_book.txt` and rebuild to change the embedded
+book. Fixed-depth searches bypass book and tablebase advice.
 
-## Source and dependencies
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `Threads` | 4 | Search workers, including the main worker; 1 to 64 |
+| `Hash` | 512 | Shared table size: 512, 1024, or 2048 MiB |
+| `SearchDiagnostics` | true | Save search, timing, node-rate, and table-use measurements |
+| `Ponder` | false | Return a legal predicted reply; GUI sends `go ponder` to start pondering |
+| `PonderDiagnostics` | false | Save and report ponder timing separately |
+| `LichessTablebase` | true | Permit bounded root advice with native legality checks and fallback |
 
-The [source folder](../../../engines_instructor/Remus6-Rust/) uses the Remus5-Rust
-bitboards, copy-make positions, search, evaluation, and a transposition table
-with a fixed 2 GiB allocation.
-The native modules match Remus5-Rust except for table capacity. Only `main.rs` and the additional
-`tablebase.rs` implement the boundary behavior.
+Enable Ponder explicitly in Lucas's external and tournament engine entries to use
+it. `ponderhit` continues the current search. Matching stop-and-go commands can
+credit completed ponder work toward the move's soft target. Hard deadlines start
+on the engine's clock. Ordinary searches can return a provisional root choice;
+ponder maturity uses completed work. A stable hit reserves 25% of the plan.
+With at least 60 seconds on the clock and no `movetime`, an uncertain hit reserves
+50% of the plan and tries for one more completed depth, within one full plan and
+half the hard budget. A hit is uncertain when its depth is below 8, the score fell
+35 centipawns between iterations of depth 4 or more, or the best move changed in
+the latest such iteration; the score and both signs carry across a Lucas
+stop-and-go. A book position answers `go ponder` and a hit from the book: the
+engine waits for `ponderhit` or `stop` without searching, and that wait earns no
+credit. The `info string ponder` line reports `reinvest`, `shallow_hit`,
+`deteriorating`, and `unstable` as 1 or 0, with the extra-time cap `hit_cap_ms`.
 
-| File | Code lines | Responsibility |
-| --- | ---: | --- |
-| `src/main.rs` | 185 | UCI, engine option, root lookup, and remaining time |
-| `src/tablebase.rs` | 253 | FEN, HTTPS, JSON validation, cache, cooldown, and bounded wait |
-| `src/board.rs` | 204 | Native position, bitboards, keys, and UCI move text |
-| `src/attacks.rs` | 140 | Attacks and king safety |
-| `src/make_move.rs` | 75 | Copy-make moves and halfmove counter |
-| `src/move_generation.rs` | 166 | Pseudo-legal moves and special moves |
-| `src/evaluation.rs` | 311 | Static evaluation |
-| `src/exchange.rs` | 99 | Static exchange evaluation |
-| `src/search.rs` | 438 | Remus5-Rust native search |
-| `src/transposition_table.rs` | 144 | Fixed 2 GiB search table, multiply-shift indexing, and Windows allocation |
-| `src/opening_book.rs` | 48 | Embedded opening lines |
-| **Total** | **2063** | |
+`SearchDiagnostics` writes `search_log.txt` beside the executable, independently of
+`PonderDiagnostics`. The final `lazy_smp` summary includes the actual worker count
+and exact total nodes after helpers join. Depth belongs to the main worker; node
+totals include helpers. The search log includes `hash_fill_pct`, sampled across the shared table after
+each native search. See [search logs and table experiments](../search_logging.md)
+for field definitions, measurement limits, and cache resizing behavior.
 
-Counts exclude blank lines and comments, including Rust documentation comments.
-`Cargo.toml` and `Cargo.lock` hold build settings and dependency versions;
-`rust-toolchain.toml` and `.cargo/config.toml` select the toolchain and CPU target.
-`opening_book.txt` supplies the embedded book.
+The shared table protects deeper results for the same position and equal-depth
+exact results against weaker bounds. A depth-qualified table cutoff refreshes the
+entry's age once per search generation. Plain probes and PV reconstruction do not
+refresh age. Collision replacement combines stored depth and search age.
 
-The Python call tree shows the corresponding engine flow; Rust keeps adapter state
-in `Tablebase` methods and native search state in `Search`.
+Per-worker log lines report active elapsed time, explicit split-drain wait time,
+and nodes. Summaries include PVS/LMR/aspiration verification counts and their node
+cost, plus work discarded after split cutoffs or search stops. These elapsed-time
+measurements are not operating-system CPU time; completed descendant table entries
+can remain useful even when their enclosing task is discarded.
 
-![Corresponding Python module overview](../Remus6/mermaid/modules.svg)
+Build with stable Rust using `cargo build --release --locked` in the engine folder.
+Native chess uses the standard library. `reqwest`, `serde_json`, and `httpdate`
+serve only the tablebase boundary. The engine remains usable without network
+access. Helpers are created for each search and joined before the next command
+can replace the shared table.
 
-[Function call diagrams](../Remus6/README.md#the-call-tree) show the native helpers.
+## Source files
 
-`reqwest` supplies HTTPS with certificate validation, `serde_json` parses JSON,
-and `httpdate` handles HTTP retry dates. These dependencies do not implement chess
-rules or search. The compiled executable includes the Rust dependencies and uses
-profile-guided optimization. Maintaining source requires the Rust toolchain; the
-workspace's designer build and verification tools accept `--engine 6`.
+<!-- Code counts are generated from nonblank Rust lines excluding standalone comments. -->
 
-## Transposition-table memory
+| File | Rust code lines |
+| --- | ---: |
+| `attacks.rs` | 147 |
+| `board.rs` | 204 |
+| `evaluation.rs` | 408 |
+| `exchange.rs` | 99 |
+| `main.rs` | 336 |
+| `make_move.rs` | 75 |
+| `move_generation.rs` | 166 |
+| `opening_book.rs` | 48 |
+| `search.rs` | 764 |
+| `search_control.rs` | 329 |
+| `search_metrics.rs` | 57 |
+| `table_metrics.rs` | 39 |
+| `tablebase.rs` | 253 |
+| `transposition_table.rs` | 253 |
+| **Total** | **3,178** |
 
-The engine allocates a fixed 2 GiB table at startup: 33,554,432 buckets of four
-16-byte entries. Multiply-shift indexing selects the bucket. Matching keys update
-in place; full buckets replace the entry with the lowest depth minus its search
-age penalty. Windows supplies zero-filled pages on first access and releases the
-region when the table is dropped. An unsuccessful allocation disables caching
-while leaving native search available.
+The attack lookups, the legal-move test, move ordering, the central-hole term,
+the static evaluation, and the table probe use the
+[speed techniques of the Rust engines 5 through 7](../remus_versions.md#speed-techniques-of-the-rust-engines-5-through-7),
+which leave the searched positions and every score unchanged.
 
-There is no UCI Hash setting. Each engine process owns its 2 GiB allocation, and
-other process memory is additional. Python Remus6 uses the same allocation size,
-bucket dimensions, and replacement policy through standard-library `mmap` and
-`struct`; its position keys differ from Rust's keys.
+## Call structure
 
-## UCI and verification behavior
+![Search and diagnostics](mermaid/search.svg)
 
-The engine accepts `position startpos moves ...`, and retains `position fen`,
-`go depth`, `go perft`, and `eval` for designer analysis. Fixed-depth and perft
-commands bypass tablebases. A timed `go` may query the service, with at most one
-second and one quarter of its hard move budget spent waiting. The native search
-receives the remaining time.
-
-Tablebase categories, FEN fields, repetition guards, cache limits, and failure
-handling match the [Python adapter](../Remus6/README.md). An accepted reply prints
-`info string Lichess tablebase`; any unusable reply leaves move selection to the
-native search. A tablebase result is not stored in the native transposition table.
+[Mermaid source](mermaid/search.mmd)

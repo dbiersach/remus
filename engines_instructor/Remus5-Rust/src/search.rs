@@ -2,10 +2,9 @@
 //! search to a fixed depth matches when table replacement does not intervene.
 
 use std::io::Write;
-use std::time::Instant;
 
-use crate::attacks::in_check;
-use crate::board::{BISHOP, KNIGHT, ROOK};
+use crate::attacks::{QUEEN_LINES, in_check};
+use crate::board::{BISHOP, KING, KNIGHT, ROOK};
 use crate::board::{
     EMPTY, MATE_SCORE, Move, NO_MOVE, PAWN, Position, QUEEN, move_promotion, move_start,
     move_target, move_text,
@@ -14,6 +13,7 @@ use crate::evaluation::{PIECE_VALUES, evaluate};
 use crate::exchange::exchange_score;
 use crate::make_move::{make_move, make_null_move};
 use crate::move_generation::{MoveList, StackList, generate_captures, generate_moves};
+use crate::search_control::SearchControl;
 use crate::transposition_table::{EXACT, LOWER, Table, UPPER};
 
 const FUTILITY_MARGIN: i32 = 200; // A quiet move seldom gains more than this
@@ -23,6 +23,7 @@ const CAPTURE: i32 = 10_000; // Every capture and queen promotion scores above t
 const HISTORY_LIMIT: i32 = 3999; // Quiet history stays below both killer moves
 const MAX_PLY: usize = 128; // Killer moves are kept for this many plies
 const MAX_DEPTH: i32 = 64; // Iterative deepening stops here
+const EARLY_PICKS: usize = 3; // Moves chosen one at a time before the rest are sorted
 
 /// The sort entries of one position's moves.
 type EntryList = StackList<u64, 256>;
@@ -33,7 +34,7 @@ struct SearchTimeout;
 /// Everything the search keeps from one position to the next.
 pub struct Search {
     nodes: u64,
-    deadline: Option<Instant>,
+    pub control: SearchControl,
     best_move: Move,
     history: Vec<u64>,
     killers: [[Move; 2]; MAX_PLY],
@@ -77,7 +78,8 @@ fn capture_priority(position: &Position, mv: Move) -> i32 {
     priority
 }
 
-/// Fill the entries with the moves of the position, the likely best first.
+/// Fill the entries with the moves of the position and their priorities. The entries
+/// stand in the order of generation: place_next() or a sort puts the likely best first.
 #[inline]
 fn ordered_moves(
     position: &Position,
@@ -103,11 +105,44 @@ fn ordered_moves(
         }
         entries.add(sort_entry(priority, mv));
     }
-    entries.as_mut_slice().sort_unstable_by(|a, b| b.cmp(a));
 }
 
-/// Stop at the first move that leaves the moving side's king safe.
-fn has_legal_move(position: &Position) -> bool {
+/// Put the entry that belongs at this index in its place, so the moves come out in
+/// the order a full sort gives. Each of the first few indexes takes the largest entry
+/// left, which costs one pass over the list. The index after those sorts the rest.
+/// Most cutoffs come from the first few moves, and then the sort never runs.
+#[inline(always)]
+fn place_next(entries: &mut [u64], index: usize) {
+    if index < EARLY_PICKS {
+        let mut best = index;
+        for other in index + 1..entries.len() {
+            if entries[other] > entries[best] {
+                best = other;
+            }
+        }
+        entries.swap(index, best);
+    } else if index == EARLY_PICKS {
+        entries[index..].sort_unstable_by(|a, b| b.cmp(a));
+    }
+}
+
+/// Return true if the side to move has a legal move. The caller says whether that
+/// side is in check.
+fn has_legal_move(position: &Position, check: bool) -> bool {
+    if !check {
+        // Out of check, a move can leave its own king attacked only by moving the
+        // king, by capturing en passant, or by leaving a line through the king. A
+        // pawn off those lines with an empty square ahead has a legal step, and three
+        // bitboard operations find one without generating a move.
+        let own = position.by_side[usize::from(!position.white)];
+        let king = (own & position.by_kind[KING as usize]).trailing_zeros() as usize;
+        let free = own & position.by_kind[PAWN as usize] & !QUEEN_LINES[king & 63];
+        let ahead = if position.white { free >> 8 } else { free << 8 };
+        if ahead & !position.occupied() != 0 {
+            return true;
+        }
+    }
+    // Stop at the first move that leaves the moving side's king safe
     let mut list = MoveList::new();
     generate_moves(position, &mut list);
     for &mut mv in list.as_mut_slice() {
@@ -133,7 +168,7 @@ impl Search {
     pub fn new() -> Search {
         Search {
             nodes: 0,
-            deadline: None,
+            control: SearchControl::new(),
             best_move: NO_MOVE,
             history: Vec::with_capacity(1024),
             killers: [[NO_MOVE; 2]; MAX_PLY],
@@ -146,11 +181,7 @@ impl Search {
     #[inline(always)]
     fn count_node(&mut self) -> Result<(), SearchTimeout> {
         self.nodes += 1;
-        if self.nodes.is_multiple_of(1024)
-            && self.best_move != NO_MOVE
-            && let Some(deadline) = self.deadline
-            && Instant::now() > deadline
-        {
+        if self.nodes.is_multiple_of(1024) && self.control.poll(self.nodes) {
             return Err(SearchTimeout);
         }
         Ok(())
@@ -168,7 +199,7 @@ impl Search {
         self.count_node()?;
         let white = position.white;
         let check = in_check(position, white);
-        if !has_legal_move(position) {
+        if !has_legal_move(position, check) {
             return Ok(if check { -(MATE_SCORE - ply as i32) } else { 0 });
         }
         if self.is_draw(position) {
@@ -194,6 +225,7 @@ impl Search {
                 &self.quiet_history[usize::from(!white)],
                 &mut entries,
             );
+            entries.as_mut_slice().sort_unstable_by(|a, b| b.cmp(a));
         } else {
             let mut list = MoveList::new();
             generate_captures(position, &mut list);
@@ -266,7 +298,7 @@ impl Search {
         let key = position.key;
         let check = in_check(position, white);
         if ply > 0 && self.is_draw(position) {
-            if check && !has_legal_move(position) {
+            if check && !has_legal_move(position, true) {
                 return Ok(-(MATE_SCORE - ply as i32));
             }
             return Ok(0);
@@ -292,7 +324,10 @@ impl Search {
                 return Ok(stored.score);
             }
         }
-        let static_score = evaluate(position);
+        // Only two tests read the score, both out of check: null move at depth 3 and
+        // up, and futility at depth 1. Every other node skips the evaluation.
+        let needs_score = !check && (depth == 1 || (depth >= 3 && can_null && ply > 0));
+        let static_score = if needs_score { evaluate(position) } else { 0 };
         // Null move: let the opponent move twice. If the side to move still stands above
         // beta with a shallower search, its real moves will too.
         if can_null
@@ -301,9 +336,10 @@ impl Search {
             && depth >= 3
             && static_score >= beta
             && has_pieces(position)
-            && has_legal_move(position)
+            && has_legal_move(position, false)
         {
             let null = make_null_move(position);
+            self.table.prefetch(null.key);
             self.history.push(key);
             let result = self.alpha_beta(&null, depth - 3, ply + 1, -beta, -beta + 1, false);
             self.history.pop();
@@ -324,9 +360,16 @@ impl Search {
             &self.quiet_history[usize::from(!white)],
             &mut entries,
         );
-        for &mut entry in entries.as_mut_slice() {
-            let mv = entry_move(entry);
+        let moves = entries.as_mut_slice();
+        for index in 0..moves.len() {
+            place_next(moves, index);
+            let mv = entry_move(moves[index]);
             let child = make_move(position, mv);
+            if depth > 1 {
+                // The child looks itself up in the table; at depth 1 it goes straight
+                // to quiescence, which does not
+                self.table.prefetch(child.key);
+            }
             if in_check(&child, white) {
                 continue; // Illegal: it leaves the king attacked
             }
@@ -413,6 +456,21 @@ impl Search {
         line
     }
 
+    /// Return a legal cached reply after the selected move.
+    pub fn ponder_reply(&self, position: &Position, mv: Move) -> Move {
+        let child = make_move(position, mv);
+        if let Some(stored) = self.table.probe(child.key, 0) {
+            let mut moves = MoveList::new();
+            generate_moves(&child, &mut moves);
+            for &mut reply in moves.as_mut_slice() {
+                if reply == stored.mv && !in_check(&make_move(&child, reply), child.white) {
+                    return reply;
+                }
+            }
+        }
+        NO_MOVE
+    }
+
     /// Search one move deeper at a time and return the best move, or NO_MOVE when there
     /// is no legal move. The search plans to use seconds, takes longer when the best
     /// move keeps changing, and never runs past longest. A depth limit replaces the
@@ -425,12 +483,6 @@ impl Search {
         longest: f64,
         depth_limit: Option<i32>,
     ) -> Move {
-        let start = Instant::now();
-        self.deadline = if depth_limit.is_some() {
-            None
-        } else {
-            Some(start + std::time::Duration::from_secs_f64(longest.max(0.0)))
-        };
         self.nodes = 0;
         self.best_move = NO_MOVE;
         // Recent cutoffs matter more than those from earlier moves of the game.
@@ -443,8 +495,12 @@ impl Search {
         }
         self.table.new_search();
         let mut score = 0;
+        let mut completed_move = NO_MOVE;
         let mut stdout = std::io::stdout();
         'deepening: for depth in 1..=MAX_DEPTH {
+            if self.control.poll(self.nodes) {
+                break;
+            }
             let previous = self.best_move;
             let (mut alpha, mut beta) = (-MATE_SCORE - 1, MATE_SCORE + 1);
             if depth >= 4 {
@@ -470,6 +526,7 @@ impl Search {
             if self.best_move == NO_MOVE {
                 break; // No legal move
             }
+            completed_move = self.best_move;
             let line = self.principal_variation(position, depth);
             let _ = writeln!(
                 stdout,
@@ -478,17 +535,23 @@ impl Search {
             );
             let _ = stdout.flush();
             // A best move that changes needs more time to settle
-            if previous != NO_MOVE && self.best_move != previous {
+            let changed = previous != NO_MOVE && self.best_move != previous;
+            if changed {
                 seconds = (seconds * 1.5).min(longest);
             }
+            self.control.completed(depth, seconds / 2.0, score, changed);
             if score.abs() > MATE_SCORE - 100 {
                 break;
             }
             match depth_limit {
                 Some(limit) if depth >= limit => break,
-                None if start.elapsed().as_secs_f64() > seconds / 2.0 => break,
+                None if self.control.soft_finished(seconds / 2.0) => break,
                 _ => {}
             }
+        }
+        self.control.nodes = self.nodes;
+        if self.control.was_ponder && completed_move != NO_MOVE {
+            self.best_move = completed_move;
         }
         self.best_move
     }

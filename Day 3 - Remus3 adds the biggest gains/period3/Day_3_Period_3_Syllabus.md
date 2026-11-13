@@ -39,7 +39,7 @@ The instructor's versions are in [`engines_instructor/Remus3`](../../engines_ins
 
 ### `opening_book.txt`
 
-In File Explorer, copy [`engines_instructor/Remus3/opening_book.txt`](../../engines_instructor/Remus3/opening_book.txt) into `engines/Remus3`. Each line is one opening, such as `e2e4 e7e5 g1f3 b8c6 f1b5`. A line that starts with `White:` or `Black:` is a trap defense, played only by that side, and a line that starts with `#` is a comment.
+In File Explorer, copy [`engines_instructor/Remus3/opening_book.txt`](../../engines_instructor/Remus3/opening_book.txt) into `engines/Remus3`. Each line is one opening, such as `e2e4 e7e5 g1f3 b8c6 f1b5`. A line that starts with `White:` or `Black:` is played only by that side: a trap defense, or an opening that leaves the other side too low a score at its end. A line that starts with `#` is a comment.
 
 ### `opening_book.py`
 

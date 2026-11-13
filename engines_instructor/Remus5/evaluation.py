@@ -6,7 +6,8 @@ bishop pair, rooks on open files, pawn structure, the pawn race, king
 safety, and a mating bonus; Black's score is subtracted. The tables show
 White's view with rank 8 on top, and a Black piece reads them upside
 down. The king's table tapers from its middlegame table to its endgame
-table as the pieces come off.
+table as the pieces come off. Backward pawns, central holes, and stable
+knight outposts add positional terms.
 """
 
 from attacks import DIAGONAL, DIRECTIONS, KNIGHT_JUMPS, STRAIGHT
@@ -132,21 +133,120 @@ ROOK_OPEN_FILE = 20  # A file with no pawns
 ROOK_HALF_OPEN_FILE = 10  # A file with only enemy pawns
 DOUBLED_PAWN = 15  # For each extra pawn on a file
 ISOLATED_PAWN = 15  # No friendly pawn on a file beside it
+BACKWARD_PAWN = 18  # An unsupported pawn whose advance meets an enemy pawn attack
+BACKWARD_OPEN_FILE = 8  # Extra penalty when no enemy pawn screens its file
+CENTRAL_HOLE = 12  # An empty central square an enemy knight can use
+KNIGHT_OUTPOST = 15  # An advanced knight that enemy pawns cannot challenge
+SUPPORTED_OUTPOST = 15  # Extra bonus when a friendly pawn protects the knight
 UNSTOPPABLE_PAWN = 500  # A passed pawn the enemy king cannot catch
 SHIELD_PAWN = 10  # For each pawn in front of a king on its back rank
 OPEN_KING_FILE = 15  # For each file at the king with no friendly pawn
 
 
-def king_safety(pawns, counts, king, side, phase) -> int:
-    """Score the pawn shield of one king, larger with more pieces left."""
-    col = king % 8
-    if king // 8 != (7 if side == 0 else 0):
-        return 0  # Only a king on its back rank has a shield
+def pawn_attacks(pawns: tuple[list[int], list[int]]) -> tuple[list[bool], list[bool]]:
+    """Mark pawn-controlled squares, including squares occupied by friendly pieces."""
+    attacks = ([False] * 64, [False] * 64)
+    for side in (0, 1):
+        step = -1 if side == 0 else 1  # Row 0 is rank 8
+        for square in pawns[side]:
+            row, col = divmod(square, 8)
+            for target_col in (col - 1, col + 1):
+                if 0 <= row + step < 8 and 0 <= target_col < 8:
+                    attacks[side][(row + step) * 8 + target_col] = True
+    return attacks
+
+
+def pawn_can_challenge(pawns: list[int], side: int, square: int) -> bool:
+    """Can an adjacent-file pawn attack this square, directly or after advancing?"""
+    row, col = divmod(square, 8)
+    for pawn in pawns:
+        behind = pawn // 8 > row if side == 0 else pawn // 8 < row
+        if behind and abs(pawn % 8 - col) == 1:
+            return True
+    return False
+
+
+def positional_terms(
+    board: list[int],
+    pawns: tuple[list[int], list[int]],
+    knights: tuple[list[int], list[int]],
+    attacks: tuple[list[bool], list[bool]],
+) -> int:
+    """Score backward pawns, central holes, and knight outposts from White's side."""
+    score = 0
+    for side in (0, 1):
+        enemy = 1 - side
+        sign = 1 if side == 0 else -1
+        step = -8 if side == 0 else 8
+        for square in pawns[side]:
+            target = square + step
+            if not 0 <= target < 64 or not attacks[enemy][target]:
+                continue
+            if attacks[side][square]:
+                continue
+            adjacent = False
+            support = False
+            for pawn in pawns[side]:
+                if abs(pawn % 8 - square % 8) == 1:
+                    adjacent = True
+                    behind = (
+                        pawn // 8 >= square // 8
+                        if side == 0
+                        else pawn // 8 <= square // 8
+                    )
+                    if behind:
+                        support = True
+            # Isolated pawns have their own penalty. Support can come from an
+            # adjacent-file pawn on this rank or behind it.
+            if adjacent and not support:
+                penalty = BACKWARD_PAWN
+                screened = False
+                for pawn in pawns[enemy]:
+                    if pawn % 8 == square % 8:
+                        screened = True
+                if not screened:
+                    penalty += BACKWARD_OPEN_FILE
+                score -= sign * penalty
+        if knights[enemy]:
+            # White's third and fourth ranks, mirrored for Black. An enemy pawn
+            # protects the hole, and no friendly pawn can challenge its occupant.
+            for view_row in (4, 5):
+                row = view_row if side == 0 else 7 - view_row
+                for col in range(2, 6):
+                    square = row * 8 + col
+                    is_hole = board[square] == EMPTY and attacks[enemy][square]
+                    if is_hole and not pawn_can_challenge(pawns[side], side, square):
+                        score -= sign * CENTRAL_HOLE
+        for square in knights[side]:
+            view_row = square // 8 if side == 0 else 7 - square // 8
+            advanced = 2 <= view_row <= 4 and 1 <= square % 8 <= 6
+            if advanced and not pawn_can_challenge(pawns[enemy], enemy, square):
+                bonus = KNIGHT_OUTPOST
+                if attacks[side][square]:
+                    bonus += SUPPORTED_OUTPOST
+                score += sign * bonus
+    return score
+
+
+def king_safety(
+    pawns: tuple[list[int], list[int]],
+    counts: tuple[list[int], list[int]],
+    king: int,
+    side: int,
+    phase: int,
+) -> int:
+    """Score nearby pawn cover, tapering its value as pieces leave the board."""
+    row, col = divmod(king, 8)
+    view_row = row if side == 0 else 7 - row
+    if view_row < 5:
+        return 0  # An advanced king uses its piece-square table
     forward = -8 if side == 0 else 8
     score = 0
     for c in range(max(col - 1, 0), min(col + 2, 8)):
         if king + forward + c - col in pawns[side]:
             score += SHIELD_PAWN
+        elif king + 2 * forward + c - col in pawns[side]:
+            score += SHIELD_PAWN // 2
         if counts[side][c + 1] == 0:
             score -= OPEN_KING_FILE
     return score * phase // 24
@@ -230,6 +330,7 @@ def evaluate(position: Position) -> int:
     kings = [0, 0]  # The squares of the White king and the Black king
     pawns = ([], [])  # The squares of White's pawns, then Black's
     rooks = ([], [])
+    knights = ([], [])
     for square in range(64):
         piece = board[square]
         if piece == EMPTY:
@@ -254,6 +355,8 @@ def evaluate(position: Position) -> int:
             score += sign * MOBILITY_BONUS * len(moves)
             if kind == ROOK:
                 rooks[side].append(square)
+            elif kind == KNIGHT:
+                knights[side].append(square)
     # Insufficient material: a lone knight or bishop cannot mate
     if phase <= 1 and not pawns[0] and not pawns[1]:
         return 0
@@ -270,4 +373,5 @@ def evaluate(position: Position) -> int:
         score -= BISHOP_PAIR
     score += material + pawn_terms(pawns, rooks, kings, phase, white)
     score += mating_bonus(material, kings, phase)
+    score += positional_terms(board, pawns, knights, pawn_attacks(pawns))
     return score if white else -score

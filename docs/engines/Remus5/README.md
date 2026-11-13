@@ -1,34 +1,40 @@
-# Remus5: check-aware quiescence and history ordering
+# Remus5: tactical search and positional evaluation
 
 Remus5 extends [Remus4](../Remus4/README.md) with four search enhancements:
 check-aware quiescence, stalemate detection at the search leaves, consistent en
-passant capture handling, and history ordering for quiet moves. Its evaluation,
-opening book, board representation, and copy-make move generation match Remus4.
+passant capture handling, and history ordering for quiet moves. Its positional
+evaluation adds backward pawns, central holes, knight outposts, and nearby king
+cover. The opening book, board representation, and copy-make move generation match
+Remus4. Remus6-Rust and Remus7-Rust share this evaluation.
+Remus5 also provides optional root tablebase advice and GUI-driven UCI pondering.
 The Python engine uses only the standard library and speaks UCI through `remus.bat`.
-Its transposition table occupies a fixed 1 GiB allocation in both Python and Rust.
+Its transposition table occupies a fixed 512 MiB allocation in both Python and Rust.
 
-The [Python source](../../../engines_instructor/Remus5/) contains 786 code lines,
-92 more than Remus4's 694. This is a net difference in source length, not a count of
+The [Python source](../../../engines_instructor/Remus5/) contains 1430 code lines,
+736 more than Remus4's 694. This is a net difference in source length, not a count of
 lines to type or replace. Remus5 is an experimental engine for strength comparisons;
 the five-day workshop continues to use Remus1 through Remus4.
 
 ## Files
 
-| File | Code lines | Responsibility |
-| --- | ---: | --- |
-| `board.py` | 23 | Piece numbers, the position tuple, starting position, position keys, and UCI move text |
-| `make_move.py` | 24 | Play a move on a copied board and maintain the fifty-move clock |
-| `attacks.py` | 34 | Detect attacks and check |
-| `move_generation.py` | 65 | Generate pseudo-legal moves, including castling, en passant, and promotions |
-| `evaluation.py` | 195 | Material, piece-square tables, mobility, pawn structure, king safety, and endgame terms |
-| `exchange.py` | 39 | Static exchange evaluation, including removal of the captured en passant pawn |
-| `transposition_table.py` | 68 | Store search depths, scores, bounds, and best moves |
-| `opening_book.py` | 21 | Read opening lines and return candidate book moves |
-| `search.py` | 255 | Alpha-beta search, quiescence, terminal-position checks, draw handling, and move ordering |
-| `uci.py` | 62 | UCI commands, game history, legal book moves, and time allocation |
-| **Total** | **786** | |
+| File | Remus5 code lines | Remus4 code lines | Responsibility |
+| --- | ---: | ---: | --- |
+| `board.py` | 23 | 23 | Piece numbers, the position tuple, starting position, position keys, and UCI move text |
+| `make_move.py` | 24 | 24 | Play a move on a copied board and maintain the fifty-move clock |
+| `attacks.py` | 34 | 34 | Detect attacks and check |
+| `move_generation.py` | 65 | 65 | Generate pseudo-legal moves, including castling, en passant, and promotions |
+| `evaluation.py` | 285 | 195 | Material, piece-square tables, mobility, pawn structure, king safety, and endgame terms |
+| `exchange.py` | 39 | 36 | Static exchange evaluation, including removal of the captured en passant pawn |
+| `transposition_table.py` | 68 | 22 | Store search depths, scores, bounds, and best moves |
+| `opening_book.py` | 21 | 21 | Read opening lines and return candidate book moves |
+| `search.py` | 283 | 212 | Alpha-beta search, quiescence, terminal-position checks, draw handling, and move ordering |
+| `uci.py` | 191 | 62 | UCI commands, game history, legal book moves, and time allocation |
+| `search_control.py` | 239 | — | Input queue, cancellation, ponder credit, and move clock |
+| `tablebase.py` | 158 | — | Bounded root advice, native legality checks, cache, and fallback |
+| **Total** | **1430** | **694** | |
 
-Counts exclude blank lines, comments, and docstrings. `remus.bat` starts `uci.py`,
+Counts exclude blank lines, comments, and docstrings. An em dash means the file
+is absent from Remus4. `remus.bat` starts `uci.py`,
 and `opening_book.txt` supplies the opening lines. Neither file contributes to the
 Python line count. The engine identifies itself as `Remus5`.
 
@@ -61,11 +67,12 @@ than the focused views.
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Complete function graph](mermaid/full_elk.svg) | 42 | 69 | [Mermaid](mermaid/full_elk.mmd) |
-| [Module overview](mermaid/modules.svg) | 10 | 17 | [Mermaid](mermaid/modules.mmd) |
-| [UCI and move selection](mermaid/uci.svg) | 13 | 14 | [Mermaid](mermaid/uci.mmd) |
-| [Search](mermaid/search.svg) | 20 | 37 | [Mermaid](mermaid/search.mmd) |
-| [Evaluation](mermaid/evaluation.svg) | 7 | 5 | [Mermaid](mermaid/evaluation.mmd) |
+| [Complete function graph](mermaid/full_elk.svg) | 74 | 128 | [Mermaid](mermaid/full_elk.mmd) |
+| [Module overview](mermaid/modules.svg) | 12 | 25 | [Mermaid](mermaid/modules.mmd) |
+| [UCI and move selection](mermaid/uci.svg) | 26 | 36 | [Mermaid](mermaid/uci.mmd) |
+| [Search](mermaid/search.svg) | 24 | 43 | [Mermaid](mermaid/search.mmd) |
+| [Tablebase lookup and validation](mermaid/tablebase.svg) | 13 | 13 | [Mermaid](mermaid/tablebase.mmd) |
+| [Evaluation](mermaid/evaluation.svg) | 10 | 8 | [Mermaid](mermaid/evaluation.mmd) |
 
 ### Viewing and editing
 
@@ -197,18 +204,43 @@ evaluation. This is a depth-limit approximation, not proof that the position is
 quiet. Away from check, quiescence remains selective: delta pruning and SEE can
 omit captures, and quiet moves other than queen promotions are not searched.
 
+## Positional evaluation
+
+A black pawn on d6 can become a lasting target when the e-pawn advances to e5
+and the c-pawn cannot support it. A white pawn on e4 controls d5, making ...d5
+difficult. The evaluation subtracts 18 centipawns for this backward pawn and
+another 8 when no enemy pawn screens its file. A neighboring friendly pawn on
+the same rank or behind the pawn prevents the penalty, as does direct pawn
+protection. Isolated pawns retain their separate penalty without this addition.
+
+An empty central square on the defending side's third or fourth rank costs
+12 centipawns when an enemy pawn protects it, an enemy knight exists, and no
+friendly pawn on an adjacent file can advance to attack the square. For example,
+d5 can become such a hole after Black plays ...e5. The term covers files c through
+f. It scores the opportunity; it does not assert that a knight can reach the square
+without a tactical problem.
+
+A knight on ranks four through six, viewed from its own side, earns 15 centipawns
+on files b through g when no enemy pawn can challenge it, plus 15 for friendly
+pawn protection. An occupied square receives the knight bonus instead of the
+empty-hole penalty. Potential pawn challenges are conservative: an adjacent pawn
+behind the square counts even if another piece currently blocks its advance.
+
+King cover applies on the king's first three ranks. A pawn one rank ahead earns
+10 centipawns; a pawn two ranks ahead earns 5. Each nearby file without a friendly
+pawn costs 15. These terms fade with the remaining pieces, reaching zero in a
+pawn-only endgame. The king's piece-square tables also reflect its location.
+
+The weights are modest heuristics, with 100 centipawns equal to a pawn. Search
+combines these terms with material, mobility, passed pawns, and tactical results.
+The terms do not force an opening move, and fixed-position checks do not establish
+a playing-strength gain.
+
 ## Expected playing strength
 
-The planning estimate for the complete package is **about +50 Elo over Remus4**,
-with a plausible range of **+20 to +80 Elo** under equal hardware and thinking time.
-These are engineering estimates, not measured ratings or statistical confidence
-intervals. A neutral result or a loss of strength remains possible.
-
-History ordering is expected to supply most of the consistent gain. Check and
-stalemate handling improve decisions in specific tactical and endgame positions,
-while en passant handling matters in a narrower set of positions. Their gains are
-not additive. Extra legality checks and quiet evasions can consume time that would
-otherwise buy another search iteration.
+The combined search and evaluation terms have no measured Elo gain. More detailed
+position scoring costs time per search node. Equal-time, color-balanced games are
+needed to determine whether the move-quality gain offsets that cost.
 
 Perft counts establish move-generation correctness, and fixed-depth comparisons
 check whether Python and Rust follow the same search. Neither establishes an Elo
@@ -220,12 +252,13 @@ against one Stockfish configuration describe that matchup, not a universal ratin
 ## Remus5-Rust and use
 
 [Remus5-Rust](../../../engines_instructor/Remus5-Rust/) implements the same search and
-evaluation in Rust. Its `search.rs` mirrors the check-aware quiescence, terminal
+evaluation in Rust. Its source contains 2472 code lines, including 407 in
+`evaluation.rs`, excluding blank lines and comments. Its `search.rs` mirrors the check-aware quiescence, terminal
 checks, history rewards, history aging, and en passant classification. Its
 `exchange.rs` removes the en passant victim during SEE, and its tactical move
 generator includes en passant captures.
 
-Python and Rust each use a fixed 1 GiB search table: 16,777,216 buckets,
+Python and Rust each use a fixed 512 MiB search table: 8,388,608 buckets,
 with four 16-byte entries per bucket. Multiply-shift indexing selects a bucket.
 An empty slot or matching key is preferred; a full bucket replaces the entry
 with the lowest stored depth minus eight times its age in searches. Ages wrap
@@ -253,7 +286,248 @@ Rust UCI interface also accepts `position fen`, `go depth`, `go perft`, and `eva
 
 ## Cache capacity in Lucas Chess
 
-Remus5 and Remus5-Rust use 1 GiB per process and advertise no UCI Hash setting.
+Remus5 and Remus5-Rust use 512 MiB per process and advertise no UCI Hash setting.
 Select the number of tournament workers with room for both engines in each game,
 Lucas Chess, and other applications. The table capacity is independent of the
 computer's installed or available RAM.
+
+## Choosing an endgame move
+
+With White's king on g7 and pawn on h7, and Black's king on e8, White can promote
+with `h7h8q`. The adapter serializes that position as
+`4k3/6KP/8/8/8/8/8/8 w - - 0 1` and requests
+`https://tablebase.lichess.org/standard?fen=<URL-encoded FEN>`.
+
+Lichess lists legal moves best first. The position's category describes the player
+to move, while each move's category describes the opponent after that move. A
+winning root therefore needs a move labeled `loss`. Remus5 uses this server order
+and checks the first entry; it does not sort signed DTZ values or select the first
+entry labeled `win`. DTZ concerns the next pawn move or capture that resets the
+fifty-move counter, not necessarily the fastest mate.
+
+The adapter accepts `win`, `loss`, `draw`, `cursed-win`, and `blessed-loss` when the
+root and child results agree. Cursed wins and blessed losses count as draws under
+the fifty-move rule. `unknown`, `maybe-win`, `maybe-loss`, `syzygy-win`, and
+`syzygy-loss` select native search because this adapter requires a definite result
+with the current counter. An illegal, empty, malformed, or inconsistent first entry
+also selects search. It does not skip a bad first entry and claim a lower-ranked
+entry is optimal.
+
+The native search never probes Lichess. The engine makes one root request per
+uncached eligible position, subject to its timing and cooldown limits. It can
+therefore consult the service on successive turns, not just once when seven pieces
+remain. No tablebase score is inserted into the native transposition table.
+
+## FEN and draw history
+
+FEN exists only at the Python HTTP boundary in `tablebase.py`. The native board,
+move generator, evaluation, and search retain the Remus5 representation. FEN
+includes the side to move, castling rights, en passant target, and actual halfmove
+counter. The fullmove number is 1 because it does not affect tablebase results and
+the native position does not store it.
+
+Positions with castling rights, more than seven pieces, or a halfmove counter of
+100 or greater use native search. FEN does not carry repetition history. The
+adapter skips a lookup if a position repeats within the reversible history, and
+rejects a candidate that revisits a recorded position without resetting the
+halfmove counter. These conservative guards leave repetition-sensitive decisions
+to the existing search; a remote result alone cannot establish the full game's
+draw status. A FEN-only Rust input has no history before that FEN.
+
+## Network behavior and timing
+
+- A lookup waits at most one second and at most one quarter of the move's hard
+  time allowance. If that allowance would give the request less than 20 ms, the
+  engine searches immediately. Elapsed lookup time is subtracted from both native
+  search budgets.
+- Each engine process permits one outstanding request. A slow worker cannot block
+  the UCI thread beyond the lookup budget or cause another concurrent request in
+  that process. Late responses are associated with their original FEN.
+- A process caches up to 256 JSON responses by complete API FEN, including the
+  halfmove counter. It clears the cache when admitting another entry at capacity.
+  Cached moves are validated against the current position and history on each use.
+- Successful JSON responses impose a one-second request cooldown. Transport and
+  parsing failures impose five seconds. HTTP 429 imposes at least 60 seconds and
+  honors a longer `Retry-After` value in seconds or HTTP-date form. Cooldowns never
+  make the engine sleep instead of searching.
+- Responses larger than 65,536 bytes are rejected. HTTPS certificate validation
+  stays enabled. An unavailable service, DNS or TLS failure, timeout, invalid
+  JSON, HTTP error, or unsupported position falls back to native search.
+
+The wait limit applies to the tablebase adapter. Native search retains Remus5's
+periodic clock checks and first-legal-move behavior. The cache and cooldown are
+local to one engine process; separate GUI engine instances do not share them.
+Service availability and lookup latency can affect how often advice is used.
+
+## Use in a chess GUI
+
+For Python, select
+[`engines_instructor/Remus5/remus.bat`](../../../engines_instructor/Remus5/remus.bat)
+as an external UCI engine and use its engine folder as the working directory. It
+requires the repository's Python 3.14 environment and identifies itself as `Remus5`.
+The workshop's setup installer registers the workshop engines; these experimental
+versions use separate external-engine entries.
+
+For Rust, select
+[`remus5_rust.exe`](../../../engines_instructor/Remus5-Rust/remus5_rust.exe).
+It identifies itself as `Remus5-Rust`, embeds its opening book, and requires no
+Python, Cargo, or Rust installation.
+
+Both engines advertise `LichessTablebase`, a UCI check option that defaults to true.
+Turn it off in the GUI's engine options for offline operation or native-search
+comparisons. The equivalent UCI command is:
+
+```text
+setoption name LichessTablebase value false
+```
+
+Use `true` to enable it. An accepted response produces `info string Lichess
+tablebase` before `bestmove`. Native-search fallback produces ordinary search
+information. Python continues to accept `position startpos moves ...`. Rust also
+accepts the designer commands `position fen`, `go depth`, `go perft`, and `eval`;
+fixed-depth and perft requests bypass the service.
+
+## Pondering in Lucas Chess R6
+
+Enable **Ponder** in the UCI options for the Remus5 or Remus5-Rust external-engine
+entry. Tournament entries keep their own engine settings: enable **Ponder** in
+that tournament's Remus5 entry too, or import the configured entry again. Keep
+Lucas Chess's external opening book at **<None>**. Restart an engine process to
+load its executable and options.
+
+For example, after Remus5 chooses `e2e4`, it can report `bestmove e2e4 ponder e7e5`.
+The GUI sends the position including both moves, followed by `go ponder`.
+Remus5 searches its response to `e7e5` while the opponent thinks.
+
+A standard `ponderhit` continues that search and starts the hard move clock.
+Lucas Chess R6 also uses `stop`, the actual `position`, and a fresh `go` when the
+prediction matches. Both Remus5 implementations recognize this handoff when the
+position command's tokens, including the full move history, match exactly and
+the new search begins within two seconds of the stopped search ending. Different
+histories, a new game, an option change, or an expired handoff receive no credit.
+Equivalent positions expressed with different command tokens conservatively miss.
+
+The stop-and-go form starts a native search with retained cache and heuristic
+information. Completed ponder time counts toward the soft target once the new
+search recovers the pondered depth. The gap between commands earns no time credit.
+Stable hits reserve 25% of the adjusted move plan on the engine's own clock,
+capped at 25% of the hard budget. With at least 60 seconds left on its clock,
+Remus5 in Python and the Rust engines 5 through 7 reinvest time when the hit
+depth is below 8, the score falls by
+at least 35 centipawns between completed iterations of depth 4 or greater, or
+the best move changes in the latest such iteration. A deeper cached score is
+preserved while a Lucas restart replays shallow iterations. Score deterioration
+and uncertainty at the hit carry across that restart.
+
+An uncertain hit reserves 50% of the adjusted plan and aims to complete a depth
+beyond the hit depth. If that iteration is too expensive, it may return after
+one full adjusted plan; both allowances are capped at half the hard budget.
+For example, a 30-second plan normally reserves 7.5 seconds after a hit; an
+uncertain hit reserves 15 seconds and can try up to 30 seconds for another depth.
+Clocks below 60 seconds and explicit `movetime` commands retain the smaller
+allowance. These thresholds guide time allocation; they do not establish an Elo
+gain or guarantee a better move. The hard deadline, explicit stop/quit, terminal
+positions, and a proven mate take precedence.
+The engine returns a completed iteration when available. Cached results can also
+help after a missed prediction, but a miss receives no ponder time credit.
+
+The standard `Ponder` check option defaults to false. Enable it with
+`setoption name Ponder value true`. The predicted reply comes from a legal cached
+move, an opening-book continuation, or a legal fallback. A prediction alone never
+starts a search. Pondering bypasses online tablebases. A legal book continuation
+takes priority on a timed turn, including a Lucas hit. During `go ponder`, Remus5
+in Python and the Rust engines 5 through 7 hold a known book move until
+`ponderhit` or `stop`, without searching.
+Book waiting earns no native ponder credit. Outside the book, waiting time goes
+to native analysis. `isready`, `stop`, and `quit` remain responsive during search.
+A finished ponder search, including mate
+or stalemate, waits for `ponderhit` or `stop` before returning `bestmove`.
+
+Lucas Chess R6 supplies the required pondering controller. Lucas Chess R2 does
+not support this feature. For native-search comparisons, leave `Ponder` disabled;
+with pondering enabled, both engines can use CPU at the same time. The search
+uses the existing 512 MiB table and one search thread per engine.
+
+## Ponder diagnostics
+
+`PonderDiagnostics` is a UCI check option, default false. With
+`setoption name PonderDiagnostics value true`, each completed ponder request
+emits one `info string ponder` line before `bestmove`. It reports:
+
+- `outcome`: `hit`, or `stopped` when cancelled before a hit.
+- `ponder_ms`: time before the hit or cancellation; a book result waits without searching.
+- `hit_depth` and `hit_nodes`: completed depth and sampled node count at a standard hit.
+  A stop-and-go hit records the prior completed depth and zero new-search nodes at handoff.
+- `final_depth` and `final_nodes`: completed depth and total work at return.
+- `own_ms`: time from a standard hit or matching new `go` to the result.
+- `hit_kind`: `uci`, `stop_go`, or `none` for a cancelled ponder without a hit.
+
+The node counter is sampled when input is polled, at most every 1,024 nodes.
+A stopped request can mean a prediction miss, game end, or other cancellation;
+its count alone is not an exact miss rate. GUI-observed response time also
+includes input delivery and polling latency. These measurements describe search
+efficiency, not playing strength or Elo.
+
+### Persistent Python logs
+
+With PonderDiagnostics enabled, Python Remus5 appends JSON lines to
+`ponder_logs/ponder_<pid>_<session>.jsonl` beside `uci.py`. One file per process
+keeps concurrent tournament workers separate; timestamps and search IDs identify
+events. The option defaults to false. Enable it together with Ponder in the
+external-engine and tournament entries. No log is created while diagnostics are off.
+
+Records include incoming commands, `go ponder` starts, complete position histories,
+legal `bestmove ... ponder ...` predictions, standard hits, and linked Lucas
+stop-and-go hits. Each search records its initial plan, hard budget, completed
+depth, total nodes, charged-clock time, and process CPU timestamps. A restarted
+Lucas search identifies the stopped ponder search whose work it credits.
+Normal searches are recorded too, so post-hit clock use can be compared with
+ordinary moves. Book choices have zero native nodes and are excluded from native
+search-rate summaries. `source` distinguishes native, book, and tablebase results.
+Book ponder waits are counted separately from native attempts and hits. Native
+results record `reinvest`, `shallow_hit`, `deteriorating`, `unstable`, and the
+extra-time cap `hit_cap_ms`; the cap applies when `reinvest` is true. This Python
+log format is separate from Rust diagnostics. The Rust engines 5 through 7 add
+the same five fields to their `info string ponder` line, with 1 for yes and 0
+for no.
+
+Count a linked stop-and-go as one hit, not a stopped miss followed by a second
+ponder attempt. Unmatched stops can mean a prediction miss, game end, or cancellation.
+Ponder time measures work performed before our clock starts; it is not a direct
+measurement of time saved. Initial plans and ordinary-move averages are useful
+context, but a causal saving requires a matched no-ponder comparison.
+
+Logging occurs at UCI/search boundaries, not at each node. An unavailable log path
+prints one UCI warning and leaves native play and stdout diagnostics available.
+Logs are retained until removed by the user. Node rates derived from process CPU
+time exclude idle waiting; they are not the same as nodes divided by GUI clock time.
+
+## Dependencies and scope
+
+Python uses `urllib`, `json`, queues, and a daemon thread from the standard library.
+Rust uses `reqwest` for HTTPS, `serde_json` for JSON, and `httpdate` for retry dates,
+with versions recorded in `Cargo.lock`. Those crates serve only the boundary; all
+chess rules, legal moves, evaluation, and fallback search remain native. The Rust
+executable uses profile-guided optimization. Python and Rust each allocate a fixed
+512 MiB transposition table containing 8,388,608 four-entry, 64-byte buckets.
+Multiply-shift indexing selects a bucket. Both implementations replace entries
+within a full bucket using stored depth and age, with an age penalty of eight
+plies per search and ages wrapping after 64 searches. Python uses the standard
+library's `mmap` and `struct`; Rust uses Windows virtual memory. Their position
+keys differ, so collisions can affect their searches differently.
+
+Both allocate zero-filled memory at startup and search without caching if the
+allocation fails. The small HTTP response cache is separate from this search
+table. Each engine process owns its own allocation; total process memory also
+includes the board, search state, and runtime.
+
+Tablebase support improves access to exact endgame information when a usable
+response arrives. It does not establish an Elo gain or guarantee the shortest mate.
+The native search and its existing approximations apply whenever the adapter
+returns no move.
+
+## API references
+
+- [Lichess API documentation](https://lichess.org/api#tag/Tablebase) describes the public service.
+- [Lichess tablebase server](https://github.com/lichess-org/lila-tablebase/blob/main/README.md) documents response categories, move ordering, and DTZ fields.
+- [Lichess API guidance](https://lichess.org/page/api-tips) specifies sequential requests and rate-limit backoff.

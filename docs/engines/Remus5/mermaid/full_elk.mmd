@@ -19,115 +19,206 @@ config:
 flowchart TB
     n0["attacks.py<br/>in_check()"]:::m8
     n1["attacks.py<br/>is_attacked()"]:::m8
-    n2["board.py<br/>is_own()"]:::m9
-    n3["board.py<br/>move_text()"]:::m9
-    n4["board.py<br/>parse_square()"]:::m9
-    n5["board.py<br/>position_key()"]:::m9
-    n6["board.py<br/>square_name()"]:::m9
-    n7["evaluation.py<br/>module initialization"]:::m5
-    n8["evaluation.py<br/>evaluate()"]:::m5
-    n9["evaluation.py<br/>king_safety()"]:::m5
-    n10["evaluation.py<br/>mating_bonus()"]:::m5
-    n11["evaluation.py<br/>mirrored_table()"]:::m5
-    n12["evaluation.py<br/>pawn_terms()"]:::m5
-    n13["exchange.py<br/>cheapest_attacker()"]:::m4
-    n14["exchange.py<br/>exchange_score()"]:::m4
-    n15["make_move.py<br/>make_move()"]:::m7
-    n16["move_generation.py<br/>add_pawn_move()"]:::m6
-    n17["move_generation.py<br/>castling_moves()"]:::m6
-    n18["move_generation.py<br/>generate_moves()"]:::m6
-    n19["move_generation.py<br/>pawn_moves()"]:::m6
-    n20["move_generation.py<br/>piece_moves()"]:::m6
-    n21["opening_book.py<br/>book_moves()"]:::m2
-    n22["opening_book.py<br/>load_book()"]:::m2
-    n23["search.py<br/>alpha_beta()"]:::m1
-    n24["search.py<br/>captured_kind()"]:::m1
-    n25["search.py<br/>count_node()"]:::m1
-    n26["search.py<br/>has_legal_move()"]:::m1
-    n27["search.py<br/>has_pieces()"]:::m1
-    n28["search.py<br/>is_draw()"]:::m1
-    n29["search.py<br/>ordered_moves()"]:::m1
-    n30["search.py<br/>principal_variation()"]:::m1
-    n31["search.py<br/>quiescence()"]:::m1
-    n32["search.py<br/>think()"]:::m1
-    n33["transposition_table.py<br/>module initialization"]:::m3
-    n34["transposition_table.py<br/>allocate_table()"]:::m3
-    n35["transposition_table.py<br/>new_search()"]:::m3
-    n36["transposition_table.py<br/>probe()"]:::m3
-    n37["transposition_table.py<br/>store()"]:::m3
-    n38["uci.py<br/>module initialization"]:::m0
-    n39["uci.py<br/>legal_book_move()"]:::m0
-    n40["uci.py<br/>main()"]:::m0
-    n41["uci.py<br/>read_time()"]:::m0
+    n2["board.py<br/>Move.get()"]:::m9
+    n3["board.py<br/>is_own()"]:::m9
+    n4["board.py<br/>move_text()"]:::m9
+    n5["board.py<br/>parse_square()"]:::m9
+    n6["board.py<br/>position_key()"]:::m9
+    n7["board.py<br/>square_name()"]:::m9
+    n8["evaluation.py<br/>module initialization"]:::m5
+    n9["evaluation.py<br/>evaluate()"]:::m5
+    n10["evaluation.py<br/>king_safety()"]:::m5
+    n11["evaluation.py<br/>mating_bonus()"]:::m5
+    n12["evaluation.py<br/>mirrored_table()"]:::m5
+    n13["evaluation.py<br/>pawn_attacks()"]:::m5
+    n14["evaluation.py<br/>pawn_can_challenge()"]:::m5
+    n15["evaluation.py<br/>pawn_terms()"]:::m5
+    n16["evaluation.py<br/>positional_terms()"]:::m5
+    n17["exchange.py<br/>cheapest_attacker()"]:::m4
+    n18["exchange.py<br/>exchange_score()"]:::m4
+    n19["make_move.py<br/>make_move()"]:::m7
+    n20["move_generation.py<br/>add_pawn_move()"]:::m6
+    n21["move_generation.py<br/>castling_moves()"]:::m6
+    n22["move_generation.py<br/>generate_moves()"]:::m6
+    n23["move_generation.py<br/>pawn_moves()"]:::m6
+    n24["move_generation.py<br/>piece_moves()"]:::m6
+    n25["opening_book.py<br/>book_moves()"]:::m2
+    n26["opening_book.py<br/>load_book()"]:::m2
+    n27["search.py<br/>alpha_beta()"]:::m1
+    n28["search.py<br/>captured_kind()"]:::m1
+    n29["search.py<br/>count_node()"]:::m1
+    n30["search.py<br/>has_legal_move()"]:::m1
+    n31["search.py<br/>has_pieces()"]:::m1
+    n32["search.py<br/>is_draw()"]:::m1
+    n33["search.py<br/>ordered_moves()"]:::m1
+    n34["search.py<br/>principal_variation()"]:::m1
+    n35["search.py<br/>quiescence()"]:::m1
+    n36["search.py<br/>think()"]:::m1
+    n37["search_control.py<br/>SearchControl()"]:::m11
+    n38["search_control.py<br/>SearchControl.__init__()"]:::m11
+    n39["search_control.py<br/>SearchControl.begin()"]:::m11
+    n40["search_control.py<br/>SearchControl.completed()"]:::m11
+    n41["search_control.py<br/>SearchControl.credit_ponder()"]:::m11
+    n42["search_control.py<br/>SearchControl.elapsed()"]:::m11
+    n43["search_control.py<br/>SearchControl.handle()"]:::m11
+    n44["search_control.py<br/>SearchControl.hit_finished()"]:::m11
+    n45["search_control.py<br/>SearchControl.hit_minimum()"]:::m11
+    n46["search_control.py<br/>SearchControl.log()"]:::m11
+    n47["search_control.py<br/>SearchControl.next_command()"]:::m11
+    n48["search_control.py<br/>SearchControl.poll()"]:::m11
+    n49["search_control.py<br/>SearchControl.ponder_credit()"]:::m11
+    n50["search_control.py<br/>SearchControl.read_input()"]:::m11
+    n51["search_control.py<br/>SearchControl.reinvest()"]:::m11
+    n52["search_control.py<br/>SearchControl.report()"]:::m11
+    n53["search_control.py<br/>SearchControl.soft_finished()"]:::m11
+    n54["search_control.py<br/>SearchControl.wait()"]:::m11
+    n55["tablebase.py<br/>collect()"]:::m10
+    n56["tablebase.py<br/>eligible()"]:::m10
+    n57["tablebase.py<br/>fetch()"]:::m10
+    n58["tablebase.py<br/>lookup()"]:::m10
+    n59["tablebase.py<br/>position_fen()"]:::m10
+    n60["tablebase.py<br/>response_move()"]:::m10
+    n61["tablebase.py<br/>retry_delay()"]:::m10
+    n62["transposition_table.py<br/>module initialization"]:::m3
+    n63["transposition_table.py<br/>allocate_table()"]:::m3
+    n64["transposition_table.py<br/>new_search()"]:::m3
+    n65["transposition_table.py<br/>probe()"]:::m3
+    n66["transposition_table.py<br/>store()"]:::m3
+    n67["uci.py<br/>module initialization"]:::m0
+    n68["uci.py<br/>choose_move()"]:::m0
+    n69["uci.py<br/>legal_book_move()"]:::m0
+    n70["uci.py<br/>legal_choice()"]:::m0
+    n71["uci.py<br/>main()"]:::m0
+    n72["uci.py<br/>ponder_reply()"]:::m0
+    n73["uci.py<br/>read_time()"]:::m0
     n0 --> n1
-    n3 --> n6
-    n7 --> n11
-    n8 --> n10
+    n4 --> n7
     n8 --> n12
-    n8 --> n20
-    n12 --> n9
-    n13 --> n18
-    n14 --> n13
-    n17 --> n1
-    n18 --> n2
+    n9 --> n11
+    n9 --> n13
+    n9 --> n15
+    n9 --> n16
+    n9 --> n24
+    n15 --> n10
+    n16 --> n14
+    n17 --> n22
     n18 --> n17
-    n18 --> n19
-    n18 --> n20
-    n19 --> n2
-    n19 --> n16
-    n20 --> n2
-    n23 --> n0
-    n23 --> n5
-    n23 --> n8
-    n23 --> n15
-    n23 --> n24
-    n23 --> n25
-    n23 --> n26
-    n23 --> n27
-    n23 --> n28
-    n23 --> n29
-    n23 --> n31
-    n23 --> n36
-    n23 --> n37
-    n26 --> n0
-    n26 --> n15
-    n26 --> n18
-    n29 --> n18
-    n29 --> n24
-    n30 --> n3
-    n30 --> n5
-    n30 --> n15
-    n30 --> n36
-    n31 --> n0
-    n31 --> n5
-    n31 --> n8
-    n31 --> n14
-    n31 --> n15
-    n31 --> n24
-    n31 --> n25
-    n31 --> n26
-    n31 --> n28
-    n31 --> n29
-    n32 --> n23
-    n32 --> n30
-    n32 --> n35
-    n33 --> n34
-    n38 --> n40
-    n39 --> n0
-    n39 --> n3
-    n39 --> n15
-    n39 --> n18
-    n39 --> n21
-    n40 --> n3
-    n40 --> n4
-    n40 --> n5
-    n40 --> n15
-    n40 --> n22
-    n40 --> n32
-    n40 --> n39
-    n40 --> n41
-    n23 --> n23
-    n31 --> n31
+    n21 --> n1
+    n22 --> n3
+    n22 --> n21
+    n22 --> n23
+    n22 --> n24
+    n23 --> n3
+    n23 --> n20
+    n24 --> n3
+    n27 --> n0
+    n27 --> n2
+    n27 --> n6
+    n27 --> n9
+    n27 --> n19
+    n27 --> n28
+    n27 --> n29
+    n27 --> n30
+    n27 --> n31
+    n27 --> n32
+    n27 --> n33
+    n27 --> n35
+    n27 --> n65
+    n27 --> n66
+    n29 --> n48
+    n30 --> n0
+    n30 --> n19
+    n30 --> n22
+    n33 --> n2
+    n33 --> n22
+    n33 --> n28
+    n34 --> n4
+    n34 --> n6
+    n34 --> n19
+    n34 --> n65
+    n35 --> n0
+    n35 --> n6
+    n35 --> n9
+    n35 --> n18
+    n35 --> n19
+    n35 --> n28
+    n35 --> n29
+    n35 --> n30
+    n35 --> n32
+    n35 --> n33
+    n36 --> n27
+    n36 --> n34
+    n36 --> n40
+    n36 --> n48
+    n36 --> n53
+    n36 --> n64
+    n37 --> n38
+    n38 --> n39
+    n38 --> n50
+    n43 --> n46
+    n44 --> n42
+    n44 --> n45
+    n44 --> n51
+    n48 --> n43
+    n48 --> n44
+    n52 --> n42
+    n52 --> n46
+    n52 --> n51
+    n53 --> n42
+    n53 --> n44
+    n54 --> n43
+    n56 --> n6
+    n57 --> n61
+    n58 --> n55
+    n58 --> n56
+    n58 --> n57
+    n58 --> n59
+    n58 --> n60
+    n59 --> n7
+    n60 --> n0
+    n60 --> n4
+    n60 --> n6
+    n60 --> n19
+    n60 --> n22
+    n62 --> n63
+    n67 --> n71
+    n68 --> n36
+    n68 --> n46
+    n68 --> n58
+    n68 --> n69
+    n68 --> n70
+    n69 --> n0
+    n69 --> n4
+    n69 --> n19
+    n69 --> n22
+    n69 --> n25
+    n70 --> n0
+    n70 --> n19
+    n70 --> n22
+    n71 --> n4
+    n71 --> n5
+    n71 --> n6
+    n71 --> n19
+    n71 --> n26
+    n71 --> n37
+    n71 --> n39
+    n71 --> n41
+    n71 --> n46
+    n71 --> n47
+    n71 --> n49
+    n71 --> n52
+    n71 --> n54
+    n71 --> n68
+    n71 --> n72
+    n71 --> n73
+    n72 --> n4
+    n72 --> n6
+    n72 --> n19
+    n72 --> n65
+    n72 --> n69
+    n72 --> n70
+    n27 --> n27
+    n35 --> n35
     classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
@@ -139,3 +230,4 @@ flowchart TB
     classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
     classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;

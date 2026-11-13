@@ -4,8 +4,8 @@ Remus4-Rust is the instructor's Remus4 written in Rust, with a larger table. It 
 same rules, the same evaluation, the same search, and the same opening book. It shows the
 class that speed matters in a chess engine, not just the algorithms. No student pair
 types it or edits it, and it lives only in
-[`engines_instructor/Remus4-Rust`](../../../engines_instructor/Remus4-Rust). It is the
-one engine with a real program, `remus4_rust.exe`, so a laptop needs no Rust installed.
+[`engines_instructor/Remus4-Rust`](../../../engines_instructor/Remus4-Rust). It includes
+a real program, `remus4_rust.exe`, so a laptop needs no Rust installed.
 Only a rebuild of the program needs Rust: `rust-toolchain.toml` names the stable compiler
 and its parts, and rustup installs them the first time `cargo` runs in the folder.
 
@@ -44,26 +44,52 @@ None of these changes which positions the search visits, so they change only the
 ## The larger table
 
 At millions of positions per second, Remus4's table of 2 million entries fills within
-seconds. Remus4-Rust uses 512 MB for 32 million entries, and a full bucket of four
+seconds. Remus4-Rust allocates a fixed 512 MiB for 33,554,432 entries, and a full bucket of four
 entries replaces its oldest and shallowest entry instead of starting the whole table
 over. On four test positions, 20 seconds of thinking reached one ply deeper than the
 same engine with Remus4's table. Kiwipete to depth 13 took 13.9 seconds, against 32.9.
 
+## Configuration and diagnostics
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `SearchDiagnostics` | true | Append search timing, nodes per second, and table-use counters to `search_log.txt` beside the executable |
+
+The table belongs to this single-threaded engine process and has a fixed 512 MiB
+capacity, like Remus5-Rust. There is no `Hash` option or runtime resizing. Stale
+`Hash` commands from saved GUI settings are ignored and leave the cache intact.
+Allocation failure disables caching; native search remains available.
+Python Remus4 retains its fixed two-million-entry dictionary and has no Hash option.
+
+[Search logs and table experiments](../search_logging.md) explains the counters,
+node-rate comparisons, and logging controls. Diagnostic output does not change
+normal UCI search results. A timed move can use a provisional root choice from an
+interrupted iteration, so its returned move need not match the last completed PV.
+
 ## Its files
 
-Each file in `src/` matches the Remus4 Python file of the same name, and `main.rs` matches
-`uci.py`. The code lines leave out blank lines and comments:
+Native chess files in `src/` match the Remus4 Python modules, and `main.rs` matches
+`uci.py`. `diagnostics.rs` handles persistent logs; `table_metrics.rs` holds counters. The code lines leave out blank lines and comments:
 
-| File | Code lines |
+| File | Rust code lines |
 | --- | ---: |
-| `board.rs` | 204 |
 | `attacks.rs` | 140 |
-| `make_move.rs` | 75 |
-| `move_generation.rs` | 162 |
+| `board.rs` | 204 |
+| `diagnostics.rs` | 60 |
 | `evaluation.rs` | 311 |
 | `exchange.rs` | 95 |
-| `transposition_table.rs` | 103 |
+| `main.rs` | 188 |
+| `make_move.rs` | 75 |
+| `move_generation.rs` | 162 |
 | `opening_book.rs` | 48 |
-| `search.rs` | 363 |
-| `main.rs` | 161 |
-| **Total** | **1,662** |
+| `search.rs` | 387 |
+| `table_metrics.rs` | 34 |
+| `transposition_table.rs` | 130 |
+| **Total** | **1,834** |
+
+
+## Call structure
+
+![Search and diagnostics](mermaid/search.svg)
+
+[Mermaid source](mermaid/search.mmd)

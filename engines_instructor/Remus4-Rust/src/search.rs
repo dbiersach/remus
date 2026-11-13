@@ -10,10 +10,12 @@ use crate::board::{
     EMPTY, MATE_SCORE, Move, NO_MOVE, Position, QUEEN, move_promotion, move_start, move_target,
     move_text,
 };
+use crate::diagnostics::Diagnostics;
 use crate::evaluation::{PIECE_VALUES, evaluate};
 use crate::exchange::exchange_score;
 use crate::make_move::{make_move, make_null_move};
 use crate::move_generation::{MoveList, StackList, generate_captures, generate_moves};
+use crate::table_metrics::TableMetrics;
 use crate::transposition_table::{EXACT, LOWER, Table, UPPER};
 
 const FUTILITY_MARGIN: i32 = 200; // A quiet move seldom gains more than this
@@ -31,7 +33,9 @@ struct SearchTimeout;
 
 /// Everything the search keeps from one position to the next.
 pub struct Search {
+    pub diagnostics: Diagnostics,
     nodes: u64,
+    metrics: TableMetrics,
     deadline: Option<Instant>,
     best_move: Move,
     history: Vec<u64>,
@@ -101,7 +105,9 @@ fn has_pieces(position: &Position) -> bool {
 impl Search {
     pub fn new() -> Search {
         Search {
+            diagnostics: Diagnostics::new(),
             nodes: 0,
+            metrics: TableMetrics::default(),
             deadline: None,
             best_move: NO_MOVE,
             history: Vec::with_capacity(1024),
@@ -222,7 +228,9 @@ impl Search {
             return self.quiescence(position, alpha, beta);
         }
         let mut first = NO_MOVE;
+        self.metrics.probes += 1;
         if let Some(stored) = self.table.probe(key, ply as i32) {
+            self.metrics.hits += 1;
             first = stored.mv;
             if ply > 0
                 && stored.depth >= depth
@@ -230,6 +238,7 @@ impl Search {
                     || (stored.bound == LOWER && stored.score >= beta)
                     || (stored.bound == UPPER && stored.score <= alpha))
             {
+                self.metrics.cutoffs += 1;
                 return Ok(stored.score);
             }
         }
@@ -319,8 +328,11 @@ impl Search {
         } else if best_score <= original_alpha {
             bound = UPPER;
         }
-        self.table
-            .store(key, depth, best_score, bound, best, ply as i32);
+        self.metrics.stores += 1;
+        self.metrics.replacements += u64::from(
+            self.table
+                .store(key, depth, best_score, bound, best, ply as i32),
+        );
         Ok(best_score)
     }
 
@@ -361,6 +373,7 @@ impl Search {
             Some(start + std::time::Duration::from_secs_f64(longest.max(0.0)))
         };
         self.nodes = 0;
+        self.metrics = TableMetrics::default();
         self.best_move = NO_MOVE;
         self.table.new_search();
         let mut score = 0;
@@ -392,12 +405,14 @@ impl Search {
                 break; // No legal move
             }
             let line = self.principal_variation(position, depth);
-            let _ = writeln!(
-                stdout,
+            let info = format!(
                 "info depth {depth} score cp {score} nodes {} pv{line}",
                 self.nodes
             );
+            let _ = writeln!(stdout, "{info}");
             let _ = stdout.flush();
+            self.diagnostics.completed_depth = depth;
+            self.diagnostics.report(&info);
             // A best move that changes needs more time to settle
             if previous != NO_MOVE && self.best_move != previous {
                 seconds = (seconds * 1.5).min(longest);
@@ -411,6 +426,15 @@ impl Search {
                 _ => {}
             }
         }
+        let seconds = start.elapsed().as_secs_f64();
+        self.diagnostics.report(&format!(
+            "info string serial workers=1 nodes={} native_ms={:.1} nps={:.0} hash_mib={} {}",
+            self.nodes,
+            seconds * 1000.0,
+            self.nodes as f64 / seconds.max(0.000_001),
+            self.table.size_mib(),
+            self.metrics
+        ));
         self.best_move
     }
 }
