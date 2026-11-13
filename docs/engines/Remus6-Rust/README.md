@@ -48,13 +48,13 @@ excluded.
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 171 | +82 | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 764 | 505 | +259 | Move selection, search, ordering, and evaluation integration |
-| `src/search_control.rs` | 346 | 307 | +39 | Input queue, cancellation, pondering, and deadlines |
+| `src/search_control.rs` | 357 | 307 | +50 | Input queue, cancellation, pondering, and deadlines |
 | `src/search_metrics.rs` | 57 | 0 | +57 | Per-worker timing, nodes, re-search costs, and scheduling counters |
 | `src/table_metrics.rs` | 39 | 34 | +5 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
 | `src/main.rs` | 346 | 319 | +27 | UCI commands, configuration, root selection, and engine orchestration |
-| `src/diagnostics.rs` | 0 | 49 | -49 | Logging is provided by search_control.rs in this engine |
-| **Total** | **3,205** | **2,785** | **+420** | |
+| `src/diagnostics.rs` | 0 | 61 | -61 | Logging is provided by search_control.rs in this engine |
+| **Total** | **3,216** | **2,797** | **+419** | |
 
 ### Supporting files
 
@@ -77,10 +77,10 @@ an external UCI engine. Its identity is `Remus6-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `Threads` | spin | 4 | 1 to 64 | Total search threads, including the main worker |
 | `Hash` | combo | 512 | 512, 1024, 2048 MiB | Capacity of one table shared by all workers |
-| `SearchDiagnostics` | check | false | true, false | Append search_log.txt and report search counters |
+| `SearchDiagnostics` | check | false | true, false | Append `logs/search_<pid>_<session>.txt` and report search counters |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
-| `PonderDiagnostics` | check | false | true, false | Report ponder timing and append ponder_log.txt |
+| `PonderDiagnostics` | check | false | true, false | Report ponder timing and append `logs/ponder_<pid>_<session>.txt` |
 
 ### Requirements and build
 
@@ -380,8 +380,25 @@ does not establish pondering; incoming `go ponder` commands do.
 
 ## Diagnostics and performance
 
-`SearchDiagnostics`, default false, writes `search_log.txt` beside the executable when enabled, independently of
-`PonderDiagnostics` . The final `lazy_smp` summary includes the actual worker count and
+Each process writes its own files in `engines_instructor/Remus6-Rust/logs/`,
+relative to the repository root. When the executable is installed elsewhere, the
+`logs` folder stays beside that executable, regardless of Lucas Chess's working folder.
+Search files are `search_<pid>_<session>.txt`; ponder files are
+`ponder_<pid>_<session>.txt`. Matching suffixes identify the same engine process.
+
+`pid` is the Windows process ID; `session` is a Unix timestamp in nanoseconds
+captured at the first enabled log write. A new launch gets a new session, so
+concurrent games and reused process IDs keep separate records. One process can
+play several games in the same session; use `ucinewgame`, position commands, and
+search IDs to separate them.
+
+Files are created only when the corresponding option is enabled. Disabling an option stops further writes without erasing its
+file; re-enabling it resumes the same file. Logs are not automatically rotated or
+deleted. Archive completed sessions when their processes have exited. Existing
+`search_log.txt` and `ponder_log.txt` files are retained but receive no new records.
+
+`SearchDiagnostics`, default false, writes `logs/search_<pid>_<session>.txt` beside
+the executable when enabled, independently of `PonderDiagnostics` . The final `lazy_smp` summary includes the actual worker count and
 exact total nodes after helpers join. Depth belongs to the main worker; node totals
 include helpers. The search log includes `hash_fill_pct` , sampled across the shared
 table after each native search. See
@@ -396,7 +413,7 @@ elapsed time is not CPU time. Shared table entries from interrupted work can rem
 useful.
 
 `PonderDiagnostics` , default false, independently reports timing and appends
-`ponder_log.txt` . It includes `reinvest` , `shallow_hit` , `deteriorating` , `unstable`
+`logs/ponder_<pid>_<session>.txt` . It includes `reinvest` , `shallow_hit` , `deteriorating` , `unstable`
 , and `hit_cap_ms` . `hit_kind` is `uci` for standard ponderhit, `stop_go` for a credited Lucas restart,
 and `none` when no hit is recognized. It appears in both ponder reports and search-log
 records. A stopped ponder report can precede a credited restart; count the restart

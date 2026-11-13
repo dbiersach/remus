@@ -13,16 +13,30 @@ pub fn initialize() {
     STARTED.get_or_init(Instant::now);
 }
 
+/// Keep both diagnostic streams in one process session, independent of the GUI's folder.
+fn log_path(kind: &str) -> std::io::Result<std::path::PathBuf> {
+    static SESSION: OnceLock<u128> = OnceLock::new();
+    let session = SESSION.get_or_init(|| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+    });
+    let folder = std::env::current_exe()?.with_file_name("logs");
+    std::fs::create_dir_all(&folder)?;
+    Ok(folder.join(format!("{kind}_{}_{session}.txt", std::process::id())))
+}
+
 /// The search thread alone writes logs; unavailable files never stop native play.
-fn append(filename: &str, text: &str) {
+fn append(kind: &str, text: &str) {
     let started = *STARTED.get_or_init(Instant::now);
-    let Ok(exe) = std::env::current_exe() else {
+    let Ok(path) = log_path(kind) else {
         return;
     };
     if let Ok(mut file) = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open(exe.with_file_name(filename))
+        .open(path)
     {
         let unix_ms = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -39,13 +53,13 @@ fn append(filename: &str, text: &str) {
 
 pub fn search_log(text: &str) {
     if SEARCH_ENABLED.load(Relaxed) {
-        append("search_log.txt", text);
+        append("search", text);
     }
 }
 
 pub fn ponder_log(text: &str) {
     if PONDER_ENABLED.load(Relaxed) {
-        append("ponder_log.txt", text);
+        append("ponder", text);
     }
 }
 

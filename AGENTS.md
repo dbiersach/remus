@@ -210,6 +210,10 @@ Diagnostic output is opt-in. `SearchDiagnostics` and `PonderDiagnostics` default
 to false wherever offered, in both advertised UCI options and runtime state. A GUI
 can explicitly enable them for a tournament; saved GUI values override defaults.
 Normal UCI iteration and move output is independent of these diagnostic options.
+Rust diagnostic files live in `logs/` beside the executable, with names
+`search_<pid>_<session>.txt` and, where pondering is supported,
+`ponder_<pid>_<session>.txt`. Both streams share one per-process session timestamp;
+concurrent processes never append to a shared diagnostic file. Preserve old logs.
 
 ### Representation conventions
 

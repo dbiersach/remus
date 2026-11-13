@@ -464,8 +464,10 @@ Lucas -> Remus: isready
 Remus -> Lucas: readyok
 ```
 
-All three Rust engines append `search_log.txt` and `ponder_log.txt` beside their
-executable when the corresponding options are enabled. Both options default to false.
+All three Rust engines append `logs/search_<pid>_<session>.txt` and
+`logs/ponder_<pid>_<session>.txt` beside their executable when the corresponding
+options are enabled. Matching suffixes identify one process session; concurrent
+games use separate files. Both options default to false.
 Python Remus5 offers
 `PonderDiagnostics` and writes per-process JSON logs in `ponder_logs/` beside `uci.py`; it does not expose
 these Rust search diagnostics. A diagnostic line beginning `info string` is

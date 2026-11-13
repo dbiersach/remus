@@ -53,9 +53,9 @@ excluded.
 | `src/transposition_table.rs` | 130 | Not applicable | Not applicable | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 387 | Not applicable | Not applicable | Move selection, search, ordering, and evaluation integration |
 | `src/table_metrics.rs` | 34 | Not applicable | Not applicable | Transposition-table probes, hits, cutoffs, stores, and replacements |
-| `src/diagnostics.rs` | 60 | Not applicable | Not applicable | Persistent search diagnostics and timing |
+| `src/diagnostics.rs` | 72 | Not applicable | Not applicable | Persistent search diagnostics and timing |
 | `src/main.rs` | 191 | Not applicable | Not applicable | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **1,837** | Not applicable | Not applicable | |
+| **Total** | **1,849** | Not applicable | Not applicable | |
 
 ### Supporting files
 
@@ -215,7 +215,25 @@ This engine does not support pondering or a Ponder option.
 
 ## Diagnostics and performance
 
-`SearchDiagnostics` defaults to false. When enabled, it appends `search_log.txt` beside the executable.
+Each process writes its own files in `engines_instructor/Remus4-Rust/logs/`,
+relative to the repository root. When the executable is installed elsewhere, the
+`logs` folder stays beside that executable, regardless of Lucas Chess's working folder.
+The filename is `search_<pid>_<session>.txt`. This engine does not ponder and
+does not create a ponder log.
+
+`pid` is the Windows process ID; `session` is a Unix timestamp in nanoseconds
+captured at the first enabled log write. A new launch gets a new session, so
+concurrent games and reused process IDs keep separate records. One process can
+play several games in the same session; use `ucinewgame`, position commands, and
+search IDs to separate them.
+
+Files are created only when the corresponding option is enabled. Disabling an option stops further writes without erasing its
+file; re-enabling it resumes the same file. Logs are not automatically rotated or
+deleted. Archive completed sessions when their processes have exited. Existing
+`search_log.txt` files are retained but receive no new records.
+
+`SearchDiagnostics` defaults to false. When enabled, it appends
+`logs/search_<pid>_<session>.txt` beside the executable.
 It records timing, nodes per second, and transposition-table counters. Diagnostic output
 does not change native search selection. A timed move may use a provisional root choice
 from an interrupted iteration, so the result need not match the last completed PV.

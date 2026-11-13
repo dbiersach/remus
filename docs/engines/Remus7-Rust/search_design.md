@@ -413,7 +413,7 @@ settings when the goal is to isolate scheduling overhead.
 The ordinary UCI output supplies depth, score, nodes, and principal variation.
 `SearchDiagnostics` supplies worker count, split count, claimed sibling tasks,
 cutoffs, and final nodes, and saves these alongside commands, completed iteration
-lines, timing, and move sources in `search_log.txt`. Its native-search node rate
+lines, timing, and move sources in `logs/search_<pid>_<session>.txt`. Its native-search node rate
 uses final drained nodes divided by native elapsed time. It measures throughput,
 not useful-work efficiency. `PonderDiagnostics` separates ponder work from time on
 the engine's clock. Both log switches default to false and operate independently.

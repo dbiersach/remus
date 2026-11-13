@@ -47,11 +47,16 @@ The table reports engine defaults; the recommended Lucas Ponder selection is tru
 | [Remus2](Remus2/README.md) | 342 | 1 | None | Not supported | No persistent logs |
 | [Remus3](Remus3/README.md) | 535 | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
 | [Remus4](Remus4/README.md) | 694 | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
-| [Remus4-Rust](Remus4-Rust/README.md) | 1,837 | 1 | Fixed 512 MiB | Not supported | SearchDiagnostics false |
+| [Remus4-Rust](Remus4-Rust/README.md) | 1,849 | 1 | Fixed 512 MiB | Not supported | SearchDiagnostics false |
 | [Remus5](Remus5/README.md) | 1,430 | 1 | Fixed 512 MiB | false | PonderDiagnostics false; optional per-process JSON logs |
-| [Remus5-Rust](Remus5-Rust/README.md) | 2,785 | 1 | Fixed 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; persistent text logs |
-| [Remus6-Rust](Remus6-Rust/README.md) | 3,205 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
-| [Remus7-Rust](Remus7-Rust/README.md) | 3,814 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
+| [Remus5-Rust](Remus5-Rust/README.md) | 2,797 | 1 | Fixed 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; per-process text logs |
+| [Remus6-Rust](Remus6-Rust/README.md) | 3,216 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
+| [Remus7-Rust](Remus7-Rust/README.md) | 3,825 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
+
+Rust diagnostics use per-process files in `logs/` beside each executable. Search
+files are `search_<pid>_<session>.txt`; Rust5 through Rust7 also write
+`ponder_<pid>_<session>.txt` when enabled. The matching suffix pairs the two streams.
+See [search measurements](search_logging.md) for aggregation and retention.
 
 Remus7-Rust additionally exposes `PonderHitMinPercent` , default 25, range 0 to 100.
 Remus5 Python and Rust5 through Rust7 expose `LichessTablebase` , default true. The

@@ -53,13 +53,13 @@ excluded.
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 253 | 0 | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 1,108 | 764 | +344 | Move selection, search, ordering, and evaluation integration |
-| `src/search_control.rs` | 353 | 346 | +7 | Input queue, cancellation, pondering, and deadlines |
+| `src/search_control.rs` | 364 | 357 | +7 | Input queue, cancellation, pondering, and deadlines |
 | `src/parallel_search.rs` | 233 | 0 | +233 | Persistent worker pool, split state, cancellation, and descendant work claims |
 | `src/search_metrics.rs` | 72 | 57 | +15 | Per-worker timing, nodes, re-search costs, and scheduling counters |
 | `src/table_metrics.rs` | 39 | 39 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
 | `src/main.rs` | 356 | 346 | +10 | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **3,814** | **3,205** | **+609** | |
+| **Total** | **3,825** | **3,216** | **+609** | |
 
 ### Supporting files
 
@@ -82,10 +82,10 @@ an external UCI engine. Its identity is `Remus7-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `Threads` | spin | 4 | 1 to 64 | Total search threads, including the main worker |
 | `Hash` | combo | 512 | 512, 1024, 2048 MiB | Capacity of one table shared by all workers |
-| `SearchDiagnostics` | check | false | true, false | Append search_log.txt and report search counters |
+| `SearchDiagnostics` | check | false | true, false | Append `logs/search_<pid>_<session>.txt` and report search counters |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
-| `PonderDiagnostics` | check | false | true, false | Report ponder timing and append ponder_log.txt |
+| `PonderDiagnostics` | check | false | true, false | Report ponder timing and append `logs/ponder_<pid>_<session>.txt` |
 | `PonderHitMinPercent` | spin | 25 | 0 to 100 | Ordinary post-hit own-clock reserve as a percentage of the adjusted plan |
 
 ### Requirements and build
@@ -430,9 +430,26 @@ depth.
 
 ## Diagnostics and performance
 
+Each process writes its own files in `engines_instructor/Remus7-Rust/logs/`,
+relative to the repository root. When the executable is installed elsewhere, the
+`logs` folder stays beside that executable, regardless of Lucas Chess's working folder.
+Search files are `search_<pid>_<session>.txt`; ponder files are
+`ponder_<pid>_<session>.txt`. Matching suffixes identify the same engine process.
+
+`pid` is the Windows process ID; `session` is a Unix timestamp in nanoseconds
+captured at the first enabled log write. A new launch gets a new session, so
+concurrent games and reused process IDs keep separate records. One process can
+play several games in the same session; use `ucinewgame`, position commands, and
+search IDs to separate them.
+
+Files are created only when the corresponding option is enabled. Disabling an option stops further writes without erasing its
+file; re-enabling it resumes the same file. Logs are not automatically rotated or
+deleted. Archive completed sessions when their processes have exited. Existing
+`search_log.txt` and `ponder_log.txt` files are retained but receive no new records.
+
 Both diagnostic options default to false and can be enabled independently for analysis.
-`SearchDiagnostics` appends to `search_log.txt` and adds a UCI summary after a native
-search. `PonderDiagnostics` appends to `ponder_log.txt` and reports ponder timing.
+`SearchDiagnostics` appends to `logs/search_<pid>_<session>.txt` and adds a UCI summary after a native
+search. `PonderDiagnostics` appends to `logs/ponder_<pid>_<session>.txt` and reports ponder timing.
 `hit_kind` is `uci` for standard ponderhit, `stop_go` for a credited Lucas restart,
 and `none` when no hit is recognized. It appears in both ponder reports and search-log
 records. A stopped report can precede a credited restart; count the restart once as a hit.

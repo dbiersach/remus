@@ -43,11 +43,11 @@ identical schemas.
 | Capability | Remus4-Rust | Remus5-Rust | Remus6-Rust | Remus7-Rust |
 | --- | --- | --- | --- | --- |
 | `SearchDiagnostics` default | false | false | false | false |
-| Persistent `search_log.txt` | Yes | Yes | Yes | Yes |
+| Persistent `logs/search_<pid>_<session>.txt` | Yes | Yes | Yes | Yes |
 | Native nodes/sec and table probes, hits, cutoffs, stores, replacements | Yes | Yes | Yes | Yes |
 | `Ponder` default | Not supported | false | false | false |
 | `PonderDiagnostics` default | Not supported | false | false | false |
-| Persistent `ponder_log.txt`, hit kind, and hit timing | Not supported | Yes | Yes | Yes |
+| Persistent `logs/ponder_<pid>_<session>.txt`, hit kind, and hit timing | Not supported | Yes | Yes | Yes |
 | Sampled cache-fill percentage | No | No | Yes | Yes |
 | Protected entries and useful-hit age refreshes | No | No | Yes | Yes |
 | Per-thread activity and re-search/cancellation costs | No | No | Yes | Yes |
@@ -70,12 +70,26 @@ have separate options. `PonderDiagnostics` records activity; `Ponder` and GUI-is
 
 ## Recorded measurements
 
-With `SearchDiagnostics=true`, each engine appends `search_log.txt` beside its own
-executable. It records received commands, root identity, budgets, completed
+With `SearchDiagnostics=true`, each engine appends
+`logs/search_<pid>_<session>.txt` beside its own executable. It records received commands, root identity, budgets, completed
 iterations, returned moves and their sources, and a final native-search summary.
 The summaries identify `serial`, `lazy_smp`, or `ybwc` search. Book selections and
 tablebase selections have no native-search summary. An unavailable log file does
-not stop play. Files grow across launches; archive them with the engine stopped.
+not stop play. Each process has separate files under `logs/` beside its executable;
+the GUI's working directory does not affect their location. `pid` identifies the
+Windows process. `session` is a Unix nanosecond timestamp captured at its first
+enabled log write and shared by its search and ponder files. This separates
+concurrent processes and later launches that reuse a process ID. The parallel
+engines also serialize writes from threads within each process.
+
+One session may contain several games. Group records by engine folder, filename
+session suffix, and search ID; use `ucinewgame` and root commands to distinguish
+games. Aggregate all relevant `logs/search_*.txt` files for a tournament, pairing
+`logs/ponder_*.txt` by the identical suffix. Do not count unrelated sessions or
+old combined logs. Neither logging option creates files while disabled. Turning
+an option off stops writes; turning it back on resumes that session's file.
+No automatic rotation or deletion occurs. Archive files after their processes
+exit. Existing `search_log.txt` and `ponder_log.txt` remain untouched.
 
 Lines include the process ID, milliseconds since process startup, and `unix_ms`.
 Search reports also include a per-process `search` ID, `wall_ms` for the current

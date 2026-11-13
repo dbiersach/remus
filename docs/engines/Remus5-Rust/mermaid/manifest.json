@@ -2,7 +2,7 @@
   "source_sha256": {
     "attacks.rs": "a603a0e200d148fe4f24c53173ae0059ec52fc4080f05789fc6714355d287965",
     "board.rs": "f270d32c8b7f79bc95d1487a35d6996936ee6f461f375036a5cbdcee0751f537",
-    "diagnostics.rs": "ee496bc68c4ad4b7ea6fe3bf772ea2fb39ab7f61688ef5e781ea6b66dc87c0b8",
+    "diagnostics.rs": "3900baff04a1a5c0fdb77392ecb2afecd71f96b3ccdb9127a638ef5180344c8c",
     "evaluation.rs": "a6573df53533f20a4cb59968c196a49d759e5ca61a6e61d3f814bd9ec98311e8",
     "exchange.rs": "c1b1fe90c897dccafcf28744abb1b2d127397f0c073ea0051bf75cf76b50e892",
     "main.rs": "e4a19bb6ad9c9c1557011ce7acc439b1049448c3833b7c905ccc6005f0fc18bd",

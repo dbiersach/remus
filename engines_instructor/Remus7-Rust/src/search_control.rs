@@ -34,13 +34,27 @@ pub static SEARCH_LOG_ENABLED: AtomicBool = AtomicBool::new(false); // SearchDia
 static LOG_START: OnceLock<Instant> = OnceLock::new();
 static LOG_FILE: Mutex<()> = Mutex::new(()); // One thread writes a line at a time
 
-/// Append one line to ponder_log.txt beside the executable while PonderDiagnostics
+/// Keep both diagnostic streams in one process session, independent of the GUI's folder.
+fn log_path(kind: &str) -> std::io::Result<std::path::PathBuf> {
+    static SESSION: OnceLock<u128> = OnceLock::new();
+    let session = SESSION.get_or_init(|| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+    });
+    let folder = std::env::current_exe()?.with_file_name("logs");
+    std::fs::create_dir_all(&folder)?;
+    Ok(folder.join(format!("{kind}_{}_{session}.txt", std::process::id())))
+}
+
+/// Append one line to this process's ponder log while PonderDiagnostics
 /// is on: the process id, milliseconds since the engine started, and the text.
 pub fn log(text: &str) {
     if !LOG_ENABLED.load(Relaxed) {
         return;
     }
-    append_log("ponder_log.txt", text);
+    append_log("ponder", text);
 }
 
 /// Save search commands and reports independently of ponder logging.
@@ -50,17 +64,16 @@ pub fn search_log(text: &str) {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_millis();
-        append_log("search_log.txt", &format!("unix_ms={unix_ms} {text}"));
+        append_log("search", &format!("unix_ms={unix_ms} {text}"));
     }
 }
 
 /// Append beside the executable; unavailable diagnostic files never stop play.
-fn append_log(filename: &str, text: &str) {
+fn append_log(kind: &str, text: &str) {
     let start = *LOG_START.get_or_init(Instant::now);
-    let Ok(exe) = std::env::current_exe() else {
+    let Ok(path) = log_path(kind) else {
         return;
     };
-    let path = exe.with_file_name(filename);
     let _lock = LOG_FILE.lock();
     if let Ok(mut file) = std::fs::OpenOptions::new()
         .create(true)

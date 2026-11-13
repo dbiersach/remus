@@ -27,7 +27,7 @@ flowchart TD
     AB --> Metrics[Local TableMetrics]
     Think --> Log[Diagnostics::report]
     UCI --> Log
-    Log --> File[search_log.txt]
+    Log --> File[Per-process search log]
     class AB module_search;
     class Alloc module_transposition_table;
     class File module_external;

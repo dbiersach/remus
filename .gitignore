@@ -44,6 +44,7 @@ dist/
 /engines_instructor/Remus7-Rust/ponder_log.txt
 
 # Runtime diagnostics belong to each local engine installation.
+/engines_instructor/*-Rust/logs/
 /engines_instructor/*-Rust/search_log.txt
 /engines_instructor/*-Rust/ponder_log.txt
 

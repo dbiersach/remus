@@ -58,10 +58,10 @@ excluded.
 | `src/search.rs` | 505 | 387 | +118 | Alpha-beta search, cancellation, and ponder timing |
 | `src/search_control.rs` | 307 | 0 | +307 | Input queue, cancellation, and the ponder clock |
 | `src/table_metrics.rs` | 34 | 34 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
-| `src/diagnostics.rs` | 49 | 60 | -11 | Independent persistent search and ponder log writers |
+| `src/diagnostics.rs` | 61 | 72 | -11 | Independent persistent search and ponder log writers |
 | `src/tablebase.rs` | 253 | 0 | +253 | FEN, HTTPS, JSON validation, cache, cooldown, and bounded wait |
 | `src/main.rs` | 319 | 191 | +128 | UCI options, legal predictions, root lookup, and search control |
-| **Total** | **2,785** | **1,837** | **+948** | |
+| **Total** | **2,797** | **1,849** | **+948** | |
 
 ### Supporting files
 
@@ -84,8 +84,8 @@ an external UCI engine. Its identity is `Remus5-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
-| `SearchDiagnostics` | check | false | true, false | Append search timing, nodes/sec, and cache measurements to `search_log.txt` |
-| `PonderDiagnostics` | check | false | true, false | Report ponder timing through UCI stdout and append `ponder_log.txt` |
+| `SearchDiagnostics` | check | false | true, false | Append search timing, nodes/sec, and cache measurements to `logs/search_<pid>_<session>.txt` |
+| `PonderDiagnostics` | check | false | true, false | Report ponder timing through UCI stdout and append `logs/ponder_<pid>_<session>.txt` |
 
 ### Requirements and build
 
@@ -500,8 +500,25 @@ engine's transposition table and one chess search thread and a separate input re
 
 ## Diagnostics and performance
 
-`SearchDiagnostics` defaults to false. When enabled, it appends `search_log.txt` beside the
-executable. It records consumed UCI commands, root identity, move budgets, completed
+Each process writes its own files in `engines_instructor/Remus5-Rust/logs/`,
+relative to the repository root. When the executable is installed elsewhere, the
+`logs` folder stays beside that executable, regardless of Lucas Chess's working folder.
+Search files are `search_<pid>_<session>.txt`; ponder files are
+`ponder_<pid>_<session>.txt`. Matching suffixes identify the same engine process.
+
+`pid` is the Windows process ID; `session` is a Unix timestamp in nanoseconds
+captured at the first enabled log write. A new launch gets a new session, so
+concurrent games and reused process IDs keep separate records. One process can
+play several games in the same session; use `ucinewgame`, position commands, and
+search IDs to separate them.
+
+Files are created only when the corresponding option is enabled. Disabling an option stops further writes without erasing its
+file; re-enabling it resumes the same file. Logs are not automatically rotated or
+deleted. Archive completed sessions when their processes have exited. Existing
+`search_log.txt` and `ponder_log.txt` files are retained but receive no new records.
+
+`SearchDiagnostics` defaults to false. When enabled, it appends
+`logs/search_<pid>_<session>.txt` beside the executable. It records consumed UCI commands, root identity, move budgets, completed
 iterations, returned moves and their sources, and a final `serial workers=1` summary
 for each native search. The summary includes unfinished-iteration nodes, native elapsed
 milliseconds, nodes per second, effective cache size, and table probes, hits, cutoffs,
@@ -518,14 +535,14 @@ in seconds, rather than averaging the per-search rates. See
 additional parallel-search measurements available in Remus6-Rust and Remus7-Rust.
 
 `PonderDiagnostics` defaults to false and operates independently of search logging.
-When enabled, `info string ponder` goes to UCI stdout and `ponder_log.txt` beside the
-executable. It reports `outcome`, `ponder_ms`, `hit_depth`, `hit_nodes`, `final_depth`,
+When enabled, `info string ponder` goes to UCI stdout and
+`logs/ponder_<pid>_<session>.txt` beside the executable. It reports `outcome`, `ponder_ms`, `hit_depth`, `hit_nodes`, `final_depth`,
 `final_nodes`, `own_ms`, and `hit_kind` (`uci`, `stop_go`, or `none`). `reinvest`,
 `shallow_hit`, `deteriorating`, and `unstable` use 1 or 0; `hit_cap_ms` gives the
 extra-time cap. The ponder log also records consumed commands and returned moves.
 
-Both files append across launches and identify the process, monotonic elapsed time,
-and `unix_ms`. Search records and final ponder reports carry a per-process search ID.
+Both files append within one process session and identify the process, monotonic
+elapsed time, and `unix_ms`. Search records and final ponder reports carry a per-process search ID.
 Search records distinguish invocation `wall_ms`, engine-clock `own_ms`, and completed
 depth. A stopped ponder request and its credited restart have separate search IDs;
 count the restart as one hit. A stopped request alone can mean a miss, game end, or
