@@ -1,0 +1,50 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: Arial
+    actorBkg: '#ffffff'
+    actorBorder: '#475569'
+    actorTextColor: '#172033'
+    signalColor: '#64748b'
+    signalTextColor: '#172033'
+    noteBkgColor: '#fff6dd'
+    noteTextColor: '#172033'
+    noteBorderColor: '#475569'
+  sequence:
+    actorFontFamily: Arial
+    messageFontFamily: Arial
+    noteFontFamily: Arial
+    mirrorActors: false
+    useMaxWidth: false
+---
+sequenceDiagram
+    box rgb(224,237,215) Opponent
+    participant W as White player
+    end
+    box rgb(241,245,249) Game controller
+    participant L as Lucas Chess
+    end
+    box rgb(219,232,251) UCI engine
+    participant R as Remus (Black)
+    end
+    Note over W,R: Alternative endings to a ponder request after 1. f3 e5, g4 is predicted.
+    L->>R: position startpos moves f2f3 e7e5 g2g4
+    L->>R: go ponder wtime 59000 btime 59000
+    alt Standard UCI hit: White plays g4
+        W->>L: g2g4
+        L->>R: ponderhit
+        R->>R: Keep the search, start own-clock budget
+        R-->>L: bestmove d8h4
+        L->>L: Play Qh4 (checkmate), record 0-1
+    else Miss: White plays e4 instead
+        W->>L: e2e4
+        L->>R: stop
+        R-->>L: bestmove d8h4
+        Note over L,R: Discard this hypothetical-position result. Do not play Qh4 here.
+        L->>R: position startpos moves f2f3 e7e5 e2e4
+        L->>R: go wtime 57000 btime 59000
+        R->>R: Search actual position, no ponder time credit
+        R-->>L: bestmove b8c6 ponder b1c3
+        L->>L: Play Nc6, continue the game
+    end

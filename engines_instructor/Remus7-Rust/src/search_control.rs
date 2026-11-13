@@ -5,7 +5,7 @@ use std::io::{BufRead, Write};
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::sync::mpsc::{self, Receiver};
 use std::sync::{Mutex, OnceLock};
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Mode {
@@ -18,11 +18,11 @@ const SHALLOW_DEPTH: i32 = 8; // Below this completed depth, a hit deserves anot
 const SCORE_DROP: i32 = 35; // Centipawns lost between mature completed iterations
 const MATURE_DEPTH: i32 = 4; // Scores of shallower iterations swing too much to judge
 
-/// What a ponder search that ended without a hit hands to a matching go: when it
-/// began, the depth it completed, its last mature score, and its two signs of doubt.
+/// What an explicitly stopped native ponder search hands to a matching go:
+/// its elapsed duration, completed depth, mature score, and signs of doubt.
 #[derive(Clone, Copy)]
 pub struct PonderCredit {
-    pub started: Instant,
+    pub seconds: Duration,
     pub depth: i32,
     pub score: Option<i32>,
     pub deteriorating: bool,
@@ -82,6 +82,8 @@ pub struct SearchControl {
     pending: VecDeque<String>,
     pub mode: Mode,
     pub stopped: bool,
+    stop_received: bool,
+    hit_kind: &'static str,
     started: Instant,
     longest: f64,
     search_started: Instant,
@@ -125,6 +127,8 @@ impl SearchControl {
             pending: VecDeque::new(),
             mode: Mode::Normal,
             stopped: false,
+            stop_received: false,
+            hit_kind: "none",
             started: Instant::now(),
             longest: f64::INFINITY,
             search_started: Instant::now(),
@@ -158,6 +162,8 @@ impl SearchControl {
     pub fn begin(&mut self, mode: Mode, longest: f64) {
         self.mode = mode;
         self.stopped = false;
+        self.stop_received = false;
+        self.hit_kind = "none";
         self.started = Instant::now();
         self.search_id += 1;
         self.diagnostics_started = self.started;
@@ -184,11 +190,12 @@ impl SearchControl {
     pub fn log_search(&self, text: &str) {
         if SEARCH_LOG_ENABLED.load(Relaxed) {
             search_log(&format!(
-                "search={} wall_ms={:.1} own_ms={:.1} completed_depth={} {text}",
+                "search={} wall_ms={:.1} own_ms={:.1} completed_depth={} hit_kind={} {text}",
                 self.search_id,
                 self.diagnostics_started.elapsed().as_secs_f64() * 1000.0,
                 self.elapsed() * 1000.0,
-                self.completed_depth
+                self.completed_depth,
+                self.hit_kind
             ));
         }
     }
@@ -205,6 +212,7 @@ impl SearchControl {
                     self.mode = Mode::Normal;
                     self.started = Instant::now();
                     self.hit_time = Some(self.started);
+                    self.hit_kind = "uci";
                     self.hit_nodes = self.nodes;
                     self.hit_depth = self.completed_depth;
                     self.uncertain_hit =
@@ -212,7 +220,10 @@ impl SearchControl {
                     self.log_search(&format!("ponderhit hit_nodes={}", self.hit_nodes));
                 }
             }
-            Some("stop") => self.stopped = true,
+            Some("stop") => {
+                self.stopped = true;
+                self.stop_received = true;
+            }
             Some("position" | "go" | "setoption" | "ucinewgame" | "quit") => {
                 self.pending.push_back(line);
                 self.stopped = true;
@@ -293,12 +304,16 @@ impl SearchControl {
         }
     }
 
-    /// What a native ponder search that ended without ponderhit hands to a matching
-    /// go, or None. A book move took no thinking and earns no credit.
+    /// Remember native ponder work only after an explicit stop without a hit.
+    /// Book waiting and cancellation by replacement commands earn no credit.
     pub fn ponder_credit(&self) -> Option<PonderCredit> {
-        if self.was_ponder && self.hit_time.is_none() && self.source == "native" {
+        if self.was_ponder
+            && self.hit_time.is_none()
+            && self.stop_received
+            && self.source == "native"
+        {
             Some(PonderCredit {
-                started: self.search_started,
+                seconds: self.search_started.elapsed(),
                 depth: self.completed_depth,
                 score: self.score,
                 deteriorating: self.deteriorating,
@@ -311,15 +326,16 @@ impl SearchControl {
 
     /// Treat this search as a ponder hit: some GUIs, Lucas Chess among them, answer a
     /// correct prediction with stop and a new go instead of ponderhit. The time spent
-    /// pondering since the credit's start counts toward the soft target, once the new
+    /// pondering excludes the inter-command gap and counts toward the soft target once the new
     /// search, helped by the table, completes the depth the ponder search reached.
     /// The score and the signs of doubt of that search carry over.
     pub fn credit_ponder(&mut self, credit: PonderCredit) {
         self.was_ponder = true;
         self.credit_depth = credit.depth.max(1);
-        self.search_started = credit.started;
+        self.search_started = self.started - credit.seconds;
         self.hit_time = Some(self.started);
         self.hit_depth = credit.depth;
+        self.hit_kind = "stop_go";
         self.score = credit.score;
         self.score_depth = credit.depth;
         self.deteriorating = credit.deteriorating;
@@ -375,7 +391,8 @@ impl SearchControl {
             0.0
         };
         let text = format!(
-            "{text} reinvest={} shallow_hit={} deteriorating={} unstable={} hit_cap_ms={hit_cap_ms:.1}",
+            "{text} hit_kind={} reinvest={} shallow_hit={} deteriorating={} unstable={} hit_cap_ms={hit_cap_ms:.1}",
+            self.hit_kind,
             u8::from(self.source == "native" && self.reinvest()),
             u8::from(self.hit_depth < SHALLOW_DEPTH),
             u8::from(self.deteriorating),

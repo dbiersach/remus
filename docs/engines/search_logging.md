@@ -195,3 +195,14 @@ Use completed-depth time and node counts alongside reduced waiting to judge help
 An existing Remus6-Rust or Remus7-Rust Lucas Chess entry can retain an explicit Hash value such as 2048 even
 when the executable advertises 512 by default. Set Hash to 512 in both the external
 entry and the tournament entry when selecting the baseline allocation.
+
+## Ponder handoff labels
+
+Remus6-Rust and Remus7-Rust include `hit_kind` on search-log records and in ponder
+reports: `none` means no recognized hit, `uci` means a standard `ponderhit`, and
+`stop_go` means a matching explicit Lucas stop-and-go restart earns native credit.
+A stopped ponder request and its credited restart have separate search IDs. Count
+the restart as one hit; the stopped report alone does not prove a prediction miss.
+The restart's credited ponder duration excludes the idle gap between commands.
+See [UCI conversations](../chess_tutor/uci.md#lucass-stop-and-go-sequence-when-the-prediction-hits)
+for the message sequence and matching rules.

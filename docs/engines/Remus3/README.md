@@ -1,45 +1,115 @@
 # Remus3: Remus2 with the biggest gains
 
+[Overview](#overview) |
+[Enhancements over the previous version](#enhancements-over-the-previous-version) |
+[Source files and TLOC](#source-files-and-tloc) |
+[Running and configuring](#running-and-configuring) |
+[Architecture and call diagrams](#architecture-and-call-diagrams) |
+[Search and evaluation](#search-and-evaluation) |
+[Memory and transposition table](#memory-and-transposition-table) |
+[Opening book and tablebases](#opening-book-and-tablebases) |
+[Time management and pondering](#time-management-and-pondering) |
+[Diagnostics and performance](#diagnostics-and-performance) |
+[Verification and limitations](#verification-and-limitations) |
+[Further reading](#further-reading)
+
+## Overview
+
 Remus3 is [Remus2](../Remus2/README.md) with the eleven enhancements that buy the most
 strength for the fewest lines: killer moves, pawn structure, a position key and a
 transposition table, an opening book, aspiration windows, time management, null-move
-pruning, the principal variation, the bishop pair, and the rook table. The student
-pairs type the 193 new lines into their Remus2. It speaks UCI to Lucas Chess
-through `remus.bat` and uses only the standard library.
+pruning, the principal variation, the bishop pair, and the rook table. The student pairs
+type the 193 new lines into their Remus2. It speaks UCI to Lucas Chess through
+`remus.bat` and uses only the standard library.
 
-[`remus_versions.md`](../remus_versions.md) explains each step and
-why Remus3 holds it. [Remus4](../Remus4/README.md) adds every other enhancement.
+[`remus_versions.md`](../remus_versions.md) explains each step and why Remus3 holds it.
+[Remus4](../Remus4/README.md) adds every other enhancement.
 
-## Files
+## Enhancements over the previous version
 
-| File | Code lines | What it does | New in Remus3 |
-| --- | ---: | --- | --- |
-| `board.py` | 23 | The piece numbers, the starting position, square names, the position key, and UCI move text | `MATE_SCORE`, `position_key()`, `move_text()` |
-| `make_move.py` | 23 | Play a move on a copy of the board | |
-| `attacks.py` | 34 | Is a square attacked? Is a king in check? | |
-| `move_generation.py` | 65 | List the moves of the side to move, castling included | |
-| `evaluation.py` | 115 | Material, five piece-square tables, the pawn structure, and the bishop pair | `ROOK_TABLE`, `pawn_terms()`, the bishop pair |
-| `transposition_table.py` | 22 | Remember each searched position's score, depth, bound, and best move | New file |
-| `opening_book.py` | 21 | Read `opening_book.txt` and find the book moves | New file |
-| `search.py` | 173 | Move ordering with killers, quiescence, alpha-beta with the table and the null move, the principal variation, aspiration windows, and time management | Killers, table, null move, principal variation, window, time |
-| `uci.py` | 59 | The UCI loop, the book, and the clock | Book, hard time limit |
-| **Total** | **535** | | **+193** |
+Remus3 adds eleven workshop enhancements: killer moves, pawn structure, position keys, a
+transposition table, an opening book, aspiration windows, time management, null-move
+pruning, a principal variation, the bishop pair, and a rook table. The net increase is
+193 TLOC.
 
-The code lines leave out blank lines, comments, and docstrings. `opening_book.txt`
-holds 43 openings and 13 trap defenses in UCI moves (`e2e4 e7e5 g1f3 ...`), so Remus
-needs no SAN code to read it. Remus plays 17 of the openings only as White, because
-Black's position at their end scores too low.
+## Source files and TLOC
 
-## The call tree
+Comparison baseline: [Remus2](../Remus2/README.md) .
+
+TLOC counts nonblank runtime source lines, excluding standalone comments and docstrings.
+Change is the net difference, not lines edited or typed. A zero means that file is
+absent from that version. Supporting files and external checks are excluded.
+
+| File | Remus3 TLOC | Remus2 TLOC | Change | Responsibility |
+| --- | ---: | ---: | ---: | --- |
+| `board.py` | 23 | 15 | +8 | The piece numbers, the starting position, square names, the position key, and UCI move text; `MATE_SCORE`, `position_key()`, `move_text()` |
+| `make_move.py` | 23 | 23 | 0 | Play a move on a copy of the board |
+| `attacks.py` | 34 | 34 | 0 | Is a square attacked? Is a king in check? |
+| `move_generation.py` | 65 | 65 | 0 | List the moves of the side to move, castling included |
+| `evaluation.py` | 115 | 68 | +47 | Material, five piece-square tables, the pawn structure, and the bishop pair; `ROOK_TABLE`, `pawn_terms()`, the bishop pair |
+| `opening_book.py` | 21 | 0 | +21 | Read `opening_book.txt` and find the book moves; New file |
+| `transposition_table.py` | 22 | 0 | +22 | Remember each searched position's score, depth, bound, and best move; New file |
+| `search.py` | 173 | 93 | +80 | Move ordering with killers, quiescence, alpha-beta with the table and the null move, the principal variation, aspiration windows, and time management; Killers, table, null move, principal variation, window, time |
+| `uci.py` | 59 | 44 | +15 | The UCI loop, the book, and the clock; Book, hard time limit |
+| **Total** | **535** | **342** | **+193** | |
+
+### Supporting files
+
+| File | Responsibility |
+| --- | --- |
+| `remus.bat` | Launch `uci.py` in the project Python environment |
+| `opening_book.txt` | Opening lines in UCI move notation |
+
+## Running and configuring
+
+Select [`remus.bat`](../../../engines_instructor/Remus3/remus.bat) as the UCI engine and
+use its engine folder as the working directory. The launcher uses the repository's
+Python 3.14 environment. Engine code imports only the standard library. The UCI identity
+is `Remus3` .
+
+Lucas Chess holds the instructor's engine, as the
+[Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
+`Remus3` . While a game follows a book line, it plays the book move at once; after that
+it searches.
+
+### UCI options
+
+This engine advertises no configurable UCI options.
+
+### Supported commands
+
+`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
+
+## Architecture and call diagrams
 
 Start with the module overview, then open the function view for the module you
 want to follow. These diagrams describe the Python Remus3 source; they are
 not Rust call graphs or a trace of one particular search.
 
-The diagrams use Mermaid's ELK layout. Each module has its own box color. An arrow
+The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
+share blue, and both search modules use orange. Colors identify source modules,
+not execution frequency. The legend below lists this engine's module colors. An arrow
 points from a caller to a callee, and a loop marks recursion. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
+
+### Module color legend
+
+The same module keeps its color across engine versions and languages. The UCI adapter is blue (`uci.py` in Python, `main.rs` in Rust). Labels and color names identify each module without relying on color alone.
+
+| Module or role | Color | Fill |
+| --- | --- | --- |
+| `uci.py` | ![Blue](../color_swatches/uci.svg) Blue | `#dbe8fb` |
+| `search.py` | ![Orange](../color_swatches/search.svg) Orange | `#fde2cf` |
+| `opening_book.py` | ![Light green](../color_swatches/opening_book.svg) Light green | `#e3f4d7` |
+| `transposition_table.py` | ![Lavender](../color_swatches/transposition_table.svg) Lavender | `#efe0f7` |
+| `evaluation.py` | ![Light red](../color_swatches/evaluation.svg) Light red | `#fbd9d9` |
+| `move_generation.py` | ![Teal](../color_swatches/move_generation.svg) Teal | `#d4f1f1` |
+| `make_move.py` | ![Tan](../color_swatches/make_move.svg) Tan | `#ece4d6` |
+| `attacks.py` | ![Pink](../color_swatches/attacks.svg) Pink | `#fadcec` |
+| `board.py` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
+| External programs, launchers, and files | ![Gray](../color_swatches/external.svg) Gray | `#f1f5f9` |
 
 ### Module overview
 
@@ -80,7 +150,7 @@ definitions with no recognized connections are outside its scope.
 See [Mermaid layouts](https://mermaid.js.org/config/layouts.html) for ELK settings
 and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering.
 
-## What each enhancement does
+## Search and evaluation
 
 - **Killer moves (S1).** A quiet move that causes a cutoff at one ply often causes a
   cutoff in the other positions at that ply. `alpha_beta()` keeps two such moves per
@@ -112,21 +182,71 @@ and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering
   both bishops, and `ROOK_TABLE` rewards rooks on the seventh rank and the central
   files.
 
-The new search visits far fewer positions for the same depth. To depth 4 from the
-starting position Remus2 visits 17,360 positions and Remus3 2,944, and both choose
-`g1f3`. `verify_engines.py` checks Remus3's
-perft counts against the published counts from six positions, and Remus3 finds a
-forced mate in all ten of its mate puzzles (the key move in nine).
+## Memory and transposition table
 
-## What it leaves out
+The transposition table is a Python dictionary with a two-million-entry limit. It stores
+depth, score, bound, and best move under the position key. A matching key is overwritten
+directly. On a store, if the dictionary already exceeds 2,000,000 entries, the entire
+dictionary is cleared before inserting the result. The limit is an entry count, not a
+byte allocation; Python object overhead determines RAM use. Entries otherwise persist
+between searches in the same process. There is no `Hash` option or depth/age replacement
+among collision buckets.
 
-Everything Remus4 adds: draw sense, the endgame terms, late move reductions,
-principal variation search, pruning margins, static exchange evaluation, and the last
-evaluation terms.
+## Opening book and tablebases
 
-## Play it
+### Opening book
 
-Lucas Chess holds the instructor's engine, as the
-[Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
-`Remus3`. While a game follows a book line, it plays the book move at once; after that
-it searches.
+The supplied `opening_book.txt` contains 43 openings and 13 trap defenses in UCI move
+notation, with 17 openings restricted to White. Every selected move is checked with the
+native generator and king-safety test. Without a legal continuation, the engine uses
+native move selection. Set Lucas Chess's external book to `<None>` , including in
+tournament entries, so a GUI book cannot override the engine's book.
+
+Python reads the file beside `opening_book.py` at startup. Edit the text file and
+restart the process to use revised lines; no compilation is needed. Missing book data
+leaves native search available.
+
+This engine has no tablebase support.
+
+## Time management and pondering
+
+### Move budgets
+
+With a supplied clock, the initial plan is one thirtieth of the remaining time plus half
+the increment. The hard budget is the smaller of three plans and one fifth of the
+remaining time. Without clock information the default is two seconds. `movetime`
+supplies both budgets explicitly. Iterative deepening can enlarge the plan when the
+preferred move changes, within the hard budget. The soft stopping target at a completed
+iteration is half the adjusted plan; an unfinished iteration can continue toward the
+hard budget. Periodic clock checks and the time to finish work can cause small timing
+overshoots.
+
+Pondering and asynchronous search-command handling are not supported.
+
+## Diagnostics and performance
+
+UCI `info` reports search progress. There are no persistent search or ponder logs and no
+cache hit counters.
+
+The search visits far fewer positions for the same depth. To depth 4 from the starting
+position Remus2 visits 17,360 positions and Remus3 2,944, and both choose `g1f3` .
+`verify_engines.py` checks Remus3's perft counts against the published counts from six
+positions, and Remus3 finds a forced mate in all ten of its mate puzzles (the key move
+in nine).
+
+## Verification and limitations
+
+Move generation is checked against published perft positions. Fixed-depth searches,
+tactical positions, and UCI conversations check native behavior without requiring
+tournament games. Perft validates move generation, not playing strength; node counts and
+search depth alone do not establish an Elo gain.
+
+Everything Remus4 adds: draw sense, the endgame terms, late move reductions, principal
+variation search, pruning margins, static exchange evaluation, and the last evaluation
+terms.
+
+## Further reading
+
+- [Version guide](../remus_versions.md): feature progression and comparisons.
+- [Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md): workshop setup and play.
+- [UCI protocol introduction](../../chess_tutor/uci.md): engine and GUI communication.

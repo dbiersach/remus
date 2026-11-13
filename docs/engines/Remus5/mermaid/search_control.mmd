@@ -1,0 +1,49 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    n0["search_control.py<br/>SearchControl()"]:::module_search_control
+    n1["search_control.py<br/>SearchControl.__init__()"]:::module_search_control
+    n2["search_control.py<br/>SearchControl.begin()"]:::module_search_control
+    n3["search_control.py<br/>SearchControl.elapsed()"]:::module_search_control
+    n4["search_control.py<br/>SearchControl.handle()"]:::module_search_control
+    n5["search_control.py<br/>SearchControl.hit_finished()"]:::module_search_control
+    n6["search_control.py<br/>SearchControl.hit_minimum()"]:::module_search_control
+    n7["search_control.py<br/>SearchControl.log()"]:::module_search_control
+    n8["search_control.py<br/>SearchControl.poll()"]:::module_search_control
+    n9["search_control.py<br/>SearchControl.read_input()"]:::module_search_control
+    n10["search_control.py<br/>SearchControl.reinvest()"]:::module_search_control
+    n11["search_control.py<br/>SearchControl.report()"]:::module_search_control
+    n12["search_control.py<br/>SearchControl.soft_finished()"]:::module_search_control
+    n13["search_control.py<br/>SearchControl.wait()"]:::module_search_control
+    n0 --> n1
+    n1 --> n2
+    n1 --> n9
+    n4 --> n7
+    n5 --> n3
+    n5 --> n6
+    n5 --> n10
+    n8 --> n4
+    n8 --> n5
+    n11 --> n3
+    n11 --> n7
+    n11 --> n10
+    n12 --> n3
+    n12 --> n5
+    n13 --> n4
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;

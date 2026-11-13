@@ -6,8 +6,8 @@ config:
   themeVariables:
     fontFamily: Arial
     fontSize: 14px
-    lineColor: "#64748b"
-    primaryTextColor: "#172033"
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
   flowchart:
     htmlLabels: false
     curve: linear
@@ -17,21 +17,14 @@ config:
     padding: 10
 ---
 flowchart TB
-    n0["attacks.py<br/>in_check()"]:::m8
-    n1["make_move.py<br/>make_move()"]:::m7
-    n2["move_generation.py<br/>generate_moves()"]:::m6
-    n3["search.py<br/>think()"]:::m1
+    n0["attacks.py<br/>in_check()"]:::module_attacks
+    n1["make_move.py<br/>make_move()"]:::module_make_move
+    n2["move_generation.py<br/>generate_moves()"]:::module_move_generation
+    n3["search.py<br/>think()"]:::module_search
     n3 --> n0
     n3 --> n1
     n3 --> n2
-    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;

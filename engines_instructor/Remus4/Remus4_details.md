@@ -50,6 +50,24 @@ Code/data counts exclude blank lines, standalone comments, and Python docstrings
 6. Search retains its best legal root move. The adapter prints bestmove plus its UCI token, or 0000 when no move exists. It then waits for the next command.
 
 ```mermaid
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
 flowchart TD
     GUI[GUI command] --> UCI[uci.py main]
     UCI --> Replay[make_move: replay supplied moves]
@@ -63,7 +81,32 @@ flowchart TD
     AB --> Q[quiescence]
     Q --> Eval[evaluate]
     Think --> Reply[bestmove UCI reply]
+    class AB module_search;
+    class Choice module_uci;
+    class Copy module_make_move;
+    class Eval module_evaluation;
+    class GUI module_external;
+    class Gen module_move_generation;
+    class Q module_search;
+    class Replay module_make_move;
+    class Reply module_uci;
+    class Safe module_attacks;
+    class Think module_search;
+    class UCI module_uci;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_external fill:#f1f5f9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
 ```
+
+<!-- module-color-legend -->
+Colors identify source modules consistently across Python and Rust: blue is the UCI adapter, orange is search, teal is move generation, tan is move copying, pink is attack checking, and red is evaluation. External programs and launchers use gray. Labels identify each responsibility.
+
+[Open rendered diagram](../../docs/engines/Remus4/mermaid/detail_flow.svg) | [Mermaid source](../../docs/engines/Remus4/mermaid/detail_flow.mmd)
+
 
 The diagram shows the search path. A legal book hit bypasses think(), while cache hits and pruning can shorten the recursive path.
 

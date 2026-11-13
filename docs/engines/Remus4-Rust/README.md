@@ -1,36 +1,160 @@
 # Remus4-Rust
 
+[Overview](#overview) |
+[Enhancements over the previous version](#enhancements-over-the-previous-version) |
+[Source files and TLOC](#source-files-and-tloc) |
+[Running and configuring](#running-and-configuring) |
+[Architecture and call diagrams](#architecture-and-call-diagrams) |
+[Search and evaluation](#search-and-evaluation) |
+[Memory and transposition table](#memory-and-transposition-table) |
+[Opening book and tablebases](#opening-book-and-tablebases) |
+[Time management and pondering](#time-management-and-pondering) |
+[Diagnostics and performance](#diagnostics-and-performance) |
+[Verification and limitations](#verification-and-limitations) |
+[Further reading](#further-reading)
+
+## Overview
+
 Remus4-Rust is the instructor's Remus4 written in Rust, with a larger table. It has the
-same rules, the same evaluation, the same search, and the same opening book. It shows the
-class that speed matters in a chess engine, not just the algorithms. No student pair
+same rules, the same evaluation, the same search, and the same opening book. It shows
+the class that speed matters in a chess engine, not just the algorithms. No student pair
 types it or edits it, and it lives only in
-[`engines_instructor/Remus4-Rust`](../../../engines_instructor/Remus4-Rust). It includes
-a real program, `remus4_rust.exe`, so a laptop needs no Rust installed.
-Only a rebuild of the program needs Rust: `rust-toolchain.toml` names the stable compiler
-and its parts, and rustup installs them the first time `cargo` runs in the folder.
+[`engines_instructor/Remus4-Rust`](../../../engines_instructor/Remus4-Rust) . It
+includes a real program, `remus4_rust.exe` , so a laptop needs no Rust installed. Only a
+rebuild of the program needs Rust: `rust-toolchain.toml` names the stable compiler and
+its parts, and rustup installs them the first time `cargo` runs in the folder.
 
-## The same engine, faster
+## Enhancements over the previous version
 
-Each search below started from the same position, 1. a3, for 5 seconds:
+There is no preceding Rust edition. Compared with its Python Remus4 counterpart, this
+engine uses compiled native code, bitboards, stack move lists, incremental position
+keys, a fixed 512 MiB bucket table, and persistent search diagnostics. It retains the
+workshop rules, evaluation, and search design.
 
-| Engine | Depth reached | Positions searched |
-| --- | ---: | ---: |
-| Remus4 | 7 | 44,625 |
-| Remus4-Rust | 14 | 21,885,237 |
+## Source files and TLOC
 
-Searched to the same depth, the two engines report the same score, visit the same
-number of positions, and pick the same move, until the larger table starts to matter on
-long searches. Kiwipete, a busy test position, to depth 7: both visit 292,713 positions,
-Remus4 in 18.25 seconds and Remus4-Rust in 0.12 seconds. In the first table each engine
-stops at the last depth it finished, so those two counts are not a pure speed ratio.
+There is no Remus3-Rust. Previous-version TLOC is not applicable; the Python counterpart
+is [Remus4](../Remus4/README.md) .
 
-These times come from one computer, and another laptop gives other times.
+TLOC counts nonblank runtime source lines, excluding standalone comments and Rust
+documentation comments. Change is the net difference, not lines edited or typed. A zero
+means that file is absent from that version. Supporting files and external checks are
+excluded.
 
-## Why Rust runs so much faster
+| File | Remus4-Rust TLOC | Previous version TLOC | Change | Responsibility |
+| --- | ---: | ---: | ---: | --- |
+| `src/board.rs` | 204 | Not applicable | Not applicable | Piece constants, position representation, position keys, and UCI move text |
+| `src/make_move.rs` | 75 | Not applicable | Not applicable | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
+| `src/attacks.rs` | 140 | Not applicable | Not applicable | Attack detection and king-safety checks |
+| `src/move_generation.rs` | 162 | Not applicable | Not applicable | Pseudo-legal moves, castling, promotions, and en passant |
+| `src/evaluation.rs` | 311 | Not applicable | Not applicable | Material, piece-square tables, and the positional and endgame terms supported by this engine |
+| `src/exchange.rs` | 95 | Not applicable | Not applicable | Static exchange evaluation |
+| `src/opening_book.rs` | 48 | Not applicable | Not applicable | Opening-line loading and candidate book moves |
+| `src/transposition_table.rs` | 130 | Not applicable | Not applicable | Search depths, scores, bounds, and best moves |
+| `src/search.rs` | 387 | Not applicable | Not applicable | Move selection, search, ordering, and evaluation integration |
+| `src/table_metrics.rs` | 34 | Not applicable | Not applicable | Transposition-table probes, hits, cutoffs, stores, and replacements |
+| `src/diagnostics.rs` | 60 | Not applicable | Not applicable | Persistent search diagnostics and timing |
+| `src/main.rs` | 188 | Not applicable | Not applicable | UCI commands, configuration, root selection, and engine orchestration |
+| **Total** | **1,834** | **Not applicable** | **Not applicable** | |
 
-Python reads each line of Remus4 as the program runs, and every number and list in it
-is a separate object in memory. Rust compiles to machine instructions ahead of time, and
-Remus4-Rust uses three more tricks:
+### Supporting files
+
+| File | Responsibility |
+| --- | --- |
+| `Cargo.toml`, `Cargo.lock` | Build settings and locked dependency versions |
+| `rust-toolchain.toml`, `.cargo/config.toml` | Compiler selection and CPU target |
+| `remus4_rust.exe` | Executable selected by the GUI |
+| `opening_book.txt` | Opening lines in UCI move notation |
+
+## Running and configuring
+
+Select [`remus4_rust.exe`](../../../engines_instructor/Remus4-Rust/remus4_rust.exe) as
+an external UCI engine. Its identity is `Remus4-Rust` . Set the GUI opening book to
+`<None>` , including in each tournament entry.
+
+### UCI options
+
+| Option | Type | Default | Allowed values | Purpose |
+| --- | --- | --- | --- | --- |
+| `SearchDiagnostics` | check | true | true, false | Write persistent search and cache measurements |
+
+### Requirements and build
+
+The supplied executable runs on Windows 11 without Python or Rust installed. Maintaining
+source requires the stable toolchain selected by `rust-toolchain.toml` . From the engine
+folder, build with `cargo build --release --locked` ; the result is in `target/release/`
+. `cargo fmt` and `cargo clippy` check Rust style and warnings. Changing
+`opening_book.txt` requires a rebuild because its text is embedded at compile time. A
+normal Cargo build does not itself perform profile-guided training.
+
+Native chess uses the Rust standard library with no external chess implementation.
+
+### Supported commands
+
+The engine accepts `position startpos moves ...` , `position fen ...` , timed `go` ,
+`go depth N` , `go perft N` , and `eval` , in addition to the UCI handshake and options.
+Fixed-depth and perft commands bypass book and tablebase selection. A FEN-only position
+has no repetition history before that FEN. Wait for `bestmove` before starting another
+search or sending `quit` .
+
+## Architecture and call diagrams
+
+### Module color legend
+
+The same module keeps its color across engine versions and languages. The UCI adapter is blue (`uci.py` in Python, `main.rs` in Rust). Labels and color names identify each module without relying on color alone.
+
+| Module or role | Color | Fill |
+| --- | --- | --- |
+| `src/main.rs` | ![Blue](../color_swatches/uci.svg) Blue | `#dbe8fb` |
+| `src/search.rs` | ![Orange](../color_swatches/search.svg) Orange | `#fde2cf` |
+| `src/opening_book.rs` | ![Light green](../color_swatches/opening_book.svg) Light green | `#e3f4d7` |
+| `src/transposition_table.rs` | ![Lavender](../color_swatches/transposition_table.svg) Lavender | `#efe0f7` |
+| `src/exchange.rs` | ![Yellow](../color_swatches/exchange.svg) Yellow | `#fff1c2` |
+| `src/evaluation.rs` | ![Light red](../color_swatches/evaluation.svg) Light red | `#fbd9d9` |
+| `src/move_generation.rs` | ![Teal](../color_swatches/move_generation.svg) Teal | `#d4f1f1` |
+| `src/make_move.rs` | ![Tan](../color_swatches/make_move.svg) Tan | `#ece4d6` |
+| `src/attacks.rs` | ![Pink](../color_swatches/attacks.svg) Pink | `#fadcec` |
+| `src/board.rs` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
+| `src/table_metrics.rs` | ![Mauve](../color_swatches/table_metrics.svg) Mauve | `#ead8e5` |
+| `src/diagnostics.rs` | ![Apricot](../color_swatches/diagnostics.svg) Apricot | `#f5d5b8` |
+| External programs, launchers, and files | ![Gray](../color_swatches/external.svg) Gray | `#f1f5f9` |
+
+### Module overview
+
+These diagrams describe the Rust source of Remus4-Rust. A module arrow records
+an explicit reference to another engine module, including imported functions,
+types, and constants. It is a dependency view, not a complete function call graph.
+Every runtime Rust module appears, including modules used only for data types.
+Colors identify the same modules across Python and Rust: `main.rs` shares the blue
+of `uci.py`, and both search modules use orange. Conceptual nodes use the color of
+the module they represent; external files and programs use gray. Labels identify
+the module even when colors are difficult to distinguish.
+
+![Remus4-Rust module references](mermaid/modules.svg)
+
+### Search and control views
+
+The search view summarizes selected calls and scheduling responsibilities. The
+arrows can collapse intermediate helpers; they are conceptual flow, not execution
+frequency or a complete compiler-derived call graph. Named functions are checked
+against source definitions. The manifest records source hashes to detect drift.
+
+![Remus4-Rust search structure](mermaid/search.svg)
+
+| View | Boxes | Arrows | Editable source |
+| --- | ---: | ---: | --- |
+| [Modules](mermaid/modules.svg) | 12 | 27 | [Mermaid](mermaid/modules.mmd) |
+| [Search](mermaid/search.svg) | 10 | 11 | [Mermaid](mermaid/search.mmd) |
+
+Open SVGs in a browser to zoom without losing text clarity. Matching `.mmd` files are editable Mermaid sources; render with Mermaid CLI 12.2.0 and the supplied ELK layout settings.
+
+## Search and evaluation
+
+### Native implementation
+
+CPython executes Remus4 bytecode through its interpreter, and every number and list in
+it is a separate object in memory. Rust compiles to machine instructions ahead of time,
+and Remus4-Rust uses three more tricks:
 
 - **Bitboards.** A 64-bit number holds one yes-or-no per square, so a single instruction
   counts the squares a rook reaches.
@@ -41,55 +165,102 @@ Remus4-Rust uses three more tricks:
 
 None of these changes which positions the search visits, so they change only the time.
 
-## The larger table
+## Memory and transposition table
 
 At millions of positions per second, Remus4's table of 2 million entries fills within
-seconds. Remus4-Rust allocates a fixed 512 MiB for 33,554,432 entries, and a full bucket of four
-entries replaces its oldest and shallowest entry instead of starting the whole table
-over. On four test positions, 20 seconds of thinking reached one ply deeper than the
-same engine with Remus4's table. Kiwipete to depth 13 took 13.9 seconds, against 32.9.
-
-## Configuration and diagnostics
-
-| Option | Default | Purpose |
-| --- | --- | --- |
-| `SearchDiagnostics` | true | Append search timing, nodes per second, and table-use counters to `search_log.txt` beside the executable |
+seconds. Remus4-Rust allocates a fixed 512 MiB for 33,554,432 entries, and a full bucket
+of four entries replaces its oldest and shallowest entry instead of starting the whole
+table over.
 
 The table belongs to this single-threaded engine process and has a fixed 512 MiB
-capacity, like Remus5-Rust. There is no `Hash` option or runtime resizing. Stale
-`Hash` commands from saved GUI settings are ignored and leave the cache intact.
-Allocation failure disables caching; native search remains available.
-Python Remus4 retains its fixed two-million-entry dictionary and has no Hash option.
+capacity, like Remus5-Rust. There is no `Hash` option or runtime resizing. Stale `Hash`
+commands from saved GUI settings are ignored and leave the cache intact. Allocation
+failure disables caching; native search remains available. Python Remus4 retains its
+fixed two-million-entry dictionary and has no Hash option.
 
-[Search logs and table experiments](../search_logging.md) explains the counters,
-node-rate comparisons, and logging controls. Diagnostic output does not change
-normal UCI search results. A timed move can use a provisional root choice from an
-interrupted iteration, so its returned move need not match the last completed PV.
+Buckets use low key bits for indexing. Replacement chooses the lowest depth minus eight
+times search age, with ages wrapping after 64 searches. Individual bucket replacement
+preserves the rest of the table; entries persist between moves.
 
-## Its files
+## Opening book and tablebases
 
-Native chess files in `src/` match the Remus4 Python modules, and `main.rs` matches
-`uci.py`. `diagnostics.rs` handles persistent logs; `table_metrics.rs` holds counters. The code lines leave out blank lines and comments:
+### Opening book
 
-| File | Rust code lines |
-| --- | ---: |
-| `attacks.rs` | 140 |
-| `board.rs` | 204 |
-| `diagnostics.rs` | 60 |
-| `evaluation.rs` | 311 |
-| `exchange.rs` | 95 |
-| `main.rs` | 188 |
-| `make_move.rs` | 75 |
-| `move_generation.rs` | 162 |
-| `opening_book.rs` | 48 |
-| `search.rs` | 387 |
-| `table_metrics.rs` | 34 |
-| `transposition_table.rs` | 130 |
-| **Total** | **1,834** |
+The supplied `opening_book.txt` contains 43 openings and 13 trap defenses in UCI move
+notation, with 17 openings restricted to White. Every selected move is checked with the
+native generator and king-safety test. Without a legal continuation, the engine uses
+native move selection. Set Lucas Chess's external book to `<None>` , including in
+tournament entries, so a GUI book cannot override the engine's book.
 
+Rust embeds the text at build time. Editing the external file does not change a running
+or already compiled engine; rebuild and restart to use revised lines. Timed moves use
+the book automatically. Fixed-depth analysis bypasses it.
 
-## Call structure
+This engine has no tablebase support.
 
-![Search and diagnostics](mermaid/search.svg)
+## Time management and pondering
 
-[Mermaid source](mermaid/search.mmd)
+### Move budgets
+
+With a supplied clock, the initial plan is one thirtieth of the remaining time plus half
+the increment. The hard budget is the smaller of three plans and one fifth of the
+remaining time. Without clock information the default is two seconds. `movetime`
+supplies both budgets explicitly. Iterative deepening can enlarge the plan when the
+preferred move changes, within the hard budget. The soft stopping target at a completed
+iteration is half the adjusted plan; an unfinished iteration can continue toward the
+hard budget. Periodic clock checks and the time to finish work can cause small timing
+overshoots.
+
+This engine does not support pondering or a Ponder option.
+
+## Diagnostics and performance
+
+`SearchDiagnostics` defaults to true and appends `search_log.txt` beside the executable.
+It records timing, nodes per second, and transposition-table counters. Diagnostic output
+does not change native search selection. A timed move may use a provisional root choice
+from an interrupted iteration, so the result need not match the last completed PV.
+
+### Measured examples
+
+Each search below started from the same position, 1. a3, for 5 seconds:
+
+| Engine | Depth reached | Positions searched |
+| --- | ---: | ---: |
+| Remus4 | 7 | 44,625 |
+| Remus4-Rust | 14 | 21,885,237 |
+
+Searched to the same depth, the two engines report the same score, visit the same number
+of positions, and pick the same move, until the larger table starts to matter on long
+searches. Kiwipete, a busy test position, to depth 7: both visit 292,713 positions,
+Remus4 in 18.25 seconds and Remus4-Rust in 0.12 seconds. In the first table each engine
+stops at the last depth it finished, so those two counts are not a pure speed ratio.
+
+These times come from one computer, and another laptop gives other times.
+
+### Cache-size example
+
+On four test positions, 20 seconds of thinking reached one ply deeper than the same
+engine with Remus4's table. Kiwipete to depth 13 took 13.9 seconds, against 32.9.
+
+See [Search logs and table experiments](../search_logging.md) for field definitions.
+Compare aggregate nodes divided by aggregate native seconds, not the arithmetic mean of
+per-move rates. NPS, hit percentage, and fill percentage alone do not establish stronger
+play; compare completed depth, time to depth, useful cutoffs, replacement pressure, and
+controlled playing results.
+
+## Verification and limitations
+
+Move generation is checked against published perft positions. Fixed-depth searches,
+tactical positions, and UCI conversations check native behavior without requiring
+tournament games. Perft validates move generation, not playing strength; node counts and
+search depth alone do not establish an Elo gain.
+
+The larger table can change collisions and search order relative to the Python
+counterpart; identical fixed-depth results are expected only when these differences do
+not affect the search.
+
+## Further reading
+
+- [Version guide](../remus_versions.md): feature progression and comparisons.
+- [Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md): workshop setup and play.
+- [UCI protocol introduction](../../chess_tutor/uci.md): engine and GUI communication.

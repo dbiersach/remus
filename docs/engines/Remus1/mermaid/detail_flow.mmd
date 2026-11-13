@@ -1,0 +1,47 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TD
+    GUI[Chess GUI] --> BAT[remus.bat]
+    BAT --> UCI[uci.main]
+    UCI --> APPLY[make_move: reconstruct position]
+    UCI --> THINK[search.think]
+    THINK --> GENERATE[generate_moves: candidates]
+    THINK --> COPY[make_move: child board]
+    THINK --> CHECK[in_check: original mover]
+    CHECK --> ATTACK[is_attacked]
+    THINK --> CHOICE[random.choice: legal list]
+    CHOICE --> OUTPUT[UCI bestmove]
+    OUTPUT --> GUI
+    class APPLY module_make_move;
+    class ATTACK module_attacks;
+    class BAT module_external;
+    class CHECK module_attacks;
+    class CHOICE module_search;
+    class COPY module_make_move;
+    class GENERATE module_move_generation;
+    class GUI module_external;
+    class OUTPUT module_uci;
+    class THINK module_search;
+    class UCI module_uci;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_external fill:#f1f5f9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

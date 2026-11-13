@@ -1,0 +1,56 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TD
+    Go[UCI go ponder] --> Book{Legal book continuation?}
+    Book -->|yes| Hold[Hold legal book result - no native credit]
+    Book -->|no| Search[Native iterative deepening - no tablebase request]
+    Search --> Event{GUI command}
+    Hold --> Event
+    Event -->|ponderhit| Hit[Continue and start own clock]
+    Event -->|stop| Stop[Return result and retain eligible native credit]
+    Stop --> Match{Fresh go with identical position tokens and history within 2 seconds?}
+    Match -->|yes| Restart[Restart using retained cache - recover credited depth]
+    Match -->|no| Normal[Ordinary move selection - no time credit]
+    Hit --> Policy{Book or terminal result?}
+    Restart --> Policy
+    Policy -->|yes| Done
+    Policy -->|no| Uncertain{Enough clock and shallow, falling, or changing result?}
+    Uncertain -->|yes| Extra[Reserve extra own-clock time and try one more depth within cap]
+    Uncertain -->|no| Stable[Ordinary hit reserve]
+    Extra --> Done[Return legal result - hard deadline and stop take precedence]
+    Stable --> Done
+    class Book module_opening_book;
+    class Done module_uci;
+    class Event module_search_control;
+    class Extra module_search_control;
+    class Go module_uci;
+    class Hit module_search_control;
+    class Hold module_search_control;
+    class Match module_uci;
+    class Normal module_uci;
+    class Policy module_uci;
+    class Restart module_search;
+    class Search module_search;
+    class Stable module_search_control;
+    class Stop module_search_control;
+    class Uncertain module_search_control;
+    classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

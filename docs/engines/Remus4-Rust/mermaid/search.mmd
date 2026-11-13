@@ -1,3 +1,21 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
 flowchart TD
     UCI[main: UCI commands] --> Think[Search::think]
     UCI --> Init[Search::new]
@@ -10,3 +28,19 @@ flowchart TD
     Think --> Log[Diagnostics::report]
     UCI --> Log
     Log --> File[search_log.txt]
+    class AB module_search;
+    class Alloc module_transposition_table;
+    class File module_external;
+    class Init module_search;
+    class Log module_diagnostics;
+    class Metrics module_table_metrics;
+    class Q module_search;
+    class TT module_transposition_table;
+    class Think module_search;
+    class UCI module_uci;
+    classDef module_diagnostics fill:#f5d5b8,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_external fill:#f1f5f9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

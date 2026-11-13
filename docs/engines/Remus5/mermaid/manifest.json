@@ -1,7 +1,7 @@
 {
   "full_elk": {
-    "nodes": 74,
-    "arrows": 128,
+    "nodes": 73,
+    "arrows": 126,
     "layout": "elk"
   },
   "modules": {
@@ -15,8 +15,13 @@
     "layout": "elk"
   },
   "search": {
-    "nodes": 24,
-    "arrows": 43,
+    "nodes": 23,
+    "arrows": 41,
+    "layout": "elk"
+  },
+  "search_control": {
+    "nodes": 14,
+    "arrows": 15,
     "layout": "elk"
   },
   "tablebase": {

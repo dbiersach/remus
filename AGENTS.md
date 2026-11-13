@@ -9,7 +9,7 @@ one adds, and [`workshop_syllabus.md`](workshop_syllabus.md)
 holds the plan of the five days. Remus5 and Remus5-Rust are single-threaded
 experimental engines with positional evaluation, optional Lichess tablebase advice,
 and UCI pondering. Remus6-Rust (Lazy SMP) and Remus7-Rust (YBWC) are Rust-only
-parallel extensions outside the five-day workshop. Both default to four search workers.
+parallel extensions outside the five-day workshop. Both default to four search threads.
 
 This file holds every project and style rule, so that every AI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
@@ -262,8 +262,8 @@ also play without internet access or a successful tablebase response.
   Compare fixed-depth nodes, scores, and moves with the baseline; investigate
   differences because bucket indexing and replacement can affect collisions.
   Run large-allocation checks and Rust builds sequentially.
-- Remus6-Rust and Remus7-Rust default to four workers and 512 MiB shared tables.
-  Use one worker and a preserved parallel executable as the search baseline;
+- Remus6-Rust and Remus7-Rust default to four search threads and 512 MiB shared tables.
+  Use one search thread and a preserved parallel executable as the search baseline;
    their cache replacement can differ from Remus5. Compare native rules and
    evaluation with Remus5. Test parallel metrics,
   cancellation, pondering, and legal results separately; parallel node counts can
@@ -594,6 +594,58 @@ Markdown, variable and function names, and printed output. Never use British spe
   python-chess stays as the API names it.
 - Do not rewrite British spellings inside third-party data, quoted sources, or proper
   nouns.
+
+### Mermaid diagram colors
+
+Use one stable palette by module across every engine version, Python and Rust,
+generated SVGs, and inline Mermaid blocks. A module keeps its color when another
+module is added or removed. Do not assign colors by node order, programming
+language, execution frequency, or whether a node is a decision. `main.rs` is the
+Rust counterpart of `uci.py` and shares its color.
+
+| Module or role | Color | Fill |
+| --- | --- | --- |
+| `uci.py`, `main.rs` | Blue | `#dbe8fb` |
+| `search.py`, `search.rs` | Orange | `#fde2cf` |
+| `opening_book.py`, `opening_book.rs` | Light green | `#e3f4d7` |
+| `transposition_table.py`, `transposition_table.rs` | Lavender | `#efe0f7` |
+| `exchange.py`, `exchange.rs` | Yellow | `#fff1c2` |
+| `evaluation.py`, `evaluation.rs` | Light red | `#fbd9d9` |
+| `move_generation.py`, `move_generation.rs` | Teal | `#d4f1f1` |
+| `make_move.py`, `make_move.rs` | Tan | `#ece4d6` |
+| `attacks.py`, `attacks.rs` | Pink | `#fadcec` |
+| `board.py`, `board.rs` | Blue gray | `#e2e5f3` |
+| `tablebase.py`, `tablebase.rs` | Mint | `#cdeedc` |
+| `search_control.py`, `search_control.rs` | Sage | `#dce8d4` |
+| `parallel_search.rs` | Steel blue | `#c8def0` |
+| `search_metrics.rs` | Blue teal | `#d0e7ed` |
+| `table_metrics.rs` | Mauve | `#ead8e5` |
+| `diagnostics.rs` | Apricot | `#f5d5b8` |
+| Lucas Chess, launchers, external programs, output files | Gray | `#f1f5f9` |
+| Opponent participant in sequence diagrams | Muted green | `#e0edd7` |
+| Explanatory notes | Cream | `#fff6dd` |
+
+Use text `#172033`, borders `#475569`, and arrows `#64748b` on a white background.
+Flowcharts use Arial and explicit `module_<role>` classes, such as `module_search`
+and `module_uci`. Keep filenames or clear responsibility labels visible; color
+is a supporting cue, never the only way to identify a module. Conceptual search
+and ponder nodes use the color of the module they represent. A standard-library
+call shown inside an engine function uses the calling engine module's color.
+External artifacts and programs have the external gray role.
+
+Sequence diagrams color participant lanes rather than individual commands:
+Remus's UCI boundary uses blue, Lucas uses gray, and the opponent uses muted green.
+Actor boxes use white with dark text and borders; explanatory notes use cream.
+Messages retain the arrow color regardless of sender. A lane denotes the protocol
+participant, not all the internal modules that process a message.
+
+The shared designer palette is `admin/mermaid_palette.py`. The Python and Rust
+renderers, inline-diagram styler, and UCI renderer all import it. Keep this table
+and the shared palette in agreement. New runtime modules require an explicit
+palette entry; do not silently fall back to the Mermaid theme. Regenerate the
+`.mmd` sources and SVGs after palette or diagram changes, including SVG copies of
+inline diagrams, and verify node assignments and rendered fills. Preserve the
+archival snapshot in `.archive/` and third-party diagrams.
 
 ### Dashes
 

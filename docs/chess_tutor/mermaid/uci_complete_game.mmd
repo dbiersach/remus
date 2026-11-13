@@ -1,0 +1,59 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: Arial
+    actorBkg: '#ffffff'
+    actorBorder: '#475569'
+    actorTextColor: '#172033'
+    signalColor: '#64748b'
+    signalTextColor: '#172033'
+    noteBkgColor: '#fff6dd'
+    noteTextColor: '#172033'
+    noteBorderColor: '#475569'
+  sequence:
+    actorFontFamily: Arial
+    messageFontFamily: Arial
+    noteFontFamily: Arial
+    mirrorActors: false
+    useMaxWidth: false
+---
+sequenceDiagram
+    box rgb(224,237,215) Opponent
+    participant W as White player
+    end
+    box rgb(241,245,249) Game controller
+    participant L as Lucas Chess
+    end
+    box rgb(219,232,251) UCI engine
+    participant R as Remus (Black)
+    end
+    Note over W,R: Legal game: 1. f3 e5 2. g4 Qh4 (checkmate), 0-1.<br/>Teaching example, setup complete, Ponder enabled.
+    W->>L: Play 1. f3
+    L->>L: Update board, switch from White's clock to Black's
+    L->>R: position startpos moves f2f3
+    L->>R: go wtime 59000 btime 60000 winc 0 binc 0
+    R-->>L: bestmove e7e5 ponder g2g4
+    L->>L: Play 1...e5, switch clocks
+    L-->>W: Show Black's e5, White to move
+    L->>R: position startpos moves f2f3 e7e5 g2g4
+    L->>R: go ponder wtime 59000 btime 59000 winc 0 binc 0
+    Note over L,R: g2g4 is hypothetical in Remus only. Lucas's real board has just 1. f3 e5.
+    R->>R: Find 2...Qh4 (checkmate)<br/>Wait for hit or stop
+    W->>L: Play the predicted 2. g4
+    L->>L: Update real board, start Black's clock
+    Note over L,R: Lucas stop-and-go handoff on a correct prediction
+    L->>R: stop
+    R-->>L: bestmove d8h4
+    Note over L,R: This result closes the ponder request. Lucas does not play it yet.
+    L->>R: position startpos moves f2f3 e7e5 g2g4
+    L->>R: go wtime 57000 btime 59000 winc 0 binc 0
+    R->>R: Recognize matching native credit<br/>Recover completed work within time limits
+    R-->>L: bestmove d8h4
+    L->>L: Play 2...Qh4 (checkmate)<br/>Stop both clocks
+    L-->>W: Display 0-1 and final board
+    Note over L,R: Lucas manages the game result.<br/>No standard UCI gameover message is required.
+    L->>R: quit
+    Note right of R: Process exits, no quitok reply
+    L->>L: Retain game record and update results
+    L-->>W: Show result, review controls, or tournament standings

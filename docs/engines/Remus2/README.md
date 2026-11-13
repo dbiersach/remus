@@ -1,42 +1,111 @@
 # Remus2: legal chess and alpha-beta
 
-Remus2 is [Remus1](../Remus1/README.md), the random mover the student pairs finish on
+[Overview](#overview) |
+[Enhancements over the previous version](#enhancements-over-the-previous-version) |
+[Source files and TLOC](#source-files-and-tloc) |
+[Running and configuring](#running-and-configuring) |
+[Architecture and call diagrams](#architecture-and-call-diagrams) |
+[Search and evaluation](#search-and-evaluation) |
+[Memory and transposition table](#memory-and-transposition-table) |
+[Opening book and tablebases](#opening-book-and-tablebases) |
+[Time management and pondering](#time-management-and-pondering) |
+[Diagnostics and performance](#diagnostics-and-performance) |
+[Verification and limitations](#verification-and-limitations) |
+[Further reading](#further-reading)
+
+## Overview
+
+Remus2 is [Remus1](../Remus1/README.md) , the random mover the student pairs finish on
 Day 1, with `evaluation.py` and a real `search.py` in place of Remus1's random one. It
-plays legal chess with an alpha-beta search, a quiescence search
-that plays out the captures at the end of each line, MVV-LVA move ordering (most
-valuable victim, least valuable attacker), a check extension, and iterative deepening.
-It speaks UCI to Lucas Chess through `remus.bat` and uses only the standard library.
+plays legal chess with an alpha-beta search, a quiescence search that plays out the
+captures at the end of each line, MVV-LVA move ordering (most valuable victim, least
+valuable attacker), a check extension, and iterative deepening. It speaks UCI to Lucas
+Chess through `remus.bat` and uses only the standard library.
 
 [Remus3](../Remus3/README.md) adds the biggest gains for the fewest lines, and
 [Remus4](../Remus4/README.md) adds every other enhancement.
-[`remus_versions.md`](../remus_versions.md) lists each enhancement
-and the version that holds it.
+[`remus_versions.md`](../remus_versions.md) lists each enhancement and the version that
+holds it.
 
-## Files
+## Enhancements over the previous version
 
-| File | Code lines | What it does |
-| --- | ---: | --- |
-| `board.py` | 15 | The piece numbers, the starting position, and square names |
-| `make_move.py` | 23 | Play a move on a copy of the board |
-| `attacks.py` | 34 | Is a square attacked? Is a king in check? |
-| `move_generation.py` | 65 | List the moves of the side to move, castling included |
-| `evaluation.py` | 68 | Material plus four piece-square tables |
-| `search.py` | 93 | Move ordering, quiescence, alpha-beta, iterative deepening |
-| `uci.py` | 44 | The UCI loop: `uci`, `isready`, `position`, `go`, `quit` |
-| **Total** | **342** | |
+Remus2 adds evaluation, alpha-beta search, capture quiescence, MVV-LVA ordering, a check
+extension, and iterative deepening. It replaces the 12-line random search with 93 search
+lines and adds 68 evaluation lines: 161 new lines to type, but a net increase of 149
+TLOC.
 
-The code lines leave out blank lines, comments, and docstrings.
+## Source files and TLOC
 
-## The call tree
+Comparison baseline: [Remus1](../Remus1/README.md) .
+
+TLOC counts nonblank runtime source lines, excluding standalone comments and docstrings.
+Change is the net difference, not lines edited or typed. A zero means that file is
+absent from that version. Supporting files and external checks are excluded.
+
+| File | Remus2 TLOC | Remus1 TLOC | Change | Responsibility |
+| --- | ---: | ---: | ---: | --- |
+| `board.py` | 15 | 15 | 0 | The piece numbers, the starting position, and square names |
+| `make_move.py` | 23 | 23 | 0 | Play a move on a copy of the board |
+| `attacks.py` | 34 | 34 | 0 | Is a square attacked? Is a king in check? |
+| `move_generation.py` | 65 | 65 | 0 | List the moves of the side to move, castling included |
+| `evaluation.py` | 68 | 0 | +68 | Material plus four piece-square tables |
+| `search.py` | 93 | 12 | +81 | Move ordering, quiescence, alpha-beta, iterative deepening |
+| `uci.py` | 44 | 44 | 0 | The UCI loop: `uci`, `isready`, `position`, `go`, `quit` |
+| **Total** | **342** | **193** | **+149** | |
+
+### Supporting files
+
+| File | Responsibility |
+| --- | --- |
+| `remus.bat` | Launch `uci.py` in the project Python environment |
+
+## Running and configuring
+
+Select [`remus.bat`](../../../engines_instructor/Remus2/remus.bat) as the UCI engine and
+use its engine folder as the working directory. The launcher uses the repository's
+Python 3.14 environment. Engine code imports only the standard library. The UCI identity
+is `Remus2` .
+
+Lucas Chess holds the instructor's engine, as the
+[Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
+`Remus2` .
+
+### UCI options
+
+This engine advertises no configurable UCI options.
+
+### Supported commands
+
+`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
+
+## Architecture and call diagrams
 
 Start with the module overview, then open the function view for the module you
 want to follow. These diagrams describe the Python Remus2 source; they are
 not Rust call graphs or a trace of one particular search.
 
-The diagrams use Mermaid's ELK layout. Each module has its own box color. An arrow
+The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
+share blue, and both search modules use orange. Colors identify source modules,
+not execution frequency. The legend below lists this engine's module colors. An arrow
 points from a caller to a callee, and a loop marks recursion. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
+
+### Module color legend
+
+The same module keeps its color across engine versions and languages. The UCI adapter is blue (`uci.py` in Python, `main.rs` in Rust). Labels and color names identify each module without relying on color alone.
+
+| Module or role | Color | Fill |
+| --- | --- | --- |
+| `uci.py` | ![Blue](../color_swatches/uci.svg) Blue | `#dbe8fb` |
+| `search.py` | ![Orange](../color_swatches/search.svg) Orange | `#fde2cf` |
+| `evaluation.py` | ![Light red](../color_swatches/evaluation.svg) Light red | `#fbd9d9` |
+| `move_generation.py` | ![Teal](../color_swatches/move_generation.svg) Teal | `#d4f1f1` |
+| `make_move.py` | ![Tan](../color_swatches/make_move.svg) Tan | `#ece4d6` |
+| `attacks.py` | ![Pink](../color_swatches/attacks.svg) Pink | `#fadcec` |
+| `board.py` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
+| External programs, launchers, and files | ![Gray](../color_swatches/external.svg) Gray | `#f1f5f9` |
 
 ### Module overview
 
@@ -77,7 +146,13 @@ definitions with no recognized connections are outside its scope.
 See [Mermaid layouts](https://mermaid.js.org/config/layouts.html) for ELK settings
 and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering.
 
-## How it keeps the code small
+## Search and evaluation
+
+Alpha-beta rejects branches that cannot improve the current choice. Capture quiescence
+extends tactical exchanges beyond the nominal depth; material and piece-square tables
+score the resulting positions.
+
+### Readable representation and search
 
 - **One function moves every piece but the pawn.** `piece_moves()` takes the steps a
   piece may take and whether it slides: a knight or king takes one step in each
@@ -105,17 +180,42 @@ and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering
 - **No legal-move list.** The search makes each pseudo-legal move and skips it if its
   own king is attacked.
 
-## What it leaves out
+## Memory and transposition table
+
+This engine has no transposition table. Search state belongs to its single process.
+
+## Opening book and tablebases
+
+This engine has neither an opening book nor tablebase support; move selection is native.
+
+## Time management and pondering
+
+The move budget is one thirtieth of the remaining clock plus half the increment, or two
+seconds without clock information. `movetime` overrides that budget. Iterative deepening
+retains a usable move when time expires. There is no separate adaptive hard-budget
+policy or pondering.
+
+## Diagnostics and performance
+
+UCI `info` reports search progress. There are no persistent search or ponder logs and no
+cache hit counters.
+
+## Verification and limitations
+
+Move generation is checked against published perft positions. Fixed-depth searches,
+tactical positions, and UCI conversations check native behavior without requiring
+tournament games. Perft validates move generation, not playing strength; node counts and
+search depth alone do not establish an Elo gain.
 
 Tests, perft, FEN, notation, undo, the repetition and fifty-move rules, and the
-principal variation. Lucas Chess sends `position startpos moves ...` for every game
-from the starting position, which is all Remus2 plays. The workshop designer's
-`verify_engines.py` checks Remus2 from
-outside: its perft counts match the published counts from six positions, and it
-finds a forced mate in all ten mate puzzles (the key move in nine).
+principal variation. Lucas Chess sends `position startpos moves ...` for every game from
+the starting position, which is all Remus2 plays. The workshop designer's
+`verify_engines.py` checks Remus2 from outside: its perft counts match the published
+counts from six positions, and it finds a forced mate in all ten mate puzzles (the key
+move in nine).
 
-## Play it
+## Further reading
 
-Lucas Chess holds the instructor's engine, as the
-[Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
-`Remus2`.
+- [Version guide](../remus_versions.md): feature progression and comparisons.
+- [Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md): workshop setup and play.
+- [UCI protocol introduction](../../chess_tutor/uci.md): engine and GUI communication.

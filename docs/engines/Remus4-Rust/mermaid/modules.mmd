@@ -1,0 +1,82 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    attacks["attacks.rs"]
+    board["board.rs"]
+    diagnostics["diagnostics.rs"]
+    evaluation["evaluation.rs"]
+    exchange["exchange.rs"]
+    main["main.rs"]
+    make_move["make_move.rs"]
+    move_generation["move_generation.rs"]
+    opening_book["opening_book.rs"]
+    search["search.rs"]
+    table_metrics["table_metrics.rs"]
+    transposition_table["transposition_table.rs"]
+    attacks --> board
+    evaluation --> attacks
+    evaluation --> board
+    exchange --> attacks
+    exchange --> board
+    exchange --> evaluation
+    main --> attacks
+    main --> board
+    main --> diagnostics
+    main --> evaluation
+    main --> make_move
+    main --> move_generation
+    main --> opening_book
+    main --> search
+    make_move --> board
+    move_generation --> attacks
+    move_generation --> board
+    search --> attacks
+    search --> board
+    search --> diagnostics
+    search --> evaluation
+    search --> exchange
+    search --> make_move
+    search --> move_generation
+    search --> table_metrics
+    search --> transposition_table
+    transposition_table --> board
+    class attacks module_attacks;
+    class board module_board;
+    class diagnostics module_diagnostics;
+    class evaluation module_evaluation;
+    class exchange module_exchange;
+    class main module_uci;
+    class make_move module_make_move;
+    class move_generation module_move_generation;
+    class opening_book module_opening_book;
+    class search module_search;
+    class table_metrics module_table_metrics;
+    class transposition_table module_transposition_table;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_diagnostics fill:#f5d5b8,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_exchange fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

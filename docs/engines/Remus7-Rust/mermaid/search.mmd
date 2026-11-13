@@ -1,3 +1,21 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
 flowchart TD
     UCI[main: UCI and root advice] --> Think[Search::think]
     Think --> Deepen[Worker::think: iterative deepening]
@@ -36,3 +54,38 @@ flowchart TD
     Work --> Discard[Discarded and unclaimed sibling costs]
     Merge --> WorkerMetrics[Pool::add_worker_metrics]
     Timing --> Logs
+    class AB module_search;
+    class Aggregate module_parallel_search;
+    class Allocate module_transposition_table;
+    class Cancel module_parallel_search;
+    class Claim module_parallel_search;
+    class Control module_search_control;
+    class Deepen module_search;
+    class Discard module_search_metrics;
+    class Drain module_search;
+    class First module_search;
+    class Help module_search;
+    class Logs module_search_control;
+    class Merge module_parallel_search;
+    class Metrics module_table_metrics;
+    class Move module_search;
+    class PVS module_search;
+    class Q module_search;
+    class Refresh module_transposition_table;
+    class Research module_search;
+    class Resize module_search;
+    class Split module_search;
+    class Table module_transposition_table;
+    class Think module_search;
+    class Timing module_search_metrics;
+    class UCI module_uci;
+    class Wait module_search;
+    class Work module_search;
+    class WorkerMetrics module_parallel_search;
+    classDef module_parallel_search fill:#c8def0,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_metrics fill:#d0e7ed,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

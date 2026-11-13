@@ -34,10 +34,9 @@ const STACK_BYTES: usize = 64 * 1024 * 1024; // Room for the deepest search
 const HIT_GAP: f64 = 2.0; // Seconds from a stopped ponder search to a go that counts as a hit
 
 /// The position of a ponder search that ended with stop, what that search earned
-/// (its start, depth, score, and signs of doubt), and when it ended.
+/// (its duration, depth, score, and signs of doubt), and when it ended.
 struct Pondered {
-    key: u64,
-    played: Vec<String>,
+    position_words: Vec<String>,
     credit: PonderCredit,
     ended: Instant,
 }
@@ -128,6 +127,7 @@ fn run() {
     let mut game_history: Vec<u64> = Vec::new(); // The keys of the positions before this one
     let mut out = std::io::stdout();
     let mut pondered: Option<Pondered> = None;
+    let mut position_words = vec!["position".to_string(), "startpos".to_string()];
 
     loop {
         let line = search.control().next_command();
@@ -157,6 +157,7 @@ fn run() {
                 let _ = writeln!(out, "uciok");
             }
             "setoption" => {
+                pondered = None;
                 if words.len() == 5 && words[1] == "name" && words[3] == "value" {
                     let enabled = words[4].eq_ignore_ascii_case("true");
                     match words[2].to_ascii_lowercase().as_str() {
@@ -188,6 +189,8 @@ fn run() {
                 }
             }
             "ucinewgame" => {
+                pondered = None;
+                position_words = vec!["position".to_string(), "startpos".to_string()];
                 position = Position::start();
                 played.clear();
                 game_history.clear();
@@ -196,6 +199,7 @@ fn run() {
                 let _ = writeln!(out, "readyok");
             }
             "position" => {
+                position_words = words.iter().map(|word| (*word).to_string()).collect();
                 // "position startpos moves e2e4 e7e5" or "position fen ... moves e2e4"
                 let moves_at = words.iter().position(|word| *word == "moves");
                 use_book = words.get(1) == Some(&"startpos");
@@ -215,6 +219,7 @@ fn run() {
                 }
             }
             "go" => {
+                let previous_ponder = pondered.take();
                 if words.contains(&"perft") {
                     let count = perft(&position, read_number(&words, "perft") as u32);
                     let _ = writeln!(out, "perft {count}");
@@ -249,11 +254,10 @@ fn run() {
                 };
                 // A go on the position just pondered, right after its stop, is a hit
                 let mut credit = None;
-                if let Some(last) = pondered.take()
+                if let Some(last) = previous_ponder
                     && mode == Mode::Normal
                     && depth_limit.is_none()
-                    && last.key == position.key
-                    && last.played == played
+                    && last.position_words == position_words
                     && last.ended.elapsed().as_secs_f64() < HIT_GAP
                 {
                     credit = Some(last.credit);
@@ -273,7 +277,7 @@ fn run() {
                     search.control().credit_ponder(credit);
                     log(&format!(
                         "stop and go on the pondered position: hit after {:.1} s of pondering to depth {}",
-                        credit.started.elapsed().as_secs_f64(),
+                        credit.seconds.as_secs_f64(),
                         credit.depth
                     ));
                 }
@@ -288,7 +292,11 @@ fn run() {
                 ));
                 let mut mv = NO_MOVE;
                 let mut source = "native";
-                if use_tablebase && depth_limit.is_none() && mode == Mode::Normal {
+                if use_tablebase
+                    && depth_limit.is_none()
+                    && mode == Mode::Normal
+                    && !search.control().was_ponder
+                {
                     mv = tablebase.lookup(&position, &game_history, longest);
                 }
                 if mv != NO_MOVE {
@@ -317,16 +325,15 @@ fn run() {
                 }
                 mv = legal_choice(&position, mv);
                 search.control().wait();
-                if ponder_diagnostics {
-                    search.control().report();
-                }
                 if let Some(credit) = search.control().ponder_credit() {
                     pondered = Some(Pondered {
-                        key: position.key,
-                        played: played.clone(),
+                        position_words: position_words.clone(),
                         credit,
                         ended: Instant::now(),
                     });
+                }
+                if ponder_diagnostics {
+                    search.control().report();
                 }
                 // With no legal move (checkmate or stalemate) UCI says "0000"
                 let mut text = if mv == NO_MOVE {

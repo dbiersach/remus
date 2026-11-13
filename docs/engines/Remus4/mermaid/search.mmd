@@ -6,8 +6,8 @@ config:
   themeVariables:
     fontFamily: Arial
     fontSize: 14px
-    lineColor: "#64748b"
-    primaryTextColor: "#172033"
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
   flowchart:
     htmlLabels: false
     curve: linear
@@ -17,23 +17,23 @@ config:
     padding: 10
 ---
 flowchart TB
-    n0["attacks.py<br/>in_check()"]:::m8
-    n1["board.py<br/>move_text()"]:::m9
-    n2["board.py<br/>position_key()"]:::m9
-    n3["evaluation.py<br/>evaluate()"]:::m5
-    n4["exchange.py<br/>exchange_score()"]:::m4
-    n5["make_move.py<br/>make_move()"]:::m7
-    n6["move_generation.py<br/>generate_moves()"]:::m6
-    n7["search.py<br/>alpha_beta()"]:::m1
-    n8["search.py<br/>count_node()"]:::m1
-    n9["search.py<br/>has_pieces()"]:::m1
-    n10["search.py<br/>is_draw()"]:::m1
-    n11["search.py<br/>ordered_moves()"]:::m1
-    n12["search.py<br/>principal_variation()"]:::m1
-    n13["search.py<br/>quiescence()"]:::m1
-    n14["search.py<br/>think()"]:::m1
-    n15["transposition_table.py<br/>probe()"]:::m3
-    n16["transposition_table.py<br/>store()"]:::m3
+    n0["attacks.py<br/>in_check()"]:::module_attacks
+    n1["board.py<br/>move_text()"]:::module_board
+    n2["board.py<br/>position_key()"]:::module_board
+    n3["evaluation.py<br/>evaluate()"]:::module_evaluation
+    n4["exchange.py<br/>exchange_score()"]:::module_exchange
+    n5["make_move.py<br/>make_move()"]:::module_make_move
+    n6["move_generation.py<br/>generate_moves()"]:::module_move_generation
+    n7["search.py<br/>alpha_beta()"]:::module_search
+    n8["search.py<br/>count_node()"]:::module_search
+    n9["search.py<br/>has_pieces()"]:::module_search
+    n10["search.py<br/>is_draw()"]:::module_search
+    n11["search.py<br/>ordered_moves()"]:::module_search
+    n12["search.py<br/>principal_variation()"]:::module_search
+    n13["search.py<br/>quiescence()"]:::module_search
+    n14["search.py<br/>think()"]:::module_search
+    n15["transposition_table.py<br/>probe()"]:::module_transposition_table
+    n16["transposition_table.py<br/>store()"]:::module_transposition_table
     n7 --> n0
     n7 --> n2
     n7 --> n3
@@ -60,14 +60,11 @@ flowchart TB
     n14 --> n12
     n7 --> n7
     n13 --> n13
-    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_exchange fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;

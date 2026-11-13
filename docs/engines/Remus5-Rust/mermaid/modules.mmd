@@ -1,0 +1,86 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
+flowchart TB
+    attacks["attacks.rs"]
+    board["board.rs"]
+    evaluation["evaluation.rs"]
+    exchange["exchange.rs"]
+    main["main.rs"]
+    make_move["make_move.rs"]
+    move_generation["move_generation.rs"]
+    opening_book["opening_book.rs"]
+    search["search.rs"]
+    search_control["search_control.rs"]
+    tablebase["tablebase.rs"]
+    transposition_table["transposition_table.rs"]
+    attacks --> board
+    evaluation --> attacks
+    evaluation --> board
+    exchange --> attacks
+    exchange --> board
+    exchange --> evaluation
+    main --> attacks
+    main --> board
+    main --> evaluation
+    main --> make_move
+    main --> move_generation
+    main --> opening_book
+    main --> search
+    main --> search_control
+    main --> tablebase
+    make_move --> board
+    move_generation --> attacks
+    move_generation --> board
+    search --> attacks
+    search --> board
+    search --> evaluation
+    search --> exchange
+    search --> make_move
+    search --> move_generation
+    search --> search_control
+    search --> transposition_table
+    tablebase --> attacks
+    tablebase --> board
+    tablebase --> make_move
+    tablebase --> move_generation
+    transposition_table --> board
+    class attacks module_attacks;
+    class board module_board;
+    class evaluation module_evaluation;
+    class exchange module_exchange;
+    class main module_uci;
+    class make_move module_make_move;
+    class move_generation module_move_generation;
+    class opening_book module_opening_book;
+    class search module_search;
+    class search_control module_search_control;
+    class tablebase module_tablebase;
+    class transposition_table module_transposition_table;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_exchange fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_tablebase fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

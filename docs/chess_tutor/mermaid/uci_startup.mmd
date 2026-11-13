@@ -1,0 +1,44 @@
+---
+config:
+  theme: base
+  themeVariables:
+    fontFamily: Arial
+    actorBkg: '#ffffff'
+    actorBorder: '#475569'
+    actorTextColor: '#172033'
+    signalColor: '#64748b'
+    signalTextColor: '#172033'
+    noteBkgColor: '#fff6dd'
+    noteTextColor: '#172033'
+    noteBorderColor: '#475569'
+  sequence:
+    actorFontFamily: Arial
+    messageFontFamily: Arial
+    noteFontFamily: Arial
+    mirrorActors: false
+    useMaxWidth: false
+---
+sequenceDiagram
+    box rgb(241,245,249) Game controller
+    participant L as Lucas Chess
+    end
+    box rgb(219,232,251) UCI engine
+    participant R as Remus7-Rust
+    end
+    L->>R: Start the executable (process launch)
+    L->>R: uci
+    R-->>L: id name Remus7-Rust
+    R-->>L: option name Ponder type check default false
+    R-->>L: option name Threads type spin default 4 min 1 max 64
+    R-->>L: option name Hash type combo default 512 var 512 var 1024 var 2048
+    Note over L,R: Other advertised options omitted here, the text transcript lists them.
+    R-->>L: uciok
+    L->>R: setoption name Ponder value true
+    L->>R: setoption name Threads value 8
+    Note over L,R: Hash stays at its 512 MiB default. Setoption has no individual acknowledgment.
+    L->>R: isready
+    R-->>L: readyok
+    L->>R: ucinewgame
+    L->>R: isready
+    R-->>L: readyok
+    Note over L,R: Ready for a position and go. No chess search starts during setup.

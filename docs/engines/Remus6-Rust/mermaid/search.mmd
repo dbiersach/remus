@@ -1,3 +1,21 @@
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
 flowchart TD
     UCI[main: UCI and root advice] --> Think[Search::think]
     UCI --> Resize[Search::set_hash]
@@ -19,5 +37,29 @@ flowchart TD
     AB --> Refresh[Table::refresh on useful cutoff]
     AB --> Research[Worker::research: verification node accounting]
     Research --> AB
-    Think --> Timing[Per-worker active and wait time]
+    Think --> Timing[Per-worker active elapsed time and nodes]
     Timing --> Log
+    class AB module_search;
+    class Alloc module_transposition_table;
+    class Control module_search_control;
+    class File module_external;
+    class Helpers module_search;
+    class Join module_search;
+    class Log module_search_control;
+    class Main module_search;
+    class Metrics module_table_metrics;
+    class Q module_search;
+    class Refresh module_transposition_table;
+    class Research module_search;
+    class Resize module_search;
+    class TT module_transposition_table;
+    class Think module_search;
+    class Timing module_search_metrics;
+    class UCI module_uci;
+    classDef module_external fill:#f1f5f9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_metrics fill:#d0e7ed,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

@@ -57,6 +57,24 @@ leave Black's king attacked, and randomly selects from the remaining moves.
 uci.py converts the selected tuple back to text and prints `bestmove ...`.
 
 ```mermaid
+---
+config:
+  layout: elk
+  theme: base
+  htmlLabels: false
+  themeVariables:
+    fontFamily: Arial
+    fontSize: 14px
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
+  flowchart:
+    htmlLabels: false
+    curve: linear
+    wrappingWidth: 320
+    nodeSpacing: 24
+    rankSpacing: 45
+    padding: 10
+---
 flowchart TD
     GUI[Chess GUI] --> BAT[remus.bat]
     BAT --> UCI[uci.main]
@@ -69,7 +87,30 @@ flowchart TD
     THINK --> CHOICE[random.choice: legal list]
     CHOICE --> OUTPUT[UCI bestmove]
     OUTPUT --> GUI
+    class APPLY module_make_move;
+    class ATTACK module_attacks;
+    class BAT module_external;
+    class CHECK module_attacks;
+    class CHOICE module_search;
+    class COPY module_make_move;
+    class GENERATE module_move_generation;
+    class GUI module_external;
+    class OUTPUT module_uci;
+    class THINK module_search;
+    class UCI module_uci;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_external fill:#f1f5f9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
 ```
+
+<!-- module-color-legend -->
+Colors identify source modules consistently across Python and Rust: blue is the UCI adapter, orange is search, teal is move generation, tan is move copying, pink is attack checking, and red is evaluation. External programs and launchers use gray. Labels identify each responsibility.
+
+[Open rendered diagram](../../docs/engines/Remus1/mermaid/detail_flow.svg) | [Mermaid source](../../docs/engines/Remus1/mermaid/detail_flow.mmd)
+
 
 The verifier is a separate entry point. It imports the same runtime modules, counts
 legal move sequences, and starts an independent uci.py subprocess for a short

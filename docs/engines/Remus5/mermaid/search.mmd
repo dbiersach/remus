@@ -6,8 +6,8 @@ config:
   themeVariables:
     fontFamily: Arial
     fontSize: 14px
-    lineColor: "#64748b"
-    primaryTextColor: "#172033"
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
   flowchart:
     htmlLabels: false
     curve: linear
@@ -17,82 +17,76 @@ config:
     padding: 10
 ---
 flowchart TB
-    n0["attacks.py<br/>in_check()"]:::m8
-    n1["board.py<br/>Move.get()"]:::m9
-    n2["board.py<br/>move_text()"]:::m9
-    n3["board.py<br/>position_key()"]:::m9
-    n4["evaluation.py<br/>evaluate()"]:::m5
-    n5["exchange.py<br/>exchange_score()"]:::m4
-    n6["make_move.py<br/>make_move()"]:::m7
-    n7["move_generation.py<br/>generate_moves()"]:::m6
-    n8["search.py<br/>alpha_beta()"]:::m1
-    n9["search.py<br/>captured_kind()"]:::m1
-    n10["search.py<br/>count_node()"]:::m1
-    n11["search.py<br/>has_legal_move()"]:::m1
-    n12["search.py<br/>has_pieces()"]:::m1
-    n13["search.py<br/>is_draw()"]:::m1
-    n14["search.py<br/>ordered_moves()"]:::m1
-    n15["search.py<br/>principal_variation()"]:::m1
-    n16["search.py<br/>quiescence()"]:::m1
-    n17["search.py<br/>think()"]:::m1
-    n18["search_control.py<br/>SearchControl.completed()"]:::m11
-    n19["search_control.py<br/>SearchControl.poll()"]:::m11
-    n20["search_control.py<br/>SearchControl.soft_finished()"]:::m11
-    n21["transposition_table.py<br/>new_search()"]:::m3
-    n22["transposition_table.py<br/>probe()"]:::m3
-    n23["transposition_table.py<br/>store()"]:::m3
-    n8 --> n0
-    n8 --> n1
-    n8 --> n3
-    n8 --> n4
-    n8 --> n6
-    n8 --> n9
-    n8 --> n10
-    n8 --> n11
-    n8 --> n12
-    n8 --> n13
-    n8 --> n14
-    n8 --> n16
-    n8 --> n22
-    n8 --> n23
-    n10 --> n19
-    n11 --> n0
-    n11 --> n6
-    n11 --> n7
+    n0["attacks.py<br/>in_check()"]:::module_attacks
+    n1["board.py<br/>move_text()"]:::module_board
+    n2["board.py<br/>position_key()"]:::module_board
+    n3["evaluation.py<br/>evaluate()"]:::module_evaluation
+    n4["exchange.py<br/>exchange_score()"]:::module_exchange
+    n5["make_move.py<br/>make_move()"]:::module_make_move
+    n6["move_generation.py<br/>generate_moves()"]:::module_move_generation
+    n7["search.py<br/>alpha_beta()"]:::module_search
+    n8["search.py<br/>captured_kind()"]:::module_search
+    n9["search.py<br/>count_node()"]:::module_search
+    n10["search.py<br/>has_legal_move()"]:::module_search
+    n11["search.py<br/>has_pieces()"]:::module_search
+    n12["search.py<br/>is_draw()"]:::module_search
+    n13["search.py<br/>ordered_moves()"]:::module_search
+    n14["search.py<br/>principal_variation()"]:::module_search
+    n15["search.py<br/>quiescence()"]:::module_search
+    n16["search.py<br/>think()"]:::module_search
+    n17["search_control.py<br/>SearchControl.completed()"]:::module_search_control
+    n18["search_control.py<br/>SearchControl.poll()"]:::module_search_control
+    n19["search_control.py<br/>SearchControl.soft_finished()"]:::module_search_control
+    n20["transposition_table.py<br/>new_search()"]:::module_transposition_table
+    n21["transposition_table.py<br/>probe()"]:::module_transposition_table
+    n22["transposition_table.py<br/>store()"]:::module_transposition_table
+    n7 --> n0
+    n7 --> n2
+    n7 --> n3
+    n7 --> n5
+    n7 --> n8
+    n7 --> n9
+    n7 --> n10
+    n7 --> n11
+    n7 --> n12
+    n7 --> n13
+    n7 --> n15
+    n7 --> n21
+    n7 --> n22
+    n9 --> n18
+    n10 --> n0
+    n10 --> n5
+    n10 --> n6
+    n13 --> n6
+    n13 --> n8
     n14 --> n1
-    n14 --> n7
-    n14 --> n9
+    n14 --> n2
+    n14 --> n5
+    n14 --> n21
+    n15 --> n0
     n15 --> n2
     n15 --> n3
-    n15 --> n6
-    n15 --> n22
-    n16 --> n0
-    n16 --> n3
-    n16 --> n4
-    n16 --> n5
-    n16 --> n6
-    n16 --> n9
-    n16 --> n10
-    n16 --> n11
-    n16 --> n13
+    n15 --> n4
+    n15 --> n5
+    n15 --> n8
+    n15 --> n9
+    n15 --> n10
+    n15 --> n12
+    n15 --> n13
+    n16 --> n7
     n16 --> n14
-    n17 --> n8
-    n17 --> n15
-    n17 --> n18
-    n17 --> n19
-    n17 --> n20
-    n17 --> n21
-    n8 --> n8
-    n16 --> n16
-    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    n16 --> n17
+    n16 --> n18
+    n16 --> n19
+    n16 --> n20
+    n7 --> n7
+    n15 --> n15
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_exchange fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;

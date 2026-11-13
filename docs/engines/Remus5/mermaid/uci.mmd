@@ -6,8 +6,8 @@ config:
   themeVariables:
     fontFamily: Arial
     fontSize: 14px
-    lineColor: "#64748b"
-    primaryTextColor: "#172033"
+    lineColor: '#64748b'
+    primaryTextColor: '#172033'
   flowchart:
     htmlLabels: false
     curve: linear
@@ -17,32 +17,32 @@ config:
     padding: 10
 ---
 flowchart TB
-    n0["attacks.py<br/>in_check()"]:::m8
-    n1["board.py<br/>move_text()"]:::m9
-    n2["board.py<br/>parse_square()"]:::m9
-    n3["board.py<br/>position_key()"]:::m9
-    n4["make_move.py<br/>make_move()"]:::m7
-    n5["move_generation.py<br/>generate_moves()"]:::m6
-    n6["opening_book.py<br/>book_moves()"]:::m2
-    n7["opening_book.py<br/>load_book()"]:::m2
-    n8["search.py<br/>think()"]:::m1
-    n9["search_control.py<br/>SearchControl()"]:::m11
-    n10["search_control.py<br/>SearchControl.begin()"]:::m11
-    n11["search_control.py<br/>SearchControl.credit_ponder()"]:::m11
-    n12["search_control.py<br/>SearchControl.log()"]:::m11
-    n13["search_control.py<br/>SearchControl.next_command()"]:::m11
-    n14["search_control.py<br/>SearchControl.ponder_credit()"]:::m11
-    n15["search_control.py<br/>SearchControl.report()"]:::m11
-    n16["search_control.py<br/>SearchControl.wait()"]:::m11
-    n17["tablebase.py<br/>lookup()"]:::m10
-    n18["transposition_table.py<br/>probe()"]:::m3
-    n19["uci.py<br/>module initialization"]:::m0
-    n20["uci.py<br/>choose_move()"]:::m0
-    n21["uci.py<br/>legal_book_move()"]:::m0
-    n22["uci.py<br/>legal_choice()"]:::m0
-    n23["uci.py<br/>main()"]:::m0
-    n24["uci.py<br/>ponder_reply()"]:::m0
-    n25["uci.py<br/>read_time()"]:::m0
+    n0["attacks.py<br/>in_check()"]:::module_attacks
+    n1["board.py<br/>move_text()"]:::module_board
+    n2["board.py<br/>parse_square()"]:::module_board
+    n3["board.py<br/>position_key()"]:::module_board
+    n4["make_move.py<br/>make_move()"]:::module_make_move
+    n5["move_generation.py<br/>generate_moves()"]:::module_move_generation
+    n6["opening_book.py<br/>book_moves()"]:::module_opening_book
+    n7["opening_book.py<br/>load_book()"]:::module_opening_book
+    n8["search.py<br/>think()"]:::module_search
+    n9["search_control.py<br/>SearchControl()"]:::module_search_control
+    n10["search_control.py<br/>SearchControl.begin()"]:::module_search_control
+    n11["search_control.py<br/>SearchControl.credit_ponder()"]:::module_search_control
+    n12["search_control.py<br/>SearchControl.log()"]:::module_search_control
+    n13["search_control.py<br/>SearchControl.next_command()"]:::module_search_control
+    n14["search_control.py<br/>SearchControl.ponder_credit()"]:::module_search_control
+    n15["search_control.py<br/>SearchControl.report()"]:::module_search_control
+    n16["search_control.py<br/>SearchControl.wait()"]:::module_search_control
+    n17["tablebase.py<br/>lookup()"]:::module_tablebase
+    n18["transposition_table.py<br/>probe()"]:::module_transposition_table
+    n19["uci.py<br/>module initialization"]:::module_uci
+    n20["uci.py<br/>choose_move()"]:::module_uci
+    n21["uci.py<br/>legal_book_move()"]:::module_uci
+    n22["uci.py<br/>legal_choice()"]:::module_uci
+    n23["uci.py<br/>main()"]:::module_uci
+    n24["uci.py<br/>ponder_reply()"]:::module_uci
+    n25["uci.py<br/>read_time()"]:::module_uci
     n19 --> n23
     n20 --> n8
     n20 --> n12
@@ -79,15 +79,13 @@ flowchart TB
     n24 --> n18
     n24 --> n21
     n24 --> n22
-    classDef m0 fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m1 fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m2 fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m3 fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m4 fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m5 fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m6 fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m7 fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m8 fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m9 fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m10 fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
-    classDef m11 fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_move_generation fill:#d4f1f1,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_tablebase fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;
