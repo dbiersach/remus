@@ -105,28 +105,6 @@ and live `stop` ; `isready` remains responsive during native search.
 
 ## Architecture and call diagrams
 
-### Module color legend
-
-The same module keeps its color across engine versions and languages. The UCI adapter is blue (`uci.py` in Python, `main.rs` in Rust). Labels and color names identify each module without relying on color alone.
-
-| Module or role | Color | Fill |
-| --- | --- | --- |
-| `src/main.rs` | ![Blue](../color_swatches/uci.svg) Blue | `#dbe8fb` |
-| `src/search.rs` | ![Orange](../color_swatches/search.svg) Orange | `#fde2cf` |
-| `src/opening_book.rs` | ![Light green](../color_swatches/opening_book.svg) Light green | `#e3f4d7` |
-| `src/transposition_table.rs` | ![Lavender](../color_swatches/transposition_table.svg) Lavender | `#efe0f7` |
-| `src/exchange.rs` | ![Yellow](../color_swatches/exchange.svg) Yellow | `#fff1c2` |
-| `src/evaluation.rs` | ![Light red](../color_swatches/evaluation.svg) Light red | `#fbd9d9` |
-| `src/move_generation.rs` | ![Teal](../color_swatches/move_generation.svg) Teal | `#d4f1f1` |
-| `src/make_move.rs` | ![Tan](../color_swatches/make_move.svg) Tan | `#ece4d6` |
-| `src/attacks.rs` | ![Pink](../color_swatches/attacks.svg) Pink | `#fadcec` |
-| `src/board.rs` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
-| `src/tablebase.rs` | ![Mint](../color_swatches/tablebase.svg) Mint | `#cdeedc` |
-| `src/search_control.rs` | ![Sage](../color_swatches/search_control.svg) Sage | `#dce8d4` |
-| `src/search_metrics.rs` | ![Blue teal](../color_swatches/search_metrics.svg) Blue teal | `#d0e7ed` |
-| `src/table_metrics.rs` | ![Mauve](../color_swatches/table_metrics.svg) Mauve | `#ead8e5` |
-| External programs, launchers, and files | ![Gray](../color_swatches/external.svg) Gray | `#f1f5f9` |
-
 ### Module overview
 
 These diagrams describe the Rust source of Remus6-Rust. A module arrow records

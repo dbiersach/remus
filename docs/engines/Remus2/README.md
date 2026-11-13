@@ -87,25 +87,10 @@ not Rust call graphs or a trace of one particular search.
 
 The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
 share blue, and both search modules use orange. Colors identify source modules,
-not execution frequency. The legend below lists this engine's module colors. An arrow
+not execution frequency. An arrow
 points from a caller to a callee, and a loop marks recursion. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
-
-### Module color legend
-
-The same module keeps its color across engine versions and languages. The UCI adapter is blue (`uci.py` in Python, `main.rs` in Rust). Labels and color names identify each module without relying on color alone.
-
-| Module or role | Color | Fill |
-| --- | --- | --- |
-| `uci.py` | ![Blue](../color_swatches/uci.svg) Blue | `#dbe8fb` |
-| `search.py` | ![Orange](../color_swatches/search.svg) Orange | `#fde2cf` |
-| `evaluation.py` | ![Light red](../color_swatches/evaluation.svg) Light red | `#fbd9d9` |
-| `move_generation.py` | ![Teal](../color_swatches/move_generation.svg) Teal | `#d4f1f1` |
-| `make_move.py` | ![Tan](../color_swatches/make_move.svg) Tan | `#ece4d6` |
-| `attacks.py` | ![Pink](../color_swatches/attacks.svg) Pink | `#fadcec` |
-| `board.py` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
-| External programs, launchers, and files | ![Gray](../color_swatches/external.svg) Gray | `#f1f5f9` |
 
 ### Module overview
 

@@ -648,6 +648,9 @@ Actor boxes use white with dark text and borders; explanatory notes use cream.
 Messages retain the arrow color regardless of sender. A lane denotes the protocol
 participant, not all the internal modules that process a message.
 
+Keep the color reference table in this guide. Engine READMEs show the diagrams
+without a module/color/fill legend table.
+
 The shared designer palette is `admin/mermaid_palette.py`. The Python and Rust
 renderers, inline-diagram styler, and UCI renderer all import it. Keep this table
 and the shared palette in agreement. New runtime modules require an explicit
