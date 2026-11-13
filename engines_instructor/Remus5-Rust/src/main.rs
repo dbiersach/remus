@@ -5,6 +5,7 @@
 
 mod attacks;
 mod board;
+mod diagnostics;
 mod evaluation;
 mod exchange;
 mod make_move;
@@ -12,6 +13,7 @@ mod move_generation;
 mod opening_book;
 mod search;
 mod search_control;
+mod table_metrics;
 mod tablebase;
 mod transposition_table;
 
@@ -138,6 +140,10 @@ fn run() {
                 let _ = writeln!(out, "option name Ponder type check default false");
                 let _ = writeln!(
                     out,
+                    "option name SearchDiagnostics type check default false"
+                );
+                let _ = writeln!(
+                    out,
                     "option name PonderDiagnostics type check default false"
                 );
                 let _ = writeln!(out, "uciok");
@@ -149,7 +155,13 @@ fn run() {
                     match words[2].to_ascii_lowercase().as_str() {
                         "lichesstablebase" => use_tablebase = enabled,
                         "ponder" => use_ponder = enabled,
-                        "ponderdiagnostics" => ponder_diagnostics = enabled,
+                        "ponderdiagnostics" => {
+                            ponder_diagnostics = enabled;
+                            diagnostics::PONDER_ENABLED
+                                .store(enabled, std::sync::atomic::Ordering::Relaxed);
+                        }
+                        "searchdiagnostics" => diagnostics::SEARCH_ENABLED
+                            .store(enabled, std::sync::atomic::Ordering::Relaxed),
                         _ => {}
                     }
                 }
@@ -237,6 +249,11 @@ fn run() {
                 {
                     search.control.credit_ponder(last.credit);
                 }
+                search.control.log_search(&format!(
+                    "begin key={:016x} side={} history_len={} planned_ms={:.1} hard_ms={:.1} command={line}",
+                    position.key, if white { "white" } else { "black" },
+                    game_history.len(), seconds * 1000.0, longest * 1000.0
+                ));
                 let started = Instant::now();
                 let mut mv = NO_MOVE;
                 if use_tablebase
@@ -301,6 +318,14 @@ fn run() {
                         text.push_str(&format!(" ponder {}", move_text(reply)));
                     }
                 }
+                search.control.log_search(&format!(
+                    "> bestmove {text} source={}",
+                    search.control.source
+                ));
+                diagnostics::ponder_log(&format!(
+                    "> bestmove {text} source={}",
+                    search.control.source
+                ));
                 let _ = writeln!(out, "bestmove {text}");
                 let _ = out.flush();
             }

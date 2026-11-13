@@ -206,6 +206,11 @@ ideas for the first time.
     movetime retain the ordinary hit floor. Preserve these confidence signals
     across Lucas stop/go restarts and record the allowance in ponder diagnostics.
 
+Diagnostic output is opt-in. `SearchDiagnostics` and `PonderDiagnostics` default
+to false wherever offered, in both advertised UCI options and runtime state. A GUI
+can explicitly enable them for a tournament; saved GUI values override defaults.
+Normal UCI iteration and move output is independent of these diagnostic options.
+
 ### Representation conventions
 
 - Board: a list of 64 numbers, one per square. A piece is its kind, from 1 for a pawn

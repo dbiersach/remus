@@ -44,22 +44,22 @@ excluded.
 
 | File | Remus7-Rust TLOC | Remus6-Rust TLOC | Change | Responsibility |
 | --- | ---: | ---: | ---: | --- |
-| `src/board.rs` | 204 | 204 | +0 | Piece constants, position representation, position keys, and UCI move text |
-| `src/make_move.rs` | 75 | 75 | +0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
-| `src/attacks.rs` | 147 | 147 | +0 | Attack detection and king-safety checks |
-| `src/move_generation.rs` | 166 | 166 | +0 | Pseudo-legal moves, castling, promotions, and en passant |
-| `src/evaluation.rs` | 408 | 408 | +0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
-| `src/exchange.rs` | 99 | 99 | +0 | Static exchange evaluation |
-| `src/opening_book.rs` | 48 | 48 | +0 | Opening-line loading and candidate book moves |
-| `src/transposition_table.rs` | 253 | 253 | +0 | Search depths, scores, bounds, and best moves |
+| `src/board.rs` | 204 | 204 | 0 | Piece constants, position representation, position keys, and UCI move text |
+| `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
+| `src/attacks.rs` | 147 | 147 | 0 | Attack detection and king-safety checks |
+| `src/move_generation.rs` | 166 | 166 | 0 | Pseudo-legal moves, castling, promotions, and en passant |
+| `src/evaluation.rs` | 408 | 408 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
+| `src/exchange.rs` | 99 | 99 | 0 | Static exchange evaluation |
+| `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
+| `src/transposition_table.rs` | 253 | 253 | 0 | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 1,108 | 764 | +344 | Move selection, search, ordering, and evaluation integration |
 | `src/search_control.rs` | 353 | 346 | +7 | Input queue, cancellation, pondering, and deadlines |
 | `src/parallel_search.rs` | 233 | 0 | +233 | Persistent worker pool, split state, cancellation, and descendant work claims |
 | `src/search_metrics.rs` | 72 | 57 | +15 | Per-worker timing, nodes, re-search costs, and scheduling counters |
-| `src/table_metrics.rs` | 39 | 39 | +0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
-| `src/tablebase.rs` | 253 | 253 | +0 | Bounded root advice, native legality validation, response cache, and network fallback |
-| `src/main.rs` | 350 | 343 | +7 | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **3,808** | **3,202** | **+606** | |
+| `src/table_metrics.rs` | 39 | 39 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
+| `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
+| `src/main.rs` | 356 | 346 | +10 | UCI commands, configuration, root selection, and engine orchestration |
+| **Total** | **3,814** | **3,205** | **+609** | |
 
 ### Supporting files
 
@@ -82,10 +82,10 @@ an external UCI engine. Its identity is `Remus7-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `Threads` | spin | 4 | 1 to 64 | Total search threads, including the main worker |
 | `Hash` | combo | 512 | 512, 1024, 2048 MiB | Capacity of one table shared by all workers |
-| `SearchDiagnostics` | check | true | true, false | Append search_log.txt and report search counters |
+| `SearchDiagnostics` | check | false | true, false | Append search_log.txt and report search counters |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
-| `PonderDiagnostics` | check | true | true, false | Report ponder timing and append ponder_log.txt |
+| `PonderDiagnostics` | check | false | true, false | Report ponder timing and append ponder_log.txt |
 | `PonderHitMinPercent` | spin | 25 | 0 to 100 | Ordinary post-hit own-clock reserve as a percentage of the adjusted plan |
 
 ### Requirements and build
@@ -430,7 +430,7 @@ depth.
 
 ## Diagnostics and performance
 
-Both diagnostics are enabled for analysis and controlled independently.
+Both diagnostic options default to false and can be enabled independently for analysis.
 `SearchDiagnostics` appends to `search_log.txt` and adds a UCI summary after a native
 search. `PonderDiagnostics` appends to `ponder_log.txt` and reports ponder timing.
 `hit_kind` is `uci` for standard ponderhit, `stop_go` for a credited Lucas restart,

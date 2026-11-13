@@ -2,26 +2,28 @@
   "source_sha256": {
     "attacks.rs": "a603a0e200d148fe4f24c53173ae0059ec52fc4080f05789fc6714355d287965",
     "board.rs": "f270d32c8b7f79bc95d1487a35d6996936ee6f461f375036a5cbdcee0751f537",
+    "diagnostics.rs": "ee496bc68c4ad4b7ea6fe3bf772ea2fb39ab7f61688ef5e781ea6b66dc87c0b8",
     "evaluation.rs": "a6573df53533f20a4cb59968c196a49d759e5ca61a6e61d3f814bd9ec98311e8",
     "exchange.rs": "c1b1fe90c897dccafcf28744abb1b2d127397f0c073ea0051bf75cf76b50e892",
-    "main.rs": "1dbaa2c029547b44ce1b1836d4328643bf5427750c61348ff2a66ab6794bd236",
+    "main.rs": "e4a19bb6ad9c9c1557011ce7acc439b1049448c3833b7c905ccc6005f0fc18bd",
     "make_move.rs": "0fb0a99aeae26a9e125532a2f888267077766f06906d0a4a501ca11f54d34460",
     "move_generation.rs": "0aed5b9d2d00495e33d7ff2b892a2c84b302e72d923809504cc70ae0e665fb39",
     "opening_book.rs": "37dbe9750c830b6a4132d199555ffe06fd63d834303ceb874866dd821e69f865",
-    "search.rs": "ad99c29efd64b925830ae3bf6c1b551ee161ab33a234f7dadf8c34e3e50eeedd",
-    "search_control.rs": "23e3fdd4b2431d26cd5d9ded58e9d57bda017565a82e6c3657f1ac061dfc570d",
+    "search.rs": "4122fd49b7951aff780865f03e9f2ef34eea69ce56f517833e040829d134fddb",
+    "search_control.rs": "d2538086de12ff9acf6b934f37a6a1af6f08462a6be18dbd8462f07e02c87e2e",
+    "table_metrics.rs": "29bd32f01788a3e8a749a45f97f802cb02ebd81806bfca55b09870cbed2e4eb9",
     "tablebase.rs": "774d96af9209c9d921358ff919a05448ede460dd52cd3676d39e48a4e6169917",
-    "transposition_table.rs": "3ae92d1faa67053446022789dff38b5a58e35ecc57373960a41bce28a49f405a"
+    "transposition_table.rs": "b90902d06380ffdc39b61484f3cd37b8a3ab0dae451843615aecf3c6bffab823"
   },
   "views": {
     "modules": {
-      "nodes": 12,
-      "arrows": 31,
+      "nodes": 14,
+      "arrows": 34,
       "kind": "module references"
     },
     "search": {
-      "nodes": 13,
-      "arrows": 14,
+      "nodes": 16,
+      "arrows": 19,
       "kind": "conceptual flow"
     },
     "ponder": {

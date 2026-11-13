@@ -416,10 +416,13 @@ cutoffs, and final nodes, and saves these alongside commands, completed iteratio
 lines, timing, and move sources in `search_log.txt`. Its native-search node rate
 uses final drained nodes divided by native elapsed time. It measures throughput,
 not useful-work efficiency. `PonderDiagnostics` separates ponder work from time on
-the engine's clock. The two log switches are independent. Waiting time,
-canceled-node counts, re-search counts, peak active
-workers, and path-copy costs need additional profiling; current counters do not
-provide those measurements.
+the engine's clock. Both log switches default to false and operate independently.
+Worker records measure active elapsed time, result waiting, cancellation waiting,
+descendant helping, re-search counts and node costs, and discarded-task costs.
+These elapsed times are not CPU time, and discarded-task nodes do not measure only
+work performed after cancellation. Peak simultaneous activity and path-copy costs
+need additional profiling. See [search log measurements](../search_logging.md) for
+field definitions and the limits on adding overlapping node categories.
 
 Disable diagnostic output and file logging for clean timing comparisons. The
 existing split/task/cutoff counters remain active when their summary is disabled,

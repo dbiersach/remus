@@ -2,8 +2,11 @@
 
 use std::collections::VecDeque;
 use std::io::{BufRead, Write};
+use std::sync::atomic::Ordering::Relaxed;
 use std::sync::mpsc::{self, Receiver};
 use std::time::{Duration, Instant};
+
+use crate::diagnostics;
 
 const SHALLOW_DEPTH: i32 = 8; // Below this completed depth, a hit deserves another look
 const SCORE_DROP: i32 = 35; // Centipawns lost between mature completed iterations
@@ -36,6 +39,8 @@ pub struct SearchControl {
     pub mode: Mode,
     pub stopped: bool,
     started: Instant,
+    search_id: u64,
+    diagnostics_started: Instant,
     longest: f64,
     search_started: Instant,
     pub was_ponder: bool,
@@ -56,6 +61,7 @@ pub struct SearchControl {
 
 impl SearchControl {
     pub fn new() -> Self {
+        diagnostics::initialize();
         let (sender, commands) = mpsc::channel();
         std::thread::spawn(move || {
             for line in std::io::stdin().lock().lines() {
@@ -75,6 +81,8 @@ impl SearchControl {
             mode: Mode::Normal,
             stopped: false,
             started: Instant::now(),
+            search_id: 0,
+            diagnostics_started: Instant::now(),
             longest: f64::INFINITY,
             search_started: Instant::now(),
             was_ponder: false,
@@ -95,9 +103,25 @@ impl SearchControl {
     }
 
     pub fn next_command(&mut self) -> String {
-        self.pending
-            .pop_front()
-            .unwrap_or_else(|| self.commands.recv().unwrap_or_else(|_| "quit".to_string()))
+        if let Some(line) = self.pending.pop_front() {
+            return line;
+        }
+        let line = self.commands.recv().unwrap_or_else(|_| "quit".to_string());
+        diagnostics::command(&line);
+        line
+    }
+
+    pub fn log_search(&self, text: &str) {
+        if diagnostics::SEARCH_ENABLED.load(Relaxed) {
+            diagnostics::search_log(&format!(
+                "search={} wall_ms={:.1} own_ms={:.1} completed_depth={} hit_kind={} {text}",
+                self.search_id,
+                self.diagnostics_started.elapsed().as_secs_f64() * 1000.0,
+                self.elapsed() * 1000.0,
+                self.completed_depth,
+                self.hit_kind
+            ));
+        }
     }
 
     pub fn begin(&mut self, mode: Mode, longest: f64) {
@@ -107,6 +131,8 @@ impl SearchControl {
         self.credit_depth = 1;
         self.hit_kind = "none";
         self.started = Instant::now();
+        self.search_id += 1;
+        self.diagnostics_started = self.started;
         self.longest = longest;
         self.search_started = self.started;
         self.was_ponder = mode == Mode::Ponder;
@@ -126,6 +152,7 @@ impl SearchControl {
     }
 
     fn handle(&mut self, line: String) {
+        diagnostics::command(&line);
         match line.split_whitespace().next() {
             Some("isready") => {
                 let mut out = std::io::stdout();
@@ -142,6 +169,7 @@ impl SearchControl {
                     self.hit_depth = self.completed_depth;
                     self.uncertain_hit =
                         self.hit_depth < SHALLOW_DEPTH || self.deteriorating || self.unstable;
+                    self.log_search(&format!("ponderhit hit_nodes={}", self.hit_nodes));
                 }
             }
             Some("stop") => {
@@ -241,6 +269,11 @@ impl SearchControl {
         self.unstable = credit.unstable;
         self.uncertain_hit =
             credit.depth < SHALLOW_DEPTH || credit.deteriorating || credit.unstable;
+        self.log_search(&format!(
+            "ponder_credit credited_ms={:.1} hit_depth={}",
+            credit.seconds.as_secs_f64() * 1000.0,
+            credit.depth
+        ));
     }
 
     pub fn wait(&mut self) {
@@ -295,9 +328,7 @@ impl SearchControl {
         } else {
             0.0
         };
-        let mut out = std::io::stdout();
-        let _ = writeln!(
-            out,
+        let text = format!(
             "info string ponder outcome={outcome} ponder_ms={ponder_ms:.1} hit_depth={} hit_nodes={} final_depth={} final_nodes={} own_ms={:.1} hit_kind={} reinvest={} shallow_hit={} deteriorating={} unstable={} hit_cap_ms={hit_cap_ms:.1}",
             self.hit_depth,
             self.hit_nodes,
@@ -310,6 +341,9 @@ impl SearchControl {
             u8::from(self.deteriorating),
             u8::from(self.unstable)
         );
+        let mut out = std::io::stdout();
+        let _ = writeln!(out, "{text}");
         let _ = out.flush();
+        diagnostics::ponder_log(&format!("search={} {text}", self.search_id));
     }
 }

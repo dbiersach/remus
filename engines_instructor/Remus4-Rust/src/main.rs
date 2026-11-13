@@ -101,7 +101,10 @@ fn run() {
         match words[0] {
             "uci" => {
                 let _ = writeln!(out, "id name Remus4-Rust");
-                let _ = writeln!(out, "option name SearchDiagnostics type check default true");
+                let _ = writeln!(
+                    out,
+                    "option name SearchDiagnostics type check default false"
+                );
                 let _ = writeln!(out, "uciok");
             }
             "isready" => {

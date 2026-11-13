@@ -39,21 +39,22 @@ excluded.
 
 | File | Remus6-Rust TLOC | Remus5-Rust TLOC | Change | Responsibility |
 | --- | ---: | ---: | ---: | --- |
-| `src/board.rs` | 204 | 204 | +0 | Piece constants, position representation, position keys, and UCI move text |
-| `src/make_move.rs` | 75 | 75 | +0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
-| `src/attacks.rs` | 147 | 147 | +0 | Attack detection and king-safety checks |
-| `src/move_generation.rs` | 166 | 166 | +0 | Pseudo-legal moves, castling, promotions, and en passant |
-| `src/evaluation.rs` | 408 | 408 | +0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
-| `src/exchange.rs` | 99 | 99 | +0 | Static exchange evaluation |
-| `src/opening_book.rs` | 48 | 48 | +0 | Opening-line loading and candidate book moves |
-| `src/transposition_table.rs` | 253 | 154 | +99 | Search depths, scores, bounds, and best moves |
-| `src/search.rs` | 764 | 483 | +281 | Move selection, search, ordering, and evaluation integration |
-| `src/search_control.rs` | 346 | 275 | +71 | Input queue, cancellation, pondering, and deadlines |
+| `src/board.rs` | 204 | 204 | 0 | Piece constants, position representation, position keys, and UCI move text |
+| `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
+| `src/attacks.rs` | 147 | 147 | 0 | Attack detection and king-safety checks |
+| `src/move_generation.rs` | 166 | 166 | 0 | Pseudo-legal moves, castling, promotions, and en passant |
+| `src/evaluation.rs` | 408 | 408 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
+| `src/exchange.rs` | 99 | 99 | 0 | Static exchange evaluation |
+| `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
+| `src/transposition_table.rs` | 253 | 171 | +82 | Search depths, scores, bounds, and best moves |
+| `src/search.rs` | 764 | 505 | +259 | Move selection, search, ordering, and evaluation integration |
+| `src/search_control.rs` | 346 | 307 | +39 | Input queue, cancellation, pondering, and deadlines |
 | `src/search_metrics.rs` | 57 | 0 | +57 | Per-worker timing, nodes, re-search costs, and scheduling counters |
-| `src/table_metrics.rs` | 39 | 0 | +39 | Transposition-table probes, hits, cutoffs, stores, and replacements |
-| `src/tablebase.rs` | 253 | 253 | +0 | Bounded root advice, native legality validation, response cache, and network fallback |
-| `src/main.rs` | 343 | 294 | +49 | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **3,202** | **2,606** | **+596** | |
+| `src/table_metrics.rs` | 39 | 34 | +5 | Transposition-table probes, hits, cutoffs, stores, and replacements |
+| `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
+| `src/main.rs` | 346 | 319 | +27 | UCI commands, configuration, root selection, and engine orchestration |
+| `src/diagnostics.rs` | 0 | 49 | -49 | Logging is provided by search_control.rs in this engine |
+| **Total** | **3,205** | **2,785** | **+420** | |
 
 ### Supporting files
 
@@ -76,7 +77,7 @@ an external UCI engine. Its identity is `Remus6-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `Threads` | spin | 4 | 1 to 64 | Total search threads, including the main worker |
 | `Hash` | combo | 512 | 512, 1024, 2048 MiB | Capacity of one table shared by all workers |
-| `SearchDiagnostics` | check | true | true, false | Append search_log.txt and report search counters |
+| `SearchDiagnostics` | check | false | true, false | Append search_log.txt and report search counters |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
 | `PonderDiagnostics` | check | false | true, false | Report ponder timing and append ponder_log.txt |
@@ -379,7 +380,7 @@ does not establish pondering; incoming `go ponder` commands do.
 
 ## Diagnostics and performance
 
-`SearchDiagnostics` writes `search_log.txt` beside the executable, independently of
+`SearchDiagnostics`, default false, writes `search_log.txt` beside the executable when enabled, independently of
 `PonderDiagnostics` . The final `lazy_smp` summary includes the actual worker count and
 exact total nodes after helpers join. Depth belongs to the main worker; node totals
 include helpers. The search log includes `hash_fill_pct` , sampled across the shared

@@ -94,6 +94,14 @@ impl Table {
         }
     }
 
+    pub fn size_mib(&self) -> usize {
+        if self.buckets.is_null() {
+            0
+        } else {
+            TABLE_BYTES / (1024 * 1024)
+        }
+    }
+
     /// Mark the start of a new search, so older entries give way first.
     pub fn new_search(&mut self) {
         self.age = (self.age + 1) % AGE_LIMIT;
@@ -101,14 +109,22 @@ impl Table {
 
     /// Save one search result. A mate score is stored as mate from here.
     #[inline]
-    pub fn store(&mut self, key: u64, depth: i32, mut score: i32, bound: u8, mv: Move, ply: i32) {
+    pub fn store(
+        &mut self,
+        key: u64,
+        depth: i32,
+        mut score: i32,
+        bound: u8,
+        mv: Move,
+        ply: i32,
+    ) -> bool {
         if score > MATE_SCORE - 1000 {
             score += ply;
         } else if score < -MATE_SCORE + 1000 {
             score -= ply;
         }
         if self.buckets.is_null() || key == 0 {
-            return; // Zero marks an empty entry, so this key is not cached.
+            return false; // Zero marks an empty entry, so this key is not cached.
         }
         let age = self.age;
         let index = bucket_index(key);
@@ -128,6 +144,7 @@ impl Table {
                 chosen = i;
             }
         }
+        let replacement = entries[chosen].key != 0 && entries[chosen].key != key;
         entries[chosen] = Entry {
             key,
             score,
@@ -135,6 +152,7 @@ impl Table {
             depth: depth as u8,
             bound_and_age: bound | (age << 2),
         };
+        replacement
     }
 
     /// Ask the processor to start loading the bucket of a position. The table is far

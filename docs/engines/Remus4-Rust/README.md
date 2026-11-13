@@ -54,8 +54,8 @@ excluded.
 | `src/search.rs` | 387 | Not applicable | Not applicable | Move selection, search, ordering, and evaluation integration |
 | `src/table_metrics.rs` | 34 | Not applicable | Not applicable | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/diagnostics.rs` | 60 | Not applicable | Not applicable | Persistent search diagnostics and timing |
-| `src/main.rs` | 188 | Not applicable | Not applicable | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **1,834** | **Not applicable** | **Not applicable** | |
+| `src/main.rs` | 191 | Not applicable | Not applicable | UCI commands, configuration, root selection, and engine orchestration |
+| **Total** | **1,837** | Not applicable | Not applicable | |
 
 ### Supporting files
 
@@ -76,7 +76,7 @@ an external UCI engine. Its identity is `Remus4-Rust` . Set the GUI opening book
 
 | Option | Type | Default | Allowed values | Purpose |
 | --- | --- | --- | --- | --- |
-| `SearchDiagnostics` | check | true | true, false | Write persistent search and cache measurements |
+| `SearchDiagnostics` | check | false | true, false | Write persistent search and cache measurements |
 
 ### Requirements and build
 
@@ -215,7 +215,7 @@ This engine does not support pondering or a Ponder option.
 
 ## Diagnostics and performance
 
-`SearchDiagnostics` defaults to true and appends `search_log.txt` beside the executable.
+`SearchDiagnostics` defaults to false. When enabled, it appends `search_log.txt` beside the executable.
 It records timing, nodes per second, and transposition-table counters. Diagnostic output
 does not change native search selection. A timed move may use a provisional root choice
 from an interrupted iteration, so the result need not match the last completed PV.

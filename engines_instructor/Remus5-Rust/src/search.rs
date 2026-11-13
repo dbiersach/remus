@@ -2,6 +2,7 @@
 //! search to a fixed depth matches when table replacement does not intervene.
 
 use std::io::Write;
+use std::time::Instant;
 
 use crate::attacks::{QUEEN_LINES, in_check};
 use crate::board::{BISHOP, KING, KNIGHT, ROOK};
@@ -14,6 +15,7 @@ use crate::exchange::exchange_score;
 use crate::make_move::{make_move, make_null_move};
 use crate::move_generation::{MoveList, StackList, generate_captures, generate_moves};
 use crate::search_control::SearchControl;
+use crate::table_metrics::TableMetrics;
 use crate::transposition_table::{EXACT, LOWER, Table, UPPER};
 
 const FUTILITY_MARGIN: i32 = 200; // A quiet move seldom gains more than this
@@ -40,6 +42,7 @@ pub struct Search {
     killers: [[Move; 2]; MAX_PLY],
     quiet_history: [[[i32; 64]; 64]; 2],
     table: Table,
+    metrics: TableMetrics,
 }
 
 /// Return a list entry that sorts by priority and then by move, as Remus5 sorts the
@@ -174,6 +177,7 @@ impl Search {
             killers: [[NO_MOVE; 2]; MAX_PLY],
             quiet_history: [[[0; 64]; 64]; 2],
             table: Table::new(),
+            metrics: TableMetrics::default(),
         }
     }
 
@@ -313,7 +317,9 @@ impl Search {
             return self.quiescence(position, alpha, beta, ply);
         }
         let mut first = NO_MOVE;
+        self.metrics.probes += 1;
         if let Some(stored) = self.table.probe(key, ply as i32) {
+            self.metrics.hits += 1;
             first = stored.mv;
             if ply > 0
                 && stored.depth >= depth
@@ -321,6 +327,7 @@ impl Search {
                     || (stored.bound == LOWER && stored.score >= beta)
                     || (stored.bound == UPPER && stored.score <= alpha))
             {
+                self.metrics.cutoffs += 1;
                 return Ok(stored.score);
             }
         }
@@ -433,8 +440,11 @@ impl Search {
         } else if best_score <= original_alpha {
             bound = UPPER;
         }
-        self.table
-            .store(key, depth, best_score, bound, best, ply as i32);
+        self.metrics.stores += 1;
+        self.metrics.replacements += u64::from(
+            self.table
+                .store(key, depth, best_score, bound, best, ply as i32),
+        );
         Ok(best_score)
     }
 
@@ -483,6 +493,8 @@ impl Search {
         longest: f64,
         depth_limit: Option<i32>,
     ) -> Move {
+        let native_started = Instant::now();
+        self.metrics = TableMetrics::default();
         self.nodes = 0;
         self.best_move = NO_MOVE;
         // Recent cutoffs matter more than those from earlier moves of the game.
@@ -528,11 +540,11 @@ impl Search {
             }
             completed_move = self.best_move;
             let line = self.principal_variation(position, depth);
-            let _ = writeln!(
-                stdout,
+            let info = format!(
                 "info depth {depth} score cp {score} nodes {} pv{line}",
                 self.nodes
             );
+            let _ = writeln!(stdout, "{info}");
             let _ = stdout.flush();
             // A best move that changes needs more time to settle
             let changed = previous != NO_MOVE && self.best_move != previous;
@@ -540,6 +552,7 @@ impl Search {
                 seconds = (seconds * 1.5).min(longest);
             }
             self.control.completed(depth, seconds / 2.0, score, changed);
+            self.control.log_search(&info);
             if score.abs() > MATE_SCORE - 100 {
                 break;
             }
@@ -549,6 +562,15 @@ impl Search {
                 _ => {}
             }
         }
+        let native_seconds = native_started.elapsed().as_secs_f64();
+        self.control.log_search(&format!(
+            "info string serial workers=1 nodes={} native_ms={:.1} nps={:.0} hash_mib={} {}",
+            self.nodes,
+            native_seconds * 1000.0,
+            self.nodes as f64 / native_seconds.max(0.000_001),
+            self.table.size_mib(),
+            self.metrics
+        ));
         self.control.nodes = self.nodes;
         if self.control.was_ponder && completed_move != NO_MOVE {
             self.best_move = completed_move;

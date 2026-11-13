@@ -19,6 +19,7 @@ config:
 flowchart TB
     attacks["attacks.rs"]
     board["board.rs"]
+    diagnostics["diagnostics.rs"]
     evaluation["evaluation.rs"]
     exchange["exchange.rs"]
     main["main.rs"]
@@ -27,6 +28,7 @@ flowchart TB
     opening_book["opening_book.rs"]
     search["search.rs"]
     search_control["search_control.rs"]
+    table_metrics["table_metrics.rs"]
     tablebase["tablebase.rs"]
     transposition_table["transposition_table.rs"]
     attacks --> board
@@ -37,6 +39,7 @@ flowchart TB
     exchange --> evaluation
     main --> attacks
     main --> board
+    main --> diagnostics
     main --> evaluation
     main --> make_move
     main --> move_generation
@@ -54,7 +57,9 @@ flowchart TB
     search --> make_move
     search --> move_generation
     search --> search_control
+    search --> table_metrics
     search --> transposition_table
+    search_control --> diagnostics
     tablebase --> attacks
     tablebase --> board
     tablebase --> make_move
@@ -62,6 +67,7 @@ flowchart TB
     transposition_table --> board
     class attacks module_attacks;
     class board module_board;
+    class diagnostics module_diagnostics;
     class evaluation module_evaluation;
     class exchange module_exchange;
     class main module_uci;
@@ -70,10 +76,12 @@ flowchart TB
     class opening_book module_opening_book;
     class search module_search;
     class search_control module_search_control;
+    class table_metrics module_table_metrics;
     class tablebase module_tablebase;
     class transposition_table module_transposition_table;
     classDef module_attacks fill:#fadcec,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_board fill:#e2e5f3,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_diagnostics fill:#f5d5b8,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_exchange fill:#fff1c2,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_make_move fill:#ece4d6,stroke:#475569,stroke-width:1px,color:#172033;
@@ -81,6 +89,7 @@ flowchart TB
     classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_tablebase fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

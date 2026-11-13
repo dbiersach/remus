@@ -111,14 +111,14 @@ Remus3 through Remus7 use their supplied `opening_book.txt`. Python reads it at
 runtime; Rust embeds it at build time, so Rust book edits require rebuilding.
 Disable Lucas's external books, including explicit `<None>` in tournament entries.
 
-Remus4-Rust, Remus6-Rust, and Remus7-Rust write search and cache measurements to
-`search_log.txt` when SearchDiagnostics is enabled (default true). Python Remus5's
+Remus4-Rust through Remus7-Rust write search and cache measurements to
+`search_log.txt` when SearchDiagnostics is enabled (default false). Python Remus5's
 PonderDiagnostics option (default false) writes separate process/session logs in
 `engines_instructor/Remus5/ponder_logs/`, recording commands, predictions, linked
 hits, nodes, depth, and clock/CPU timing. Enable it in the GUI for tournament
-analysis. Remus5-Rust reports ponder diagnostics through UCI stdout; Remus6-Rust
-and Remus7-Rust can also append `ponder_log.txt`. See each engine README for options
-and measurement limits.
+analysis. Remus5-Rust through Remus7-Rust report ponder diagnostics through UCI
+stdout and append `ponder_log.txt` when PonderDiagnostics is enabled (default false).
+See each engine README for options and measurement limits.
 
 Everything else sits in the plan of the week, the day folders, `science/`, `science_instructor/`, and `docs/`:
 

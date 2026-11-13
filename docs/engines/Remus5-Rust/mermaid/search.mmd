@@ -31,11 +31,19 @@ flowchart TD
     AB --> Poll[count_node - SearchControl::poll]
     UCI --> Advice[Tablebase - bounded root advice and native validation]
     UCI --> Book[legal_book_move - embedded lines and native validation]
+    AB --> Metrics[TableMetrics - probes hits cutoffs stores replacements]
+    Think --> Log[SearchControl::log_search]
+    Control --> Files[diagnostics.rs - search and ponder files]
+    Log --> Files
+    UCI --> Files
     class AB module_search;
     class Advice module_tablebase;
     class Book module_opening_book;
     class Control module_search_control;
     class Eval module_evaluation;
+    class Files module_diagnostics;
+    class Log module_search_control;
+    class Metrics module_table_metrics;
     class Order module_search;
     class PV module_search;
     class Poll module_search_control;
@@ -44,10 +52,12 @@ flowchart TD
     class TT module_transposition_table;
     class Think module_search;
     class UCI module_uci;
+    classDef module_diagnostics fill:#f5d5b8,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_evaluation fill:#fbd9d9,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_opening_book fill:#e3f4d7,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_search fill:#fde2cf,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_search_control fill:#dce8d4,stroke:#475569,stroke-width:1px,color:#172033;
+    classDef module_table_metrics fill:#ead8e5,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_tablebase fill:#cdeedc,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_transposition_table fill:#efe0f7,stroke:#475569,stroke-width:1px,color:#172033;
     classDef module_uci fill:#dbe8fb,stroke:#475569,stroke-width:1px,color:#172033;

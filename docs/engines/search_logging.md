@@ -1,11 +1,11 @@
 # Search logs and table-size experiments
 
-Remus4-Rust, Remus6-Rust, and Remus7-Rust offer `SearchDiagnostics`. Only
-Remus6-Rust and Remus7-Rust offer `Hash`; Remus4-Rust uses a fixed 512 MiB table.
+Remus4-Rust through Remus7-Rust offer `SearchDiagnostics`. Only Remus6-Rust and
+Remus7-Rust offer `Hash`; Remus4-Rust and Remus5-Rust use fixed 512 MiB tables.
 
 | Option | Default | Choices |
 | --- | --- | --- |
-| `SearchDiagnostics` | true | true or false |
+| `SearchDiagnostics` | false | true or false |
 | `Hash` (Remus6-Rust and Remus7-Rust) | 512 | 512, 1024, or 2048 MiB |
 
 `Hash` is a UCI combo option. Its numbers are binary mebibytes: 1024 MiB is 1 GiB,
@@ -19,8 +19,8 @@ isready
 ```
 
 Resizing in Remus6-Rust and Remus7-Rust occurs between searches. They cancel and
-drain an active search before processing the option. Remus4-Rust ignores Hash
-commands and retains its fixed allocation. Changing size clears the cache;
+drain an active search before processing the option. Remus4-Rust and Remus5-Rust ignore Hash
+commands and retain their fixed allocations. Changing size clears the cache;
 selecting the current effective size preserves it. Unsupported values are ignored.
 The old allocation is released before allocating the replacement. Allocation
 failure leaves native search available without caching, with `hash_mib=0` in the
@@ -29,6 +29,44 @@ log. There is no automatic smaller-table retry.
 Each process owns its table. Remus6-Rust and Remus7-Rust share that table among
 all their workers, rather than allocating the selected amount per worker. Memory
 for stacks, positions, and other search state is additional.
+
+## Coverage and defaults by engine
+
+All diagnostic options default to false. A saved Lucas Chess entry that explicitly
+sets an option to true overrides the executable default; disable it in that entry
+when logging is not wanted. Normal UCI depth, score, and move output remains available.
+
+The core search fields have matching definitions across the Rust engines. Additional
+fields describe capabilities present only in the parallel engines; log files are not
+identical schemas.
+
+| Capability | Remus4-Rust | Remus5-Rust | Remus6-Rust | Remus7-Rust |
+| --- | --- | --- | --- | --- |
+| `SearchDiagnostics` default | false | false | false | false |
+| Persistent `search_log.txt` | Yes | Yes | Yes | Yes |
+| Native nodes/sec and table probes, hits, cutoffs, stores, replacements | Yes | Yes | Yes | Yes |
+| `Ponder` default | Not supported | false | false | false |
+| `PonderDiagnostics` default | Not supported | false | false | false |
+| Persistent `ponder_log.txt`, hit kind, and hit timing | Not supported | Yes | Yes | Yes |
+| Sampled cache-fill percentage | No | No | Yes | Yes |
+| Protected entries and useful-hit age refreshes | No | No | Yes | Yes |
+| Per-thread activity and re-search/cancellation costs | No | No | Yes | Yes |
+| Descendant helping and separate result/cancellation waits | No | No | No | Yes |
+
+All search logs include process IDs, monotonic timestamps, and `unix_ms`. Remus5's
+ponder log also includes `unix_ms` and search IDs on final reports; Remus6 and Remus7
+ponder logs use process IDs and monotonic timestamps without that Unix-time prefix.
+Their search logs provide search IDs for correlation. Remus7 also reports
+`hit_min_percent`, its configurable minimum post-hit allowance; Remus5 and Remus6
+use a fixed allowance and omit that field. Remus5 records commands as the
+search thread consumes them; Remus6 and Remus7 record them in the input thread.
+These timestamps represent different boundaries, not exact GUI send times.
+
+Enable both diagnostic options in each participating engine's Lucas Chess entry to
+collect comparable evidence. Existing entries can cache the advertised option list;
+refresh or recreate an entry if an available option is absent. Tournament entries
+have separate options. `PonderDiagnostics` records activity; `Ponder` and GUI-issued
+`go ponder` commands actually enable pondering.
 
 ## Recorded measurements
 
@@ -54,7 +92,7 @@ Remus7 prefers its last completed iteration when available.
 
 | Final summary field | Meaning |
 | --- | --- |
-| `workers` | Actual search-worker count, including the main worker |
+| `workers` | Actual search-thread count, including the main thread |
 | `nodes` | All searched nodes, including unfinished iterations and worker remainders |
 | `native_ms` | Native search wall time, including worker startup/drain where applicable |
 | `nps` | Total nodes divided by native elapsed seconds, across all workers |
@@ -105,7 +143,8 @@ after splits drain. No per-probe global atomic increment or file write is requir
 Counters remain active with `SearchDiagnostics=false`; that switch disables log
 output, not instrumentation. The counters and boundary file writes still have a
 cost, so compare runs using the same instrumented builds and diagnostic settings.
-`PonderDiagnostics` is independent where offered.
+`PonderDiagnostics` independently controls ponder stdout reports and the persistent
+ponder log in Remus5-Rust through Remus7-Rust.
 
 ## Comparing sizes
 
@@ -121,7 +160,7 @@ a different root from the actual move, though retained entries can still help.
 Fixed-position checks do not establish playing strength. Starting new engine games
 for strength measurements requires the workshop designer's approval.
 
-## MT replacement policy and worker efficiency
+## Parallel replacement policy and worker efficiency
 
 Remus6-Rust and Remus7-Rust protect a matching entry when its stored depth
 exceeds the incoming depth. At equal depth, an exact entry survives an incoming
@@ -198,7 +237,7 @@ entry and the tournament entry when selecting the baseline allocation.
 
 ## Ponder handoff labels
 
-Remus6-Rust and Remus7-Rust include `hit_kind` on search-log records and in ponder
+Remus5-Rust, Remus6-Rust, and Remus7-Rust include `hit_kind` on search-log records and in ponder
 reports: `none` means no recognized hit, `uci` means a standard `ponderhit`, and
 `stop_go` means a matching explicit Lucas stop-and-go restart earns native credit.
 A stopped ponder request and its credited restart have separate search IDs. Count

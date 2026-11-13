@@ -234,9 +234,9 @@ Remus -> Lucas: option name Hash type combo default 512 var 512 var 1024 var 204
 Remus -> Lucas: option name LichessTablebase type check default true
 Remus -> Lucas: option name Ponder type check default false
 Remus -> Lucas: option name PonderHitMinPercent type spin default 25 min 0 max 100
-Remus -> Lucas: option name SearchDiagnostics type check default true
+Remus -> Lucas: option name SearchDiagnostics type check default false
 Remus -> Lucas: option name Threads type spin default 4 min 1 max 64
-Remus -> Lucas: option name PonderDiagnostics type check default true
+Remus -> Lucas: option name PonderDiagnostics type check default false
 Remus -> Lucas: uciok
 Lucas -> Remus: setoption name Threads value 8
 Lucas -> Remus: setoption name Hash value 1024
@@ -455,7 +455,7 @@ Remus behavior layered on UCI commands, not a separate UCI command.
 
 ## Confirming pondering from diagnostics
 
-For Remus6-Rust or Remus7-Rust, enable the diagnostics while the engine is idle:
+For Remus5-Rust, Remus6-Rust, or Remus7-Rust, enable the diagnostics while the engine is idle:
 
 ```text
 Lucas -> Remus: setoption name PonderDiagnostics value true
@@ -464,7 +464,9 @@ Lucas -> Remus: isready
 Remus -> Lucas: readyok
 ```
 
-Both engines append logs beside their executable. Python Remus5 offers
+All three Rust engines append `search_log.txt` and `ponder_log.txt` beside their
+executable when the corresponding options are enabled. Both options default to false.
+Python Remus5 offers
 `PonderDiagnostics` and writes per-process JSON logs in `ponder_logs/` beside `uci.py`; it does not expose
 these Rust search diagnostics. A diagnostic line beginning `info string` is
 engine-specific explanatory text, not an extra UCI control command.

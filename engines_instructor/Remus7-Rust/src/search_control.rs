@@ -29,8 +29,8 @@ pub struct PonderCredit {
     pub unstable: bool,
 }
 
-pub static LOG_ENABLED: AtomicBool = AtomicBool::new(true); // PonderDiagnostics is on
-pub static SEARCH_LOG_ENABLED: AtomicBool = AtomicBool::new(true); // SearchDiagnostics is on
+pub static LOG_ENABLED: AtomicBool = AtomicBool::new(false); // PonderDiagnostics controls output
+pub static SEARCH_LOG_ENABLED: AtomicBool = AtomicBool::new(false); // SearchDiagnostics controls output
 static LOG_START: OnceLock<Instant> = OnceLock::new();
 static LOG_FILE: Mutex<()> = Mutex::new(()); // One thread writes a line at a time
 

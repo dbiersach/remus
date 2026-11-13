@@ -215,7 +215,7 @@ impl Search {
             stop,
             total_nodes,
             table,
-            diagnostics: true,
+            diagnostics: false,
         };
         search.set_threads(DEFAULT_THREADS);
         search

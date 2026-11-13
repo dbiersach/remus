@@ -54,14 +54,14 @@ excluded.
 | `src/evaluation.rs` | 408 | 311 | +97 | Material, positional weaknesses, outposts, and king cover |
 | `src/exchange.rs` | 99 | 95 | +4 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Embedded opening lines |
-| `src/transposition_table.rs` | 154 | 130 | +24 | Fixed 512 MiB search table, multiply-shift indexing, and Windows allocation |
-| `src/search.rs` | 483 | 387 | +96 | Alpha-beta search, cancellation, and ponder timing |
-| `src/search_control.rs` | 275 | 0 | +275 | Input queue, cancellation, and the ponder clock |
-| `src/table_metrics.rs` | 0 | 34 | -34 | Not a separate source file in this engine; transposition-table probes, hits, cutoffs, stores, and replacements |
-| `src/diagnostics.rs` | 0 | 60 | -60 | Not a separate source file in this engine; persistent search diagnostics and timing |
+| `src/transposition_table.rs` | 171 | 130 | +41 | Fixed 512 MiB search table, multiply-shift indexing, and Windows allocation |
+| `src/search.rs` | 505 | 387 | +118 | Alpha-beta search, cancellation, and ponder timing |
+| `src/search_control.rs` | 307 | 0 | +307 | Input queue, cancellation, and the ponder clock |
+| `src/table_metrics.rs` | 34 | 34 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
+| `src/diagnostics.rs` | 49 | 60 | -11 | Independent persistent search and ponder log writers |
 | `src/tablebase.rs` | 253 | 0 | +253 | FEN, HTTPS, JSON validation, cache, cooldown, and bounded wait |
-| `src/main.rs` | 294 | 188 | +106 | UCI options, legal predictions, root lookup, and search control |
-| **Total** | **2,606** | **1,834** | **+772** | |
+| `src/main.rs` | 319 | 191 | +128 | UCI options, legal predictions, root lookup, and search control |
+| **Total** | **2,785** | **1,837** | **+948** | |
 
 ### Supporting files
 
@@ -84,7 +84,8 @@ an external UCI engine. Its identity is `Remus5-Rust` . Set the GUI opening book
 | --- | --- | --- | --- | --- |
 | `LichessTablebase` | check | true | true, false | Allow bounded root advice |
 | `Ponder` | check | false | true, false | Enable predictions and GUI-controlled pondering |
-| `PonderDiagnostics` | check | false | true, false | Report ponder timing through UCI stdout |
+| `SearchDiagnostics` | check | false | true, false | Append search timing, nodes/sec, and cache measurements to `search_log.txt` |
+| `PonderDiagnostics` | check | false | true, false | Report ponder timing through UCI stdout and append `ponder_log.txt` |
 
 ### Requirements and build
 
@@ -128,6 +129,8 @@ The same module keeps its color across engine versions and languages. The UCI ad
 | `src/board.rs` | ![Blue gray](../color_swatches/board.svg) Blue gray | `#e2e5f3` |
 | `src/tablebase.rs` | ![Mint](../color_swatches/tablebase.svg) Mint | `#cdeedc` |
 | `src/search_control.rs` | ![Sage](../color_swatches/search_control.svg) Sage | `#dce8d4` |
+| `src/table_metrics.rs` | ![Mauve](../color_swatches/table_metrics.svg) Mauve | `#ead8e5` |
+| `src/diagnostics.rs` | ![Apricot](../color_swatches/diagnostics.svg) Apricot | `#f5d5b8` |
 
 ### Module overview
 
@@ -157,8 +160,8 @@ The ponder view shows both UCI hit forms and book waiting. Exact reserve percent
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Modules](mermaid/modules.svg) | 12 | 31 | [Mermaid](mermaid/modules.mmd) |
-| [Search](mermaid/search.svg) | 13 | 14 | [Mermaid](mermaid/search.mmd) |
+| [Modules](mermaid/modules.svg) | 14 | 34 | [Mermaid](mermaid/modules.mmd) |
+| [Search](mermaid/search.svg) | 16 | 19 | [Mermaid](mermaid/search.mmd) |
 | [Ponder](mermaid/ponder.svg) | 15 | 18 | [Mermaid](mermaid/ponder.mmd) |
 
 Open SVGs in a browser to zoom without losing text clarity. Matching `.mmd` files are editable Mermaid sources; render with Mermaid CLI 12.2.0 and the supplied ELK layout settings.
@@ -497,19 +500,45 @@ engine's transposition table and one chess search thread and a separate input re
 
 ## Diagnostics and performance
 
-`PonderDiagnostics` defaults to false. When enabled, `info string ponder` reports
-`outcome` , `ponder_ms` , `hit_depth` , `hit_nodes` , `final_depth` , `final_nodes` ,
-`own_ms` , and `hit_kind` (`uci`, `stop_go` , or `none` ). `reinvest` , `shallow_hit` ,
-`deteriorating` , and `unstable` use 1 or 0; `hit_cap_ms` is the extra-time cap when
-reinvestment applies. A stopped request can be a miss, game end, or cancellation. These
-diagnostics go to UCI stdout; this engine does not create a persistent search or ponder
-log. A GUI can capture protocol output.
+`SearchDiagnostics` defaults to false. When enabled, it appends `search_log.txt` beside the
+executable. It records consumed UCI commands, root identity, move budgets, completed
+iterations, returned moves and their sources, and a final `serial workers=1` summary
+for each native search. The summary includes unfinished-iteration nodes, native elapsed
+milliseconds, nodes per second, effective cache size, and table probes, hits, cutoffs,
+stores, and replacements. Book and tablebase selections have no native-search summary.
 
-Ponder time is work before the engine's clock starts, not a direct measurement of time
-saved. Count a linked stop-and-go as one hit. Exclude book waits from native search-rate
-measurements. A controlled no-ponder comparison is needed to measure causal clock
-savings. The combined evaluation and search enhancements have no established Elo gain.
-Equal-time, color-balanced testing is required.
+These core fields use the same definitions as Remus4-Rust. `nps` divides all native
+nodes, including quiescence, by native search elapsed seconds. It excludes root advice
+and waiting after a finished ponder search. Table rates divide hits and cutoffs by
+alpha-beta probes, and replacements by store attempts. PV extraction and predicted-reply
+lookups do not count as probes; empty-slot inserts and same-key updates do not count as
+replacements. To compare a series of searches, divide total nodes by total `native_ms`
+in seconds, rather than averaging the per-search rates. See
+[Search logs and measurements](../search_logging.md) for field definitions and the
+additional parallel-search measurements available in Remus6-Rust and Remus7-Rust.
+
+`PonderDiagnostics` defaults to false and operates independently of search logging.
+When enabled, `info string ponder` goes to UCI stdout and `ponder_log.txt` beside the
+executable. It reports `outcome`, `ponder_ms`, `hit_depth`, `hit_nodes`, `final_depth`,
+`final_nodes`, `own_ms`, and `hit_kind` (`uci`, `stop_go`, or `none`). `reinvest`,
+`shallow_hit`, `deteriorating`, and `unstable` use 1 or 0; `hit_cap_ms` gives the
+extra-time cap. The ponder log also records consumed commands and returned moves.
+
+Both files append across launches and identify the process, monotonic elapsed time,
+and `unix_ms`. Search records and final ponder reports carry a per-process search ID.
+Search records distinguish invocation `wall_ms`, engine-clock `own_ms`, and completed
+depth. A stopped ponder request and its credited restart have separate search IDs;
+count the restart as one hit. A stopped request alone can mean a miss, game end, or
+cancellation. Ponder time is not a direct measurement of time saved: a controlled
+no-ponder comparison is needed to measure causal savings.
+
+Logging writes occur at command, iteration, and search boundaries, never at every
+node. Cache counters remain active when search logging is disabled. Instrumentation
+and file writes have a cost; compare builds with the same diagnostic settings. An
+unavailable log file never stops play. Archive growing logs while the engine is stopped.
+Existing Lucas Chess entries can cache the option list; refresh or recreate the engine
+entry if `SearchDiagnostics` is absent, and check the tournament's separate entry too.
+Enable `Ponder` and `PonderDiagnostics` there to collect ponder evidence.
 
 ## Verification and limitations
 

@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
-pub static ENABLED: AtomicBool = AtomicBool::new(true);
+pub static ENABLED: AtomicBool = AtomicBool::new(false);
 static STARTED: OnceLock<Instant> = OnceLock::new();
 
 /// Append beside the executable. Missing permissions or storage never stop play.

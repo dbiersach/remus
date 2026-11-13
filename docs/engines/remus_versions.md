@@ -47,11 +47,11 @@ The table reports engine defaults; the recommended Lucas Ponder selection is tru
 | [Remus2](Remus2/README.md) | 342 | 1 | None | Not supported | No persistent logs |
 | [Remus3](Remus3/README.md) | 535 | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
 | [Remus4](Remus4/README.md) | 694 | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
-| [Remus4-Rust](Remus4-Rust/README.md) | 1,834 | 1 | Fixed 512 MiB | Not supported | SearchDiagnostics true |
+| [Remus4-Rust](Remus4-Rust/README.md) | 1,837 | 1 | Fixed 512 MiB | Not supported | SearchDiagnostics false |
 | [Remus5](Remus5/README.md) | 1,430 | 1 | Fixed 512 MiB | false | PonderDiagnostics false; optional per-process JSON logs |
-| [Remus5-Rust](Remus5-Rust/README.md) | 2,606 | 1 | Fixed 512 MiB | false | PonderDiagnostics false; UCI stdout only |
-| [Remus6-Rust](Remus6-Rust/README.md) | 3,202 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics true; PonderDiagnostics false |
-| [Remus7-Rust](Remus7-Rust/README.md) | 3,808 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics true; PonderDiagnostics true |
+| [Remus5-Rust](Remus5-Rust/README.md) | 2,785 | 1 | Fixed 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; persistent text logs |
+| [Remus6-Rust](Remus6-Rust/README.md) | 3,205 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
+| [Remus7-Rust](Remus7-Rust/README.md) | 3,814 | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
 
 Remus7-Rust additionally exposes `PonderHitMinPercent` , default 25, range 0 to 100.
 Remus5 Python and Rust5 through Rust7 expose `LichessTablebase` , default true. The
@@ -234,9 +234,9 @@ typing assignments.
 | Version | Language | Search and boundary features | Code lines |
 | --- | --- | --- | ---: |
 | [Remus5](Remus5/README.md) | Python | Tactical and positional enhancements, fixed 512 MiB table, optional root tablebase advice, UCI pondering | 1,430 |
-| [Remus5-Rust](Remus5-Rust/README.md) | Rust | The same single-threaded search and boundary behavior | 2,606 |
-| [Remus6-Rust](Remus6-Rust/README.md) | Rust only | Lazy SMP with independent root searches and one shared table | 3,202 |
-| [Remus7-Rust](Remus7-Rust/README.md) | Rust only | YBWC, sibling splitting, persistent workers, and restricted descendant helping | 3,808 |
+| [Remus5-Rust](Remus5-Rust/README.md) | Rust | The same single-threaded search and boundary behavior | 2,785 |
+| [Remus6-Rust](Remus6-Rust/README.md) | Rust only | Lazy SMP with independent root searches and one shared table | 3,205 |
+| [Remus7-Rust](Remus7-Rust/README.md) | Rust only | YBWC, sibling splitting, persistent workers, and restricted descendant helping | 3,814 |
 
 Remus5 adds check-aware quiescence, terminal-position handling, en passant capture
 accounting, quiet-move history ordering, and

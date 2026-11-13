@@ -119,7 +119,7 @@ fn run() {
     let mut tablebase = tablebase::Tablebase::new(tablebase::ENDPOINT);
     let mut use_tablebase = true;
     let mut use_ponder = false;
-    let mut ponder_diagnostics = true;
+    let mut ponder_diagnostics = false;
     let mut search = Search::new();
     let mut position = Position::start();
     let mut played: Vec<String> = Vec::new(); // The moves of a game from the start
@@ -148,12 +148,18 @@ fn run() {
                     out,
                     "option name PonderHitMinPercent type spin default 25 min 0 max 100"
                 );
-                let _ = writeln!(out, "option name SearchDiagnostics type check default true");
+                let _ = writeln!(
+                    out,
+                    "option name SearchDiagnostics type check default false"
+                );
                 let _ = writeln!(
                     out,
                     "option name Threads type spin default {DEFAULT_THREADS} min 1 max {MAX_THREADS}"
                 );
-                let _ = writeln!(out, "option name PonderDiagnostics type check default true");
+                let _ = writeln!(
+                    out,
+                    "option name PonderDiagnostics type check default false"
+                );
                 let _ = writeln!(out, "uciok");
             }
             "setoption" => {

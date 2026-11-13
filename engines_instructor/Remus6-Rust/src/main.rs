@@ -141,7 +141,10 @@ fn run() {
                     out,
                     "option name Hash type combo default 512 var 512 var 1024 var 2048"
                 );
-                let _ = writeln!(out, "option name SearchDiagnostics type check default true");
+                let _ = writeln!(
+                    out,
+                    "option name SearchDiagnostics type check default false"
+                );
                 let _ = writeln!(out, "option name LichessTablebase type check default true");
                 let _ = writeln!(out, "option name Ponder type check default false");
                 let _ = writeln!(
