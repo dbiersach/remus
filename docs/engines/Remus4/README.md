@@ -62,8 +62,11 @@ About 50 of the 195 lines of `evaluation.py` are the rows of its six tables.
 
 ## Running and configuring
 
-Select [`remus.bat`](../../../engines_instructor/Remus4/remus.bat) as the UCI engine and
-use its engine folder as the working directory. The launcher uses the repository's
+During Day 1 setup, `install_lucas_engines.py` registers the instructor's
+[`remus.bat`](../../../engines_instructor/Remus4/remus.bat) with Lucas Chess. Students
+select that existing entry; they do not add an engine manually in class. For a
+separate home setup, use the engine folder as the launcher's working directory and
+follow the Lucas Chess guide. The launcher uses the repository's
 Python 3.14 environment. Engine code imports only the standard library. The UCI identity
 is `Remus4` .
 
@@ -71,6 +74,13 @@ Lucas Chess holds the instructor's engine, as the
 [Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
 `Remus4` . While a game follows a book line, it plays the book move at once; after that
 it searches.
+
+Opening `uci.py` with Run Python File starts a silent UCI command loop, with no
+board window. Close that run's terminal when finished. Running a helper module
+such as `make_move.py` loads its imports and definitions and normally exits without
+output; this checks for load errors, not whether its functions work. In Lucas
+Chess, a game should display moves and clocks. It uses the instructor's registered
+engine, not the student pair's files; see the verifier instructions below.
 
 ### UCI options
 
@@ -226,10 +236,26 @@ of `verify_engines.py` it plays a move that mates more slowly than the key move,
 
 ## Verification and limitations
 
-Move generation is checked against published perft positions. Fixed-depth searches,
-tactical positions, and UCI conversations check native behavior without requiring
-tournament games. Perft validates move generation, not playing strength; node counts and
-search depth alone do not establish an Elo gain.
+Open `engines/Remus4/verify_remus.py` in VS Code and press Run Python File at the
+scheduled checkpoint. It checks required files and counts legal move sequences
+(perft) from six reference positions, comparing them with published counts.
+It also compares five evaluation scores and depth-4 search moves, scores, and node
+counts with stored instructor results. Those searches call the native search
+directly, bypassing the opening-book choice. The UCI check looks for the engine
+name, `uciok`, `readyok`, and a final `bestmove` line; it does not validate that
+move's legality or every possible protocol exchange.
+
+Expect `Verifying` followed by actual and expected results. Success ends with
+`Remus4 passes every test` and elapsed time. A mismatch prints `PROBLEM:`;
+import or execution errors can show a traceback. Fix the reported problem and
+rerun. Passing covers these reference cases, not every position or code branch,
+and does not measure playing strength. Games in Lucas Chess use the instructor's
+engine and do not test the student pair's copy.
+
+During Day 4, the verifier selects intermediate reference results from the modules
+and functions present. Expect `Remus4 after Period 1 passes every test` (or Period 2
+or 3) at those checkpoints; the name identifies the selected reference set, not
+proof that every enhancement is implemented correctly.
 
 ## Further reading
 

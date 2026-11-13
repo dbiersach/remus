@@ -18,7 +18,7 @@ Quiescence search plays every capture, even queen takes a pawn that a pawn defen
 | --- | --- |
 | 10:30 to 10:45 | A capture is good only if the whole exchange on its square wins material: play it out on paper, cheapest attacker first. |
 | 10:45 to 11:50 | Type `exchange.py` (36 code lines): `cheapest_attacker()` and `exchange_score()`. In `quiescence()`, add delta pruning and skip the captures that lose material (about 8 code lines). |
-| 11:50 to 12:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 2 passes every test. |
+| 11:50 to 12:00 | Press Run Python File in `engines/Remus4/verify_remus.py` until the terminal prints `Remus4 after Period 2 passes every test`. |
 
 ## What changes this period
 
@@ -62,6 +62,8 @@ Create `exchange.py` in `engines/Remus4`. It has 41 lines when it is done.
 4. Under the two lines `if priority < CAPTURE:` and `break`, type the six lines from `if not move[2]:` to the second `continue` (lines 78 to 83). A promotion skips both tests, because a pawn that promotes gains far more than the piece it captures.
 5. Change the legality test under `child = make_move(position, move)` to `if in_check(child[0], white):` (line 85), using the name from step 3.
 
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
+
 ## Done when
 
-`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 2 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 2 passes every test. The verifier selects reference results from the modules and functions present. Its fixed-depth test calls the native search directly, without using the opening book. Passing means the listed reference cases match; it does not establish that every line or branch was exercised.

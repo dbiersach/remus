@@ -76,6 +76,12 @@ Select [`remus7_rust.exe`](../../../engines_instructor/Remus7-Rust/remus7_rust.e
 an external UCI engine. Its identity is `Remus7-Rust` . Set the GUI opening book to
 `<None>` , including in each tournament entry.
 
+Launching the engine alone opens no chess board and normally waits silently for
+UCI input. A GUI sends the commands and displays the returned moves; adding the
+engine to its list confirms configuration, not chess correctness. In a game,
+expect moves on the board and clocks changing sides. A successful exchange exercises
+that position; it is not a comprehensive engine test.
+
 ### UCI options
 
 | Option | Type | Default | Allowed values | Purpose |
@@ -109,6 +115,14 @@ machines rather than optimized for one particular host CPU.
 Rebuild after editing `opening_book.txt` , because the book is embedded at compile time.
 The engine must remain usable without successful network requests.
 
+For maintainers, a successful build ends with Cargo's `Finished` message and
+produces the executable under `target/release/`. It does not replace the executable
+selected by Lucas Chess or run chess tests. `cargo fmt` rewrites source formatting;
+`cargo fmt --check` reports formatting differences without editing. `cargo clippy`
+reports compiler and lint diagnostics. Successful formatting or lint checks do not
+exercise move generation, evaluation, or search. These are maintenance commands,
+not student workshop steps.
+
 ### Supported commands
 
 The engine supports `position startpos moves ...` , `position fen ...` , timed `go` ,
@@ -116,7 +130,9 @@ The engine supports `position startpos moves ...` , `position fen ...` , timed `
 `eval` . A fixed-depth search bypasses both opening-book and tablebase selection. Only
 UCI protocol output is written to stdout.
 
-For a reproducible single-worker native search:
+For a single-worker native search, start a fresh engine process so cached results
+and search history from earlier requests do not affect the comparison. The following
+commands are a maintainer's protocol example, not a student workshop step:
 
 ```text
 uci
@@ -126,9 +142,23 @@ position startpos
 go depth 7
 ```
 
-Wait for `bestmove` before sending another search or `quit` . During an active search,
+Expect identity and option lines ending in `uciok`, then `info depth` reports up
+to depth 7 and a final `bestmove` line. No exact move, score, or node count is asserted
+by this example; it exercises one native search, with no book or tablebase choice.
+To use it as a regression check, compare those results with a separately recorded
+baseline from the same executable and settings. Wait for `bestmove` before sending
+another search or `quit` . During an active search,
 `isready` receives `readyok` ; replacement commands cancel and drain the current search
 before the next one begins.
+
+For maintainer analysis, `uci` returns identity/options and ends with `uciok`;
+`isready` returns `readyok`. Neither command searches a position. `position` normally
+has no reply. `go depth N` reports completed search iterations and ends with
+`bestmove`; compare its move, score, and nodes with a reference if testing a change.
+`go perft N` prints `perft <count>` and `eval` prints `eval <score>`; neither returns
+`bestmove`, and neither automatically checks its number against an expected value.
+For example, `go perft 1` after `position startpos` should report `perft 20`, checking
+only the starting position's one-ply move count. `quit` ends the engine process.
 
 ## Architecture and call diagrams
 
@@ -431,8 +461,8 @@ search. `PonderDiagnostics` appends to `logs/ponder_<pid>_<session>.txt` and rep
 `hit_kind` is `uci` for standard ponderhit, `stop_go` for a credited Lucas restart,
 and `none` when no hit is recognized. It appears in both ponder reports and search-log
 records. A stopped report can precede a credited restart; count the restart once as a hit.
-Neither writes a line per searched node. Both files grow across sessions; archive them
-with the engine stopped. An unavailable log file does not stop play.
+Neither writes a line per searched node. Files grow during their process's session;
+archive them with that engine process stopped. An unavailable log file does not stop play.
 
 The search log contains incoming UCI commands, root identity and move budgets, each
 completed iteration's depth, score, cumulative nodes and principal variation, the final
@@ -477,10 +507,12 @@ controlled playing results.
 
 ## Verification and limitations
 
-Move generation is checked against published perft positions. Fixed-depth searches,
-tactical positions, and UCI conversations check native behavior without requiring
-tournament games. Perft validates move generation, not playing strength; node counts and
-search depth alone do not establish an Elo gain.
+Perft checks compare legal move sequence counts with published values for specific
+positions and depths. Fixed-depth search and tactical checks exercise their supplied
+positions; a UCI exchange checks only the commands and responses it includes. None
+runs automatically when the engine starts. Matching these reference cases provides
+evidence about those cases, not every position or code branch. Perft does not measure
+playing strength; node counts and search depth alone do not establish an Elo gain.
 
 Verify tablebase fallback, repetition-sensitive positions, standard and Lucas ponder
 hits, cancellation, and post-hit deadlines separately from native chess checks. Network

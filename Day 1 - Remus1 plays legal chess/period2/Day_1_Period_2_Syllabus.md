@@ -19,8 +19,8 @@ The student pair keeps building Remus1 from nothing in `engines/Remus1`, so both
 | Time | Activity |
 | --- | --- |
 | 10:30 to 10:45 | The position tuple and copy-make: `make_move()` copies the board and returns a new position, so no move is ever taken back. Reminder of castling rights, en passant, and promotion. |
-| 10:45 to 11:15 | Type `make_move.py` (23 code lines). Run it. |
-| 11:15 to 12:00 | Type `attacks.py` (34 code lines): the knight jumps, the eight directions, `is_attacked()`, and `in_check()`. Run it. |
+| 10:45 to 11:15 | Type `make_move.py` (23 code lines). Press Run Python File to check for syntax and import errors. No output is expected; this does not test the functions' behavior. |
+| 11:15 to 12:00 | Type `attacks.py` (34 code lines): the knight jumps, the eight directions, `is_attacked()`, and `in_check()`. Press Run Python File to check for syntax and import errors. No output is expected; this does not test the functions' behavior. |
 
 ## What the student pair types this period
 
@@ -57,4 +57,4 @@ Lines 3 to 6 list the eight knight jumps as (row change, column change) pairs, a
 
 ## Done when
 
-`make_move.py` and `attacks.py` both run with no error.
+Press Run Python File in `make_move.py` and then in `attacks.py`. Both files load without an error and print nothing. This checks syntax and imports; it does not call `make_move()`, `is_attacked()`, or `in_check()` to test their behavior. The finished Remus1 is tested with `verify_remus.py` in Period 4.

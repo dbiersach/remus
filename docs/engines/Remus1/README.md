@@ -17,8 +17,9 @@
 
 Remus1 is the engine the student pairs finish at the end of Day 1. It generates legal
 moves but looks no moves ahead: `think()` lists the legal moves and plays one at random.
-It plays legal chess, and it plays it badly, so the first game in Lucas Chess shows that
-the move generator works before any search exists. It speaks UCI to Lucas Chess through
+The first game in Lucas Chess illustrates random legal play by the instructor's
+engine. The student pair checks its own move generator with `verify_remus.py`; a
+single game does not establish that all move-generation rules work. It speaks UCI to Lucas Chess through
 `remus.bat` and uses only the standard library.
 
 [Remus2](../Remus2/README.md) holds the same `board.py` , `make_move.py` , `attacks.py`
@@ -57,14 +58,24 @@ absent from that version. Supporting files and external checks are excluded.
 
 ## Running and configuring
 
-Select [`remus.bat`](../../../engines_instructor/Remus1/remus.bat) as the UCI engine and
-use its engine folder as the working directory. The launcher uses the repository's
+During Day 1 setup, `install_lucas_engines.py` registers the instructor's
+[`remus.bat`](../../../engines_instructor/Remus1/remus.bat) with Lucas Chess. Students
+select that existing entry; they do not add an engine manually in class. For a
+separate home setup, use the engine folder as the launcher's working directory and
+follow the Lucas Chess guide. The launcher uses the repository's
 Python 3.14 environment. Engine code imports only the standard library. The UCI identity
 is `Remus1` .
 
 Lucas Chess holds the instructor's engine, as the
 [Lucas Chess guide](../../lucas_chess/lucas_chess_guide.md) shows. It names itself
 `Remus1` . It answers at once, whatever the clock.
+
+Opening `uci.py` with Run Python File starts a silent UCI command loop, with no
+board window. Close that run's terminal when finished. Running a helper module
+such as `make_move.py` loads its imports and definitions and normally exits without
+output; this checks for load errors, not whether its functions work. In Lucas
+Chess, a game should display moves and clocks. It uses the instructor's registered
+engine, not the student pair's files; see the verifier instructions below.
 
 ### UCI options
 
@@ -154,12 +165,22 @@ Only the normal UCI result is reported; there is no persistent diagnostic log.
 
 ## Verification and limitations
 
-Move generation is checked against published perft positions and UCI conversations.
-There is no fixed-depth search or tactical mate solver in this random-move engine. Perft
-validates move generation, not playing strength.
+Open `engines/Remus1/verify_remus.py` in VS Code and press Run Python File at the
+scheduled checkpoint. It checks required files and counts legal move sequences
+(perft) from six reference positions, comparing them with published counts.
+The UCI check looks for the engine
+name, `uciok`, `readyok`, and a final `bestmove` line; it does not validate that
+move's legality or every possible protocol exchange.
 
-There is no evaluation, repetition-history search, or fifty-move search logic. Legal
-move generation does not imply strong play.
+Expect `Verifying` followed by actual and expected results. Success ends with
+`Remus1 passes every test` and elapsed time. A mismatch prints `PROBLEM:`;
+import or execution errors can show a traceback. Fix the reported problem and
+rerun. Passing covers these reference cases, not every position or code branch,
+and does not measure playing strength. Games in Lucas Chess use the instructor's
+engine and do not test the student pair's copy.
+
+Remus1 has no evaluation or fixed-depth search, so the verifier does not test
+those. The engine has no repetition-history or fifty-move search logic.
 
 ## Further reading
 

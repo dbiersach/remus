@@ -42,7 +42,8 @@ The workshop runs for one week, five days of four 90-minute periods, for student
 who know some coding and know how to play chess, including notation. Twenty students
 work in ten student pairs, one Windows 11 laptop per student pair. Each day builds the
 engine of its number: Day 1 types in Remus1, Day 2 Remus2, Day 3 Remus3, and Day 4
-Remus4, and the last period of each of those days tests the newest engine in Lucas Chess.
+Remus4. Student pairs test their code with `verify_remus.py`; in the last period of
+each day they play and observe the instructor's engines in Lucas Chess.
 Day 5 turns the search ideas of the week into a science project.
 [`workshop_syllabus.md`](workshop_syllabus.md) holds the plan of the week, and each day has its own folder at the top of the repository.
 
@@ -112,12 +113,16 @@ runtime; Rust embeds it at build time, so Rust book edits require rebuilding.
 Disable Lucas's external books, including explicit `<None>` in tournament entries.
 
 Remus4-Rust through Remus7-Rust write search and cache measurements to
-`search_log.txt` when SearchDiagnostics is enabled (default false). Python Remus5's
+`logs/search_<pid>_<session>.txt` beside the executable when SearchDiagnostics is
+enabled (default false). Python Remus5's
 PonderDiagnostics option (default false) writes separate process/session logs in
 `engines_instructor/Remus5/ponder_logs/`, recording commands, predictions, linked
 hits, nodes, depth, and clock/CPU timing. Enable it in the GUI for tournament
 analysis. Remus5-Rust through Remus7-Rust report ponder diagnostics through UCI
-stdout and append `ponder_log.txt` when PonderDiagnostics is enabled (default false).
+stdout and write `logs/ponder_<pid>_<session>.txt` beside the executable when
+PonderDiagnostics is enabled (default false). With diagnostics disabled, no new
+diagnostic files are expected; ordinary UCI output still operates. Log records are
+measurements, not automatic pass/fail checks.
 See each engine README for options and measurement limits.
 
 Everything else sits in the plan of the week, the day folders, `science/`, `science_instructor/`, and `docs/`:
@@ -139,8 +144,9 @@ Remus runs on Windows 11 with [Git](https://git-scm.com/),
 [uv](https://docs.astral.sh/uv/), [VS Code](https://code.visualstudio.com/), and Lucas
 Chess. On Day 1, period 1, the teacher walks each student pair through steps 1 to 6
 below. A class laptop that already holds VS Code or Lucas Chess skips that install.
-After that setup no student or teacher types a git or uv command: every step of the
-workshop runs from VS Code's Run button. The same steps set up any other computer,
+After setup, students and teachers use VS Code's Run Python File button for Python
+programs, Lucas Chess for games, and File Explorer for copies. They type no further
+git or uv commands during the workshop. The same steps set up any other computer,
 such as the teacher's laptop or a computer at home.
 
 1. Open **PowerShell** from the Start menu and install Git and VS Code with winget:
@@ -156,6 +162,9 @@ such as the teacher's laptop or a computer at home.
    winget install --id astral-sh.uv -e
    ```
 
+   Expect installation progress and a completion message for each package, or a
+   message that it is already installed. Resolve any reported installation error
+   before continuing. These steps install tools; they do not test Remus.
    Close PowerShell and open a new window, so that it finds `git`, `uv`, and `code`.
 
 3. Clone the repository and change into its folder:
@@ -166,7 +175,10 @@ such as the teacher's laptop or a computer at home.
    ```
 
    Cloning a public repository needs no GitHub account, so the students never create
-   one.
+   one. Expect download progress and a new `Remus` folder. `cd Remus` changes the
+   current folder and normally prints nothing; cloning does not run the engine.
+   When setting up a USB copy at home, use that existing Remus folder instead of
+   cloning over it, so the student pair's typed files remain available.
 
 4. Install Python 3.14, `matplotlib` for the Day 5 graphs, and the development tools
    (`python-chess` and `ruff`) into the project:
@@ -176,7 +188,9 @@ such as the teacher's laptop or a computer at home.
    ```
 
    uv reads `.python-version` and downloads Python 3.14 by itself, so no separate
-   Python install is needed.
+   Python install is needed. Expect environment and package messages, followed by
+   the PowerShell prompt without an error. The project has a `.venv` folder after
+   setup. This prepares dependencies; it does not test engine or science functions.
 
 5. Install the VS Code extensions the class uses, then open the Remus workspace:
 
@@ -190,25 +204,36 @@ such as the teacher's laptop or a computer at home.
    with ruff on save, and points VS Code at the project's `.venv`. If PowerShell
    refuses to run the script, run
    `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once and try again.
+   Expect extension installation messages; an uninstall message for an extension
+   that is absent is harmless. Check any installation failures. The second command
+   opens the workspace in VS Code. Open a Python file and confirm that Run Python
+   File is available; this checks editor setup, not the program's behavior.
 
 6. Install Lucas Chess, the chess board that plays against Remus. Download the
    Windows installer from
    [lucaschess.pythonanywhere.com/downloads](https://lucaschess.pythonanywhere.com/downloads)
-   and run it. Lucas Chess comes with Stockfish, so no other engine is needed.
+   and run it. Expect the installation wizard to finish; launch Lucas Chess once
+   to reach its main window and create its configuration, then close it before
+   registration. Lucas Chess comes with Stockfish, so no other engine is needed.
 
    Every laptop then adds the engines: close Lucas Chess, open
    [`docs/lucas_chess/install_lucas_engines.py`](docs/lucas_chess/install_lucas_engines.py)
    in VS Code, and press the Run button. The program adds the instructor's Remus1 to
    Remus4 and Remus4-Rust to the External engines list, keeps every engine already
-   there, and adds no duplicates, so nobody adds an engine by hand. The
+   there, and adds no duplicates, so nobody adds an engine by hand. Expect a line
+   for each engine, followed by `Saved ... engines in ...` or
+   `Nothing changed: every engine is already registered`. A missing installation
+   or file message means registration did not finish. Reopen Lucas Chess and check
+   **Engines > External engines** for all five names. Registration stores paths
+   and settings; it does not launch or test the engines. The
    [Lucas Chess guide](docs/lucas_chess/lucas_chess_guide.md) shows, with screenshots, how
    to play those engines and watch them play.
 
 ### Stockfish
 
-Stockfish is the strongest free chess engine in the world, and like Remus it speaks
-UCI. Remus plays it in class at a reduced strength, such as 1500 Elo, to see how good
-Remus really is. Lucas Chess installs its own copy of Stockfish, so the class laptops
+Stockfish speaks UCI, like Remus. In class it provides a comparison opponent at a
+reduced strength setting, such as 1500 Elo. Record the games' results; a short round
+against that setting does not measure Remus's Elo rating. Lucas Chess installs its own copy of Stockfish, so the class laptops
 need nothing more.
 
 To get the newest Stockfish at home, download it free from
@@ -221,9 +246,27 @@ engine, the way the "Lucas Chess at home" part of the guide adds a `remus.bat`.
 
 ### Running the files
 
-From here on, every file runs inside VS Code. Open a file, such as `uci.py` in
-the student pair's own `engines/Remus2`, and click the Run Python File button (the triangle at the top right
-of the editor).
+For workshop Python files, open the file in VS Code and click Run Python File
+(the triangle at the top right). What happens depends on the file:
+
+| File | What to expect | What it checks |
+| --- | --- | --- |
+| Engine module such as `make_move.py` | It loads and exits without output. A syntax or import error shows a traceback. | Loading imports and definitions; the functions are not exercised. |
+| `uci.py` | It waits silently for UCI commands; no board opens. Close that run's terminal before continuing. | Startup only, until commands arrive. Use the verifier for the scheduled behavior checks. |
+| `engines/RemusN/verify_remus.py` | It prints `Verifying`, actual and expected results, then `RemusN passes every test` and elapsed time. Day 4 intermediate checks name the period. A mismatch prints `PROBLEM:`; an execution error may show a traceback. | Required files, legal move sequence counts from six reference positions, and a short UCI exchange; Remus2 to Remus4 also compare five evaluation scores and depth-4 search results with stored instructor results. |
+| Day 5 programs in `science/` | They print measured results and open graphs; close each graph to continue. | The student functions are called, but printed expectation text is not an automatic pass/fail check. Compare results manually with the Day 5 syllabus for the current period and settings. |
+
+Passing the verifier covers its reference cases, not every position or code branch.
+Its UCI check looks for the engine name, `uciok`, `readyok`, and a `bestmove` line;
+it does not validate that move's legality or every book choice. Fix a reported
+problem and rerun. Lucas Chess uses the registered instructor engines, so games
+there do not test the student pair's files.
+
+An unfinished science function raises `NotImplementedError`. At the end of Day 5,
+Period 2, `Write search()` is expected after the greedy results and first graph;
+an earlier or different error is not the planned stopping point. The
+[Day 5 syllabus](Day%205%20-%20Solve%20a%20science%20problem%20with%20chess%20AI/Day_5_Syllabus.md)
+gives the reference numbers and explains how parameter changes affect them.
 
 The Python engines use only the standard library. Rust tablebase engines bundle
 their HTTPS and JSON dependencies; running their executables needs no Rust installation. The development group adds

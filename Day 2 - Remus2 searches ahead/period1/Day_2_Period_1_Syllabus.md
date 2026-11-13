@@ -20,7 +20,7 @@ No copied file changes this period. The copied files of Remus1 keep working, and
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus1` into `engines/Remus2`. The rest of Day 2 edits those copies. |
 | 8:35 to 8:45 | A score in centipawns: material, plus a bonus or penalty for where each piece stands. A Black piece reads each table upside down. |
-| 8:45 to 9:55 | Type `evaluation.py` (68 code lines): `mirrored_table()`, the four piece-square tables (files a to d only), the piece values, and `evaluate()`. Run it. |
+| 8:45 to 9:55 | Type `evaluation.py` (68 code lines): `mirrored_table()`, the four piece-square tables (files a to d only), the piece values, and `evaluate()`. Press Run Python File to check for syntax and import errors. No output is expected; this does not test the functions' behavior. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 ## What changes this period
@@ -50,4 +50,4 @@ The four tables follow: `PAWN_TABLE = mirrored_table((` (line 12), `KNIGHT_TABLE
 
 ## Done when
 
-`evaluation.py` runs with no error.
+Press Run Python File in `evaluation.py`. The file loads without an error and prints nothing. This checks syntax and imports, not whether `evaluate()` returns correct scores. The finished Remus2 is tested with `verify_remus.py` in Period 3.

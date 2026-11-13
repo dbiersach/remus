@@ -20,7 +20,7 @@ The student pair keeps working in `engines/Remus2`. This period finishes `search
 | --- | --- |
 | 1:00 to 1:10 | Reminder of checkmate and stalemate: a side with no legal move has lost if in check, and draws if not. |
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
-| 2:10 to 2:30 | Run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
+| 2:10 to 2:30 | Press Run Python File in `engines/Remus2/verify_remus.py` and fix any file it names until the terminal prints `Remus2 passes every test`. |
 
 ## What changes this period
 
@@ -48,6 +48,8 @@ Open `search.py` in `engines/Remus2`. It ends at line 63, `return alpha`, the la
 ![uci.py, line 21](images/uci_line_21.png)
 
 The copied `uci.py` works for Remus2 unchanged except for one line, the name Lucas Chess shows. Change `print("id name Remus1")` to `print("id name Remus2")` (line 21).
+
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
 
 ## Done when
 

@@ -85,6 +85,12 @@ queue keep native search responsive to commands. Packed cache entries use `mmap`
 The experimental engine uses a separate external-engine entry in Lucas Chess. Enable
 Ponder in both that entry and its tournament entry to use pondering.
 
+Launching the engine alone opens no chess board and normally waits silently for
+UCI input. A GUI sends the commands and displays the returned moves; adding the
+engine to its list confirms configuration, not chess correctness. In a game,
+expect moves on the board and clocks changing sides. A successful exchange exercises
+that position; it is not a comprehensive engine test.
+
 ### UCI options
 
 | Option | Type | Default | Allowed values | Purpose |
@@ -95,6 +101,11 @@ Ponder in both that entry and its tournament entry to use pondering.
 
 PonderDiagnostics also writes the Python logs described below. Disabling
 LichessTablebase selects native move choice without network advice.
+
+Running a helper Python module with Run Python File normally loads its imports
+and definitions and exits without output; function behavior is not tested. Running
+`uci.py` starts the waiting command loop instead. Close that run's terminal when
+finished. The workshop's `verify_remus.py` supports Remus1 to Remus4, not Remus5.
 
 ### Supported commands
 
@@ -535,8 +546,8 @@ The combined search and evaluation terms have no measured Elo gain. More detaile
 position scoring costs time per search node. Equal-time, color-balanced games are needed
 to determine whether the move-quality gain offsets that cost.
 
-Perft counts establish move-generation correctness, and fixed-depth comparisons check
-native search behavior. Neither establishes an Elo gain. For a strength comparison, use
+Matching perft counts checks move generation at the supplied positions and depths;
+fixed-depth comparisons check native search behavior on their reference positions. Neither establishes an Elo gain. For a strength comparison, use
 the same Stockfish binary and settings, opening positions, time control, hardware, and
 color balance for Remus4 and Remus5. Report the difference with a statistical
 uncertainty estimate. Results against one Stockfish configuration describe that matchup,
@@ -544,10 +555,12 @@ not a universal rating.
 
 ## Verification and limitations
 
-Move generation is checked against published perft positions. Fixed-depth searches,
-tactical positions, and UCI conversations check native behavior without requiring
-tournament games. Perft validates move generation, not playing strength; node counts and
-search depth alone do not establish an Elo gain.
+Perft checks compare legal move sequence counts with published values for specific
+positions and depths. Fixed-depth search and tactical checks exercise their supplied
+positions; a UCI exchange checks only the commands and responses it includes. None
+runs automatically when the engine starts. Matching these reference cases provides
+evidence about those cases, not every position or code branch. Perft does not measure
+playing strength; node counts and search depth alone do not establish an Elo gain.
 
 Tablebase availability does not guarantee a shortest mate or an Elo gain. Native search
 and its selective approximations apply whenever no acceptable advice arrives. Pondering

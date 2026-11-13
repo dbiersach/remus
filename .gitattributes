@@ -35,5 +35,8 @@
 # The one compiled engine, Remus4-Rust, is stored as it is.
 *.exe binary
 
+# Preserve PDF bytes; never apply text line-ending conversion.
+*.pdf binary
+
 # Rust source.
 *.rs text eol=lf

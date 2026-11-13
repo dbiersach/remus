@@ -21,7 +21,7 @@ The period also moves `MATE_SCORE` from `search.py` to `board.py` and adds two s
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus2` into `engines/Remus3`. |
 | 8:35 to 8:45 | Doubled, isolated, and passed pawns, on a position the teacher shows in Lucas Chess. Why two bishops together are worth more than a bishop and a knight. |
 | 8:45 to 9:00 | Move `MATE_SCORE` from `search.py` to `board.py`, and add `position_key()` and `move_text()` (8 code lines in `board.py`). |
-| 9:00 to 9:55 | In `evaluation.py`, add the rook table, `pawn_terms()`, the bishop pair, and the lines of `evaluate()` that collect the pawns (47 code lines). Run `uci.py`. |
+| 9:00 to 9:55 | In `evaluation.py`, add the rook table, `pawn_terms()`, the bishop pair, and the lines of `evaluate()` that collect the pawns (47 code lines). Press Run Python File in `uci.py` to check for syntax and import errors. No text is expected while it waits for UCI commands; starting it does not test the engine's chess functions. Close that run's terminal before continuing. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 ## What changes this period
@@ -91,4 +91,4 @@ Then delete `MATE_SCORE = 100_000` and the blank line above it, which stood at l
 
 ## Done when
 
-`uci.py` runs and still plays.
+Press Run Python File in `uci.py`. It loads without an error and waits silently for UCI commands. Close that run's terminal before continuing. This checks startup, including syntax and imports; it does not test evaluation or search, and it does not show that the engine plays correctly. The finished Remus3 is tested with `verify_remus.py` in Period 4.

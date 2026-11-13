@@ -101,4 +101,4 @@ In `think()`, from the top down:
 
 ## Done when
 
-`uci.py` says `id name Remus3` and plays a book move from the start position.
+The opening-book and clock edits are complete, and the name line in `uci.py` reads `id name Remus3`. Press Run Python File in `uci.py` to check for syntax and import errors. It waits silently for UCI commands; starting it does not test book moves or time management. Close that run's terminal before continuing. The finished Remus3 is tested with `verify_remus.py` in Period 4.

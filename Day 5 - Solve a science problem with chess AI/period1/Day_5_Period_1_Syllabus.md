@@ -4,7 +4,7 @@
 
 ## Goal
 
-The student pair's science AI chooses where to measure next on a sample, and beats random guessing.
+The student pair's science AI chooses where to measure next and compares its measurement count with random guessing on the supplied benchmark.
 
 ## The big picture
 
@@ -15,8 +15,8 @@ No engine file changes today: `engines/Remus1` to `engines/Remus4` stay as they 
 | Time | Activity |
 | --- | --- |
 | 8:30 to 8:45 | A 10 by 10 sample hides a hot spot, and every measurement costs beam time. Choosing the next square is choosing a move: list the candidates, score each one, keep the best. |
-| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Run it. |
-| 9:30 to 10:00 | Tune `EXPLORE_WEIGHT` and compare. Over 100 hidden samples, random guessing needs 54.3 measurements on average, the AI with weight 0 needs 17.5, weight 8 needs 9.4, and weight 40 needs 19.4. The teacher shows the expectimax lookahead (24.7): it looks two measurements ahead, but its crude model makes it worse than the one-step AI. |
+| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Press Run Python File in `science/hidden_peak.py`. With `EXPLORE_WEIGHT = 8`, compare the printed averages: random 54.3; greedy weights 0, 8, and 40: 17.5, 9.4, and 19.4. Close each of the two graph windows to finish. |
+| 9:30 to 10:00 | After matching the default results, change `EXPLORE_WEIGHT`, save, and rerun `science/hidden_peak.py`. The program compares weights 0, the chosen value, and 40 over 100 generated samples. It also prints expectimax's 24.7 average over only 10 samples: a separate lookahead demonstration, not the same 100-sample comparison. Record the chosen weight and measured averages; the printed expectation text is a fixed reference. |
 
 ## The files
 
@@ -44,4 +44,4 @@ When `hidden_peak.py` finishes printing its results, matplotlib opens these two 
 
 ## Done when
 
-`choose_next_measurement()` needs fewer measurements on average than random guessing.
+With `EXPLORE_WEIGHT = 8`, the student pair has compared the printed 100-sample averages with 54.3 for random guessing and 17.5, 9.4, and 19.4 for greedy weights 0, 8, and 40. The separate 10-sample expectimax result is 24.7. Both graph windows have been closed and the program has exited. These benchmark results do not prove correctness on every possible sample.

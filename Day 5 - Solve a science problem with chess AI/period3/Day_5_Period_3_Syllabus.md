@@ -4,7 +4,7 @@
 
 ## Goal
 
-The student pair searches every set of up to three phases and verifies the search on 200 known powders.
+The student pair searches every set of up to three phases and compares the printed results with reference counts on 200 generated powders.
 
 ## The big picture
 
@@ -16,7 +16,7 @@ No engine file changes today: `engines/Remus1` to `engines/Remus4` stay as they 
 | --- | --- |
 | 1:00 to 1:15 | The tree of phase sets beside Remus's game tree: a set is a position and adding a phase is a move. Quartz then rutile is the same set as rutile then quartz, the same idea as the transposition table. |
 | 1:15 to 1:50 | Write `search()` (12 code lines), which scores every set of up to three phases and keeps every set that ties for the best score. |
-| 1:50 to 2:15 | Verify on the 200 known powders: 139 right, 52 "can't tell", and 9 wrong, against greedy's 34 wrong. The search scores 176 sets per powder in library order, against 821 in every order. Change `PHASE_COST` and `MISSING` and watch the verdicts move. |
+| 1:50 to 2:15 | Press Run Python File in `science/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
 | 2:15 to 2:30 | The programs that search the same tree on real synchrotron data, and the agent that steers measurements at a beamline. |
 
 ## The files
@@ -45,4 +45,4 @@ These pictures explain the search and the tie between gold and silver.
 
 ## Done when
 
-`search()` makes fewer wrong calls than greedy.
+With the supplied settings, the student pair has compared the printed search counts (139 right, 52 "can't tell", 9 wrong), greedy counts (166 right, 0 "can't tell", 34 wrong), and set counts (176 and 821) with the references. Both graph windows have been closed and the program has exited. After changing the settings, the student pair records the new counts, even if the change makes the results worse.

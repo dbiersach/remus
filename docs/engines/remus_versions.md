@@ -74,10 +74,10 @@ contribute to runtime-source TLOC.
 
 - **Python lines in the feature catalog** are estimates for an individual enhancement; each may differ by up to a third. **TLOC in engine/file tables** is counted from current runtime source, excluding blank lines, standalone comments, and Python docstrings. Rust documentation comments are excluded too.
 - **New lines to type** differs from net TLOC change. Remus2 replaces 12 search lines and adds 161 lines, increasing the total by 149. README file tables show current TLOC, predecessor TLOC, and the net change.
-- **Elo** is the expected gain over the engine before the step. No games have measured
-  these numbers for Remus2, Remus3, and Remus4 yet, so they are estimates, and gains
-  overlap as the engine grows: two enhancements that both speed up the same search
-  add less together than apart.
+- **Elo** in the feature catalog is an estimated gain for one enhancement, not a
+  measured Remus result or a target for a student test. Whole-version match results
+  do not isolate a feature's effect. Gains overlap as the engine grows and cannot
+  be added to predict a rating.
 - Three rows marked **(foundation)** gain little alone but are needed by later rows.
 - **Version** names the engine that first holds the step.
 
@@ -102,9 +102,13 @@ safest steps: a bug here makes Remus play worse, never illegally.
 
 ### (S) Search Only: `search.py`
 
-These change which moves the search tries and how deeply. A bug here can lose games
-badly without making an illegal move, so each step should keep a fixed-depth search's
-best move on a few test positions while visiting fewer positions.
+These change which moves the search tries and how deeply. A bug can produce legal
+but poor choices. At the scheduled checkpoints, `verify_remus.py` compares the
+student engine with stored results for that version or period; its README describes
+the expected output. Passing those cases does not prove that pruning is safe in
+every position or that strength improved. Selective search changes can alter moves,
+scores, and node counts; fewer nodes and an unchanged move are not universal
+requirements for an enhancement.
 
 | Step | Enhancement | What it adds | Python lines | Elo | Version |
 | --- | --- | --- | ---: | ---: | --- |

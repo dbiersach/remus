@@ -71,6 +71,12 @@ Select [`remus6_rust.exe`](../../../engines_instructor/Remus6-Rust/remus6_rust.e
 an external UCI engine. Its identity is `Remus6-Rust` . Set the GUI opening book to
 `<None>` , including in each tournament entry.
 
+Launching the engine alone opens no chess board and normally waits silently for
+UCI input. A GUI sends the commands and displays the returned moves; adding the
+engine to its list confirms configuration, not chess correctness. In a game,
+expect moves on the board and clocks changing sides. A successful exchange exercises
+that position; it is not a comprehensive engine test.
+
 ### UCI options
 
 | Option | Type | Default | Allowed values | Purpose |
@@ -87,12 +93,20 @@ an external UCI engine. Its identity is `Remus6-Rust` . Set the GUI opening book
 The supplied executable runs on Windows 11 without Python or Rust installed. Maintaining
 source requires the stable toolchain selected by `rust-toolchain.toml` . From the engine
 folder, build with `cargo build --release --locked` ; the result is in `target/release/`
-. `cargo fmt` and `cargo clippy` check Rust style and warnings. Changing
+. Formatting and lint commands are described below. Changing
 `opening_book.txt` requires a rebuild because its text is embedded at compile time. A
 normal Cargo build does not itself perform profile-guided training.
 
 `reqwest` , `serde_json` , and `httpdate` serve only the HTTPS/JSON tablebase boundary.
 Native chess and thread coordination use the standard library.
+
+For maintainers, a successful build ends with Cargo's `Finished` message and
+produces the executable under `target/release/`. It does not replace the executable
+selected by Lucas Chess or run chess tests. `cargo fmt` rewrites source formatting;
+`cargo fmt --check` reports formatting differences without editing. `cargo clippy`
+reports compiler and lint diagnostics. Successful formatting or lint checks do not
+exercise move generation, evaluation, or search. These are maintenance commands,
+not student workshop steps.
 
 ### Supported commands
 
@@ -102,6 +116,15 @@ Fixed-depth and perft commands bypass book and tablebase selection. A FEN-only p
 has no repetition history before that FEN. Wait for `bestmove` before starting another
 search or sending `quit` . It also supports `go infinite` , `go ponder` , `ponderhit` ,
 and live `stop` ; `isready` remains responsive during native search.
+
+For maintainer analysis, `uci` returns identity/options and ends with `uciok`;
+`isready` returns `readyok`. Neither command searches a position. `position` normally
+has no reply. `go depth N` reports completed search iterations and ends with
+`bestmove`; compare its move, score, and nodes with a reference if testing a change.
+`go perft N` prints `perft <count>` and `eval` prints `eval <score>`; neither returns
+`bestmove`, and neither automatically checks its number against an expected value.
+For example, `go perft 1` after `position startpos` should report `perft 20`, checking
+only the starting position's one-ply move count. `quit` ends the engine process.
 
 ## Architecture and call diagrams
 
@@ -406,10 +429,12 @@ controlled playing results.
 
 ## Verification and limitations
 
-Move generation is checked against published perft positions. Fixed-depth searches,
-tactical positions, and UCI conversations check native behavior without requiring
-tournament games. Perft validates move generation, not playing strength; node counts and
-search depth alone do not establish an Elo gain.
+Perft checks compare legal move sequence counts with published values for specific
+positions and depths. Fixed-depth search and tactical checks exercise their supplied
+positions; a UCI exchange checks only the commands and responses it includes. None
+runs automatically when the engine starts. Matching these reference cases provides
+evidence about those cases, not every position or code branch. Perft does not measure
+playing strength; node counts and search depth alone do not establish an Elo gain.
 
 Verify tablebase fallback, repetition-sensitive positions, standard and Lucas ponder
 hits, cancellation, and post-hit deadlines separately from native chess checks. Network

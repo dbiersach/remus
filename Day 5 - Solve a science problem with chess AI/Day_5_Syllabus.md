@@ -15,7 +15,7 @@ they reuse the engine's ideas, not its code.
 | Evaluation | Predicted value plus distance to the nearest reading | Peaks explained, minus peaks left over, missing, and phases used |
 | Search | Choose the best-scoring square | Score every set of up to three phases |
 | Several moves with the best score | | Several sets tie: the pattern cannot decide |
-| `verify_remus.py` | The average measurements over 100 hidden samples | The verdicts on 200 known powders |
+| Reference checks with `verify_remus.py` | Manually compare the averages over 100 generated samples | Manually compare the verdict counts on 200 generated powders |
 
 ## The two programs
 
@@ -30,12 +30,12 @@ The student pair writes the bodies of `candidate_squares()`, `score_candidate()`
 
 ## Running a program
 
-Open the file in VS Code and click Run Python File. `main()` prints each result next to the result it expects, and matplotlib opens each graph in its own window. Close the window and the program continues. In `science/`, a function not written yet stops the run with `NotImplementedError` and its name, such as "Write score()".
+Open the program in `science/` and press Run Python File. Its `main()` calls the student pair's functions, prints measured benchmark results, and opens graph windows. Close each window to continue; the program has not finished while it is waiting for a graph to close. Compare the actual numbers with the references below. The printed "expected" messages are fixed text, not assertions: a mismatch does not automatically stop the program or produce a failure message. The references use the supplied settings; changing a parameter can legitimately change the results. A remaining unfinished function stops the run with `NotImplementedError` and its name. At the end of Period 2, `Write search()` is expected after the greedy results and first graph; another error or an earlier stop is not that planned stopping point.
 
-Expected results of the finished programs:
+Reference results of the finished programs with the supplied settings (`EXPLORE_WEIGHT = 8`, `PHASE_COST = 1`, and `MISSING = 1`, with the other constants unchanged):
 
-- `hidden_peak.py`: random guessing needs 54.3 measurements on average over 100 hidden samples, and the program's AI with explore weight 8 needs 9.4.
-- `phase_hunt.py`: on 200 known powders the greedy answer gets 166 right and 34 wrong, and the search gets 139 right, 52 "can't tell", and 9 wrong.
+- `hidden_peak.py`: over 100 generated samples, random guessing averages 54.3 measurements; greedy weights 0, 8, and 40 average 17.5, 9.4, and 19.4. Expectimax averages 24.7 over a separate 10-sample run.
+- `phase_hunt.py`: on 200 generated benchmark powders the greedy answer gets 166 right and 34 wrong, and the search gets 139 right, 52 "can't tell", and 9 wrong.
 
 ## The day at a glance
 
@@ -54,8 +54,8 @@ Expected results of the finished programs:
 | Time | Activity |
 | --- | --- |
 | 8:30 to 8:45 | A 10 by 10 sample hides a hot spot, and every measurement costs beam time. Choosing the next square is choosing a move: list the candidates, score each one, keep the best. |
-| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Run it. |
-| 9:30 to 10:00 | Tune `EXPLORE_WEIGHT` and compare. Over 100 hidden samples, random guessing needs 54.3 measurements on average, the AI with weight 0 needs 17.5, weight 8 needs 9.4, and weight 40 needs 19.4. The teacher shows the expectimax lookahead (24.7): it looks two measurements ahead, but its crude model makes it worse than the one-step AI. |
+| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Press Run Python File in `science/hidden_peak.py`. With `EXPLORE_WEIGHT = 8`, compare the printed averages: random 54.3; greedy weights 0, 8, and 40: 17.5, 9.4, and 19.4. Close each of the two graph windows to finish. |
+| 9:30 to 10:00 | After matching the default results, change `EXPLORE_WEIGHT`, save, and rerun `science/hidden_peak.py`. The program compares weights 0, the chosen value, and 40 over 100 generated samples. It also prints expectimax's 24.7 average over only 10 samples: a separate lookahead demonstration, not the same 100-sample comparison. Record the chosen weight and measured averages; the printed expectation text is a fixed reference. |
 
 [`Day_5_Period_1_Syllabus.md`](period1/Day_5_Period_1_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
 
@@ -65,7 +65,7 @@ Expected results of the finished programs:
 | --- | --- |
 | 10:30 to 10:45 | The PDF beamline at Brookhaven's NSLS-II and its daily question: which crystal phases are in this powder? Each phase makes its own fingerprint of X-ray peaks. |
 | 10:45 to 11:15 | Write `score()` in `phase_hunt.py` (11 code lines): a point for each explained peak, and a point lost for each left-over peak, missing peak, and phase used. |
-| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), which adds the best phase again and again. On 200 known powders greedy names 166 right and 34 wrong, and on powder 12 it mistakes silver for gold. |
+| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `science/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
 
 [`Day_5_Period_2_Syllabus.md`](period2/Day_5_Period_2_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
 
@@ -75,7 +75,7 @@ Expected results of the finished programs:
 | --- | --- |
 | 1:00 to 1:15 | The tree of phase sets beside Remus's game tree: a set is a position and adding a phase is a move. Quartz then rutile is the same set as rutile then quartz, the same idea as the transposition table. |
 | 1:15 to 1:50 | Write `search()` (12 code lines), which scores every set of up to three phases and keeps every set that ties for the best score. |
-| 1:50 to 2:15 | Verify on the 200 known powders: 139 right, 52 "can't tell", and 9 wrong, against greedy's 34 wrong. The search scores 176 sets per powder in library order, against 821 in every order. Change `PHASE_COST` and `MISSING` and watch the verdicts move. |
+| 1:50 to 2:15 | Press Run Python File in `science/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
 | 2:15 to 2:30 | The programs that search the same tree on real synchrotron data, and the agent that steers measurements at a beamline. |
 
 [`Day_5_Period_3_Syllabus.md`](period3/Day_5_Period_3_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
@@ -84,14 +84,14 @@ Expected results of the finished programs:
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:10 | Each student copies the Remus folder to a USB drive in File Explorer, leaving out `.venv`, and checks that the copy opens in VS Code. |
-| 3:10 to 3:30 | Each student pair runs both programs once more and fills in its results: measurements against random guessing, and right, wrong, and can't-tell counts for greedy and for search, with the `PHASE_COST` and `MISSING` the student pair picked in Period 3. The class collects every student pair's numbers and its two values on the board. |
-| 3:30 to 3:45 | Each student pair compares two powders. The search names powder 0 right: silicon and zincite. Powder 12 holds anatase and silver, and the search answers "can't tell": anatase with gold, or anatase with silver. Every peak of gold lands less than 0.3 degrees from a peak of silver, inside `TOLERANCE`, and 50 of the search's 52 "can't tell" answers are this same tie. No X-ray peak in the library settles powder 12, so the student pair works out what other test would. |
-| 3:45 to 4:20 | Each student pair presents its results, its two values, and its answer for powder 12 in three minutes. |
+| 3:00 to 3:10 | Each student copies the Remus folder to a USB drive in File Explorer, leaving out `.venv`, then opens the copied folder in VS Code and opens an engine file and both science files. This checks that those files are present and readable; it does not test execution on another computer. The destination computer needs the setup in `README.md`. |
+| 3:10 to 3:30 | Reopen `Remus.code-workspace` in the original folder on the class laptop, where `.venv` is installed. Each student pair uses Run Python File on `science/hidden_peak.py` and `science/phase_hunt.py`, closing each graph window to continue. Record the measured averages and right, wrong, and "can't tell" counts, together with `EXPLORE_WEIGHT`, `PHASE_COST`, and `MISSING`. Changed settings can produce different results from the printed references. The class collects the settings and results on the board. |
+| 3:30 to 3:45 | Compare these supplied examples for the default settings: powder 0 is correctly identified as silicon and zincite; powder 12 ties between anatase with gold and anatase with silver. The normal program run displays powder 12, not powder 0. At the default settings, 50 of the 52 "can't tell" answers involve this gold/silver tie. Their library peaks differ by less than `TOLERANCE = 0.3`; discuss what additional measurement could distinguish them. Results with tuned settings can differ. |
+| 3:45 to 4:20 | Each student pair presents its results, its parameter values, and its answer for powder 12 in three minutes. |
 | 4:20 to 4:30 | What comes next: AI agents that steer real experiments at light sources such as NSLS-II. |
 
 [`Day_5_Period_4_Syllabus.md`](period4/Day_5_Period_4_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
 
 ## By the end of the day
 
-**Checkpoint:** every student pair's `choose_next_measurement()` beats random guessing, every student pair's `search()` makes fewer wrong calls than greedy, and every student leaves with the code on a USB drive.
+**Checkpoint:** every student pair has compared its default benchmark results with the references, recorded the effects of its chosen parameters, and presented its findings. Every student leaves with a readable copy of the code on a USB drive.

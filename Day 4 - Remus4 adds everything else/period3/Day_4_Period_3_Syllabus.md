@@ -19,7 +19,7 @@ Two endgame rules follow. A side that is ahead by 400 centipawns or more in a la
 | Time | Activity |
 | --- | --- |
 | 1:00 to 1:15 | Reminder of insufficient material. In the endgame the king comes to the center, and the side that is ahead drives the lone king to the edge. |
-| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 3 passes every test. |
+| 1:15 to 2:25 | In `evaluation.py`, add the endgame king table and the taper that blends the two king tables, mobility, `mating_bonus()`, and insufficient material (about 45 code lines). Press Run Python File in `engines/Remus4/verify_remus.py` until the terminal prints `Remus4 after Period 3 passes every test`. |
 | 2:25 to 2:30 | Swap driver and navigator. |
 
 ## What changes this period
@@ -70,6 +70,8 @@ The instructor's version is [`engines_instructor/Remus4/evaluation.py`](../../en
 
 `pawn_terms()` does not change this period; Period 4 gives it the king and the rooks.
 
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
+
 ## Done when
 
-`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 3 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 3 passes every test. The verifier selects reference results from the modules and functions present. Its fixed-depth test calls the native search directly, without using the opening book. Passing means the listed reference cases match; it does not establish that every line or branch was exercised.

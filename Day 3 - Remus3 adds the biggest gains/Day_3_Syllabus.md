@@ -1,6 +1,6 @@
 # Day 3: Remus3
 
-**Goal for the day:** the student pair turns its Remus2 into Remus3 by typing the 193 new lines, then tests it in P4. Each period ends with an engine that plays, because the lines of one period never call a function of a later period.
+**Goal for the day:** the student pair turns its Remus2 into Remus3 by typing the 193 new lines, then tests it in P4. The planned period states contain the functions they need, but successful startup does not establish that the student pair's implementation plays correctly.
 
 ## The day at a glance
 
@@ -21,7 +21,7 @@
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus2` into `engines/Remus3`. |
 | 8:35 to 8:45 | Doubled, isolated, and passed pawns, on a position the teacher shows in Lucas Chess. Why two bishops together are worth more than a bishop and a knight. |
 | 8:45 to 9:00 | Move `MATE_SCORE` from `search.py` to `board.py`, and add `position_key()` and `move_text()` (8 code lines in `board.py`). |
-| 9:00 to 9:55 | In `evaluation.py`, add the rook table, `pawn_terms()`, the bishop pair, and the lines of `evaluate()` that collect the pawns (47 code lines). Run `uci.py`. |
+| 9:00 to 9:55 | In `evaluation.py`, add the rook table, `pawn_terms()`, the bishop pair, and the lines of `evaluate()` that collect the pawns (47 code lines). Press Run Python File in `uci.py` to check for syntax and import errors. No text is expected while it waits for UCI commands; starting it does not test the engine's chess functions. Close that run's terminal before continuing. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 [`Day_3_Period_1_Syllabus.md`](period1/Day_3_Period_1_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
@@ -32,7 +32,7 @@
 | --- | --- |
 | 10:30 to 10:45 | Why move order matters to alpha-beta, and why the same position appears by many move orders: e4 e5 Nf3 and Nf3 e5 e4 reach one position. The null move: let the opponent move twice; if the side to move still stands above beta, cut off. |
 | 10:45 to 11:00 | Type `transposition_table.py` (22 code lines): `store()` and `probe()`. |
-| 11:00 to 11:55 | In `search.py`, add the killer moves and the table probe and store, then `has_pieces()` and null-move pruning in `alpha_beta()` (about 52 code lines). Run `uci.py`. |
+| 11:00 to 11:55 | In `search.py`, add the killer moves and the table probe and store, then `has_pieces()` and null-move pruning in `alpha_beta()` (about 52 code lines). Press Run Python File in `uci.py` to check for syntax and import errors. No text is expected while it waits for UCI commands; starting it does not test the engine's chess functions. Close that run's terminal before continuing. |
 | 11:55 to 12:00 | Swap driver and navigator. |
 
 [`Day_3_Period_2_Syllabus.md`](period2/Day_3_Period_2_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
@@ -53,9 +53,9 @@
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). |
-| 3:20 to 4:30 | Run `verify_remus.py` in `engines/Remus3` until Remus3 passes every test. Then play one round of their Remus3 against their Remus2, two 10-minute games played at once in two Lucas workers. Once a game leaves the book, Lucas Chess shows each engine's depth and the line it expects beside its score: Remus3 searches deeper than Remus2 in the same time. Each student pair finds one game where Remus3 played a book move. |
-| If time remains | One round of the student pair against their Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
-| If more time remains | One round of their Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
+| 3:20 to 4:30 | Press Run Python File in `engines/Remus3/verify_remus.py` until the terminal prints `Remus3 passes every test`. Then play one round of the instructor's Remus3 against the instructor's Remus2, two 10-minute games played at once in two Lucas workers. Once Remus3 leaves the book, compare the search depths both engines report. Remus3 also reports its predicted line beside its score; Remus2 does not report a principal variation. Different game positions make this an observation, not a controlled speed test. Each student pair compares an opening sequence with `engines_instructor/Remus3/opening_book.txt`. Matching a listed move alone does not prove it came from the book. |
+| If time remains | One round of the student pair against the instructor's Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If more time remains | One round of the instructor's Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.
 

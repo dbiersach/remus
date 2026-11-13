@@ -17,7 +17,7 @@ The file lists the moves a piece could make before it checks whether the move le
 | Time | Activity |
 | --- | --- |
 | 1:00 to 1:15 | One function moves every piece but the pawn: a knight or king takes one step, a bishop, rook, or queen slides. Reminder of the castling conditions. |
-| 1:15 to 2:20 | Type `move_generation.py` (65 code lines): `add_pawn_move()`, `pawn_moves()`, `piece_moves()`, `castling_moves()`, and `generate_moves()`. Run it. |
+| 1:15 to 2:20 | Type `move_generation.py` (65 code lines): `add_pawn_move()`, `pawn_moves()`, `piece_moves()`, `castling_moves()`, and `generate_moves()`. Press Run Python File to check for syntax and import errors. No output is expected; this does not test the functions' behavior. |
 | 2:20 to 2:30 | Catch-up. |
 
 ## What the student pair types this period
@@ -48,4 +48,4 @@ Create `move_generation.py` in `engines/Remus1`. It has 75 lines when it is done
 
 ## Done when
 
-`move_generation.py` runs with no error.
+Press Run Python File in `move_generation.py`. The file loads without an error and prints nothing. This checks syntax and imports, not whether the move-generation functions produce the right moves. The finished Remus1 is tested with `verify_remus.py` in Period 4.

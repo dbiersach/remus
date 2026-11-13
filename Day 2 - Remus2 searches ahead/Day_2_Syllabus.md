@@ -1,6 +1,6 @@
 # Day 2: Remus2 searches ahead
 
-**Goal for the day:** the student pair turns Remus1 into Remus2, and Remus2 plays Remus1 and the student pair in Lucas Chess.
+**Goal for the day:** the student pair builds and verifies its Remus2, then observes and plays the instructor's engines in Lucas Chess.
 
 ## The day at a glance
 
@@ -20,7 +20,7 @@
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus1` into `engines/Remus2`. The rest of Day 2 edits those copies. |
 | 8:35 to 8:45 | A score in centipawns: material, plus a bonus or penalty for where each piece stands. A Black piece reads each table upside down. |
-| 8:45 to 9:55 | Type `evaluation.py` (68 code lines): `mirrored_table()`, the four piece-square tables (files a to d only), the piece values, and `evaluate()`. Run it. |
+| 8:45 to 9:55 | Type `evaluation.py` (68 code lines): `mirrored_table()`, the four piece-square tables (files a to d only), the piece values, and `evaluate()`. Press Run Python File to check for syntax and import errors. No output is expected; this does not test the functions' behavior. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 [`Day_2_Period_1_Syllabus.md`](period1/Day_2_Period_1_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
@@ -41,7 +41,7 @@
 | --- | --- |
 | 1:00 to 1:10 | Reminder of checkmate and stalemate: a side with no legal move has lost if in check, and draws if not. |
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
-| 2:10 to 2:30 | Run `verify_remus.py` in `engines/Remus2` and fix any file it names until Remus2 passes every test. |
+| 2:10 to 2:30 | Press Run Python File in `engines/Remus2/verify_remus.py` and fix any file it names until the terminal prints `Remus2 passes every test`. |
 
 [`Day_2_Period_3_Syllabus.md`](period3/Day_2_Period_3_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
 
@@ -49,9 +49,9 @@
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:25 | Start one round of their Remus2 against their Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2's climbs one move at a time, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
-| 3:25 to 4:05 | One round of the student pair against their Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
-| 4:05 to 4:30, if time remains | One round of their Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
+| 3:00 to 3:25 | Start one round of the instructor's Remus2 against the instructor's Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2 reports completed iterations in half-moves, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
+| 3:25 to 4:05 | One round of the student pair against the instructor's Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| 4:05 to 4:30, if time remains | One round of the instructor's Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 
 [`Day_2_Period_4_Syllabus.md`](period4/Day_2_Period_4_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
 

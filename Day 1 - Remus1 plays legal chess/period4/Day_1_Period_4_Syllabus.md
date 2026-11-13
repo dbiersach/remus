@@ -14,14 +14,16 @@ The last two files of Remus1 are new files in `engines/Remus1`, like every file 
 
 `uci.py` is the engine's voice. Lucas Chess and Remus talk in UCI, the Universal Chess Interface: Lucas Chess sends lines of text such as `position startpos moves e2e4` and `go`, and Remus answers with lines such as `bestmove e7e5`. `uci.py` reads each line, plays the moves of the game on the starting position, asks `search.py` for a move, and prints it.
 
+Lucas Chess uses the registered instructor engines in `engines_instructor/`; these games do not test the student pair's files in `engines/`. Record wins, draws, losses, or unfinished games. A short round illustrates play but does not establish a reliable strength rating or a controlled speed comparison.
+
 ## The period step by step
 
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](../../docs/chess_tutor/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
 | 3:10 to 3:50 | Type `search.py` of `engines_instructor/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
-| 3:50 to 4:05 | Run `verify_remus.py` in `engines/Remus1` and fix any file it names until it reports that Remus1 passes every test. |
-| 4:05 to 4:30 | One round of the student pair against their Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Every move it makes is legal, and nearly every move is bad. |
+| 3:50 to 4:05 | Press Run Python File in `engines/Remus1/verify_remus.py` and fix any file it names until the terminal prints `Remus1 passes every test`. |
+| 4:05 to 4:30 | One round of the student pair against the instructor's Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |
 
 ## What the student pair types this period
 
@@ -54,6 +56,8 @@ Create `uci.py` in `engines/Remus1`. It has 51 lines when it is done, and it is 
 
 Lines 50 and 51, `if __name__ == "__main__":` and `main()`, run `main()` only when `uci.py` itself is started, as Java runs `main` in the class it starts.
 
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
+
 ## Done when
 
-The student pair's Remus1 passes every test in `verify_remus.py`, and each student has played it in Lucas Chess.
+The terminal reports `Remus1 passes every test` for the student pair's code, and each student has played the instructor's Remus1 in Lucas Chess.

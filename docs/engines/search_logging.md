@@ -30,6 +30,13 @@ Each process owns its table. Remus6-Rust and Remus7-Rust share that table among
 all their workers, rather than allocating the selected amount per worker. Memory
 for stacks, positions, and other search state is additional.
 
+The command block above is a protocol example for instructor analysis, not a
+student terminal exercise. `setoption` normally gives no reply; `isready` should
+receive `readyok`. That reply checks responsiveness, not successful allocation.
+With search diagnostics enabled, inspect `hash_mib` in a subsequent native-search
+summary for the effective table size. Changing Hash alone does not run a search
+or compare chess results with a reference.
+
 ## Coverage and defaults by engine
 
 All diagnostic options default to false. A saved Lucas Chess entry that explicitly
@@ -67,6 +74,11 @@ collect comparable evidence. Existing entries can cache the advertised option li
 refresh or recreate an entry if an available option is absent. Tournament entries
 have separate options. `PonderDiagnostics` records activity; `Ponder` and GUI-issued
 `go ponder` commands actually enable pondering.
+
+Diagnostics record observed activity; they are not automated correctness tests.
+Expect command records when logging is enabled and search summaries after native
+searches. Enabling an option alone does not produce a completed-search result.
+Compare measured fields with a defined baseline when investigating a change.
 
 ## Recorded measurements
 

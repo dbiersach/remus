@@ -8,6 +8,28 @@ Interface. `uci.py` reads Lucas Chess's commands and sends back Remus's answers.
 Each Python Remus engine has its own `uci.py`, and `remus.bat` starts it.
 Rust engines read the same protocol in `main.rs` and run as executables.
 
+## Reading and checking
+
+The conversations on this page are examples to read, not commands for students to
+type. Lucas Chess sends the commands during play. Example moves, scores, depths,
+node counts, and times are illustrative, not expected results for a test.
+
+If you open `uci.py` in VS Code and press Run Python File, expect it to wait
+silently for commands, without a board window. A syntax or import error can show
+a traceback; a silent start does not exercise the chess functions. Close that
+run's terminal before continuing. Running a helper module such as `make_move.py`
+normally loads its imports and definitions and exits without output.
+
+At the scheduled checkpoints, run `verify_remus.py` in the student pair's engine
+folder. Expect actual and expected results, then `RemusN passes every test` and
+elapsed time (Day 4 intermediate checks name their period). `PROBLEM:` or a
+traceback means it has not passed. The verifier checks specific reference positions
+and a short UCI exchange; it does not test every position or branch. Its UCI check
+looks for the engine name, `uciok`, `readyok`, and a final `bestmove` line, without
+validating that move's legality. It starts `uci.py` directly, so it does not check
+`remus.bat` or Lucas Chess's configuration. Workshop games in Lucas Chess use the
+registered instructor engines, not the student pair's files.
+
 ## Words to know
 
 - **UCI:** the text language between chess GUIs and chess engines. Stockfish speaks
@@ -41,16 +63,22 @@ Lucas Chess -> quit
 
 1. `main()` reads one line at a time and looks at its first word.
 2. `uci` asks the engine's name. Remus answers `id name` and `uciok`.
-3. `isready` asks whether Remus is ready. Remus answers `readyok`.
+3. `isready` requests synchronization. Remus answers `readyok`. Like `uciok`, this
+   confirms a protocol response; it does not test move generation or search.
 4. `position startpos moves e2e4 e7e5 ...` names the game so far. Remus starts from
    `START_POSITION` and plays every move after the word `moves`. Lucas Chess sends
    every game from the starting position, so the workshop Python engines need no FEN input.
-5. `go` starts the search. `read_time()` reads the clock (`wtime` or `btime`) and the
+5. In Remus2, `go` starts the search. `read_time()` reads the clock (`wtime` or `btime`) and the
    increment (`winc` or `binc`) of the side to move. Remus plans to spend a thirtieth
-   of its clock plus half its increment, or exactly `movetime` when Lucas sends one.
-6. `think()` in `search.py` searches one move deeper at a time and prints an `info`
+   of its clock plus half its increment, or uses `movetime` as its budget when Lucas sends one. That is a time allowance,
+   not a promise to spend exactly that long; it can finish early or slightly overrun
+   between clock checks.
+6. Remus2's `think()` in `search.py` searches one half-move deeper per iteration and prints an `info`
    line after each depth: the depth, the score in centipawns, and the positions
-   visited. When the time is up, Remus sends `bestmove` and the move.
+   visited. When it stops, Remus sends `bestmove` and the chosen move. Remus1 instead
+   chooses a random legal move immediately; Remus3 and later can use a book move
+   without searching. The word `bestmove` names the response, not proof of an
+   objectively best move.
 7. With no legal move (checkmate or stalemate), Remus sends `bestmove 0000`.
 8. `quit` ends the program.
 
@@ -89,20 +117,36 @@ Lucas Chess -> go movetime 2000             Remus -> info depth 1 score cp 50 no
 Lucas Chess -> quit
 ```
 
-Each `info` line reports one finished depth. At depth 1 Remus2 tries each of White's
-20 first moves, and the best of them scores 50 centipawns, half a pawn. At depth 2 it
-also tries every Black reply, and the score falls to 0. The score swings up at the
-odd depths, where White makes the last move, and down at the even ones, where Black
-answers. The `nodes` count is cumulative across the search, including earlier iterations.
-At the end of depth 5 this example reports 153,457 visited nodes. Remus2 starts a new depth only while less than half of its
-time is gone. After depth 5 more than a second has passed, so Remus2 sends its best
-move from depth 5: `g1f3`, the knight to f3.
+Each `info` line reports one completed iteration. In this example the reported
+score changes from 50 centipawns at depth 1 to 0 at depth 2. These are heuristic
+scores from White's perspective at this root, not proven advantages. Alpha-beta
+can skip replies that cannot affect the result, so depth 2 does not mean every
+Black reply was searched. Check extensions and quiescence can extend some lines
+beyond the nominal depth; alternating scores are not a required pattern.
+
+The `nodes` count is cumulative across iterations and counts search visits, not
+distinct positions. Here depth 5 reports 153,457 visits. The transcript contains no
+elapsed-time field, so it cannot establish how much time that depth took. Remus2
+normally stops after a completed iteration once half its budget has elapsed, also
+stops on its mate-score condition, and checks the deadline during search. The
+example's final `g1f3` is an illustrative choice, not an assertion for students to
+match. An `info` or `bestmove` line reports work; it does not compare it with a
+reference or announce that a correctness test passed.
 
 ## Puzzle questions
 
 1. Why must every line Remus prints be a UCI line, with nothing else mixed in?
 2. What does Remus send when it has no legal move?
 3. How does Lucas Chess write the move of a knight from g1 to f3?
+
+## Beyond the workshop engines
+
+The remaining protocol examples cover experimental engines. Pondering, live `stop`
+and `ponderhit` handling belong to Remus5 and Rust engines 5 through 7; the workshop
+Python Remus1 to Remus4 engines do not implement that controller. Rust-only analysis
+commands such as `position fen`, `go depth`, `go perft`, and `eval` are not supported
+by the workshop Python adapters. These are reference examples, not additional
+student exercises.
 
 ## Remus5: optional online endgame advice
 
@@ -115,13 +159,26 @@ option name LichessTablebase type check default true
 A GUI can disable network lookups with `setoption name LichessTablebase value false`
 and enable them with `setoption name LichessTablebase value true`. A successful
 lookup prints `info string Lichess tablebase`, followed by the legal `bestmove`.
-Failures use the native search and its ordinary `info depth` output.
+A failed or unavailable lookup falls back to native move selection; search can
+report `info depth` lines. Enabling the option does not guarantee a lookup or a
+successful response. The tablebase message reports accepted advice for that move,
+not a test of every network failure or endgame position.
 
 Only the HTTP boundary serializes the current position as FEN for Lichess. The
 Python UCI adapter continues to accept `position startpos moves ...`; it does not
 add `position fen` input. Rust retains its designer `position fen`, `go depth`,
-`go perft`, and `eval` commands. Fixed-depth and perft checks do not query Lichess.
-See [Remus5](../engines/Remus5/README.md) for timing, caching, and draw limitations.
+`go perft`, and `eval` commands. Fixed-depth and perft requests do not query Lichess.
+These analysis commands report results; they do not compare them with a reference:
+
+| Rust analysis request | Expected response | Scope |
+| --- | --- | --- |
+| `go depth N` | Search progress and a final `bestmove` | Native search for the supplied position; no automatic correctness assertion |
+| `go perft N` | `perft <count>`, with no `bestmove` | Legal move sequence count at the requested depth; compare it manually with a published count |
+| `eval` | `eval <score>`, with no `bestmove` | Static evaluation of the supplied position, not a search or proof of the result |
+
+For example, `go perft 1` after `position startpos` should return `perft 20`. Even a
+matching count checks only that position and depth. See
+[Remus5](../engines/Remus5/README.md) for timing, caching, and draw limitations.
 
 ## Search-table memory and search threads
 
@@ -252,6 +309,10 @@ Here Lucas requests eight search threads, a 1 GiB table, and pondering. Remus's
 compiled defaults remain four threads, 512 MiB, and pondering off. A fresh process
 starts with those defaults; Lucas reapplies the saved settings for that entry.
 `ucinewgame` announces a different game; it does not restore default options.
+`setoption`, `position`, and `ucinewgame` normally have no individual acknowledgment.
+The following `readyok` confirms responsiveness, not that the requested memory was
+allocated or each option has the intended effect. For example, an unsupported
+option can be ignored. Check the relevant diagnostic fields for observed settings.
 
 | Field | Meaning | Example |
 | --- | --- | --- |
@@ -455,7 +516,9 @@ Remus behavior layered on UCI commands, not a separate UCI command.
 
 ## Confirming pondering from diagnostics
 
-For Remus5-Rust, Remus6-Rust, or Remus7-Rust, enable the diagnostics while the engine is idle:
+For optional instructor analysis with Remus5-Rust, Remus6-Rust, or Remus7-Rust,
+enable the diagnostic options in Lucas Chess's external and tournament entries
+while the engine is idle. The corresponding protocol exchange looks like this:
 
 ```text
 Lucas -> Remus: setoption name PonderDiagnostics value true
@@ -467,16 +530,19 @@ Remus -> Lucas: readyok
 All three Rust engines append `logs/search_<pid>_<session>.txt` and
 `logs/ponder_<pid>_<session>.txt` beside their executable when the corresponding
 options are enabled. Matching suffixes identify one process session; concurrent
-games use separate files. Both options default to false.
+games use separate files. Both options default to false. Expect records when the
+corresponding activity occurs; the option exchange alone neither runs a chess test
+nor guarantees a completed-search report. A book move has no native-search summary.
+Read log fields as measurements, not automatic pass/fail results.
 Python Remus5 offers
 `PonderDiagnostics` and writes per-process JSON logs in `ponder_logs/` beside `uci.py`; it does not expose
 these Rust search diagnostics. A diagnostic line beginning `info string` is
 engine-specific explanatory text, not an extra UCI control command.
 
-| Evidence | What it proves |
+| Evidence | What it reports |
 | --- | --- |
 | Incoming `go ponder` | Lucas starts a ponder request |
-| Increasing native nodes during that request | Remus actually searches while the opponent thinks |
+| Increasing native nodes during that request | Native search work during the ponder request; correlate with the GUI's clock events to establish overlap with the opponent's turn |
 | `hit_kind=uci` | A real `ponderhit` converts the search |
 | `hit_kind=stop_go` | A matching explicit stop-and-go earns native search credit |
 | `hit_kind=none` | No hit is recognized for that search |

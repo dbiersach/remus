@@ -22,7 +22,7 @@ The name line in `uci.py` stays `id name Remus3` until Period 4. No new file is 
 | --- | --- |
 | 8:30 to 8:35 | In File Explorer, copy every file of `engines/Remus3` into `engines/Remus4`. |
 | 8:35 to 8:45 | Reminder of threefold repetition and the fifty-move rule. Late move reductions, principal variation search, and futility pruning: three ways to spend less time on moves that are probably bad. |
-| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Run `verify_remus.py` in `engines/Remus4` until Remus4 after Period 1 passes every test. |
+| 8:45 to 9:55 | The halfmove clock in `board.py` and `make_move.py`, the game history in `uci.py`, then `is_draw()`, the history list, futility pruning, late move reductions, and PVS in `search.py` (about 36 code lines). Press Run Python File in `engines/Remus4/verify_remus.py` until the terminal prints `Remus4 after Period 1 passes every test`. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
 ## What changes this period
@@ -115,6 +115,8 @@ Change the first line of `generate_moves()`'s body to `board, white, castling, e
 3. In the `position` branch, type `game_history = []` (line 43) under `played = words[3:]`, and type `game_history.append(position_key(position))` (line 45) as the first line inside the loop `for text in played:`. Each position of the game goes into the history before its move is played.
 4. Pass the history to the search: `move = think(position, game_history, seconds, longest)` (line 61).
 
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
+
 ## Done when
 
-`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 1 passes every test. The file reads from the student pair's files which period it has reached, and its search test never opens the book, so it runs every line typed this period.
+`verify_remus.py` in `engines/Remus4` reports that Remus4 after Period 1 passes every test. The verifier selects reference results from the modules and functions present. Its fixed-depth test calls the native search directly, without using the opening book. Passing means the listed reference cases match; it does not establish that every line or branch was exercised.

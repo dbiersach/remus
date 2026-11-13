@@ -16,7 +16,7 @@ The first file is `board.py`, because every other file of the engine imports it.
 
 | Time | Activity |
 | --- | --- |
-| 8:30 to 9:15 | Setup, steps 1 to 6 of the top `README.md`: install Git, VS Code, and `uv`, clone the repository, run `uv sync`, install the extensions, open `Remus.code-workspace`, and run `install_lucas_engines.py` to add the engines to Lucas Chess. This is the only time anyone types a git or `uv` command. |
+| 8:30 to 9:15 | Setup, steps 1 to 6 of the top `README.md`: install Git, VS Code, and `uv`, clone the repository, run `uv sync`, install the extensions, open `Remus.code-workspace`, then open Lucas Chess once to reach its main window, close it, and press Run Python File in `install_lucas_engines.py`. Expect registration messages in the terminal; reopen Lucas Chess and confirm Remus1 to Remus4 and Remus4-Rust appear under External engines. This registers the instructor engines; it does not test their play. This is the only time anyone types a git or `uv` command. |
 | 9:15 to 9:30 | The teacher starts the instructor's Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](../../docs/lucas_chess/lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
 | 9:30 to 9:40 | Each student pair opens its `engines/Remus1` folder in VS Code. The folder holds `remus.bat`, the one line that starts the engine, and `verify_remus.py`, which tests the finished engine; the student pair types every other file. |
 | 9:40 to 10:00 | Type `board.py` (15 code lines): the piece numbers, the starting position, and square names. The reminder before typing: row 0 is rank 8, column 0 is file a, so a8 is square 0 and h1 is square 63. |
@@ -47,6 +47,8 @@ Lines 5 to 9 build the starting position. `BACK_RANK = [ROOK, KNIGHT, BISHOP, QU
 
 Leave one blank line inside the starting position block and two blank lines before each `def`, as the instructor's file does. VS Code also fixes the spacing when it saves the file.
 
+For the engine installer, expect messages naming Remus1 to Remus4 and Remus4-Rust, followed by `Saved ... engines in ...` or `Nothing changed: every engine is already registered`. A message that Lucas Chess is not installed or an engine path does not exist means registration did not complete. Reopen Lucas Chess and confirm the five External engines entries. Registration records their paths; it does not run a game or verify student code.
+
 ## Done when
 
-`board.py` in `engines/Remus1` runs with the Run button and prints nothing.
+Press Run Python File in `board.py` in `engines/Remus1`. The file loads without an error and prints nothing. This checks syntax and imports, not whether its functions return correct results. The finished Remus1 is tested with `verify_remus.py` in Period 4.

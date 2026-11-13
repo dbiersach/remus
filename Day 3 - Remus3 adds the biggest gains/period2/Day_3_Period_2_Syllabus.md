@@ -20,7 +20,7 @@ The null move is a test. If the side to move could pass, letting the opponent mo
 | --- | --- |
 | 10:30 to 10:45 | Why move order matters to alpha-beta, and why the same position appears by many move orders: e4 e5 Nf3 and Nf3 e5 e4 reach one position. The null move: let the opponent move twice; if the side to move still stands above beta, cut off. |
 | 10:45 to 11:00 | Type `transposition_table.py` (22 code lines): `store()` and `probe()`. |
-| 11:00 to 11:55 | In `search.py`, add the killer moves and the table probe and store, then `has_pieces()` and null-move pruning in `alpha_beta()` (about 52 code lines). Run `uci.py`. |
+| 11:00 to 11:55 | In `search.py`, add the killer moves and the table probe and store, then `has_pieces()` and null-move pruning in `alpha_beta()` (about 52 code lines). Press Run Python File in `uci.py` to check for syntax and import errors. No text is expected while it waits for UCI commands; starting it does not test the engine's chess functions. Close that run's terminal before continuing. |
 | 11:55 to 12:00 | Swap driver and navigator. |
 
 ## What changes this period
@@ -88,4 +88,4 @@ Type `def has_pieces(board, white):` (lines 82 to 87) above `alpha_beta()`. It c
 
 ## Done when
 
-`uci.py` runs and still plays.
+Press Run Python File in `uci.py`. It loads without an error and waits silently for UCI commands. Close that run's terminal before continuing. This checks startup, including syntax and imports; it does not test evaluation or search, and it does not show that the engine plays correctly. The finished Remus3 is tested with `verify_remus.py` in Period 4.

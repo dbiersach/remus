@@ -16,7 +16,7 @@ No engine file changes today: `engines/Remus1` to `engines/Remus4` stay as they 
 | --- | --- |
 | 10:30 to 10:45 | The PDF beamline at Brookhaven's NSLS-II and its daily question: which crystal phases are in this powder? Each phase makes its own fingerprint of X-ray peaks. |
 | 10:45 to 11:15 | Write `score()` in `phase_hunt.py` (11 code lines): a point for each explained peak, and a point lost for each left-over peak, missing peak, and phase used. |
-| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), which adds the best phase again and again. On 200 known powders greedy names 166 right and 34 wrong, and on powder 12 it mistakes silver for gold. |
+| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `science/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
 
 ## The files
 
@@ -34,7 +34,7 @@ These images show the function bodies from [`science_instructor/phase_hunt.py`](
 
 ### The graphs
 
-When `phase_hunt.py` finishes the greedy benchmark, matplotlib opens this graph of powder 12. Close the window and the program continues, until it stops at "Write search()", the function of Period 3. The student pair types none of the graph code.
+When `phase_hunt.py` finishes the greedy benchmark, matplotlib opens this graph of powder 12. Close the window; `NotImplementedError: Write search()` is the expected stopping point because the student pair has not written Period 3's function. A different exception, or a stop before the greedy results and graph, needs investigation. The student pair types none of the graph code.
 
 ![Powder 12 and the greedy answer](images/powder_answer.png)
 
@@ -52,4 +52,4 @@ These pictures explain the experiment and the two functions of this period.
 
 ## Done when
 
-`greedy_phases()` runs on the 200 known powders and prints its right and wrong counts.
+With the supplied settings, the run prints 166 right, 0 "can't tell", and 34 wrong. After the powder-12 graph closes, it stops at `NotImplementedError: Write search()`, because Period 3 supplies that function. The counts are a manual comparison with the reference results, not an automatic pass/fail test.

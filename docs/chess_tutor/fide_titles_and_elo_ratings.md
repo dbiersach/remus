@@ -51,8 +51,10 @@ casual players have no rating at all.
 
 ## Where the Remus engines would land
 
-FIDE gives titles only to people, so no engine can earn one. The table below shows
-the title or class a player with each engine's rating would hold. Remus2, Remus3,
+FIDE gives titles only to people, so no engine can earn one. The figures below
+are estimates from the benchmark described here, not human FIDE ratings or expected
+results for a workshop test. The class labels are numerical comparisons only;
+sharing a number does not establish equivalent strength against people. Remus2, Remus3,
 Remus4, and Remus4-Rust each played 200 games against Stockfish held to a set
 strength (its UCI_Elo setting), at 15 minutes per side with no increment, half with
 White and half with Black, on one fast processor core per game. Each engine met
@@ -61,7 +63,7 @@ explains its score against those levels. The 27 games that Stockfish lost on tim
 are left out, because Stockfish ran out of time in long endgames whatever the
 position on the board.
 
-| Engine | Elo | 95% range | Likely title or class |
+| Engine | Benchmark Elo estimate | Reported 95% interval | Numerical class comparison only |
 | --- | ---: | ---: | --- |
 | Remus1 | 300 (estimate) | | None: a random mover sits far below Class D |
 | Remus2 | 1840 | 1785 to 1895 | Class A player |
@@ -69,15 +71,33 @@ position on the board.
 | Remus4 | 2195 | 2133 to 2257 | Expert, at the edge of Candidate Master (CM) |
 | Remus4-Rust | 2897 | 2831 to 2963 | Super Grandmaster |
 
-Remus1 plays a random legal move, so it loses every game even to Stockfish's
-weakest setting, 1320, and its rating stays an estimate.
+Remus1's 300 figure is a rough estimate, not a fitted result in this table. Random
+move choice does not guarantee a loss in every game.
 
-The 95% range means that 95 times out of 100, a measurement like this one lands
-within that range of the engine's true rating on this scale. Stockfish's UCI_Elo
-scale is calibrated against other engines, not against people, so a human FIDE
-rating for the same strength could sit 100 to 200 points away.
+A 95% confidence interval describes a procedure that, under its statistical
+assumptions, would cover the underlying parameter in about 95% of repeated
+experiments. It is not a 95% range for individual game outcomes. These intervals
+do not account for every systematic effect of the opponent, hardware, time control,
+opening choices, or excluded time losses. There is no fixed conversion here from
+Stockfish's UCI_Elo setting to a person's FIDE rating.
 
-Remus4-Rust plays the same moves as Remus4 but searches more than 100 times as many
-positions per second, so it looks several moves deeper in the same time. That extra
-depth alone lifts it about 700 Elo, from Expert to the level of the strongest human
-players.
+Remus4-Rust shares Remus4's core chess algorithms but uses a different implementation
+and a larger table. Equal-time searches can choose different moves. The rating gap
+in this benchmark does not isolate speed, table capacity, or any one enhancement,
+and does not establish a strength difference against human players.
+
+The experimental engines, Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust, each
+played 20 games against the same limited-strength Stockfish at 15 minutes per side
+with no increment, one game at a time. Each engine pondered on Stockfish's time and
+used its default root lookups in the Lichess tablebase. Remus6-Rust and Remus7-Rust
+ran with a 2048 MB table and 16 search threads across the whole processor. Each
+engine first played one game with each color at 2200, 2400, 2600, 2800, 3000, and
+3190, Stockfish's highest setting, and then eight games at the two levels 100 points
+below and above the rating from those first twelve games. Twenty games give a much
+wider interval than 200, so these rows place an engine on the scale only roughly.
+Games lost on time are left out, as above.
+
+In class, record wins, draws, losses, and unfinished games as observations. One
+short round against a limited-strength Stockfish setting does not measure a rating.
+Passing `verify_remus.py` checks its reference cases, not Elo, and games using the
+registered instructor engines do not test the student pair's typed code.

@@ -4,7 +4,7 @@
 
 ## Goal
 
-Remus4's evaluation is complete, and the student pair tests it with `verify_remus.py`, then it plays Remus3 and Remus4-Rust.
+The student pair completes Remus4's evaluation and tests its code with `verify_remus.py`, then observes the instructor's Remus4 playing the instructor's Remus3 and Remus4-Rust.
 
 ## The big picture
 
@@ -12,14 +12,16 @@ The student pair finishes Remus4 in `engines/Remus4` with the last terms of the 
 
 Three terms join `pawn_terms()`, because each one depends on where the pawns stand. The pawn race uses the rule of the square: in a pawn endgame, a passed pawn whose enemy king is too far away to catch it will promote, so it earns a bonus of 500, more than a rook. A rook on a file with no pawns of its own side is on a half-open file, worth 10, and on a file with no pawns at all it is on an open file, worth 20. King safety rewards a king on its home rank for each pawn in front of it and punishes each file next to it with no pawn of its own, scaled by the phase from Period 3 so it fades as the pieces come off.
 
+Lucas Chess uses the registered instructor engines in `engines_instructor/`; these games do not test the student pair's files in `engines/`. Record wins, draws, losses, or unfinished games. A short round illustrates play but does not establish a reliable strength rating or a controlled speed comparison.
+
 ## The period step by step
 
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:30 | Reminder of the rule of the square. In `pawn_terms()`, add the pawn race, rooks on open files, and `king_safety()` (about 35 code lines). Change the name line to `id name Remus4`. |
-| 3:30 to 4:00 | Run `verify_remus.py` in `engines/Remus4` until Remus4 passes every test. Then play one round of their Remus4 against their Remus3, two 10-minute games played at once in two Lucas workers. |
-| 4:00 to 4:30 | One round of their Remus4 against Remus4-Rust, two 10-minute games played at once in two Lucas workers. Remus4-Rust is the instructor's Remus4 written in Rust, with the same evaluation and search and a larger table, so speed and memory alone separate the two engines. |
-| If time remains | One round of the student pair against their Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| 3:30 to 4:00 | Press Run Python File in `engines/Remus4/verify_remus.py` until the terminal prints `Remus4 passes every test`. Then play one round of the instructor's Remus4 against the instructor's Remus3, two 10-minute games played at once in two Lucas workers. |
+| 4:00 to 4:30 | One round of the instructor's Remus4 against Remus4-Rust, two 10-minute games played at once in two Lucas workers. Remus4-Rust is the instructor's Remus4 written in Rust, with the same evaluation and search and a larger table, so compare the reported search depths and game results. This round does not isolate speed from table size or prove a playing-strength difference. |
+| If time remains | One round of the student pair against the instructor's Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.
 
@@ -68,6 +70,8 @@ The instructor's versions are [`engines_instructor/Remus4/evaluation.py`](../../
 
 Change the name line to `print("id name Remus4")` (line 36). Remus4 is complete, and every file in `engines/Remus4` now matches the instructor's Remus4, comments, docstrings, and type hints aside.
 
+The terminal prints actual results beside `(expected ...)` references. A `PROBLEM:` message or a traceback means the run has not passed; fix the reported problem and rerun. Continue only after the final success line named in the schedule. These checks cover the listed reference cases, not every position or code branch.
+
 ## Done when
 
-The student pair's Remus4 passes every test in `verify_remus.py`, and it has played one round against its Remus3 and one against Remus4-Rust. A round against the student pair follows if time remains.
+The terminal reports `Remus4 passes every test` for the student pair's code. The student pair has observed the instructor's Remus4 against the instructor's Remus3 and Remus4-Rust in Lucas Chess and recorded the game results. A round against the student pair follows if time remains.

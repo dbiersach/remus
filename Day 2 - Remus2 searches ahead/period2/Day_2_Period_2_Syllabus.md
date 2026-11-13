@@ -12,7 +12,7 @@ The student pair keeps working in `engines/Remus2`, on the copies made this morn
 
 The first half of the new `search.py` holds three helpers that the search of Period 3 calls. `ordered_moves()` puts the most promising moves first, because alpha-beta search, which comes in Period 3, skips more moves when it tries the best one early. It scores a capture by MVV-LVA, "most valuable victim, least valuable attacker": pawn takes queen comes before queen takes pawn. `count_node()` counts the positions searched and stops the search when its time is up. `quiescence()` keeps playing captures at the end of the search until the position is quiet, so the engine never stops looking in the middle of an exchange, with a queen just taken and the recapture not yet seen.
 
-Until Period 3 finishes `search.py`, the file has no `think()`, so `uci.py` cannot run this period: run `search.py` instead.
+Until Period 3 finishes `search.py`, the file has no `think()`, so `uci.py` cannot run this period. Press Run Python File in `search.py` to check for syntax and import errors instead. No output is expected; this does not call the search functions or test their behavior.
 
 ## The period step by step
 
@@ -52,4 +52,4 @@ Below the imports, type the constants and the search's memory. `MATE_SCORE = 100
 
 ## Done when
 
-`search.py` runs with no error.
+Press Run Python File in `search.py`. The file loads without an error and prints nothing. This checks syntax and imports, not whether the search functions work. The finished Remus2 is tested with `verify_remus.py` in Period 3.
