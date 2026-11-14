@@ -26,7 +26,14 @@ it. Its [measured examples](../rust_engines/Remus5/remus5.md#measured-examples) 
 speed difference on the benchmark computer; they are not a universal
 hardware-independent speed ratio.
 
-The feature catalog explains the workshop enhancements and the files they change.
+Evaluation assigns a score to a position. Alpha-beta search compares possible
+continuations and skips branches that cannot change the best move. Quiescence
+search follows captures beyond the main search depth to avoid scoring an unfinished
+exchange. MVV-LVA means most valuable victim, least valuable attacker: try a pawn
+capturing a queen before a queen capturing a pawn.
+
+A transposition table stores search results for reuse. An opening book stores
+opening lines. The feature catalog explains these enhancements and the files they change.
 The Rust sections describe the supplied engines and their speed techniques.
 Whole-engine rating methods and limitations appear in the final section.
 
@@ -57,7 +64,7 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
-FIDE ratings. Versions without a reported estimate are marked Not measured. See
+FIDE ratings. See
 [benchmark conditions and confidence intervals](#about-the-remus-elo-estimates)
 for their scope and limitations.
 
@@ -87,7 +94,7 @@ contribute to runtime lines of code.
   do not isolate a feature's effect. Gains overlap as the engine grows and cannot
   be added to predict a rating.
 - Rows marked **(foundation)** provide supporting data or output for later steps.
-- **Version** names the engine that first holds the step.
+- **Version** names the first engine that implements the enhancement.
 
 ## The enhancements, grouped by the file they change
 
@@ -111,7 +118,7 @@ so evaluation changes still need the version verifier.
 
 ### (S) Search Only: `search.py`
 
-These change which moves the search tries and how deeply. A bug can produce legal
+These enhancements change which moves the search tries and how deeply. A bug can produce legal
 but poor choices. At the scheduled checkpoints, `verify_remusN.py` (with your version number in place of N) compares the
 student engine with stored results for that version or period; its engine guide describes
 the expected output. Passing those cases does not prove that pruning is safe in
@@ -159,7 +166,7 @@ the random choice with a score and a search, in the order Day 2 types them:
 | --- | --- | --- |
 | Material and piece-square tables | `evaluate()`: 100 for a pawn, 300 for a knight or bishop, 500 for a rook, 900 for a queen, plus a bonus or penalty for each piece's square | A search needs a score to compare positions, so the evaluation comes first |
 | MVV-LVA ordering | `ordered_moves()` tries the best capture first: pawn takes queen before queen takes pawn | Alpha-beta cuts off sooner when the best move comes first |
-| Quiescence | `quiescence()` plays out the captures at the end of the search before it trusts the score | A search that stops in the middle of an exchange counts a queen as won when it is about to be taken back |
+| Quiescence | `quiescence()` plays out the captures at the end of the search before it uses the score | A search that stops in the middle of an exchange counts a queen as won when it is about to be taken back |
 | Alpha-beta | `alpha_beta()` looks ahead, assumes both sides play their best, and skips the moves that cannot change the result | The heart of the engine: the same best move as minimax, from far fewer positions |
 | Check extension | A side in check searches one ply deeper | A search never stops on a position where the king is in check |
 | Iterative deepening | `think()` searches to depth 1, then 2, then 3, until its time runs out | The engine always has a move ready, and each search starts with the best move of the one before |
@@ -184,10 +191,10 @@ Remus4, so each takes one day of typing:
 | S1 | Killer moves | The best gain for the fewest lines, and it teaches why move order matters to alpha-beta |
 | E1 | Pawn structure | The largest evaluation gain; students see Remus value passed pawns |
 | N1, N2 | Position key, then the transposition table | The largest single gain; the key comes first because the table needs it |
-| N3 | Opening book | Variety and sound openings; a typing-light step built on a data file |
+| N3 | Opening book | Variety and sound openings from a supplied data file, with few lines to type |
 | S8, M2 | Aspiration windows, then time management | They help most once the table makes each iteration fast, and they finish the iterative deepening loop |
-| S2 | Null-move pruning | The largest depth gain for about a dozen lines |
-| S4 | Principal variation | The `info` line shows the line Remus expects, read from the table |
+| S2 | Null-move pruning | The largest increase in search depth for about a dozen lines |
+| S4 | Principal variation | The `info` line shows the predicted continuation read from the table |
 | E4, E6 | Bishop pair, rook table | Short evaluation terms that need no change to the rest of `evaluate()` |
 
 The steps change the files of Remus2 like this:
@@ -210,8 +217,8 @@ Remus4 adds the other twelve steps, in the order a class can type them:
 | Steps | Enhancements | Why here |
 | --- | --- | --- |
 | M1 | Draw sense | Reuses the position key to score repetitions as draws during search |
-| E2, E3 | Mating bonus, then tapered evaluation | Remus learns to finish endgames: drive the king to the edge, then centralize its own king |
-| S3 | Late move reductions | A depth gainer of about a dozen lines |
+| E2, E3 | Mating bonus, then tapered evaluation | Reward positions that drive the lone enemy king to the edge and bring its own king toward the center |
+| S3 | Late move reductions | Deeper search with about a dozen lines |
 | S5 | Principal variation search | PVS needs the first move to be the best one, which the table supplies |
 | E5 | Rooks on open files | A short evaluation term built on the pawn counts of each file |
 | S6, S7 | Delta pruning, futility pruning | Two small pruning rules that share the idea of a margin |
@@ -231,7 +238,7 @@ Remus4 adds the other twelve steps, in the order a class can type them:
 
 ## Checking each version
 
-Run the Day-local `verify_remusN.py` at the scheduled checkpoints. It prints the
+Run `verify_remusN.py` in the day's engine folder at the scheduled checkpoints. It prints the
 checks and expected values, reports any problems, and ends with the version's
 success line when its reference cases pass. Running an individual engine module
 only checks that it and its imports load; it does not test all its functions.
@@ -239,8 +246,8 @@ only checks that it and its imports load; it does not test all its functions.
 The designer's separate native checks cover published perft positions, mate
 puzzles, fixed-depth searches, and UCI exchanges. Recorded depth-4 searches from
 the starting position visit 17,360 nodes in Remus2, 2,944 in Remus3, and 3,005 in
-Remus4, with `g1f3` as the best move in each. These compare one position at one
-depth; fewer nodes alone do not establish faster play or greater strength.
+Remus4, with `g1f3` as the best move in each. These counts compare one position
+at one depth; fewer nodes alone do not establish faster play or greater strength.
 
 A strength comparison needs enough games under controlled conditions, with colors
 balanced and uncertainty reported. Winning more games than losing in a short
@@ -260,8 +267,8 @@ in [Engine defaults and Total Lines of Code (TLOC)](#engine-defaults-and-total-l
 | --- | --- |
 | [Remus5](../rust_engines/Remus5/remus5.md) | Remus4 algorithms implemented in Rust with a larger bucketed table |
 | [Remus6](../rust_engines/Remus6/remus6.md) | Enhanced single-threaded search and positional evaluation, root tablebase advice, and UCI pondering |
-| [Remus7](../rust_engines/Remus7/remus7.md) | Lazy SMP parallel search with a shared table |
-| [Remus8](../rust_engines/Remus8/remus8.md) | YBWC parallel search with sibling splitting and restricted worker helping |
+| [Remus7](../rust_engines/Remus7/remus7.md) | Lazy SMP (symmetric multiprocessing): search threads share a table |
+| [Remus8](../rust_engines/Remus8/remus8.md) | Young Brothers Wait Concept (YBWC): search the first move before splitting the remaining moves, with restricted worker helping |
 
 Remus6 adds check-aware quiescence, terminal-position handling, en passant capture
 accounting, quiet-move history, backward-pawn and central-hole penalties, knight
@@ -274,10 +281,11 @@ clock and en passant square, validate suggested moves with native rules, and fal
 back to native search on failures or uncertain responses. Fixed-depth checks and
 ponder searches bypass the service.
 
-When pondering is enabled in Lucas Chess, Remus6 to Remus8 can search during the
-opponent's turn after `go ponder`. A matching hit starts the engine's move clock. Book continuations remain subject to native legality checks;
-book pondering waits without claiming native search credit. See each engine guide
-for time-budget details and supported options.
+Pondering searches during the opponent's turn. When pondering is enabled in
+Lucas Chess, Remus6 to Remus8 start that search after `go ponder`. If the opponent
+plays the predicted move, a ponder hit starts the engine's move clock. The engine
+checks book moves for legality. Book pondering waits without claiming native
+search credit. See each engine guide for time-budget details and supported options.
 
 ## Nodes per second across the Remus engines
 
@@ -294,9 +302,9 @@ speed comparison across all versions. Rates are rounded.
 | Remus3 | 1 | 44,100 | Five-position suite through depth 4, 15 runs |
 | Remus4 | 1 | 19,600 | Five-position suite through depth 4, 15 runs |
 | Remus5 | 1 | 2,440,000 | Kiwipete through depth 7: 292,713 nodes in 0.12 seconds |
-| Remus6 | 1 | 5,590,000 | Six-position fixed-depth suite with T1–T6 |
-| Remus7 | 1 | 5,600,000 | Six-position fixed-depth suite with T1–T6 |
-| Remus8 | 1 | 5,720,000 | Six-position fixed-depth suite with T1–T6 |
+| Remus6 | 1 | 5,590,000 | Six-position fixed-depth suite with T1 to T6 |
+| Remus7 | 1 | 5,600,000 | Six-position fixed-depth suite with T1 to T6 |
+| Remus8 | 1 | 5,720,000 | Six-position fixed-depth suite with T1 to T6 |
 
 The Python figures use the shortened engines' saved benchmark results: total nodes
 across all 15 runs divided by their total search time, excluding imports. Each run
@@ -306,7 +314,7 @@ measures legal move generation, so it is not included as search NPS.
 
 The Remus5 rate is calculated from its published
 [fixed-depth example](../rust_engines/Remus5/remus5.md#measured-examples); the recorded
-0.12-second time limits its precision. Remus6–8 use the recorded rates in the
+0.12-second time limits its precision. Remus6 to Remus8 use the recorded rates in the
 [six-technique comparison](#speed-techniques-of-the-rust-engines-6-through-8) below.
 That comparison also reports four-thread rates of 16,600,000 NPS for Remus7 and
 16,900,000 NPS for Remus8. These are not measurements at the 16-thread settings used
@@ -353,7 +361,7 @@ rate compares.
 | T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% | Remus6 |
 
 `Version` identifies the first engine with the technique. All six begin in Remus6
-and are retained in Remus7 and Remus8; Remus1–5 do not implement these optimizations.
+and are retained in Remus7 and Remus8; Remus1 to Remus5 do not implement these optimizations.
 
 Each gain is that technique alone, in nodes per second with one search thread. T1, T2, and
 T4 are measured in Remus6. T3, T5, and T6 are measured in the move loop of the
@@ -368,10 +376,10 @@ and a1. With a piece on a5, the rook reaches a7, a6, and a5, so the lookup finds
 first piece on the ray and removes the squares beyond it, which are the ray from a5
 itself.
 
-The plain form first asks "is any piece on this ray?", because an empty ray has no first
-piece to look up. The answer changes from one lookup to the next with no pattern, the
-processor predicts it wrongly a large share of the time, and each wrong prediction costs
-about as much as fifteen ordinary operations. Every bishop, rook, or queen lookup makes
+The plain form first checks whether the ray contains a piece, because an empty
+ray has no first piece to look up. The answer changes from one lookup to the next
+with no pattern. The processor often predicts the answer incorrectly. Each wrong
+prediction costs about as much as fifteen ordinary operations. Every bishop, rook, or queen lookup makes
 that test four times, once per ray, and the engine makes those lookups in the mobility
 count of `evaluate()`, in `is_attacked()`, in move generation, and in the exchange
 evaluation.
@@ -444,24 +452,24 @@ score is the same.
 `alpha_beta()` reads the static score of a position in two tests only. Null-move pruning
 reads it at depth 3 and up, out of check, away from the root, and not right after
 another null move. Futility pruning reads it at depth 1, out of check. The plain form
-calls `evaluate()` at every position before those tests. The engines 6 through 8 compute
-`needs_score` from the same conditions and call `evaluate()` only when it is true. A
-position at depth 2 and a position in check never evaluate, and at depth 3 and up
-neither does the root or the position right after a null move.
+calls `evaluate()` at every position before those tests. Remus6 through Remus8 compute
+`needs_score` from the same conditions and call `evaluate()` only when it is true. The
+search skips this static evaluation at depth 2 and in check. At depth 3 and up,
+it also skips the evaluation at the root and immediately after a null move.
 
 ### T6: Table prefetch
 
 The transposition table holds 512 MiB, far more than the processor's cache, so reading
 the bucket of a position takes roughly 100 nanoseconds, about half of the time the
-engine spends on an average position. The search knows which bucket the next position
-needs as soon as `make_move()` returns that position's key.
+engine spends on an average position. The search can locate the next position's bucket
+as soon as `make_move()` returns that position's key.
 
 `Table::prefetch(key)` asks the processor to start loading the bucket and returns at
 once. `alpha_beta()` calls it right after `make_move()`, so the legality test and the
 check test of the move run while the bucket travels from memory, and the child's
-`probe()` waits for less. It calls prefetch only at depth 2 and up: a child of a depth-1
-position goes to quiescence unless it is in check, quiescence does not use the table,
-and a prefetch there costs more than it saves. The null-move search prefetches its
+`probe()` spends less time waiting for memory. `alpha_beta()` calls prefetch only
+at depth 2 and up. A child of a depth-1 position goes to quiescence unless it is
+in check. Quiescence does not use the table, so a prefetch there costs more than it saves. The null-move search prefetches its
 position the same way, and in Remus8 so does `search_split_move()` when a worker
 takes a move from a split. A prefetch reads no value, so the shared table of the
 parallel engines needs no added synchronization.
@@ -570,8 +578,8 @@ reply that Remus predicted for about 41% of Remus's moves, so pondering pays off
 less than half the time. A larger table helps only until it holds the positions the
 search reaches: fixed-depth searches find nearly the same node counts with 512 MiB, 1 GiB,
 and 2 GiB tables. The evaluation sets the ceiling, because a deeper search finds
-the best move by the engine's own judgment, and the positional terms of Remus6 to
-Remus8 are modest. Remus6 shows how close these effects run: it adds pondering,
+the best move according to the engine's evaluation. The positional terms of Remus6
+to Remus8 are modest. Remus6 shows how close these effects run: it adds pondering,
 tablebase lookups, and the positional terms to a single thread, and its 2737 sits
 below Remus5's 2897, inside the 95% intervals of both engines.
 

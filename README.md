@@ -1,11 +1,12 @@
 # Remus
 
-How much chess can fit into 630 lines of Python? Remus4 combines legal move
-generation, evaluation, alpha-beta search, and an opening book in that space.
-Playing strength depends on the position, time control, and hardware.
+Remus4 plays chess with 630 lines of Python. It generates legal moves, scores
+positions, and searches ahead with alpha-beta, which skips branches that cannot
+change the best move. An opening book supplies stored opening lines. Playing
+strength depends on the position, time control, and hardware.
 
-Remus is a chess engine written in plain Python, built one lesson at a time for
-the "Turning a Chess Engine into Science AI" workshop.
+The "Turning a Chess Engine into Science AI" workshop builds Remus one lesson
+at a time in plain Python. The supplied Rust versions extend the same ideas.
 
 <table>
   <tr>
@@ -44,8 +45,8 @@ workshop's search and evaluation techniques with a recorded ELO estimate of 2195
 You can understand every part of an engine whose moves may be stronger than your own.
 
 **TLOC means Total Lines of Code**: runtime code excluding blank lines, comments,
-docstrings, and supplied verification programs. Supplied data files are not code
-to type.
+docstrings, and supplied verification programs.
+The supplied data files do not have to be typed and don't represent code.
 
 | Engine | ELO | Rank | Language | TLOC | What to explore |
 | --- | ---: | --- | --- | ---: | --- |
@@ -55,12 +56,12 @@ to type.
 | [Remus4](Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | Refine search, recognize draws, and improve endgame play |
 | [Remus5](rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | Run Remus4's core algorithms as compiled code with a larger table |
 | [Remus6](rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,849 | Add positional terms, speed techniques, pondering, and tablebase advice |
-| [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,216 | Search in parallel with Lazy SMP and a shared table |
-| [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | Coordinate parallel work with Young Brothers Wait Concept (YBWC) |
+| [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,216 | Use Lazy SMP (symmetric multiprocessing): search threads share a table |
+| [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | Use Young Brothers Wait Concept (YBWC): search the first move before splitting work |
 
-ELO values are
-benchmark estimates, with Remus1 a rough estimate; Rank gives a numerical comparison
-with human rating bands, not a FIDE title or a measured result against people.
+ELO values estimate playing strength from benchmarks; Remus1 is a rough estimate.
+Rank compares those numbers with human rating bands. These labels are not FIDE
+titles or measured results against people.
 
 Python makes the ideas approachable. Rust shows how much execution speed can add:
 Remus5 retains Remus4's core algorithms and reaches a much higher benchmark rating
@@ -94,8 +95,6 @@ On Day 5 they apply the same search ideas to science problems.
 
 The [workshop syllabus](workshop_syllabus.md) leads through each day.
 The [version guide](docs/remus_versions.md) explains the engine progression.
-Runtime Python totals are 189, 300, 484, and 630 lines of code for Remus1 to Remus4.
-These counts omit blank lines, comments, docstrings, and the supplied verifier.
 Remus2 to Remus4 receive `piece_square_tables.json`; Remus3 and Remus4 also
 receive `opening_book.txt`. Student pairs do not type those data files.
 
