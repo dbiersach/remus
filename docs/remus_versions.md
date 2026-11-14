@@ -51,10 +51,10 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus2](../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | 1840 | Class A player | Python | 300 | 1 | None | Not supported | No persistent logs |
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
-| [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | SearchDiagnostics false |
-| [Remus6](../rust_engines/Remus6/remus6.md) | Not measured | Not measured | Rust | 2,797 | 1 | 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; per-process text logs |
-| [Remus7](../rust_engines/Remus7/remus7.md) | Not measured | Not measured | Rust | 3,216 | 16 | 2 GiB | false | SearchDiagnostics false; PonderDiagnostics false |
-| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | false | SearchDiagnostics false; PonderDiagnostics false |
+| [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
+| [Remus6](../rust_engines/Remus6/remus6.md) | Not measured | Not measured | Rust | 2,797 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | Not measured | Not measured | Rust | 3,216 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
 FIDE ratings. Versions without a reported estimate are marked Not measured. See
