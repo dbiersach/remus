@@ -36,6 +36,43 @@ empire together through widespread revolts. Remus echoes Rimush: a "son of Sargo
 heir to the small, readable chess programs whose insides lie open for learners,
 rebuilt in modern Python.
 
+## A strong chess engine in surprisingly little code
+
+Build an opponent that can beat you. Remus starts with 189 lines of Python that
+play legal chess. At 300 lines it searches ahead; at 630 lines it combines the
+workshop's search and evaluation techniques with a recorded ELO estimate of 2195.
+You can understand every part of an engine whose moves may be stronger than your own.
+
+**TLOC means Total Lines of Code**: runtime code excluding blank lines, comments,
+docstrings, and supplied verification programs. Supplied data files are not code
+to type.
+
+| Engine | ELO | Rank | Language | TLOC | What to explore |
+| --- | ---: | --- | --- | ---: | --- |
+| [Remus1](Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) | 300 | Below Class D | Python | 189 | Legal moves and a random choice: the starting point |
+| [Remus2](Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | 1840 | Class A player | Python | 300 | Evaluation and alpha-beta search turn rules into decisions |
+| [Remus3](Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | Remember positions, order moves, and use an opening book |
+| [Remus4](Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | Refine search, recognize draws, and improve endgame play |
+| [Remus5](rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | Run Remus4's core algorithms as compiled code with a larger table |
+| [Remus6](rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,849 | Add positional terms, speed techniques, pondering, and tablebase advice |
+| [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,216 | Search in parallel with Lazy SMP and a shared table |
+| [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | Coordinate parallel work with Young Brothers Wait Concept (YBWC) |
+
+ELO values are
+benchmark estimates, with Remus1 a rough estimate; Rank gives a numerical comparison
+with human rating bands, not a FIDE title or a measured result against people.
+
+Python makes the ideas approachable. Rust shows how much execution speed can add:
+Remus5 retains Remus4's core algorithms and reaches a much higher benchmark rating
+on one search thread. Remus7 and Remus8 explore the next step, parallel search;
+their listed ratings use 16 threads. Speed and parallelism are central to Remus's
+progression, but algorithms, evaluation, and hardware also matter. Parallelism is
+not a prerequisite for the single-threaded Remus5 result.
+
+**[Explore the full Remus version guide](docs/remus_versions.md)** for the enhancement
+catalog, nodes-per-second comparisons, engine settings, and rating methods and
+confidence intervals. Follow an engine link above to see how that version works.
+
 ## The workshop
 
 Students work in ten student pairs over five days. Each day has four

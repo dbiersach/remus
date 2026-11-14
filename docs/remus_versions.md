@@ -52,8 +52,8 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
-| [Remus6](../rust_engines/Remus6/remus6.md) | Not measured | Not measured | Rust | 2,797 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus7](../rust_engines/Remus7/remus7.md) | Not measured | Not measured | Rust | 3,216 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus6](../rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,849 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,216 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 | [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
@@ -279,6 +279,45 @@ opponent's turn after `go ponder`. A matching hit starts the engine's move clock
 book pondering waits without claiming native search credit. See each engine guide
 for time-budget details and supported options.
 
+## Nodes per second across the Remus engines
+
+Nodes per second (NPS) counts search visits to positions, including quiescence
+search. A node does not necessarily call the evaluation function, and the same
+position can be visited more than once. These recorded results give a sense of
+scale; they use different positions and search depths, so they are not a controlled
+speed comparison across all versions. Rates are rounded.
+
+| Engine | Search threads | Approximate nodes per second | Recorded benchmark |
+| --- | ---: | ---: | --- |
+| Remus1 | 1 | Not applicable | Chooses a random legal move without searching ahead |
+| Remus2 | 1 | 72,900 | Five-position suite through depth 4, 15 runs |
+| Remus3 | 1 | 44,100 | Five-position suite through depth 4, 15 runs |
+| Remus4 | 1 | 19,600 | Five-position suite through depth 4, 15 runs |
+| Remus5 | 1 | 2,440,000 | Kiwipete through depth 7: 292,713 nodes in 0.12 seconds |
+| Remus6 | 1 | 5,590,000 | Six-position fixed-depth suite with T1–T6 |
+| Remus7 | 1 | 5,600,000 | Six-position fixed-depth suite with T1–T6 |
+| Remus8 | 1 | 5,720,000 | Six-position fixed-depth suite with T1–T6 |
+
+The Python figures use the shortened engines' saved benchmark results: total nodes
+across all 15 runs divided by their total search time, excluding imports. Each run
+searches the starting position, an Italian opening, Kiwipete, a rook ending, and a
+pawn race with iterative deepening through depth 4. Remus1's saved perft timing
+measures legal move generation, so it is not included as search NPS.
+
+The Remus5 rate is calculated from its published
+[fixed-depth example](../rust_engines/Remus5/remus5.md#measured-examples); the recorded
+0.12-second time limits its precision. Remus6–8 use the recorded rates in the
+[six-technique comparison](#speed-techniques-of-the-rust-engines-6-through-8) below.
+That comparison also reports four-thread rates of 16,600,000 NPS for Remus7 and
+16,900,000 NPS for Remus8. These are not measurements at the 16-thread settings used
+for their Elo tests, and no 16-thread NPS is inferred from them.
+
+More work per node can lower NPS while improving move choices or reducing the number
+of nodes needed. The lower Python rates in later versions therefore do not imply
+weaker play. Hardware, position, depth, table settings, and thread count all affect
+NPS; it does not by itself measure Elo. These figures describe the recorded builds,
+not a fresh benchmark of any subsequent engine edits.
+
 ## Speed techniques of the Rust engines 6 through 8
 
 Remus6, Remus7, and Remus8 share six techniques that make each position
@@ -296,7 +335,7 @@ the plain form of every step below, so each of its files stays close to the Remu
 | Remus7 | 4 | 12.5 | 16.6 | 1.33 |
 | Remus8 | 4 | 11.7 | 16.9 | 1.44 |
 
-The numbers are millions of positions per second on the workshop designer's computer,
+The numbers are millions of search nodes per second on the workshop designer's computer,
 summed over six fixed-depth searches: the starting position, an Italian opening, the
 "kiwipete" test position, a quiet middlegame, a rook ending, and a pawn race. With one
 worker both builds search the same 34 million positions, so the ratio is also the ratio
@@ -304,16 +343,19 @@ of the two run times. With four search threads the threads reach the shared tabl
 different order on every run, the two builds visit different positions, and only the
 rate compares.
 
-| Step | Technique | Code | What it saves | Gain alone |
-| --- | --- | --- | --- | ---: |
-| T1 | Branch-free ray lookup | `rising_ray()` and `falling_ray()` in `attacks.rs` | A badly predicted test in each of the four rays of every bishop, rook, and queen lookup | 8% |
-| T2 | Legal-move shortcut | `has_legal_move()` in `search.rs`, with the table `QUEEN_LINES` in `attacks.rs` | A full move generation at most quiescence positions | 10% |
-| T3 | Lazy move ordering | `place_next()` in `search.rs` | The sort of the whole move list when one of the first three moves causes the cutoff | 4% |
-| T4 | Central holes from one mask | `positional_terms()` in `evaluation.rs` | Sixteen square-by-square tests in every evaluation | 2% |
-| T5 | Evaluation on demand | `alpha_beta()` in `search.rs` | The evaluation of positions whose pruning never reads the score | 1 to 2% |
-| T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% |
+| Step | Technique | Code | What it saves | Gain alone | Version |
+| --- | --- | --- | --- | ---: | --- |
+| T1 | Branch-free ray lookup | `rising_ray()` and `falling_ray()` in `attacks.rs` | A badly predicted test in each of the four rays of every bishop, rook, and queen lookup | 8% | Remus6 |
+| T2 | Legal-move shortcut | `has_legal_move()` in `search.rs`, with the table `QUEEN_LINES` in `attacks.rs` | A full move generation at most quiescence positions | 10% | Remus6 |
+| T3 | Lazy move ordering | `place_next()` in `search.rs` | The sort of the whole move list when one of the first three moves causes the cutoff | 4% | Remus6 |
+| T4 | Central holes from one mask | `positional_terms()` in `evaluation.rs` | Sixteen square-by-square tests in every evaluation | 2% | Remus6 |
+| T5 | Evaluation on demand | `alpha_beta()` in `search.rs` | The evaluation of positions whose pruning never reads the score | 1 to 2% | Remus6 |
+| T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% | Remus6 |
 
-Each gain is that technique alone, in positions per second with one search thread. T1, T2, and
+`Version` identifies the first engine with the technique. All six begin in Remus6
+and are retained in Remus7 and Remus8; Remus1–5 do not implement these optimizations.
+
+Each gain is that technique alone, in nodes per second with one search thread. T1, T2, and
 T4 are measured in Remus6. T3, T5, and T6 are measured in the move loop of the
 Remus4 search, which the three engines share. The gains overlap, so together they give
 the ratios of the first table, not their sum. The six techniques add 49 code lines to
@@ -473,7 +515,7 @@ explains its score against those levels. The 27 games that Stockfish lost on tim
 are left out, because Stockfish ran out of time in long endgames whatever the
 position on the board.
 
-Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2831 to 2963; Remus8: 2900 to 3297.
+Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2831 to 2963; Remus6: 2535 to 2939; Remus7: 2815 to 3236; Remus8: 2900 to 3297.
 
 Remus1's 300 figure is a rough estimate, not a fitted benchmark result. Random
 move choice does not guarantee a loss in every game.
@@ -490,15 +532,51 @@ and a larger table. Equal-time searches can choose different moves. The rating g
 in this benchmark does not isolate speed, table capacity, or any one enhancement,
 and does not establish a strength difference against human players.
 
-Remus8's estimate uses 20 games against limited-strength Stockfish at 15 minutes
-per side with no increment, one game at a time. Remus8 uses a 2048 MiB table,
-16 search threads, pondering, and its default root tablebase lookups. Stockfish
-runs on a separate fast core. The ladder includes one game with each color at
-2200, 2400, 2600, 2800, 3000, and 3190, then eight games around the initial estimate.
-Twenty games give a much wider interval than 200. Games lost on time are excluded,
-as described above.
+Remus6, Remus7, and Remus8 each played 20 games against limited-strength Stockfish
+at 15 minutes per side with no increment. Each engine pondered on Stockfish's time
+and used its default root tablebase lookups. Remus6 searches on one thread, so it
+played eight games at once, each on its own fast core shared with that game's
+Stockfish, as in the 200-game runs. Remus7 and Remus8 used a 2048 MiB table and 16
+search threads and played one game at a time. In Remus7's games Stockfish ran alone
+on one fast core; in Remus8's games the operating system placed both engines, so
+Stockfish could share a core with Remus8 and play slightly below its setting. Each
+ladder holds one game with each color at 2200, 2400, 2600, 2800, 3000, and 3190,
+Stockfish's highest setting, then eight games at the two levels 100 points below
+and above the rating from those first twelve games. Twenty games give a much wider
+interval than 200. Games lost on time are left out, as described above.
 
 In class, record wins, draws, losses, and unfinished games as observations. One
 short round against a limited-strength Stockfish setting does not measure a rating.
 Passing `verify_remusN.py` (with your version number in place of N) checks its reference cases, not Elo, and games using the
 registered student engines exercise the typed code only for the positions reached.
+
+### Why Remus5 stays close to Remus8
+
+Remus5 is the Rust implementation of workshop Remus4: one search thread and the
+Remus4 evaluation. Remus8 adds 16 search threads, a 2048 MiB table, pondering,
+tablebase lookups, and positional evaluation, yet it measures only about 200 Elo
+higher, 3099 against 2897. Three effects keep the gap that small.
+
+The first is the diminishing return from deeper search. Each doubling of search
+speed buys roughly 50 to 70 Elo at these depths, and less as the search gets deeper.
+Sixteen threads do not search 16 times faster, because parallel alpha-beta spends
+work on positions that a single thread would cut off. A speedup of 5 to 8 times is
+typical, about three doublings, or roughly 150 to 200 Elo. The step from Python
+Remus4 to Rust Remus5 is more than 100 times faster, about seven doublings from a
+much shallower search, and it gains about 700 Elo.
+
+The second is that each extra feature adds only a little. Stockfish played the
+reply that Remus predicted for about 41% of Remus's moves, so pondering pays off
+less than half the time. A larger table helps only until it holds the positions the
+search reaches: fixed-depth searches find nearly the same node counts with 512 MiB, 1 GiB,
+and 2 GiB tables. The evaluation sets the ceiling, because a deeper search finds
+the best move by the engine's own judgment, and the positional terms of Remus6 to
+Remus8 are modest. Remus6 shows how close these effects run: it adds pondering,
+tablebase lookups, and the positional terms to a single thread, and its 2737 sits
+below Remus5's 2897, inside the 95% intervals of both engines.
+
+The third is the measurement itself. Stockfish's UCI_Elo setting stops at 3190, and
+Remus8 scores 6 of 11 points at 2990 and above, so the ladder has
+little room above it. Twenty games give an interval of about 200 points on each
+side, against about 66 for 200 games. The intervals of Remus5, Remus7, and Remus8
+overlap, so the true gap between them could be near zero or near 400.
