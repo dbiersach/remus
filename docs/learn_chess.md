@@ -45,10 +45,10 @@ from one of them, or a capture on one of them, turns off a castling right.*
 
 ### En passant (Remus1)
 
-When a pawn moves two squares and lands beside an enemy pawn, that enemy pawn may
+When a pawn moves two squares and finishes beside an enemy pawn, that enemy pawn may
 capture it on the very next move only, as if it had moved one square. The capturing
-pawn lands on the square the pawn skipped, and the captured pawn disappears from the
-square beside it, not from the square the capturer lands on. The rare trap: an en
+pawn moves to the square the pawn skipped, and the captured pawn disappears from the
+square beside it, not from the square the capturer moves to. The rare trap: an en
 passant capture can open a line along the rank to your own king, so Remus tests the
 king's safety after the captured pawn is gone.
 
@@ -132,7 +132,7 @@ Each piece except the pawn has a capital letter:
 
 ### Write a move
 
-A move is the piece letter, then the square it lands on.
+A move is the piece letter, then the square it moves to.
 
 - `Nf3`: a knight moves to f3.
 - `Bc4`: a bishop moves to c4.
@@ -172,7 +172,7 @@ Castling uses the capital letter O, not the number zero.
 ```text
 N  b  x  d2  +
 |  |  |  |   gives check
-|  |  |  square it lands on
+|  |  |  square it moves to
 |  |  captures
 |  which knight (the one on the b-file)
 piece letter (no letter for a pawn)
@@ -194,7 +194,7 @@ to is attacked or blocked.
 ### The notation chess programs use
 
 Lucas Chess and Remus talk to each other in **UCI** notation instead. A UCI move is
-only the square a piece leaves and the square it lands on, with no piece letter:
+only the square a piece leaves and the square it moves to, with no piece letter:
 `e2e4`, `g1f3`, and `e1g1` for White castling on the king's side. A promotion adds
 the new piece in a small letter: `e7e8q`. UCI is easy for a program to read but
 harder for people, so Remus reads and writes only UCI, and Lucas Chess turns each

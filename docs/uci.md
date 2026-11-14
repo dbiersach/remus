@@ -45,7 +45,7 @@ registered student engines from the day folders.
 
 ## UCI moves
 
-A UCI move is only the square a piece leaves and the square it lands on, with no
+A UCI move is only the square a piece leaves and the square it moves to, with no
 piece letter: `e2e4`, `g1f3`, and `e1g1` for White castling on the king's side. A
 promotion adds the new piece in a small letter: `e7e8q`. People write moves in SAN
 (`e4`, `Nf3`, `O-O`, `e8=Q`), but a program reads UCI more easily, so Remus reads and

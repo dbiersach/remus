@@ -62,7 +62,7 @@ def castling_moves(board, white, castling, moves):
     A right that remains means the king and rook have not moved. The
     squares between them must be empty, and the king may not start in
     check or cross an attacked square. The search checks the square
-    where the king lands.
+    where the king finishes its move.
     """
     king = 60 if white else 4  # e1 or e8
     kingside = 1 if white else 4

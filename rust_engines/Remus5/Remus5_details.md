@@ -1456,7 +1456,7 @@ Generate candidate moves before the native king-safety filter.
 | 102 | <code>    list.add&#95;targets(king, KING&#95;ATTACKS&#91;king&#93; &amp; mask);</code> | Evaluate or continue this expression in add&#95;piece&#95;moves(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 103 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 | 104 | <code></code> | Blank line separating related declarations or steps. |
-| 105 | <code>/// Add the castling moves. The search checks the square where the king lands.</code> | Source explanation: Add the castling moves. The search checks the square where the king lands. |
+| 105 | <code>/// Add the castling moves. The search checks the square where the king finishes its move.</code> | Source explanation: Add the castling moves. The search checks the square where the king finishes its move. |
 | 106 | <code>fn add&#95;castling&#95;moves(position: &amp;Position, list: &amp;mut MoveList) {</code> | Declare add&#95;castling&#95;moves(); its parameters and return type define the interface. |
 | 107 | <code>    let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
 | 108 | <code>    let board = &amp;position.board;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
@@ -2291,7 +2291,7 @@ The reference covers all 12 runtime Rust modules and all 2,166 physical source l
 | [src/exchange.rs](src/exchange.rs) | `0d17d128305c95edd191a4265a2d429cd76bd9477e96ec3de30a26922fa450a4` |
 | [src/main.rs](src/main.rs) | `751ae8bbbd8803007da6776e42b647c60f91894c25290a9e71b1ca16018f2ac1` |
 | [src/make_move.rs](src/make_move.rs) | `4f701e4f884f7b92116f8e8aa2a036f5a35717d09d730fedf3231f01d2c56524` |
-| [src/move_generation.rs](src/move_generation.rs) | `0672d0d647dc6c3cab6f21633d28fd13e2746de1b36c42a7f11e82a435f1cd64` |
+| [src/move_generation.rs](src/move_generation.rs) | `ca3fcac09183facdb48dd7048c6b69ff004aacf298eecfa8b2bea997ae3541c4` |
 | [src/opening_book.rs](src/opening_book.rs) | `37dbe9750c830b6a4132d199555ffe06fd63d834303ceb874866dd821e69f865` |
 | [src/search.rs](src/search.rs) | `ec1bd3f10d5cbd757e74723f7dd1630867c57130a92627a247bfd28a2d53d0ac` |
 | [src/table_metrics.rs](src/table_metrics.rs) | `29bd32f01788a3e8a749a45f97f802cb02ebd81806bfca55b09870cbed2e4eb9` |

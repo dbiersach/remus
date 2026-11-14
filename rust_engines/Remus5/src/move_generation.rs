@@ -102,7 +102,7 @@ fn add_piece_moves(position: &Position, own: u64, occupied: u64, mask: u64, list
     list.add_targets(king, KING_ATTACKS[king] & mask);
 }
 
-/// Add the castling moves. The search checks the square where the king lands.
+/// Add the castling moves. The search checks the square where the king finishes its move.
 fn add_castling_moves(position: &Position, list: &mut MoveList) {
     let white = position.white;
     let board = &position.board;

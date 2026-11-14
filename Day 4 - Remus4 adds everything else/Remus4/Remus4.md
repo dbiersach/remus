@@ -148,7 +148,7 @@ for each term and its identifier.
   its priority, so quiescence stops at the first move below `CAPTURE`.
 - **Exchanges reuse the move generator.** `cheapest_attacker()` lists the moves of
   the attacking side with `generate_moves()` and keeps the cheapest piece whose move
-  lands on the square, so `exchange.py` needs no attack loop of its own.
+  moves to the square, so `exchange.py` needs no attack loop of its own.
 - **Mobility counts moves.** `evaluate()` lists each piece's moves with
   `piece_moves()` and counts them, so it needs no counting function of its own.
 - **Pawn files padded by one.** The pawn counts hold ten files, the eight real ones

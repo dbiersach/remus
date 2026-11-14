@@ -58,7 +58,7 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
 FIDE ratings. Versions without a reported estimate are marked Not measured. See
-[benchmark conditions and confidence intervals](#where-the-remus-engines-would-land)
+[benchmark conditions and confidence intervals](#about-the-remus-elo-estimates)
 for their scope and limitations.
 
 Rust diagnostics use per-process files in `logs/` beside each executable. Search
@@ -245,7 +245,7 @@ depth; fewer nodes alone do not establish faster play or greater strength.
 A strength comparison needs enough games under controlled conditions, with colors
 balanced and uncertainty reported. Winning more games than losing in a short
 round is not sufficient evidence to accept an enhancement. The
-[closing Elo discussion](#where-the-remus-engines-would-land) describes the recorded
+[closing Elo discussion](#about-the-remus-elo-estimates) describes the recorded
 rating experiments. The original-versus-shortened comparison remains paused; its
 unfinished results do not establish whether the code reductions preserve Elo.
 
@@ -459,7 +459,7 @@ because the gain does not pay for the code.
 | Selecting every move one at a time, with no sort | 6% slower | Positions that try every move pay a pass per move |
 | Prefetch at depth 1 as well | 1% slower | Those children seldom read the table |
 
-## Where the Remus engines would land
+## About the Remus ELO Estimates
 
 FIDE gives titles only to people, so no engine can earn one. The ratings in the
 [engine table](#engine-defaults-and-total-lines-of-code-tloc) summarize the benchmark described

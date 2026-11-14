@@ -29,7 +29,7 @@ def make_move(position: Position, move: Move) -> Position:
     # A capture or pawn move restarts the fifty-move count
     halfmove = 0 if is_pawn or board[target] != EMPTY else halfmove + 1
     # En passant: the captured pawn stands beside the pawn that
-    # moves, not on the square it lands on
+    # moves, not on the square it moves to
     if is_pawn and target == en_passant:
         board[start // 8 * 8 + target % 8] = EMPTY
     # Castling: the king moves two squares, and the rook jumps to the
