@@ -169,8 +169,10 @@ Open `engines/Remus1/verify_remus.py` in VS Code and press Run Python File at th
 scheduled checkpoint. It checks required files and counts legal move sequences
 (perft) from six reference positions, comparing them with published counts.
 The UCI check looks for the engine
-name, `uciok`, `readyok`, and a final `bestmove` line; it does not validate that
-move's legality or every possible protocol exchange.
+name, `uciok`, `readyok`, and a final `bestmove` line. It checks that move against
+the fixed set of 20 legal Black replies to `1. e4`, independently of the student
+move generator. This checks one position, not every possible protocol exchange
+or book choice.
 
 Expect `Verifying` followed by actual and expected results. Success ends with
 `Remus1 passes every test` and elapsed time. A mismatch prints `PROBLEM:`;

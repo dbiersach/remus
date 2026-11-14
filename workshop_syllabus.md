@@ -55,8 +55,9 @@ code with `verify_remus.py` at the scheduled checkpoints before observing those 
   sequence counts from six published positions. For Remus2 to Remus4 it also
   compares five evaluation scores and depth-4 search moves, scores, and node counts
   with stored instructor results. Its UCI check looks for the engine name,
-  handshake replies, and a `bestmove` line; it does not validate every possible UCI
-  exchange or book choice. Success ends with `RemusN passes every test` (or the
+  handshake replies, and a `bestmove` line. It checks that move against a fixed set
+  of all 20 legal Black replies to `1. e4`, independently of the student move
+  generator; it does not test every position, UCI exchange, or book choice. Success ends with `RemusN passes every test` (or the
   named Remus4 period) and the elapsed time. A failed comparison prints `PROBLEM:`;
   an import or execution error may show a traceback. Fix the reported problem and
   rerun. Passing covers these reference cases, not every position or code branch.

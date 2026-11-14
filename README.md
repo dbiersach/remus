@@ -257,8 +257,10 @@ For workshop Python files, open the file in VS Code and click Run Python File
 | Day 5 programs in `science/` | They print measured results and open graphs; close each graph to continue. | The student functions are called, but printed expectation text is not an automatic pass/fail check. Compare results manually with the Day 5 syllabus for the current period and settings. |
 
 Passing the verifier covers its reference cases, not every position or code branch.
-Its UCI check looks for the engine name, `uciok`, `readyok`, and a `bestmove` line;
-it does not validate that move's legality or every book choice. Fix a reported
+Its UCI check looks for the engine name, `uciok`, `readyok`, and a `bestmove` line,
+then checks that move against the 20 legal Black replies to `1. e4`. This fixed
+reference is independent of the student move generator. It does not test every
+position or book choice. Fix a reported
 problem and rerun. Lucas Chess uses the registered instructor engines, so games
 there do not test the student pair's files.
 

@@ -25,8 +25,10 @@ folder. Expect actual and expected results, then `RemusN passes every test` and
 elapsed time (Day 4 intermediate checks name their period). `PROBLEM:` or a
 traceback means it has not passed. The verifier checks specific reference positions
 and a short UCI exchange; it does not test every position or branch. Its UCI check
-looks for the engine name, `uciok`, `readyok`, and a final `bestmove` line, without
-validating that move's legality. It starts `uci.py` directly, so it does not check
+looks for the engine name, `uciok`, `readyok`, and a final `bestmove` line. It checks
+the move against a fixed reference set of all 20 legal Black replies to `1. e4`,
+independently of the student move generator. This does not establish legality in
+other positions or test every book choice. It starts `uci.py` directly, so it does not check
 `remus.bat` or Lucas Chess's configuration. Workshop games in Lucas Chess use the
 registered instructor engines, not the student pair's files.
 

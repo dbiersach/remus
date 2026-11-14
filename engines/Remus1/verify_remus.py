@@ -14,7 +14,7 @@ to look at:
    instructor's engine.
 4. Search (Remus2 to Remus4): a search four moves deep finds the same move, the
    same score, and the same number of positions as the instructor's engine.
-5. UCI: uci.py answers the commands Lucas Chess sends.
+5. UCI: uci.py completes the handshake and returns a legal Black reply to 1. e4.
 
 The same file sits in engines/Remus1 to engines/Remus4. It reads the name of its
 own folder to know which version it tests. Remus4 grows over the four periods of
@@ -160,6 +160,32 @@ EXPECTED_SEARCHES = {
         ("e3d4", 715, 2_424),
         ("d7c8q", 515, 3_585),
     ],
+}
+
+
+UCI_POSITION = "position startpos moves e2e4"  # Black to move after White's e4
+# All legal replies to this fixture, independent of the engine being checked.
+UCI_LEGAL_MOVES = {
+    "a7a6",
+    "a7a5",
+    "b7b6",
+    "b7b5",
+    "c7c6",
+    "c7c5",
+    "d7d6",
+    "d7d5",
+    "e7e6",
+    "e7e5",
+    "f7f6",
+    "f7f5",
+    "g7g6",
+    "g7g5",
+    "h7h6",
+    "h7h5",
+    "b8a6",
+    "b8c6",
+    "g8f6",
+    "g8h6",
 }
 
 
@@ -358,12 +384,12 @@ def verify_search(engine, stage: str):
 
 
 def verify_uci(stage: str):
-    """Step 5: send uci.py the commands Lucas Chess sends."""
+    """Step 5: check the UCI handshake and a legal reply to White's e4."""
     # Remus4 takes its name in Day 4, Period 4, so until then uci.py says Remus3
     name = VERSION
     if stage != VERSION:
         name = "Remus3"
-    commands = "uci\nisready\nposition startpos moves e2e4\ngo movetime 500\nquit\n"
+    commands = f"uci\nisready\n{UCI_POSITION}\ngo movetime 500\nquit\n"
     answer = subprocess.run(
         [sys.executable, "uci.py"],
         cwd=FOLDER,
@@ -379,9 +405,17 @@ def verify_uci(stage: str):
     if "uciok" not in lines or "readyok" not in lines:
         fail("uci.py does not answer uciok and readyok")
     last = answer.stdout.strip().split("\n")[-1]
-    if not last.startswith("bestmove "):
+    words = last.split()
+    if len(words) < 2 or words[0] != "bestmove":
         fail(f"uci.py ends with {last!r} instead of a bestmove")
-    print(f"5. UCI: uci.py names itself {name} and answers e2e4 with {last}")
+    if words[1] not in UCI_LEGAL_MOVES:
+        fail(
+            f"uci.py returns illegal move {words[1]!r} after e2e4. "
+            "Look at uci.py and search.py"
+        )
+    print(
+        f"5. UCI: uci.py names itself {name} and answers e2e4 with legal move {words[1]}"
+    )
 
 
 def main():
