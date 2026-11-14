@@ -81,7 +81,7 @@ The syllabuses, READMEs, guides, and PDF briefs distinguish three operations:
 2. Running `verify_remusN.py` checks the supplied reference cases for that version, including legal UCI replies and terminal positions.
 3. Playing through Lucas Chess exercises the student's engine and launcher for positions reached in that game. A short game or round does not establish Elo or isolate a speed improvement.
 
-`docs/remus_versions.md` contains the language, lines-of-code, estimated Elo, approximate human level, and engine defaults table. Rating-method and uncertainty discussion remains in `docs/fide_titles_and_elo_ratings.md`. Human levels are approximate descriptions, not earned FIDE titles.
+`docs/remus_versions.md` contains the language, lines-of-code, estimated Elo, approximate human level, and engine defaults table. Rating-method and uncertainty discussion appears in the closing section of `docs/remus_versions.md`; `docs/fide_titles_and_elo_ratings.md` describes human titles and rating ranges. Human levels are approximate descriptions, not earned FIDE titles.
 
 Runtime Python counts are Remus1: 189; Remus2: 300; Remus3: 484; Remus4: 630. The heading is “Lines of code”; there is no physical-lines column. Verifiers are supplied tools and are excluded from runtime code counts and typing tables.
 

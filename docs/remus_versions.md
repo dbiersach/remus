@@ -55,7 +55,7 @@ The table reports engine defaults; the recommended Lucas Ponder selection is tru
 Elo figures are benchmark estimates, not FIDE ratings. Human levels are numerical
 comparisons only, not earned titles. Remus1's 300 is a rough estimate, not a fitted
 result. Versions without a reported estimate are marked Not measured. See
-[benchmark conditions and confidence intervals](fide_titles_and_elo_ratings.md#where-the-remus-engines-would-land)
+[benchmark conditions and confidence intervals](#where-the-remus-engines-would-land)
 for time controls, uncertainty, and interpretation. These results do not verify
 that the current code-shortening changes preserve Elo; those matches remain incomplete.
 
@@ -460,3 +460,50 @@ because the gain does not pay for the code.
 | Delta pruning and the exchange test before `make_move()` in quiescence | Under 1% | Within the error of the timing |
 | Selecting every move one at a time, with no sort | 6% slower | Positions that try every move pay a pass per move |
 | Prefetch at depth 1 as well | 1% slower | Those children seldom read the table |
+
+## Where the Remus engines would land
+
+FIDE gives titles only to people, so no engine can earn one. The figures below
+are estimates from the benchmark described here, not human FIDE ratings or expected
+results for a workshop test. The class labels are numerical comparisons only;
+sharing a number does not establish equivalent strength against people. Remus2, Remus3,
+Remus4, and Remus5 each played 200 games against Stockfish held to a set
+strength (its UCI_Elo setting), at 15 minutes per side with no increment, half with
+White and half with Black, on one fast processor core per game. Each engine met
+Stockfish at six levels between 1320 and 2950, and its rating is the one that best
+explains its score against those levels. The 27 games that Stockfish lost on time
+are left out, because Stockfish ran out of time in long endgames whatever the
+position on the board.
+
+The estimates and approximate human levels appear in the
+[Engine defaults and source sizes table](#engine-defaults-and-source-sizes).
+
+Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2831 to 2963; Remus8: 2900 to 3297.
+
+Remus1's 300 figure is a rough estimate, not a fitted result in this table. Random
+move choice does not guarantee a loss in every game.
+
+A 95% confidence interval describes a procedure that, under its statistical
+assumptions, would cover the underlying parameter in about 95% of repeated
+experiments. It is not a 95% range for individual game outcomes. These intervals
+do not account for every systematic effect of the opponent, hardware, time control,
+opening choices, or excluded time losses. There is no fixed conversion here from
+Stockfish's UCI_Elo setting to a person's FIDE rating.
+
+Remus5 shares Remus4's core chess algorithms but uses a different implementation
+and a larger table. Equal-time searches can choose different moves. The rating gap
+in this benchmark does not isolate speed, table capacity, or any one enhancement,
+and does not establish a strength difference against human players.
+
+Remus8's estimate uses 20 games against limited-strength Stockfish at 15 minutes
+per side with no increment, one game at a time. Remus8 uses a 2048 MiB table,
+16 search threads, pondering, and its default root tablebase lookups. Stockfish
+runs on a separate fast core. The ladder includes one game with each color at
+2200, 2400, 2600, 2800, 3000, and 3190, then eight games around the initial estimate.
+Twenty games give a much wider interval than 200. Games lost on time are excluded,
+as described above.
+
+In class, record wins, draws, losses, and unfinished games as observations. One
+short round against a limited-strength Stockfish setting does not measure a rating.
+Passing `verify_remusN.py` (with your version number in place of N) checks its reference cases, not Elo, and games using the
+registered student engines exercise the typed code only for the positions reached.
