@@ -1,7 +1,8 @@
 # The versions of Remus
 
-The workshop builds four Remus engines, one for each of Days 1 to 4, and the student
-pairs type every line of each one, typing the code shown in the period screenshots:
+Student pairs build four Python engines, one for each of Days 1 to 4, by typing
+the code shown in the period screenshots. Later versions reuse completed modules
+and add the changes taught that day:
 
 | Version | What it adds | New lines to type | Lines of code |
 | --- | --- | ---: | ---: |
@@ -15,7 +16,7 @@ whole engine. Both leave out blank lines, comments, and docstrings. Before Remus
 student pairs finish [Remus1](../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) at the end of Day 1: the board, the
 moves, and `uci.py` of Remus2, with a 12-line `search.py` that plays a random legal
 move. Remus2 replaces that file, so its new lines are `evaluation.py` and the 93 lines
-of its own `search.py` . Each version is the one before plus its enhancements, so a
+of its own `search.py`. Each version is the one before plus its enhancements, so a
 student pair that finishes Remus2 types only the new lines of Remus3, and then only the
 new lines of Remus4.
 
@@ -25,52 +26,53 @@ it. Its [measured examples](../rust_engines/Remus5/remus5.md#measured-examples) 
 speed difference on the benchmark computer; they are not a universal
 hardware-independent speed ratio.
 
-This page lists every enhancement of Remus3 and Remus4, the file each one changes, the
-code it adds, and the Elo it should gain, then shows what each of Remus2, Remus3, and
-Remus4 adds.
+The feature catalog explains the workshop enhancements and the files they change.
+The Rust sections describe the supplied engines and their speed techniques.
+Whole-engine rating methods and limitations appear in the final section.
 
-## Engine defaults and source sizes
+## Engine defaults and Total Lines of Code (TLOC)
 
-These are advertised engine defaults, not necessarily the values saved in a GUI entry.
+The table lists engine defaults except the Remus7 and Remus8 ELO measurement
+settings: 16 search threads and a 2 GiB transposition table. Their advertised defaults
+are four threads and 512 MiB. Saved GUI settings can override engine defaults.
 Remus1 chooses a random legal move. Remus2 through Remus6 use one chess search
 thread; Remus7 and Remus8 parallelize chess search.
 
-For pondering in Lucas Chess R6, keep the engine's advertised `Ponder` default
+For pondering with Remus6 to Remus8 in Lucas Chess R6, keep the advertised `Ponder` default
 false and select true in both its external-engine and tournament settings. The
 explicit true override activates Lucas's pondering controller. A true advertised
 default can leave that controller inactive even when the checkbox is checked.
-The table reports engine defaults; the recommended Lucas Ponder selection is true.
+The table reports engine defaults; the recommended Lucas Ponder selection for those
+three engines is true. Remus1 to Remus5 do not support pondering.
 
-| Engine | Language | Lines of code | Estimated Elo | Approximate human level | Search threads | Transposition table | Advertised Ponder default | Diagnostic defaults |
-| --- | --- | ---: | ---: | --- | --- | --- | --- | --- |
-| [Remus1](../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) | Python | 189 | 300 (rough estimate) | Below Class D (random mover) | 1 | None | Not supported | No persistent logs |
-| [Remus2](../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | Python | 300 | 1840 | Class A player | 1 | None | Not supported | No persistent logs |
-| [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | Python | 484 | 2086 | Expert | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
-| [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | Python | 630 | 2195 | Expert, at the edge of Candidate Master (CM) | 1 | 2,000,000-entry dictionary | Not supported | No persistent logs |
-| [Remus5](../rust_engines/Remus5/remus5.md) | Rust | 1,849 | 2897 | Super Grandmaster | 1 | Fixed 512 MiB | Not supported | SearchDiagnostics false |
-| [Remus6](../rust_engines/Remus6/remus6.md) | Rust | 2,797 | Not measured | Not measured | 1 | Fixed 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; per-process text logs |
-| [Remus7](../rust_engines/Remus7/remus7.md) | Rust | 3,216 | Not measured | Not measured | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
-| [Remus8](../rust_engines/Remus8/remus8.md) | Rust | 3,825 | 3099 | Super Grandmaster | 4, configurable 1 to 64 | Hash 512 MiB, choices 512/1024/2048 | false | SearchDiagnostics false; PonderDiagnostics false |
+| Engine | ELO | Rank | Language | TLOC | Search threads | Transposition table | Ponder | Diagnostics |
+| --- | ---: | --- | --- | ---: | --- | --- | --- | --- |
+| [Remus1](../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) | 300 | Below Class D | Python | 189 | 1 | None | Not supported | No persistent logs |
+| [Remus2](../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | 1840 | Class A player | Python | 300 | 1 | None | Not supported | No persistent logs |
+| [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
+| [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
+| [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | SearchDiagnostics false |
+| [Remus6](../rust_engines/Remus6/remus6.md) | Not measured | Not measured | Rust | 2,797 | 1 | 512 MiB | false | SearchDiagnostics false; PonderDiagnostics false; per-process text logs |
+| [Remus7](../rust_engines/Remus7/remus7.md) | Not measured | Not measured | Rust | 3,216 | 16 | 2 GiB | false | SearchDiagnostics false; PonderDiagnostics false |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | false | SearchDiagnostics false; PonderDiagnostics false |
 
-Elo figures are benchmark estimates, not FIDE ratings. Human levels are numerical
-comparisons only, not earned titles. Remus1's 300 is a rough estimate, not a fitted
-result. Versions without a reported estimate are marked Not measured. See
+Estimated Elo and human-level labels summarize the recorded benchmarks, not human
+FIDE ratings. Versions without a reported estimate are marked Not measured. See
 [benchmark conditions and confidence intervals](#where-the-remus-engines-would-land)
-for time controls, uncertainty, and interpretation. These results do not verify
-that the current code-shortening changes preserve Elo; those matches remain incomplete.
+for their scope and limitations.
 
 Rust diagnostics use per-process files in `logs/` beside each executable. Search
 files are `search_<pid>_<session>.txt`; Remus6 through Remus8 also write
 `ponder_<pid>_<session>.txt` when enabled. The matching suffix pairs the two streams.
 See [search measurements](search_logging.md) for aggregation and retention.
 
-Remus8 additionally exposes `PonderHitMinPercent` , default 25, range 0 to 100.
-Remus6 through Remus8 expose `LichessTablebase` , default true. The
-table is shared by workers within a process, not across engine processes. All
-book-enabled Python engines read their own file at startup; Rust embeds its book at
-build time. Disable GUI books with explicit `<None>` in tournaments.
+Remus8 additionally exposes `PonderHitMinPercent`, default 25, range 0 to 100.
+Remus6 through Remus8 expose `LichessTablebase`, default true. The
+transposition table in each parallel engine is shared by its workers, not across
+engine processes. All book-enabled Python engines read their own file at startup;
+Rust embeds its book at build time. Disable GUI books with explicit `<None>` in tournaments.
 
-Each README uses the same main headings and file-table columns. Python comparisons use
+Each engine guide uses the same main headings and file-table columns. Python comparisons use
 the preceding Python version; Remus6 through Remus8 use the preceding Rust version. Remus5
 has no preceding Rust edition and identifies Python Remus4 as its counterpart, not its
 predecessor. A zero denotes an absent file. Supporting files and external checks do not
@@ -78,27 +80,28 @@ contribute to runtime lines of code.
 
 ## How to read the tables
 
-- **Python lines in the feature catalog** are estimates for an individual enhancement; each may differ by up to a third. **TLOC in engine/file tables** is counted from current runtime source, excluding blank lines, standalone comments, and Python docstrings. Rust documentation comments are excluded too.
-- **New lines to type** differs from net TLOC change. Remus2 replaces 12 search lines and adds 123 lines, increasing the total by 111. README file tables show current TLOC, predecessor TLOC, and the net change.
+- **Python lines in the feature catalog** are estimates for an individual enhancement; each may differ by up to a third. **TLOC (total lines of code) and engine/file line counts** are counted from current runtime source, excluding blank lines, standalone comments, and Python docstrings. Rust documentation comments are excluded too.
+- **New lines to type** differs from the net change in lines of code. Remus2 replaces 12 search lines and adds 123 lines, increasing the total by 111. Engine-guide file tables show current and preceding line counts and the net change.
 - **Elo** in the feature catalog is an estimated gain for one enhancement, not a
   measured Remus result or a target for a student test. Whole-version match results
   do not isolate a feature's effect. Gains overlap as the engine grows and cannot
   be added to predict a rating.
-- Three rows marked **(foundation)** gain little alone but are needed by later rows.
+- Rows marked **(foundation)** provide supporting data or output for later steps.
 - **Version** names the engine that first holds the step.
 
 ## The enhancements, grouped by the file they change
 
 ### (E) Evaluation Only: `evaluation.py`
 
-Each row adds one term to `evaluate()` and touches no other file, so these are the
-safest steps: a bug here makes Remus play worse, never illegally.
+Each row describes a term in `evaluate()`. These terms score positions rather than
+choose legal moves. Errors can change move choices or prevent the engine from running,
+so evaluation changes still need the version verifier.
 
 | Step | Enhancement | What it adds | Python lines | Elo | Version |
 | --- | --- | --- | ---: | ---: | --- |
 | E1 | Pawn structure | Penalties for doubled and isolated pawns, a bonus for passed pawns that grows as they advance | 30 | +49 | Remus3 |
 | E2 | Mating bonus | When ahead in material, push the lone enemy king to the edge and bring the own king close, so K+Q and K+R against K end in mate | 12 | +19 | Remus4 |
-| E3 | Tapered evaluation | A game phase from the pieces left, an supplied endgame king table that brings the king to the center, and a blend of the middlegame and endgame scores | 12 | +40 | Remus4 |
+| E3 | Tapered evaluation | A game phase from the pieces left, a supplied endgame king table that brings the king to the center, and a blend of the middlegame and endgame scores | 12 | +40 | Remus4 |
 | E4 | Bishop pair | +30 for a side that keeps both bishops | 7 | +10 | Remus3 |
 | E5 | Rooks on open files | +20 for a rook on a file with no pawns, +10 on a file with only enemy pawns | 15 | +10 | Remus4 |
 | E6 | Rook table | Load the supplied rook piece-square table that Remus2 leaves out: rooks on the seventh rank and central files | 1 | +5 | Remus3 |
@@ -110,7 +113,7 @@ safest steps: a bug here makes Remus play worse, never illegally.
 
 These change which moves the search tries and how deeply. A bug can produce legal
 but poor choices. At the scheduled checkpoints, `verify_remusN.py` (with your version number in place of N) compares the
-student engine with stored results for that version or period; its README describes
+student engine with stored results for that version or period; its engine guide describes
 the expected output. Passing those cases does not prove that pruning is safe in
 every position or that strength improved. Selective search changes can alter moves,
 scores, and node counts; fewer nodes and an unchanged move are not universal
@@ -144,7 +147,7 @@ repetition that would save a lost game.
 | --- | --- | --- | --- | ---: | ---: | --- |
 | N1 | Position key (foundation) | A number that names a position, for the transposition table and the repetition history: Python's `hash()` of the tuple `(tuple(board), white, castling, en_passant)` | `board.py` | 2 | 0 | Remus3 |
 | N2 | Transposition table | Remember each searched position's score, depth, bound, and best move; reuse the score when it suffices, and try the stored move first | **New file** `transposition_table.py`, plus `search.py` | 35 | +101 | Remus3 |
-| N3 | Opening book | Play a stored opening line while the game follows one. The book holds UCI moves (`e2e4 e7e5 g1f3`), not SAN, so it needs no notation code | **New file** `opening_book.py`, plus `uci.py`, plus `opening_book.txt` (56 lines of data) | 28 | +58 | Remus3 |
+| N3 | Opening book | Play a stored opening line while the game follows one. The book holds UCI moves (`e2e4 e7e5 g1f3`), not SAN, so it needs no notation code | **New file** `opening_book.py`, plus `uci.py`, plus the supplied `opening_book.txt` data | 28 | +58 | Remus3 |
 | N4 | Static exchange evaluation | Play out every capture on one square, cheapest attacker first, to see if a capture wins material; quiescence then skips the losing captures | **New file** `exchange.py`, plus `search.py` | 45 | +15 | Remus4 |
 
 ## Remus2: looking ahead
@@ -200,15 +203,13 @@ The steps change the files of Remus2 like this:
 | `make_move.py`, `attacks.py`, `move_generation.py` | 118 | 118 | Unchanged |
 | **Total** | **300** | **484** | |
 
-The expected gains add up to about +350 Elo over Remus2, less once they overlap.
-
 ## Remus4: everything else
 
 Remus4 adds the other twelve steps, in the order a class can type them:
 
 | Steps | Enhancements | Why here |
 | --- | --- | --- |
-| M1 | Draw sense | Reuses the position key; stops Remus drawing won games by repetition |
+| M1 | Draw sense | Reuses the position key to score repetitions as draws during search |
 | E2, E3 | Mating bonus, then tapered evaluation | Remus learns to finish endgames: drive the king to the edge, then centralize its own king |
 | S3 | Late move reductions | A depth gainer of about a dozen lines |
 | S5 | Principal variation search | PVS needs the first move to be the best one, which the table supplies |
@@ -228,67 +229,64 @@ Remus4 adds the other twelve steps, in the order a class can type them:
 | `attacks.py`, `move_generation.py`, `transposition_table.py`, `opening_book.py` | 138 | 138 | Unchanged |
 | **Total** | **484** | **630** | |
 
-The expected gains add up to about +195 Elo over Remus3, less once they overlap.
-
 ## Checking each version
 
-The workshop designer's `verify_engines.py` checks all four engines without playing a
-game: perft counts from six published positions, ten mate puzzles, five positions
-searched to a fixed depth, and a short UCI conversation. The fixed-depth searches show
-what each step buys. To depth 4 from the starting position Remus2 visits 17,360
-positions, Remus3 2,944, and Remus4 3,005, and all three choose `g1f3` .
+Run the Day-local `verify_remusN.py` at the scheduled checkpoints. It prints the
+checks and expected values, reports any problems, and ends with the version's
+success line when its reference cases pass. Running an individual engine module
+only checks that it and its imports load; it does not test all its functions.
 
-Each step should also be measured in games: the new engine plays the engine before it
-with the same clock, and keeps the step only if it wins more than it loses.
+The designer's separate native checks cover published perft positions, mate
+puzzles, fixed-depth searches, and UCI exchanges. Recorded depth-4 searches from
+the starting position visit 17,360 nodes in Remus2, 2,944 in Remus3, and 3,005 in
+Remus4, with `g1f3` as the best move in each. These compare one position at one
+depth; fewer nodes alone do not establish faster play or greater strength.
+
+A strength comparison needs enough games under controlled conditions, with colors
+balanced and uncertainty reported. Winning more games than losing in a short
+round is not sufficient evidence to accept an enhancement. The
+[closing Elo discussion](#where-the-remus-engines-would-land) describes the recorded
+rating experiments. The original-versus-shortened comparison remains paused; its
+unfinished results do not establish whether the code reductions preserve Elo.
 
 ## Supplied Rust engines
 
 Remus5 through Remus8 are Rust-only engines. Their source, executables, overview
 guides, and line-by-line references live under `rust_engines/RemusN`. Students do
-not type them. The counts below describe implementation size, not workshop typing.
+not type them. Their source sizes, settings, and recorded ratings are listed once
+in [Engine defaults and Total Lines of Code (TLOC)](#engine-defaults-and-total-lines-of-code-tloc).
 
-| Version | Language | Search and boundary features | Lines of code |
-| --- | --- | --- | ---: |
-| [Remus5](../rust_engines/Remus5/remus5.md) | Rust | Remus4 algorithms with a fixed 512 MiB bucketed table | 1,849 |
-| [Remus6](../rust_engines/Remus6/remus6.md) | Rust | Enhanced single-threaded search and positional evaluation, root tablebase advice, and UCI pondering | 2,797 |
-| [Remus7](../rust_engines/Remus7/remus7.md) | Rust | Lazy SMP parallel search with a shared configurable table | 3,216 |
-| [Remus8](../rust_engines/Remus8/remus8.md) | Rust | YBWC parallel search with sibling splitting and restricted worker helping | 3,825 |
+| Version | What it adds |
+| --- | --- |
+| [Remus5](../rust_engines/Remus5/remus5.md) | Remus4 algorithms implemented in Rust with a larger bucketed table |
+| [Remus6](../rust_engines/Remus6/remus6.md) | Enhanced single-threaded search and positional evaluation, root tablebase advice, and UCI pondering |
+| [Remus7](../rust_engines/Remus7/remus7.md) | Lazy SMP parallel search with a shared table |
+| [Remus8](../rust_engines/Remus8/remus8.md) | YBWC parallel search with sibling splitting and restricted worker helping |
 
 Remus6 adds check-aware quiescence, terminal-position handling, en passant capture
 accounting, quiet-move history, backward-pawn and central-hole penalties, knight
 outposts, and nearby king cover. These additions are shared by Remus7 and Remus8.
 Their presence alone does not establish an Elo gain.
 
-Remus5 and Remus6 use fixed 512 MiB tables. Remus7 and Remus8 expose Hash settings
-of 512, 1024, or 2048 MiB and default to 512 MiB with four search threads. Each
-parallel engine shares its table among workers. Saved GUI options override defaults.
-
 Remus6 to Remus8 can request root tablebase advice for eligible positions with
 at most seven pieces and no castling rights. They preserve the actual halfmove
 clock and en passant square, validate suggested moves with native rules, and fall
 back to native search on failures or uncertain responses. Fixed-depth checks and
-ponder searches bypass the service. `LichessTablebase` defaults to true.
+ponder searches bypass the service.
 
-`Ponder` defaults to false in Remus6 to Remus8. When enabled in Lucas Chess, the
-engine can search during the opponent's turn after `go ponder`. A matching hit
-starts its move clock. Book continuations remain subject to native legality checks;
+When pondering is enabled in Lucas Chess, Remus6 to Remus8 can search during the
+opponent's turn after `go ponder`. A matching hit starts the engine's move clock. Book continuations remain subject to native legality checks;
 book pondering waits without claiming native search credit. See each engine guide
 for time-budget details and supported options.
-
-Python Remus3 and Remus4 read their supplied opening book at runtime. Rust engines
-embed their book at build time. Disable GUI opening books in Lucas Chess, including
-explicit None in tournament entries, so the engine's own book and search determine play.
-Optional [search measurements](search_logging.md) record diagnostics, not automatic
-correctness or strength results. A successful reference check is not an Elo estimate.
 
 ## Speed techniques of the Rust engines 6 through 8
 
 Remus6, Remus7, and Remus8 share six techniques that make each position
-cheaper to search. None of them changes which positions the search visits. With one
-worker, a fixed-depth search prints the same score, the same count of positions, and the
-same line of best play with or without them, and `evaluate()` returns the same score for
-every position. Remus5 uses the plain form of every step below, so each of its
-files stays close to the Remus4 Python file of the same name.
+cheaper to search. They are intended to preserve native search choices. In the fixed-depth
+comparison positions, one-worker searches return the same scores, node counts, and
+principal variations with or without the techniques. Evaluation cross-checks compare
+the tested positions; they are not a proof for every possible position. Remus5 uses
+the plain form of every step below, so each of its files stays close to the Remus4 Python file of the same name.
 
 | Engine | Search threads | Plain form | With the six techniques | Ratio |
 | --- | ---: | ---: | ---: | ---: |
@@ -333,7 +331,7 @@ piece to look up. The answer changes from one lookup to the next with no pattern
 processor predicts it wrongly a large share of the time, and each wrong prediction costs
 about as much as fifteen ordinary operations. Every bishop, rook, or queen lookup makes
 that test four times, once per ray, and the engine makes those lookups in the mobility
-count of `evaluate()` , in `is_attacked()` , in move generation, and in the exchange
+count of `evaluate()`, in `is_attacked()`, in move generation, and in the exchange
 evaluation.
 
 `rising_ray()` covers the four rays whose square numbers grow. It sets bit 63, the
@@ -374,7 +372,7 @@ move. Most cutoffs come from the table move, a capture, or a killer move, which 
 among the first few, and then the sorted order of the other 30 moves is never read.
 
 `ordered_moves()` leaves the entries in the order of generation. At the top of the move
-loop, `place_next(entries, index)` puts the right entry at `index` . For the first three
+loop, `place_next(entries, index)` puts the right entry at `index`. For the first three
 indexes (`EARLY_PICKS`) it makes one pass over the entries that are left and swaps the
 largest into place. At the fourth index it sorts the rest once. No two entries are
 equal, because the move is part of each entry, so the moves come out in exactly the
@@ -404,7 +402,7 @@ score is the same.
 `alpha_beta()` reads the static score of a position in two tests only. Null-move pruning
 reads it at depth 3 and up, out of check, away from the root, and not right after
 another null move. Futility pruning reads it at depth 1, out of check. The plain form
-calls `evaluate()` at every position before those tests. The engines 5 through 7 compute
+calls `evaluate()` at every position before those tests. The engines 6 through 8 compute
 `needs_score` from the same conditions and call `evaluate()` only when it is true. A
 position at depth 2 and a position in check never evaluate, and at depth 3 and up
 neither does the root or the position right after a null move.
@@ -417,7 +415,7 @@ engine spends on an average position. The search knows which bucket the next pos
 needs as soon as `make_move()` returns that position's key.
 
 `Table::prefetch(key)` asks the processor to start loading the bucket and returns at
-once. `alpha_beta()` calls it right after `make_move()` , so the legality test and the
+once. `alpha_beta()` calls it right after `make_move()`, so the legality test and the
 check test of the move run while the bucket travels from memory, and the child's
 `probe()` waits for less. It calls prefetch only at depth 2 and up: a child of a depth-1
 position goes to quiescence unless it is in check, quiescence does not use the table,
@@ -445,7 +443,7 @@ parallel engines needs no added synchronization.
 
 ### Techniques that measure too little to keep
 
-Each of these also leaves the search unchanged. The engines 5 through 7 leave them out
+Each of these also leaves the search unchanged. The engines 6 through 8 leave them out
 because the gain does not pay for the code.
 
 | Technique | Measured | Why it stays out |
@@ -463,9 +461,9 @@ because the gain does not pay for the code.
 
 ## Where the Remus engines would land
 
-FIDE gives titles only to people, so no engine can earn one. The figures below
-are estimates from the benchmark described here, not human FIDE ratings or expected
-results for a workshop test. The class labels are numerical comparisons only;
+FIDE gives titles only to people, so no engine can earn one. The ratings in the
+[engine table](#engine-defaults-and-total-lines-of-code-tloc) summarize the benchmark described
+here; they are not human FIDE ratings or expected results for a workshop test. The class labels are numerical comparisons only;
 sharing a number does not establish equivalent strength against people. Remus2, Remus3,
 Remus4, and Remus5 each played 200 games against Stockfish held to a set
 strength (its UCI_Elo setting), at 15 minutes per side with no increment, half with
@@ -475,12 +473,9 @@ explains its score against those levels. The 27 games that Stockfish lost on tim
 are left out, because Stockfish ran out of time in long endgames whatever the
 position on the board.
 
-The estimates and approximate human levels appear in the
-[Engine defaults and source sizes table](#engine-defaults-and-source-sizes).
-
 Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2831 to 2963; Remus8: 2900 to 3297.
 
-Remus1's 300 figure is a rough estimate, not a fitted result in this table. Random
+Remus1's 300 figure is a rough estimate, not a fitted benchmark result. Random
 move choice does not guarantee a loss in every game.
 
 A 95% confidence interval describes a procedure that, under its statistical

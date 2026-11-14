@@ -8,7 +8,7 @@ $workshopRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
 $readyFile = Join-Path $workshopRoot '.workshop-student.json'
 
 if (-not $StudentCopy) {
-    throw 'Run setup_workshop.ps1 -StudentCopy only in the cloned student workspace. Add -WhatIf to preview.'
+    throw 'Run setup_student.ps1 -StudentCopy only in the cloned student workspace. Add -WhatIf to preview.'
 }
 if (Test-Path -LiteralPath (Join-Path $workshopRoot 'admin/workshop_paths.py')) {
     throw 'This is the protected designer workspace. Prepare a separate student clone.'
@@ -118,4 +118,4 @@ try {
 finally { Pop-Location }
 
 # This is reached only when every setup step above succeeds.
-Remove-Item -LiteralPath (Get-WorkshopChild 'setup_workshop.ps1') -Force
+Remove-Item -LiteralPath (Get-WorkshopChild 'setup_student.ps1') -Force

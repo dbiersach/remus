@@ -335,7 +335,7 @@ A button uses `setoption name <name>` without `value`. Remus7 does not advertise
 these types. Use only the options an engine actually lists; for example,
 Remus6 has no `Threads` or `Hash` setting, and Remus7 has no
 `PonderHitMinPercent` setting. See the individual
-[engine READMEs](remus_versions.md#engine-defaults-and-source-sizes)
+[engine READMEs](remus_versions.md#engine-defaults-and-total-lines-of-code-tloc)
 for their defaults and supported values.
 
 ### Advertising defaults is not reporting active values

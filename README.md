@@ -92,7 +92,7 @@ modules so students can type them. Do not run initial setup over existing studen
 3. Prepare the student workspace:
 
    ```powershell
-   .\setup_workshop.ps1 -StudentCopy
+   .\setup_student.ps1 -StudentCopy
    ```
 
    The script installs the VS Code extensions and runs `uv sync` to prepare Python
