@@ -19,6 +19,18 @@
         "files.exclude": { "**/__pycache__": true },
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
         "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.exclude": [
+            ".archive",
+            "**/target",
+            "**/build",
+            "**/dist",
+            "admin/ponder_handoff_builds",
+            "admin/remus5_diagnostics_builds",
+            ".venv",
+            "**/node_modules",
+            "**/__pycache__",
+            "**/__editable__.*"
+        ],
         "python.analysis.autoImportCompletions": true,
         "python.analysis.completeFunctionParens": true,
         "python.terminal.activateEnvironment": true,

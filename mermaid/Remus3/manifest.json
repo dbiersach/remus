@@ -1,0 +1,27 @@
+{
+  "full_elk": {
+    "nodes": 30,
+    "arrows": 48,
+    "layout": "elk"
+  },
+  "modules": {
+    "nodes": 9,
+    "arrows": 14,
+    "layout": "elk"
+  },
+  "uci": {
+    "nodes": 12,
+    "arrows": 13,
+    "layout": "elk"
+  },
+  "search": {
+    "nodes": 15,
+    "arrows": 24,
+    "layout": "elk"
+  },
+  "evaluation": {
+    "nodes": 2,
+    "arrows": 1,
+    "layout": "elk"
+  }
+}

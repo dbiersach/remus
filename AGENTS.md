@@ -1,15 +1,12 @@
 # Remus Project Rules and Python Style Guide
 
-Remus is a chess engine written in pure, native Python as a teaching project for the
-**"Turning a Chess Engine into Science AI"** workshop. The workshop has four engines in
-the top `engines_instructor/` folder: Remus1, a random legal mover that ends Day 1, and Remus2,
-Remus3, and Remus4;
-[`docs/engines/remus_versions.md`](docs/engines/remus_versions.md) lists what each
-one adds, and [`workshop_syllabus.md`](workshop_syllabus.md)
-holds the plan of the five days. Remus5 and Remus5-Rust are single-threaded
-experimental engines with positional evaluation, optional Lichess tablebase advice,
-and UCI pondering. Remus6-Rust (Lazy SMP) and Remus7-Rust (YBWC) are Rust-only
-parallel extensions outside the five-day workshop. Both default to four search threads.
+Remus is a teaching chess project for the **Turning a Chess Engine into Science AI**
+workshop. Student pairs type Remus1 to Remus4 in Python from screenshots. Annotated
+solutions live privately under `instructor/Remus1` through `Remus4`; testing copies
+live in each Day folder's `RemusN` subfolder. Remus5 through Remus8 are Rust-only
+engines under `rust_engines`, with all their engine documentation beside their source.
+[`docs/remus_versions.md`](docs/remus_versions.md) describes the versions and
+[`workshop_syllabus.md`](workshop_syllabus.md) describes the five days.
 
 This file holds every project and style rule, so that every AI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
@@ -47,71 +44,36 @@ ideas for the first time.
 
 ### Audience and workshop format
 
-- Remus is an instructional engine for a **one-week, five-day workshop** taught to
-  **students who know some coding and know how to play chess, including notation**
-  (David, 2026-11-04): four 90-minute periods a day (8:30 to 10:00, 10:30 to 12:00,
-  1:00 to 2:30, 3:00 to 4:30). Many students have learned Java, close enough to type
-  Python and follow the ideas. Each engine carries the number of the day that
-  builds it (David, 2026-11-03): Day 1 types in Remus1, Day 2 Remus2, Day 3 Remus3,
-  Day 4 Remus4, and Day 5 is the science project.
-- **The workshop is open to students of all ages** (David, 2026-11-04). Every
-  document, comment, and brief names the audience with the plain word "students":
-  no age, grade, school level, or age group.
-- 20 students work in **10 student pairs** (driver and navigator, swapping every
-  period). Each student pair gets an identical, preconfigured **Windows 11** class
-  laptop with VS Code and Lucas Chess. Remus targets Windows only (David, 2026-10-28):
-  the repository holds no Mac or Linux launchers or setup scripts.
-- **Students type the engines in** (David, 2026-11-03). On Days 1 and 2 each
-  student pair types in Remus1 and then Remus2, copying the instructor's version
-  systematically, file by file. Later the student pairs type the new lines of Remus3
-  and then of Remus4 the same way. The workshop has no Python skills labs and no
-  unplugged (non-coding) activities.
-- **Always minimize the code students type** (David, 2026-11-03). The engines hold
-  no test, check, perft, or print code beyond what UCI needs: they "assume it works",
-  and the workshop designer's `admin/verify_engines.py` checks them from
-  outside. Prefer the shorter of two equally clear forms.
-- Students know how the pieces move. Lessons remind them of the rarer rules right
-  before the code that needs each one: castling conditions, en passant, promotion,
-  stalemate, threefold repetition, the fifty-move rule, and insufficient material.
-- The teacher writes no code during the workshop (David, 2026-10-31): every line a
-  student pair does not type is already in the repository.
-- Write code, comments, and lesson text for a student reading the idea for the first
-  time: short functions, concrete names, and one small example position per idea.
-- The class never builds a GUI. Every laptop uses **Lucas Chess** (David,
-  2026-10-27), which runs Remus as a UCI engine through `remus.bat`.
-  [`docs/lucas_chess/lucas_chess_guide.md`](docs/lucas_chess/lucas_chess_guide.md) shows
-  students, step by step with screenshots, how to find the engines, play a game against
-  Remus1, and run one-round tournaments between the versions.
-  `docs/lucas_chess/install_lucas_engines.py` adds the instructor's Remus1 to Remus4
-  and Remus4-Rust to the list of external engines, from `engines_instructor/`
-  (David, 2026-11-04), without touching any other entry or adding a duplicate, so no
-  student or teacher adds an engine by hand. Lucas Chess plays only the instructor's
-  engines, and `verify_remus.py` tests what a student pair types. The guide's pictures
-  live in `docs/lucas_chess/jpg/`.
-- **No GitHub for students.** Students create no online accounts: cloning the public
-  repository needs none.
-- **git and `uv` only at setup** (David, 2026-10-29). On Day 1, period 1, the teacher
-  walks each student through installing git and `uv`, cloning the repository, and
-  running `uv sync` once to build `.venv`. After that setup no student or teacher uses
-  git or `uv` at any point in the workshop: no fetch, branch, commit, restore, or
-  clone, and no `uv run`. Code never moves between laptops through git: on Day 5
-  each student copies the Remus folder, without `.venv`, to a USB drive in File
-  Explorer to take home. Never plan a step that needs a student account, pushes
-  student code online, or asks a student or teacher to type a git or `uv` command
-  after setup.
-- **Three people use the repository** (David, 2026-10-29), and every document names
-  the right one:
-  - **Students**, the student pairs, who type in Remus1, Remus2, Remus3, and Remus4.
-  - **Teachers**, who run the class. A teacher does everything in VS Code: open a
-    file and press the Run Python File button, or open a Markdown page. No step of the
-    five-day workshop asks a student or a teacher to type a command.
-  - **The workshop designer** (David), who builds the workshop. The tools in
-    `admin/` are designer tools, and only they may need `uv run` in a
-    terminal.
-- Documents describe the workshop as it stands, with no dates of past events ("the
-  league finished on 2026-10-28", "a survey from October 2026"), the same rule as
-  for code comments. The David dates in this file record when a rule was set and
-  stay here only.
+- The workshop is open to students of all ages who know some coding and chess.
+  Use the plain word "students", with no school or age classification.
+- Students work in student pairs, switching driver and navigator every period.
+  Four 90-minute periods run 8:30 to 10:00, 10:30 to 12:00, 1:00 to 2:30, and 3:00 to 4:30.
+- Windows 11, VS Code, and Lucas Chess are the workshop platform. No GUI is built.
+- Student pairs type Python from period screenshots, never from instructor source.
+  Student-facing documents must neither mention nor link private solution folders.
+- Minimize student typing while keeping clarity, playing strength, and performance.
+  Exclude supplied verifiers and data from every typing or runtime code-count table.
+  Remus1 to Remus4 have 189, 300, 484, and 630 runtime lines of code.
+- On Day 1 student pairs create runtime modules in the Day 1 Remus1 folder. On Days
+  2 to 4 they copy only the previous runtime modules, excluding its verifier, into
+  the next engine folder and type the changes. Keep the destination's guide,
+  launcher, verifier, and data. Student pairs never type Rust.
+- A helper module's silent run checks syntax/imports/top-level loading, not function
+  behavior. Running uci.py waits silently for protocol input. The supplied version
+  verifier checks reference cases; it does not establish Elo or exhaustive correctness.
+- Lucas Chess plays the student-written day-local engines after verification.
+  Teacher demonstrations can use private completed copies on the teacher's laptop.
+- Students create no online accounts. Initial setup clones the public repository,
+  runs setup_workshop.ps1 -StudentCopy, installs extensions, and runs uv sync.
+  It removes Git metadata, private solutions, designer tools, and temporary runtime
+  Python files while keeping each verify_remusN.py. It deletes itself only on success.
+  Never run cleanup on the author checkout or over completed student work.
+- After setup students use VS Code's Run Python File button, Lucas Chess, and File
+  Explorer. No student types Git or uv commands again during the workshop; supplied
+  remusN.bat launchers invoke uv automatically. The teacher writes no code in class.
+- Say "student pairs" or "the student pair", not bare "pairs" for the audience.
+- Documentation describes present behavior. Keep change history in a handoff or
+  commit, not READMEs. Explain expected output and exactly what each run checks.
 
 ### Hard rules for the engine code
 
@@ -120,14 +82,14 @@ ideas for the first time.
    shorter and faster.
 2. **No third-party libraries inside the Python engine.** Standard library only.
    No bitboards, magic numbers, compiled extensions, or framework machinery.
-   Remus5-Rust, Remus6-Rust, and Remus7-Rust may use `reqwest`, `serde_json`, and `httpdate` only for HTTPS, JSON,
+   Remus6, Remus7, and Remus8 may use `reqwest`, `serde_json`, and `httpdate` only for HTTPS, JSON,
    and HTTP retry dates at the tablebase boundary. Their native chess code uses no
    external chess library.
 3. **Engine is the single source of truth** for board, rules, legal moves, search,
    evaluation, and legal move choice. A GUI only sends moves and displays results.
-   Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust may use Lichess advice to choose a root move, after
+   Remus6, Remus7, and Remus8 may use Lichess advice to choose a root move, after
    validating that move with the native generator and king-safety check. Their
-   fallback search and evaluation remain those of Remus5 and Remus5-Rust.
+   fallback search and evaluation remain the shared Remus6 native implementation.
 4. **`python-chess` and Lucas Chess are boundary tools only.** Lucas Chess is the
    desktop GUI, which runs Remus over UCI. `python-chess` serves as an external
    cross-check in `verify_engines.py`, never as the engine's hidden implementation.
@@ -138,12 +100,11 @@ ideas for the first time.
    steps that `remus_versions.md` gives Remus3, and Remus4 is Remus3 plus every other
    step. Keep the shared code identical from version to version, so a student pair
    types only the new lines. A change to a shared line goes into every version that
-   holds it. Remus1 is one exception: Remus2 replaces its 14-line `search.py`.
-   Remus5 and the Rust engines 5 through 7 add positional evaluation for backward pawns, central holes,
+   holds it. Remus1 is one exception: Remus2 replaces its 12-code-line `search.py`.
+   Remus6 through Remus8 add positional evaluation for backward pawns, central holes,
    knight outposts, and nearby king cover; keep these additions identical across these
    implementations. Remus1 through Remus4 retain their
-   workshop evaluation. Another explicit exception is table capacity: Remus4-Rust, Remus5, and
-   Remus5-Rust use fixed 512 MiB tables. Remus6-Rust and Remus7-Rust
+   workshop evaluation. Another explicit exception is table capacity: Remus5 and Remus6 use fixed 512 MiB tables. Remus7 and Remus8
    expose Hash with a 512 MiB default and 1024/2048 MiB experimental sizes. Remus3
    and Remus4 use two-million-entry Python dictionaries. Remus1 and Remus2 have no transposition table.
 
@@ -153,11 +114,11 @@ ideas for the first time.
    generator; an absent book must never stop play. Remus opening choices come only from
    that engine's supplied `opening_book.txt`: Python reads it and Rust embeds it
    at build time. Disable Lucas Chess external books for every Remus entry,
-   including Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust. Tournament engine entries use
+   including Remus5, Remus6, Remus7, and Remus8. Tournament engine entries use
    explicit `<None>`, not `<By default>`, so they cannot inherit a GUI book.
    When no legal book continuation exists, use native move selection. Remus1
    and Remus2 have no opening book and keep their native behavior.
-9. Remus5 and Rust engines 5 through 7 tablebase requests belong only at the root, never inside native search.
+9. Remus6 through Remus8 tablebase requests belong only at the root, never inside native search.
    Query at most seven pieces, including kings, with no castling rights. Preserve
    the actual halfmove clock and en passant square in the API FEN. Keep repetition
    checks native: FEN does not carry game history. Unknown or uncertain results,
@@ -168,20 +129,15 @@ ideas for the first time.
    elapsed lookup time from the search budget, and offer the `LichessTablebase` UCI
    option (default true). Fixed-depth Rust checks bypass the service.
 
-10. Remus5 uses a fixed 512 MiB allocation for search caches, in
-    both Python and Rust. Four 16-byte entries
-    occupy each 64-byte bucket. Multiply-shift indexing selects the bucket;
-    a full bucket replaces the entry with the lowest depth minus age penalty.
-    Python uses standard-library `mmap` and `struct` only inside the table module;
-    moves remain tuples everywhere else. Rust uses Windows virtual-memory
-    allocation and release. Both allocate zero-filled memory at startup and
-    proceed without caching if allocation fails. There is no UCI Hash option,
-    RAM query, dynamic resizing, or smaller-capacity retry. Each process owns
-    its own allocation. Remus4-Rust also has a fixed 512 MiB table without Hash; it retains its
-    native allocator, low-bit bucket indexing, and depth/age replacement.
-    Remus6-Rust and Remus7-Rust share one configurable table across their workers.
+10. Remus6 uses a fixed 512 MiB table, with four 16-byte entries per 64-byte
+    bucket, multiply-shift indexing, and depth/age replacement. Its Windows virtual
+    memory allocation starts zero-filled and disables caching if allocation fails.
+    It exposes no Hash option and does not retry smaller capacities. Remus5 also
+    has a fixed 512 MiB table but retains its low-bit indexing and native allocator.
+    Remus7 and Remus8 share a configurable table across workers, defaulting to
+    512 MiB and four threads, with 1024/2048 MiB experimental sizes.
 
-11. Remus5, Remus5-Rust, Remus6-Rust, and Remus7-Rust support standard UCI pondering with a `Ponder` check
+11. Remus6, Remus7, and Remus8 support standard UCI pondering with a `Ponder` check
     option, default false. Return a legal predicted reply with `bestmove` when
     enabled, but search on the opponent's time only after `go ponder`. Keep
     reading commands during search. `ponderhit` starts the move clock without
@@ -196,7 +152,7 @@ ideas for the first time.
     search and makes no tablebase requests. Lucas Chess R6 controls pondering;
     its external-engine and tournament entries must enable `Ponder`.
 
-    All four engines preserve legal book continuations during both hit forms. A book
+    All three engines preserve legal book continuations during both hit forms. A book
     ponder request waits for hit or stop without native search and earns no search
     credit. With at least 60 seconds remaining, an uncertain native hit reserves
     half the adjusted plan and tries for one further completed depth, bounded by
@@ -231,9 +187,7 @@ concurrent processes never append to a shared diagnostic file. Preserve old logs
   kind.
 - The engines read and write only UCI moves (`e2e4`, `e7e8q`), and only at the UCI
   boundary. They hold no SAN. Workshop Python engines hold no FEN: Lucas Chess
-  sends `position startpos moves ...` for every game. Remus5 permits outbound FEN
-  serialization only in `tablebase.py`, at the HTTP API boundary. Native board,
-  move generation, evaluation, and search use the existing position tuple. Rust
+  sends `position startpos moves ...` for every game. Native Python code uses the position tuple. Rust
   retains its `position fen` UCI input for designer checks; `tablebase.rs` serializes
   outbound API FEN. The API fullmove number is 1 because it does not affect a probe.
 
@@ -243,8 +197,8 @@ concurrent processes never append to a shared diagnostic file. Preserve old logs
 | --- | --- |
 | Native Python engine | Board, rules, moves, search, evaluation, move choice |
 | UCI adapter, `uci.py` | `uci`, `isready`, `position startpos moves ...`, `go`, `quit`; only protocol lines on stdout; `bestmove 0000` only with no legal move |
-| Tablebase adapter, Remus5 and Rust 5 through 7 | Root advice from Lichess over HTTPS; FEN/JSON boundary, cache, cooldown, bounded wait, native legality validation, and search fallback |
-| GUI | Lucas Chess, which starts `remus.bat` and hosts Remus as an external UCI engine |
+| Tablebase adapter, Remus6 through Remus8 | Root advice from Lichess over HTTPS; FEN/JSON boundary, cache, cooldown, bounded wait, native legality validation, and search fallback |
+| GUI | Lucas Chess, which starts `remusN.bat` and hosts Remus as an external UCI engine |
 | Checks | `admin/verify_engines.py`, outside the engines |
 
 The engine must run without Lucas Chess or `python-chess` installed. Tablebase-enabled engines must
@@ -252,147 +206,67 @@ also play without internet access or a successful tablebase response.
 
 ### Verification
 
-- Write expected results before running.
-- `uv run admin/verify_engines.py` must pass after any engine change: perft
-  from six published positions, ten mate puzzles, fixed-depth searches, and a short
-  UCI conversation. Compare the fixed-depth node counts and moves before and after a
-  change; a change that should not alter the search must leave them identical.
-- For Remus5, also run `uv run admin/verify_tablebase.py` for shared Python/Rust
-  HTTP fixtures, `uv run admin/verify_engines.py Remus5`, and
-  `uv run admin/verify_ponder_control.py`, `verify_pondering.py`, and
-  `verify_lucas_pondering.py` for standard and Lucas pondering. After a change to
-  the ponder clock or the book rule, run `uv run admin/verify_ponder_reinvestment.py`
-  for Python and `uv run admin/verify_rust_ponder_reinvestment.py` for the Rust
-  engines 5 through 7. `--live` on the
-  tablebase check adds sequential live HTTPS probes. Build with
-  `uv run admin/build_rust.py --engine 5` and run `uv run admin/verify_rust.py --engine 5`.
-- After a Remus5 table change, run `uv run admin/verify_transposition_tables.py`,
-  rebuild Remus5-Rust, and run `uv run admin/verify_cache_uci.py`.
-  Compare fixed-depth nodes, scores, and moves with the baseline; investigate
-  differences because bucket indexing and replacement can affect collisions.
-  Run large-allocation checks and Rust builds sequentially.
-- Remus6-Rust and Remus7-Rust default to four search threads and 512 MiB shared tables.
-  Use one search thread and a preserved parallel executable as the search baseline;
-   their cache replacement can differ from Remus5. Compare native rules and
-   evaluation with Remus5. Test parallel metrics,
-  cancellation, pondering, and legal results separately; parallel node counts can
-  vary with scheduling. Build separate candidates and verify before installing.
-- Start no engine games or matches (any time control) without David's approval
-  (David, 2026-11-03). Verify with perft and fixed-depth comparisons instead.
+- Write expected results before running. After engine changes run
+  `uv run admin/verify_engines.py` for published perft, mate puzzles, fixed-depth
+  searches, and UCI checks. Search-preserving changes must preserve moves, scores,
+  and node counts, apart from separately justified table-collision effects.
+- Run each day-local verify_remusN.py and `admin/verify_student_uci.py` when changing
+  verifiers or student copies. Module loading is not a substitute for these checks.
+- `uv run admin/build_rust.py --engine N` builds current Rust versions N=5..8.
+  Build sequentially. Verify Remus5 and Remus6 against their Python references with
+  `admin/verify_rust.py --engine N`; for Remus7/8 supply a preserved executable with
+  `--baseline` and one search thread. Parallel node counts may vary with scheduling.
+- Designer tools may read the archived Python5 implementation as a comparison oracle
+  through `admin/workshop_paths.py`; never modify that archive. Legacy boundary and
+  pondering fixture tools retain historical labels through explicit path adapters.
+  Their references are not active workshop engine names.
+- Tablebase, cache, cancellation, and pondering changes require the corresponding
+  designer fixture checks. Live HTTPS checks are optional and must distinguish a
+  native fallback from a successful tablebase result. Native search must work offline.
+- Preserve existing logs and completed match evidence. **Matches are paused at
+  David's request. Do not start or resume games without fresh approval.**
+- After source/diagram changes run `admin/verify_engine_docs.py`. After screenshot
+  source or line-reference changes run `admin/make_code_images.py --check`, then
+  capture changed screenshots. Check actual PNG/JPEG signatures and extensions.
 
-### Project setup
+### Project setup and layout
 
-- Remus is a `uv` project on Python 3.14 (`.python-version`, `pyproject.toml`).
-  Run `uv sync` once, then `uv run ruff check .`.
-- The one runtime dependency is `matplotlib`, for the graphs of the Day 5 science
-  programs (David, 2026-11-04); no engine imports it. The `dev` dependency group holds
-  `python-chess` (imported as `chess`) and `ruff`. Engine modules never import
-  `chess`.
-- Lucas Chess is a desktop application, not a Python dependency. It hosts Remus as an
-  external UCI engine and comes preinstalled on the class laptops.
-- The top `engines_instructor/` folder holds one folder per finished engine,
-  `engines_instructor/Remus1` to `engines_instructor/Remus4`, the versions the
-  student pairs copy from. Each holds only the files the engine runs
-  (David, 2026-11-03): its Python files and `remus.bat` (the one line `uv run uci.py`;
-  Lucas Chess starts it in its own folder). Remus3 and Remus4 also hold
-  `opening_book.txt`. Each also holds a copy of `verify_remus.py`, so the workshop
-  designer can run the student pairs' test on the instructor's engine;
-  `make_mermaid_call_trees.py` skips it and the tool that strips the engines copies it unchanged. Each engine's `README.md` and Mermaid call diagrams live in
-  `docs/engines/Remus1` to `docs/engines/Remus4`.
-  Each engine names itself in `uci.py` (`id name Remus2`). Modules import each other
-  by name (`from board import START_POSITION`), so any module runs from inside its
-  folder with the Run button, and nothing in an engine folder imports from another
-  folder.
-- `engines_instructor/Remus4-Rust` holds Remus4 rewritten in Rust (David, 2026-11-04),
-  so the class sees that speed matters, not just the algorithms. Students neither type
-  nor read it, and it lives only in this folder, with no copy in `engines/`. It has a
-  real `remus4_rust.exe`, which git keeps, so a laptop needs no Rust
-  installed. Each `.rs` file matches the Remus4 Python file of the same name, and
-  `main.rs` matches `uci.py`. Its one difference in play is a larger table (David,
-  2026-11-04): 512 MB of four-entry buckets that replace their least useful entry
-  instead of starting over. Until a bucket fills, it searches the same tree as Remus4.
-  A change to Remus4's rules, evaluation, search, or book needs the same change here,
-  then `uv run admin/build_rust.py` and a clean `uv run admin/verify_rust.py`. The rules of Part 2 and
-  the bans on bitboards and extra print code apply to the Python engines only: this
-  engine uses bitboards, follows `cargo fmt` and `cargo clippy`, and takes the extra
-  commands `position fen`, `go depth`, `go perft`, and `eval` for that check.
-- Experimental `engines_instructor/Remus5` contains the Python engine, launcher,
-  and opening book, with documentation in `docs/engines/Remus5`.
-  `Remus5-Rust` implements the same single-threaded native search, evaluation,
-  fixed table, tablebase boundary, and pondering. Boundary changes must preserve
-  Python/Rust behavior and native fixed-depth results.
-  `Remus6-Rust` adds Lazy SMP and `Remus7-Rust` adds YBWC with restricted worker
-  helping. They are Rust-only and the only engines with parallel chess search.
-  Each Rust folder contains source, locked dependencies, an embedded book, and
-  its tracked `remusN_rust.exe`. Documentation lives in the matching folder under
-  `docs/engines/`. These experimental engines have no copies in `engines/`.
-  The workshop installer registers only Remus1 through Remus4 and Remus4-Rust;
-  experimental READMEs give their external UCI paths.
-- The top `engines/` folder holds the student pair's own engines (David,
-  2026-11-03): four folders, `engines/Remus1` to `engines/Remus4`, each holding only
-  `remus.bat` and `verify_remus.py` in the repository. `verify_remus.py` is the
-  same file in all four: run with the Run button, it tests the student pair's
-  finished version (files, perft, evaluation, a depth-4 search, UCI) against the
-  instructor's numbers, which it holds. In `engines/Remus4` it also tests Remus4 as
-  it stands at the end of Day 4, Periods 1 to 3, told apart by `exchange.py`,
-  `mating_bonus()`, and `king_safety()`, with numbers measured on the period states
-  that `admin/make_code_images.py` rebuilds. Update those numbers after any engine
-  change that moves them. On Day 1 the student pair creates every
-  file of Remus1 in `engines/Remus1`. At the start of Days 2, 3, and 4 it copies every
-  file of the previous version's folder into the next one in File Explorer and edits
-  those copies. Never put instructor code in `engines/`.
-- The code a student pair types is `engines_instructor/` stripped by a tool that
-  `admin/README.md` lists: no shebang, docstrings, comments, or type hints, only the
-  `# fmt: skip` comments that keep the board tables in shape when VS Code formats on
-  save. Never edit the stripped code by hand. It stays on David's computer only, so
-  the student pairs cannot copy it from the public repository.
-- Each engine README holds a table of its files with their code lines (blank lines,
-  comments, and docstrings left out), the call tree picture, and what the version
-  adds. `uv run admin/make_mermaid_call_trees.py --render` draws Mermaid SVGs
-  from the code and updates the call-tree section in each engine README; run it after any change to which functions exist or which
-  call which. Update the line counts in the READMEs and `remus_versions.md` after any
-  code change. Each engine has one README in its documentation folder; its
-  `mermaid/` subfolder holds diagram sources, SVGs, and a manifest only.
-- A module keeps one file name in every version. When a later version makes a file
-  smarter, the new code goes into the same file. Never add version numbers to file
-  names.
-- The top folder holds everything that is not an engine folder (David, 2026-11-04):
-  - The plan of the workshop: `workshop_syllabus.md`, the whole week on one page,
-    and one top folder per day, such as `Day 1 - Remus1 plays legal chess`, with
-    `Day_1_Syllabus.md` and a folder per period (`period1` to `period4`) that
-    holds `Day_1_Period_1_Syllabus.md`. The day and period pages follow
-    `workshop_syllabus.md`; a change to one goes into the others. Each period
-    folder with typed code also holds `images/` (David, 2026-11-04): pictures of
-    that code from VS Code, so a student pair cannot paste it, written by
-    `admin/make_code_images.py`, and the Day 5 graphs from
-    `admin/make_science_figures.py`. Run both after a change to the code they show.
-  - `science/`, the two Day 5 programs, `hidden_peak.py` and `phase_hunt.py`, with
-    the functions the student pairs write left empty, and `science_instructor/`,
-    the finished versions (David, 2026-11-04). This mirrors `engines/` and
-    `engines_instructor/`. They follow the engine style (no shebang, copy-make), import
-    no engine, and show their graphs with matplotlib: the student pair closes each
-    window and the program continues. The student pair types none of the graph code.
-  - `docs/`, the pages people read:
-    - `docs/engines/`: `Remus1` to `Remus4`, each with its `README.md` and
-      Mermaid call diagrams, and `remus_versions.md`.
-    - `docs/lucas_chess/`: `lucas_chess_guide.md` and its pictures.
-    - `docs/chess_tutor/`: `learn_chess.md` (the rarer rules and chess
-      notation, with its board pictures in `images/`), `uci.md`, the minimax,
-      negamax, and alpha-beta videos page, and `fide_titles_and_elo_ratings.md`.
-    - `docs/briefs/`: the one-page management brief and the one-page student
-      and parent brief, as PDFs.
-  - `admin/`: the workshop designer's scripts, with a `README.md`. Every workshop
-    designer tool lives here, finds the top Remus folder from its own path, and
-    runs from the top folder with `uv run admin/<name>.py`. List every script in
-    `admin/README.md` with what it does (David, 2026-10-28). Git ignores
-    `admin/` (David, 2026-11-04): it stays on David's computer only, and no
-    public page links to it.
-- David keeps a snapshot of the workshop before the Remus engines in
-  `.archive/` at the top of his Remus folder (David, 2026-11-03). Git ignores it.
-  Never edit or delete it.
-- **Say "student pairs"** (David, 2026-10-29). The students work in pairs, and every
-  document and comment names them "student pairs" or "the student pair", never a bare
-  "pairs". A pair of games or a `(row, col)` pair keeps its plain word.
+- Python 3.14 is managed by uv. `.venv` is the sole workshop environment.
+  matplotlib supplies science graphs; python-chess and Ruff are designer/verifier
+  dependencies. Engines import only standard-library and sibling engine modules.
+- `instructor/Remus1` through `Remus4` hold annotated solutions. Each private
+  RemusN_details.md contains only Line-by-line source reference and Source coverage
+  and identity. `instructor/science` holds completed science programs.
+- `Day N - .../RemusN` contains the merged RemusN.md, remusN.bat, verify_remusN.py,
+  and supplied data. Complete generated student Python is retained temporarily for
+  testing and Lucas Chess. Setup on a student clone removes runtime .py files only,
+  preserving its version verifier. Never hand-edit generated runtime modules.
+- `admin/make_student_engines.py` generates stripped modules in memory and checks
+  existing day copies. `--populate-days` explicitly writes testing copies. There is
+  no engines_student folder. Remus2 to Remus4 keep piece_square_tables.json; Remus3 and Remus4 keep
+  opening_book.txt. Verifiers are supplied and excluded from code totals.
+- Day and period syllabuses sit directly in each Day folder. Day 5 also contains
+  hidden_peak.py and phase_hunt.py starters; their graphs are supplied, not typed.
+- `rust_engines/Remus5` through `Remus8` contain all active Rust code, Cargo metadata,
+  embedded books, remusN.exe, remusN.md, and RemusN_details.md. There is no -Rust
+  suffix and no active Python version above Remus4. Preserve source algorithms
+  during layout and identity changes.
+- `docs` is flat: shared .md/.pdf guides and install_lucas_engines.py. The installer
+  registers day-local Python launchers and rust_engines executables, with Lucas
+  books disabled. Registration does not test chess behavior.
+- `images/Day1` through `Day5` hold period-prefixed code and science images;
+  images/chess_tutor, images/lucas_chess, and images/color_swatches hold guide assets.
+  `mermaid/Remus1` through `Remus8` and mermaid/chess_tutor hold diagram sources,
+  rendered SVGs, and manifests. Never recreate asset folders inside Day or docs.
+- Designer scripts live under ignored `admin`, resolve the workspace from their own
+  path, and are listed in admin/README.md. Use workshop_paths.py for shared paths.
+  Private game records live under admin/played_games. Preserve historical records
+  and frozen benchmark inputs rather than relabeling their contents.
+- `.archive` is private and ignored. Existing snapshots must never be edited or
+  deleted. The retired Python5 source and documentation are preserved there.
+- Maintain source counts, links, code screenshots, diagram manifests, guides, briefs,
+  and syllabus workflow together. Display "Lines of code", not physical-line counts,
+  for student typing totals. The line numbers used beside screenshots remain useful.
 
 ## Part 2: Python style
 

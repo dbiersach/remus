@@ -27,26 +27,17 @@ dist/
 # git bundles that carry changes between computers
 *.bundle
 
-# What cargo builds for Remus4-Rust. The finished remus4_rust.exe stays in git
-/engines_instructor/Remus4-Rust/target/
+# Rust compiler output and local diagnostics are not source files.
+/rust_engines/Remus*/target/
+/rust_engines/Remus*/logs/
+/rust_engines/Remus*/search_log.txt
+/rust_engines/Remus*/ponder_log.txt
 
-# The workshop designer's tools, kept on David's computer only
+# Designer tools, private generated code, hooks, and workflows stay local.
 /admin/
-
-# David's commit hook and GitHub workflow, kept on his computer only
+/engines_student/
 /.githooks/
 /.github/
 
-# Experimental Rust engine build directories; finished executables stay in git.
-/engines_instructor/Remus5-Rust/target/
-/engines_instructor/Remus6-Rust/target/
-/engines_instructor/Remus7-Rust/target/
-/engines_instructor/Remus7-Rust/ponder_log.txt
-
-# Runtime diagnostics belong to each local engine installation.
-/engines_instructor/*-Rust/logs/
-/engines_instructor/*-Rust/search_log.txt
-/engines_instructor/*-Rust/ponder_log.txt
-
-# Python ponder diagnostics are local tournament evidence.
-/engines_instructor/Remus5/ponder_logs/
+# Local setup-state markers
+/.workshop-student.json
