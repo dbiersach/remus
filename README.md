@@ -89,11 +89,11 @@ On Day 5 they apply the same search ideas to science problems.
 | Place | Contents |
 | --- | --- |
 | `Day 1 - ...` through `Day 4 - ...` | Day and period syllabuses, with one `RemusN` subfolder for that day's Python engine |
-| Each `Day N - .../RemusN` | `RemusN.md`, `remusN.bat`, `verify_remusN.py`, supplied data, and the engine modules the student pair types |
+| Each `Day N - .../RemusN` | Python engine source, `RemusN.md`, `remusN.bat`, `verify_remusN.py`, and supplied data |
 | `Day 5 - Solve a science problem with chess AI` | Day and period syllabuses and the two science starter programs |
-| `rust_engines/Remus5` through `Remus8` | Supplied Rust engines, executable files, source, and engine documentation; students do not type Rust |
+| `rust_engines/Remus5` through `Remus8` | Rust source, ready-to-run Windows executables, and engine documentation |
 | `docs` | Shared guides and briefs, containing only Markdown and PDF files |
-| `utils` | Student setup, VS Code extension installation, and Lucas Chess engine registration scripts |
+| `utils` | VS Code extension installation, Lucas Chess engine registration, and other setup utilities |
 | `utils/images` | Code screenshots, science figures, chess illustrations, and guide screenshots, grouped into named subfolders |
 | `utils/mermaid` | Diagram sources, rendered SVGs, and manifests, grouped by engine or topic |
 
@@ -104,8 +104,9 @@ receive `opening_book.txt`. Student pairs do not type those data files.
 
 ## Setup
 
-Use a fresh student clone on Windows 11. Setup removes the supplied Python engine
-modules so students can type them. Do not run initial setup over existing student work.
+To try Remus on your own Windows 11 PC, follow these steps. The repository includes
+working Python engines and compiled Windows versions of the Rust engines, so you
+can play them without typing the lessons or installing a Rust compiler.
 
 1. Install Git, VS Code, and uv in PowerShell if they are not already installed:
 
@@ -119,45 +120,48 @@ modules so students can type them. Do not run initial setup over existing studen
    and reopen PowerShell so it finds the installed commands. This installs tools;
    it does not test Remus.
 
-2. Clone the public repository and enter its folder. No GitHub account is required:
+2. Download the repository and enter its folder. Git calls this download a clone.
+   No GitHub account is required:
 
    ```powershell
    git clone https://github.com/dbiersach/remus.git Remus
    cd Remus
    ```
 
-   Expect download progress and a new Remus folder. Changing directory normally
-   prints nothing. Cloning does not run an engine.
+   Expect download progress and a new Remus folder. Run the remaining commands
+   from this folder. Keep the supplied engine source and data files in place.
 
-3. Install Lucas Chess from its [official download page](https://lucaschess.pythonanywhere.com/downloads)
+3. Prepare Python and the editor extensions:
+
+   ```powershell
+   uv sync
+   .\utils\install_vscode_extensions.ps1
+   ```
+
+   `uv sync` installs Python 3.14 if needed and creates the project's `.venv`
+   environment with its dependencies. The extension installer prints progress
+   messages for the VS Code tools used by this project. Neither command tests
+   chess behavior. If PowerShell blocks the extension script, run
+   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` and retry it.
+
+4. Install Lucas Chess from its [official download page](https://lucaschess.pythonanywhere.com/downloads)
    if it is not already installed. Use its default location under
    `%LOCALAPPDATA%\Programs\LucasChessR`. Open it, complete any first-run prompts,
    and wait for its main window so it creates its configuration files. Then close
-   it. Keep Lucas Chess closed while setup registers the engines.
-
-4. From the cloned Remus folder in PowerShell, prepare the student workspace:
+   it before registering the engines:
 
    ```powershell
-   .\utils\setup_student.ps1 -StudentCopy
+   uv run utils/install_lucas_engines.py
    ```
 
-   The script installs the VS Code extensions and runs `uv sync` to prepare Python
-   3.14 and dependencies in `.venv`. It automatically runs
-   `utils/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
-   Registration sets Remus7 and Remus8 to Hash 512 MiB and Threads 4, replacing
-   older values in their external-engine entries. Other saved options are kept;
-   existing tournament entries have separate settings.
-   It removes development material, Git history, and the temporary Python engine
-   modules. It keeps each engine guide, verifier,
-   launcher, and supplied data, and keeps the Day 5 starter programs and Rust engines.
-   Expect installation messages, engine registration messages, and
-   `Workshop setup complete`. If Lucas Chess is missing, uninitialized, or open,
-   setup stops with instructions. Registration must succeed before setup removes
-   student files or marks the workspace ready. On success the script
-   deletes itself. On failure it remains available for retry; read the error before
-   continuing. Add `-WhatIf` to preview cleanup without installing or deleting anything.
-   If script execution is blocked, use
-   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` and retry.
+   Expect messages saying each Remus engine was added, updated, or already
+   registered. The script connects Lucas Chess to the Python launchers in the Day
+   folders and the executables under `rust_engines`. It disables Lucas Chess's
+   external opening books for Remus so each engine uses its own opening choices.
+   For Remus7 and Remus8, it sets Hash to 512 MiB and Threads to 4, replacing older
+   saved values in their external-engine entries. Other saved options are kept;
+   existing tournament entries have separate settings. Registration checks launch
+   paths, not playing strength or chess correctness.
 
 5. Open the workspace:
 
@@ -168,40 +172,51 @@ modules so students can type them. Do not run initial setup over existing studen
    VS Code opens with the project interpreter and formatting settings. Open a Python
    file and confirm the Run Python File button is available. This checks editor setup.
 
-6. Reopen Lucas Chess and confirm Remus1 through Remus8 under **External engines**.
-   Setup registers them automatically; no separate registration step is needed.
-   Registration records launch paths; Python engines cannot play until their modules
-   have been typed and their verifier passes. If an entry is missing, follow the
-   [registration repair instructions](docs/lucas_chess_guide.md#part-2-find-the-engines).
+6. Check Remus1 before playing:
 
-After setup, use VS Code's Run Python File button, Lucas Chess, and File Explorer.
-No further Git or uv commands need to be typed during the workshop. The supplied
-batch launchers use uv automatically. Follow the [Lucas Chess guide](docs/lucas_chess_guide.md)
-for games and tournament settings, with GUI opening books set to None.
+   ```powershell
+   uv run "Day 1 - Remus1 plays legal chess/Remus1/verify_remus1.py"
+   ```
 
-## Working through the days
+   Expect actual and expected results, followed by `Remus1 passes every test` and
+   elapsed time. This checks reference move counts and legal UCI replies; it does
+   not establish an Elo rating or prove every possible position correct. If it
+   prints `PROBLEM:` or a traceback, resolve that error before playing.
 
-Start Remus1 by typing the screenshots into its Day 1 engine folder. At the start
-of Days 2, 3, and 4, copy only the previous engine's runtime `.py` modules to the
-next day's engine folder, excluding its verifier. Keep the destination's supplied
-launcher, version verifier, guide, and data. Edit the copied modules as the period
-screenshots show. Leave the earlier version available for comparison games.
+7. Reopen Lucas Chess and confirm Remus1 through Remus8 under **External engines**.
+   Select Remus1 as your opponent to try a game. Follow the
+   [Lucas Chess guide](docs/lucas_chess_guide.md) for the game controls and engine
+   settings. If an entry is missing, close Lucas Chess and rerun the registration
+   command in step 4.
+
+The supplied Python launchers run uv automatically. Keep the repository in the
+same location after registration. If you move it, close Lucas Chess and rerun
+`uv run utils/install_lucas_engines.py` from the new location to update the paths.
+
+## Explore and modify the engines
+
+Start with the Remus1 source and its guide, then compare each successive version.
+The Day folders include lessons and code screenshots if you want a guided
+walkthrough. You can also edit the supplied code directly and try your own ideas.
+Before playing a modified Python engine, run its `verify_remusN.py` in the same
+folder. Use `verify_remus2.py`, `verify_remus3.py`, or `verify_remus4.py` for the
+corresponding version.
 
 | What you run | Expected result | What it checks |
 | --- | --- | --- |
 | A helper module such as `make_move.py` | Exits without output, or shows a traceback | Syntax, imports, and any top-level initialization; it does not call the chess functions to test them |
 | `uci.py` | Waits silently for UCI commands; no board window | Startup only; close that terminal when finished |
 | The day's `verify_remusN.py` | Prints actual and expected results, then `RemusN passes every test` and elapsed time; Day 4 intermediate checks name the period | Reference move counts, UCI legal replies, and version-appropriate evaluation and search checks; not every position, Elo, or Lucas configuration |
-| Lucas Chess with a completed Python engine | Board moves and clocks advance | The student pair's engine and launcher operate through the GUI for that game |
+| Lucas Chess with a completed Python engine | Board moves and clocks advance | The engine and launcher operate through the GUI for that game |
 | A Day 5 science program | Prints measurements and displays graphs; close each graph to continue | Exercises the completed functions; compare results with the period instructions, since printed expectations are not automatic pass/fail assertions |
 
 `PROBLEM:` or a traceback means a verifier has not passed. Fix the named problem
 and rerun it before playing that version. Short games illustrate behavior; they do
 not establish a dependable Elo rating or prove correctness for all positions.
 
-For a USB copy on another computer, preserve the typed modules. Install the tools,
-run `uv sync` in that copy, install the editor extensions, and register its engines.
-Do not apply initial student cleanup to completed work.
+To use your modified engines on another computer, copy the project with your
+source and data files, then follow the setup steps there. Let `uv sync` create
+that computer's Python environment rather than copying `.venv`.
 
 ## License
 
