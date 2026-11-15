@@ -313,6 +313,23 @@ position can be visited more than once. These recorded results give a sense of
 scale; they use different positions and search depths, so they are not a controlled
 speed comparison across all versions. Rates are rounded.
 
+**Kiwipete** is the nickname of a standard chess test position by Peter McKenzie.
+White has 48 legal moves, including captures and both castling moves. Its many
+possible continuations exercise move generation and king-safety checks; deeper
+lines also include en passant and promotions. The [Chess Programming Wiki shows
+the position and its published move counts](https://chessprogramming.org/Perft_Results#Position_2).
+
+Remus uses it in two ways. A legal-move counting test, called **perft**, explores
+every legal continuation to a chosen depth: Kiwipete has 48 one-move sequences,
+2,039 two-move sequences, and 97,862 three-move sequences. Here a move means one
+side's turn, also called a ply. Matching these counts checks the move generator
+on that position. A search benchmark instead asks the engine to choose a move
+from the same position and measures its work and elapsed time. Search skips
+branches and can extend others, so its node count is not the perft count.
+Kiwipete supplies a repeatable, demanding position; the suite also includes
+openings and endings because one position cannot establish overall speed or
+playing strength.
+
 | Engine | Search threads | Approximate nodes per second | Recorded benchmark |
 | --- | ---: | ---: | --- |
 | Remus1 | 1 | Not applicable | Chooses a random legal move without searching ahead |
@@ -359,7 +376,7 @@ builds return the same scores, node counts, and principal variations.
 
 The numbers are millions of search nodes per second on the workshop designer's computer,
 summed over six fixed-depth searches: the starting position, an Italian opening, the
-"kiwipete" test position, a quiet middlegame, a rook ending, and a pawn race. With one
+Kiwipete test position, a quiet middlegame, a rook ending, and a pawn race. With one
 worker both builds search the same 34 million positions, so the ratio is also the ratio
 of the two run times. With four search threads the threads reach the shared table in a
 different order on every run, the two builds visit different positions, and only the
