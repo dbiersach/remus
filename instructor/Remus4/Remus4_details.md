@@ -1,4 +1,247 @@
-# Remus4: instructor source reference
+# Remus4: instructor guide and source reference
+
+## Instructor overview and learning goals
+
+Teach Remus4 as deciding where additional search is worth its cost, while judging
+more kinds of positions. Keep three questions separate: Is this move legal?
+What does this position appear to be worth? How much of this continuation should
+we search? The first has a rule-based answer; evaluation and selective search
+use models and heuristics. Their smaller search trees do not prove that omitted
+continuations are unimportant in every position.
+
+Remus4 has 630 runtime lines, 146 more than Remus3. Supplied JSON values, opening
+lines, and verifier code are outside the typing total. It adds a fifth position
+field, game and search history, static exchange evaluation, selective search,
+and more evaluation terms. It retains the plain-container design from
+[Remus3](../Remus3/Remus3_details.md#instructor-overview-and-learning-goals).
+The [Day 4 syllabus](../../Day%204%20-%20Remus4%20adds%20everything%20else/Day_4_Syllabus.md)
+orders the work by period; the annotated reference below explains each source line.
+
+By the end, a student should be able to trace a GUI request through book lookup
+or native search, describe how a child position stays independent, explain a
+score's perspective, and identify which decisions use rules, cached bounds, or
+heuristics. That understanding is more useful than memorizing the names of every
+search technique.
+
+## Recommended teaching sequence
+
+| Period | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| [1: History and selective search](../../Day%204%20-%20Remus4%20adds%20everything%20else/Day_4_Period_1_Syllabus.md) | Add the halfmove field; replay game-history keys; separate past game positions from the active search path; implement draw scoring; explain full-window search, then principal variation search (PVS), late-move reduction (LMR), and futility; verify the checkpoint. | State and draw context must be understood before pruning changes which branches are visited. Explain the search variants in dependency order even if their statements appear in a different order in the file. | Why is a repeated position not necessarily captured by the board alone? When must a reduced search be repeated at full depth? |
+| [2: Exchanges](../../Day%204%20-%20Remus4%20adds%20everything%20else/Day_4_Period_2_Syllabus.md) | Play out one exchange on paper; choose the cheapest attacker; record alternating gains; work backward allowing either side to stop; add static exchange evaluation (SEE) and delta filters to quiescence; verify. | A short numerical example makes the backward recurrence understandable before it becomes a compact loop. | Why can a capture win material immediately but lose material after recapture? |
+| [3: Endgame evaluation](../../Day%204%20-%20Remus4%20adds%20everything%20else/Day_4_Period_3_Syllabus.md) | Accumulate material and phase; locate kings; count mobility with existing movement code; recognize a limited insufficient-material case; blend king tables; add mating guidance; verify. | Students first collect the data that the new terms need. A continuous king-table blend is easier to justify than an unexplained switch between phases. | Why should the same king square receive different scores when queens are on or off the board? |
+| [4: Pawn-dependent terms](../../Day%204%20-%20Remus4%20adds%20everything%20else/Day_4_Period_4_Syllabus.md) | Reuse pawn counts and king locations; estimate pawn races; score rook files; score phase-weighted king cover; run the full verifier; observe the scheduled games. | Several features can share the same data gathered in Period 3 instead of duplicating scans and representations. | Which data serves more than one evaluation term? Which bonus is a heuristic rather than proof of a win? |
+
+For Period 1, teach an unreduced first move before the later-move probe. Explain
+PVS as a question about a bound, then LMR as a question asked with less depth,
+then futility as permission to omit some remaining work. This conceptual order
+prevents three separate conditions from looking like arbitrary ways to skip code.
+Do not add extra student typing or change the scheduled checkpoint order.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| Position | `(board, white, castling, en_passant, halfmove)`. | Row 0 is rank 8 and column 0 is file a. All constructors and consumers must agree on five fields. `halfmove` counts plies since a pawn move or capture, not full move pairs. |
+| Board and move | The same 64-integer list and `(start, target, promotion)` tuple. | `make_move()` still copies the board before changing it. The new clock does not require another board representation. |
+| Position key | Hash of the board tuple, side, rights, and en passant; excludes `halfmove`. | Repetition identity is separate from the no-progress clock. The same key also indexes the table, so table reuse does not encode all draw context. |
+| Game history | Local `game_history` in UCI, containing keys before each replayed game move. | The current root position is not appended as a previous occurrence. Replaying the supplied start-position move list reconstructs both board and history. |
+| Search history | Module-level `history`, copied from game history before each aspiration attempt. | Search appends ancestors before descending and pops on normal return. A membership check looks back within the halfmove window. This is a path, not a move-ordering history heuristic. |
+| Cache and killers | The same dictionary of `(depth, score, bound, move)` and 128 two-move killer rows. | They are process-wide search aids. They do not replace game history, and their entries are not complete proof records. |
+| Exchange workspace | A copied board, current attacker square, and `gains` list. | Only one target square is analyzed. The list supports backward decisions to stop or continue the exchange. |
+| Evaluation workspace | Local `material`, `phase`, `kings = [0, 0]`, `pawns = ([], [])`, and `rooks = ([], [])`. | Index 0 means White and 1 means Black. One board scan collects inputs for several later terms. |
+| Phase and tables | Piece-kind phase weights, middle/endgame king tables, and ten pawn-file counts per side. | Phase weights are 1 for each minor, 2 per rook, and 4 per queen, capped at 24. Padding in the pawn counts supports neighboring-file tests. |
+
+`make_move()` resets `halfmove` for every pawn move or occupied-target capture,
+otherwise increments it by one. En passant resets it because the moving piece is
+a pawn even though its target starts empty. A hypothetical null move increments
+the clock and clears en passant; it is still a search construction, not a real
+move to send to Lucas Chess.
+
+Keep the two meanings of `white` distinct from the integer `side` used by
+evaluation: `white=True` means White moves next, while `side=0` indexes White's
+collected pieces. Reversing those conventions silently changes scores and pawn
+race calculations.
+
+## State ownership, classes, and Python scope
+
+`SearchTimeout` is still the only custom class. The additional chess knowledge
+fits into functions and ordinary containers; no piece objects or board methods
+are required. Type aliases in the annotated reference document these shapes.
+They do not add fields, validate tuples at runtime, or make the contained board
+immutable.
+
+`uci.main()` owns `game_history`; `think()` owns a copied search history through
+the module variable `history`. The assignment `history = game_history[:]`
+requires `global history` in `think()`. Recursive `history.append(key)` and
+`history.pop()` mutate the list and do not require that declaration. Copying
+protects the game's list from speculative search paths.
+
+On normal returns, appends and pops balance, including the null-move path. A
+`SearchTimeout` can unwind before a pending pop because these calls are not
+wrapped in `finally`. The interrupted search stops, and every new attempt starts
+with a fresh copy of `game_history`. Do not claim the module's history is always
+clean after an exception, or catch and resume a branch without restoring it.
+The caller's game history remains unchanged.
+
+`exchange_score()` deliberately mutates its own copied board while simulating a
+sequence on one square. This does not violate the parent-position contract:
+it owns that scratch list. `cheapest_attacker()` only reads it through generated
+candidates. Evaluation also owns fresh lists per call; collecting pawns and rooks
+never mutates a position.
+
+Module globals keep recursive signatures short, but this design supports one
+active search per module instance. It is not a template for sharing these mutable
+lists across threads. The Rust parallel engines solve a different ownership
+problem and should be taught separately.
+
+## Control flow and function call tree
+
+![Remus4 module dependencies](../../utils/mermaid/Remus4/modules.svg)
+
+The [complete function diagram](../../utils/mermaid/Remus4/full_elk.svg) expands the
+helpers grouped in this teaching tree.
+
+```text
+uci.main()
+  startup -> load_book()
+  position -> position_key() before each replayed make_move()
+  go -> legal_book_move() [book candidates plus native legality checks]
+    otherwise: search.think(position, game_history, seconds, longest)
+      copy game_history before each depth/window attempt
+      alpha_beta()
+        count_node(), position_key(), is_draw() at non-root nodes
+        in_check(); check extension; depth boundary -> quiescence()
+        tt.probe(), evaluate(), optional null-move recursion
+        append current key; ordered_moves() -> generate_moves()
+        make_move(), in_check(), classify legal and calm moves
+        first legal move: full-window alpha_beta()
+        later moves: futility decision, PVS probe, optional depth reduction
+        re-search an improving probe when required
+        pop history; classify result; tt.store()
+      principal_variation(); completed-iteration info; time decisions
+  print bestmove
+
+quiescence()
+  count_node(), evaluate(), ordered_moves()
+  for eligible non-promotion moves: delta test, exchange_score()
+    exchange_score() -> cheapest_attacker() -> generate_moves()
+  make_move(), in_check(), recursive quiescence()
+
+evaluate()
+  piece_moves() for mobility of knights, bishops, rooks, and queens
+  insufficient-material subset; blend king tables; bishop-pair term
+  pawn_terms() -> king_safety()
+  mating_bonus(); convert score to side-to-move perspective
+```
+
+For an ordinary node, the first legal move receives a full-depth, full-window
+search. A later move is first tested with the narrow window `(-alpha - 1, -alpha)`
+from the child's perspective. That PVS probe asks whether the move can beat alpha.
+If it improves alpha and the code's retry condition holds, the move is searched
+again with the full window and normal depth.
+
+A late calm move can lose one ply when depth is at least 3, more than three legal
+moves have been encountered, and the move is not a killer. `reduce` is a Boolean;
+Python uses it as 0 or 1 in `depth - 1 - reduce`. This saves a separate branch but
+is worth explaining aloud. At depth 1, futility can skip a later calm move if
+`static + FUTILITY_MARGIN <= alpha`. `legal_count` is incremented before that
+skip, so pruned legal moves are not mistaken for absence of legal moves.
+
+Here, `quiet` means empty target and no promotion; `calm` additionally means neither
+the parent nor the opponent's king in the child is in check. Because en passant
+has an empty target, this compact classification treats it as quiet. Explain the
+actual predicate rather than equating it with every chess meaning of a noncapture.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| One extra tuple field for the clock | Reuses the existing state-transition design with little typing. | A positional tuple has no named-field protection. A missing field or mismatched unpacking breaks its contract across modules. |
+| A list of history keys | A slice and membership test express a short repetition heuristic. | Membership is linear and the fingerprints can collide. One prior occurrence is enough in this implementation; it is not a formal threefold-claim adjudicator. |
+| PVS and late-move reduction | Good move ordering lets many later moves receive a cheaper initial question. | Retries can erase savings, and depth reduction is heuristic. Preserve the full-depth recovery condition rather than presenting every reduced value as final. |
+| Futility and delta margins | A small number of conditions can avoid searching apparently unpromising moves. | Static scores and material gains can miss tactics. The margin is a heuristic, not a mathematical upper bound on every possible continuation. |
+| SEE reuses `generate_moves()` | Avoids a separate attacker-discovery implementation and its extra student code. | Generating all candidates repeatedly can be expensive. Pinned attackers are not fully filtered; this is approximate exchange analysis, not a complete tactical search. |
+| Mobility reuses `piece_moves()` | The same movement geometry supports both legal-move candidates and an evaluation term. | It counts pseudo-legal destinations, including some pinned movement, and excludes pawn and king mobility. It is not a count of all legal moves. |
+| One scan gathers phase, pieces, and king squares | Multiple evaluation terms share the resulting local data. | The terms still add runtime work; stronger evaluation is not automatically faster evaluation. |
+| Integer interpolation of king tables | A weighted sum avoids an abrupt middlegame/endgame switch and needs no floating-point model. | `//` floors, including negative values. The same arithmetic and rounding must be preserved in a behavior-preserving rewrite. |
+
+The ordinary king table entry in `TABLES` is zero because the king receives its
+blended contribution later. Otherwise king placement would be counted twice.
+Phase is capped at 24 because promotions can increase the available material.
+At phase 12 the two king tables have equal weights before integer rounding.
+Pawn cover is also scaled by phase, so its middlegame importance fades gradually.
+
+The insufficient-material shortcut returns 0 when there are no pawns and total
+phase is at most 1: bare kings or just one minor piece in addition to the kings.
+It does not recognize every drawn material configuration. `mating_bonus()` is
+active only at phase 8 or below with an absolute material advantage of at least
+400; it encourages driving the weaker king outward and bringing the stronger
+king closer. It is guidance, not detection of a forced mate.
+
+## Worked example to teach at the board
+
+For the clock and history, start from the initial position and play
+`g1f3 g8f6 f3g1 f6g8`. The placement, side, castling rights, and en passant field
+return to their initial values; `halfmove` is now 4. The position key excludes
+that clock, so it matches the original key. The replayed game history contains
+the initial position once. A non-root `is_draw()` test can therefore return true
+on this first recurrence. Contrast that search shortcut with the actual threefold
+rule before a student concludes that two occurrences always end a game.
+
+For SEE, draw a queen taking a pawn on a square defended by an enemy pawn, with
+no further recaptures. The gain list begins at 100. The recapture appends
+`900 - 100 = 800`. Working backward gives `-max(-100, 800) = -800` for the initial
+capture. The first side is not credited with a free pawn simply because the
+capture comes before its opponent's reply. Then remove the defender and ask
+which gain remains. Label these as illustrative exchange cases, not full mate
+or pin analysis.
+
+For evaluation, keep the kings on fixed squares and vary only the phase supplied
+to the blend: 24 selects the middlegame table, 12 mixes both equally, and 0 selects
+the endgame table. Ask which existing data also supports the pawn-shield term,
+rook-file bonuses, and the enemy king's distance to a promotion square. This
+connects individual bonuses to the shared representation rather than a list of
+unrelated tricks.
+
+## Verification, misconceptions, and limits
+
+Each Day 4 period has a supplied `verify_remus4.py` checkpoint. The first three
+report the completed period explicitly; the final one reports
+`Remus4 passes every test`. The verifier recognizes the implemented stage and
+checks reference cases, including native search without relying on a book move.
+Keep verification code outside the student typing total. A silent import remains
+a loading check, not a substitute for any of these checkpoints.
+
+Draw detection runs at non-root alpha-beta nodes before the ordinary terminal
+logic. It scores a 100-halfmove position or a matching ancestor as 0. The current
+quiescence recursion does not independently maintain this history or run the
+same draw test. The table key excludes both the halfmove clock and the preceding
+path; draw checks before a table probe do not make all cached results independent
+of that context. Raw en passant state is also included without canonicalizing
+whether an en passant capture is actually available. These are limits of the
+compact model, not a complete implementation of every competition draw rule.
+
+SEE has a special king-capture guard but does not fully establish the legality of
+every hypothetical attacker. Delta and SEE pruning are bypassed for promotions
+that reach that part of quiescence. The ordering still favors queen promotions;
+underpromotions and en passant are not exhaustively treated as tactical moves.
+Pawn-race scoring uses a king-distance estimate and a phase-zero guard, not a
+proof that every route is unobstructed or that promotion wins.
+
+Retain the distinction between the best move found so far and the last fully
+completed iteration: the root move can be updated before a timeout. The reported
+principal variation is reconstructed from table entries, and time limits are
+sampled rather than enforced asynchronously. No Python version here has threads,
+pondering, or an online tablebase.
+
+When discussing why the implementation is a good teaching fit, point to concrete
+savings: shared move geometry, supplied tables, positional tuples, ordinary
+containers, and reused helpers. Do not label it universally optimal. The
+[recorded performance discussion](../../docs/remus_versions.md#measuring-speed-and-playing-strength)
+concerns complete versions and specific measurement conditions. Legal-move
+checks, search regression checks, timing, and playing-strength evidence answer
+different questions; a classroom game cannot replace them.
 
 ## Line-by-line source reference
 

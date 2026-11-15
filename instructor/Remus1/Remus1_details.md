@@ -1,4 +1,169 @@
-# Remus1: instructor source reference
+# Remus1: instructor guide and source reference
+
+## Instructor overview and learning goals
+
+Teach Remus1 as a sequence of questions: What is a position? What changes when a
+piece moves? Is the king safe? Which candidate moves are legal? How does the GUI
+ask for one? Introduce the working game before optimization or recursive search.
+The student already knows basic coding and chess; the new task is expressing
+those rules precisely enough for a program to follow them.
+
+Remus1 has 189 runtime lines of Python. This count excludes supplied verification
+code, comments, docstrings, and blank lines. Its achievement is legal move choice,
+not strong play: `think()` chooses randomly from the legal candidates. The same
+board representation and rule functions support the later engines. Protect those
+contracts as students move toward Remus4.
+
+Use this overview to prepare explanations, then use the existing source reference
+below for individual statements. Students continue to type from the period
+screenshots, not this instructor solution. The [Day 1 syllabus](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Day_1_Syllabus.md)
+sets the schedule; the recommendations below explain the order within it.
+
+## Recommended teaching sequence
+
+| Period | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| [1: The board](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Day_1_Period_1_Syllabus.md) | Show one completed engine move; draw an 8 by 8 board; number its squares; encode pieces; construct `START_POSITION`; convert square names. | Concrete squares give meaning to indexing before tuples or bit operations become abstract syntax. | Why is e2 square 52? Why is a White knight 10, but a Black knight 2? |
+| [2: Moves and attacks](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Day_1_Period_2_Syllabus.md) | Trace one ordinary move on a copied board; add the special-move changes; remove castling rights; inspect attacks outward from a target; locate the king. | State transition comes before asking whether the resulting state is safe. Special moves demonstrate why a position needs more than piece locations. | Which object changes? Why can en passant expose a rook attack? |
+| [3: Move generation](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Day_1_Period_3_Syllabus.md) | Build a list of moves for one pawn; expand promotions; use directions and a sliding flag for other pieces; add castling; scan the board. | Small generators become one whole-position generator. The shared movement table makes differences between pieces explicit. | Why does the generator return candidates rather than guarantee that every move is legal? |
+| [4: Choosing and communicating](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Day_1_Period_4_Syllabus.md) | Combine generate, copy-make, and king-safety filtering; choose randomly; replay a UCI move list; request and print a move; verify before playing. | Only after the rules work does the text protocol have something meaningful to expose. | Why does the legality test inspect the mover's king even though the child says the opponent moves next? |
+
+Do not explain the entire program by walking down `uci.py` first. Give the GUI's
+request in one sentence, then build the helpers from the bottom up. At the end,
+trace the request from the top down so students can connect the pieces.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| Board | A list of 64 integer piece codes. | Row 0 is rank 8; column 0 is file a. `row * 8 + col` is one index, and `// 8` and `% 8` recover coordinates. One flat list needs only one shallow copy for a child position. |
+| Piece | Kind 1 through 6, plus 8 for White; 0 means empty. | `piece & 7` selects the kind and `piece & WHITE` selects the color bit. These are small piece codes, not a bitboard representing 64 squares. `is_own()` excludes the empty square. |
+| Position | `(board, white, castling, en_passant)`; `white` is a Boolean. | The side to move and historical rights travel with the board. A tuple fixes the order and number of fields; it does not freeze the list inside it. |
+| Castling rights | Integer mask: 1 and 2 for White; 4 and 8 for Black. | Moving a king or rook away and back must not restore a right. `RIGHTS_OF_SQUARE` maps the six home squares to the rights lost when a move touches them. Checking both endpoints also handles a rook captured at home. |
+| En passant | The skipped square, or -1 when absent. | This records a one-turn opportunity that cannot be inferred from the current arrangement of pieces alone. Every ordinary subsequent move clears it. |
+| Move | `(start, target, promotion)`; promotion is 0 or a piece kind. | One fixed shape represents ordinary moves and all four promotion choices. Castling and en passant effects are inferred from the position and move. |
+| Movement tables | Tuples of direction pairs, plus `PIECE_STEPS[kind] = (steps, slides)`. | Rooks and bishops differ by directions; queens combine them; kings and knights do not slide. Pawns keep a separate generator because moving and capturing obey different rules. |
+| Candidate and legal moves | Fresh lists of move tuples within each call. | Helpers append to the caller's output list. `think()` builds a distinct list after checking king safety. |
+
+`START_POSITION` contains the same list object as `START_BOARD`. Treat both as
+read-only templates. The position returned by `make_move()` must have a different
+board list; the integer entries can be shared because integers are immutable.
+This is why `board[:]` suffices and a recursive deep copy is unnecessary.
+
+## State ownership, classes, and Python scope
+
+There are no custom classes in Remus1. `Position` and `Move` in the annotated
+source are type aliases, not objects with constructors or methods. Lists, tuples,
+and ordinary functions let students see every field and operation without first
+learning a class hierarchy. The aliases and function annotations are instructor
+explanations; the student copies omit them.
+
+Module-level constants and the starting position are constructed when Python first
+imports `board`. A `def` creates a function; its body waits until a call. The
+`if __name__ == "__main__"` guard starts the input loop when `uci.py` is run directly,
+but prevents it from waiting for input when a verifier imports it. Module imports
+normally reuse the already loaded module within that process.
+
+In `make_move()`, unpacking creates local names referring to the supplied fields.
+`board = board[:]` then rebinds the local name to a new list. Later assignments
+such as `board[target] = piece` mutate that new list, not the caller's list.
+Rebinding the local `castling` integer or `en_passant` value also leaves the
+parent's fields unchanged. In contrast, `moves.append(...)` in a generator
+intentionally mutates the list its caller supplied.
+
+`uci.main()` owns the current game position as a local variable. On a `position`
+command it reconstructs that position from the starting board and the supplied
+moves. On `go` it asks for a move; printing `bestmove` does not itself advance the
+stored game position. The next position command supplies the authoritative game
+history. There is no global mutable search context in Remus1, although random
+selection uses the standard library's random-number generator.
+
+## Control flow and function call tree
+
+![Remus1 module dependencies](../../utils/mermaid/Remus1/modules.svg)
+
+The following teaching tree groups repeated calls. The [complete function diagram](../../utils/mermaid/Remus1/full_elk.svg)
+shows individual dependencies; this tree emphasizes the path to a move.
+
+```text
+uci.main()
+  position command
+    board.parse_square()
+    make_move.make_move() for each supplied move
+  go command
+    uci.read_time()
+    search.think()
+      move_generation.generate_moves()
+        board.is_own()
+        pawn_moves() -> add_pawn_move()
+        piece_moves()
+        castling_moves() -> attacks.is_attacked()
+      make_move.make_move() for each candidate
+      attacks.in_check() -> attacks.is_attacked()
+      random.choice() from the legal list, or None
+    board.square_name() and promotion formatting
+    print bestmove, with flushing
+```
+
+`make_move()` applies a candidate; it is not a legality validator.
+`generate_moves()` checks movement geometry, occupancy, and some castling
+conditions. The final filter checks the mover's king on the resulting board.
+For castling, the generator checks the starting and transit squares; this final
+filter checks the destination. That division avoids a second special legality
+system for pinned pieces and discovered attacks.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Flat board and copy-make | A built-in list slice replaces hand-written undo records for captures, promotion, castling, and en passant. Parent positions survive early returns without restoration code. | Copying 64 references and allocating a list still costs time. This is a good fit for this small Python engine, not proof that copy-make beats undo in every language or implementation. |
+| Direction tables and one sliding loop | The same control flow handles several piece types. Students type and debug fewer nearly identical branches. | Students must first trace one direction carefully. Boundary tests use row and column, preventing a step from wrapping across files. |
+| Target-centered attack detection | Rays stop at their first occupied square; pawn and knight offsets answer the attack question directly. | Attacks and legal moves are different concepts. Do not implement attacks by recursively asking whether the attacker has a legal move. |
+| `get(square, 0)` with a rights mask | The six special squares use one small dictionary and one loop over the two endpoints. | Teach the mask as a set of permissions before introducing `&` and `~`. The integer records history, not current rook placement. |
+| Integer repetition when constructing ranks | `[PAWN] * 8` and `[EMPTY] * 32` express repeated immutable values with little typing. | Repeating a mutable list would share it. This safe integer example does not justify `[[0] * 8] * 8`. |
+| Plain `if`, loops, unpacking, and early returns | Students can trace state without callbacks, decorators, or inheritance. | A short statement is useful only if the reader can explain its condition and result. There is no requirement to compress every branch into one line. |
+
+The runtime uses standard-library and sibling modules. Reducing source length is
+not the same as optimizing every hot path: `in_check()` deliberately finds the
+king with `board.index()` rather than maintaining another piece of state through
+every move. Explain that consistency has a maintenance cost too.
+
+## Worked example to teach at the board
+
+Trace `e2e4` before any search. The starting piece at e2 is 9, a White pawn.
+`parse_square("e2")` returns 52 and `parse_square("e4")` returns 36, so the move
+is `(52, 36, 0)`. Its distance is 16. `make_move()` copies the board, puts 9 at
+36, clears 52, changes the side to Black, retains rights 15, and records the
+skipped square 44, e3. The original board still has its pawn at 52.
+
+Now distinguish three questions: the pawn generator can propose this move;
+`make_move()` can apply it; and the king-safety filter decides whether it is legal
+in this position. Ask the student to repeat the reasoning for a pawn pinned to its
+king. The same movement geometry may be available while the resulting move is
+illegal. This example prepares both the recursive child positions of Remus2 and
+the historical fields needed later.
+
+## Verification, misconceptions, and limits
+
+Before running anything, state the expected result. A helper module should load
+silently; that checks syntax, imports, and initialization only. The completed
+student engine's `verify_remus1.py` should report matching reference move counts
+and legal UCI replies, then `Remus1 passes every test`. The starting position has
+20 legal moves and 400 legal two-ply continuations; perft counts continuations,
+not evaluation strength. Keep the supplied verifier outside student typing totals.
+
+Have the student explain why both an illegal pinned move and an en passant move
+that exposes the king are rejected by the same final test. Ask why `None` becomes
+UCI `0000` only when there is no legal move. Remus1 does not score checkmate versus
+stalemate for search, evaluate material, or use the requested thinking time; its
+`seconds` parameter preserves the interface that Remus2 will use.
+
+The compact UCI adapter expects the workshop's `position startpos moves ...`
+commands and trusted move lists. It is not a general FEN parser or a validator of
+arbitrary user input. Its synchronous loop does not implement asynchronous
+`stop` or pondering. A verifier pass covers its reference cases; a game through
+Lucas Chess demonstrates integration for that game, not exhaustive correctness
+or a measured Elo rating.
 
 ## Line-by-line source reference
 

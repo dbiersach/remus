@@ -1,4 +1,201 @@
-# Remus3: instructor source reference
+# Remus3: instructor guide and source reference
+
+## Instructor overview and learning goals
+
+Teach Remus3 as using limited thinking time more effectively. Students already
+have legal moves, evaluation, negamax, and iterative deepening. Their next question
+is why an engine should recompute an answer when it reaches the same position
+again. Separate three ideas throughout the lesson: adding chess knowledge,
+reusing earlier search work, and deciding how much new work to attempt.
+
+Remus3 has 484 runtime lines, 184 more than Remus2. Its supplied JSON tables and
+opening book require no student transcription, and its verifier is excluded from
+typing totals. The position still has four fields. New modules hold the
+transposition table and opening book; search and evaluation build on
+[Remus2's contracts](../Remus2/Remus2_details.md#instructor-overview-and-learning-goals).
+The [Day 3 syllabus](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Day_3_Syllabus.md)
+provides the schedule. This overview explains why its steps depend on one another.
+
+## Recommended teaching sequence
+
+| Period | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| [1: Evaluation and identity](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Day_3_Period_1_Syllabus.md) | Identify pawn weaknesses on a board; introduce `position_key()` and `move_text()`; place shared mate scoring in `board.py`; collect pawns; count files; score passed pawns, bishop pairs, and rook placement. | Students meet the key before the cache that uses it. Collecting data during the existing board scan prepares several evaluation terms without introducing a separate board model. | Why can equal piece placements still represent different positions? Why are there ten pawn-file counters rather than eight? |
+| [2: Remembering search](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Day_3_Period_2_Syllabus.md) | Show a transposition; explain exact scores and bounds; implement probe/store; normalize mate distance; use stored moves for ordering; add killer moves; introduce the null-move hypothesis and its restrictions. | A cache is only useful when students understand what the cached answer promises. Null-move pruning comes last because it is a heuristic shortcut rather than simple reuse. | Why is a shallow table hit still useful? Why is a lower bound different from an exact score? |
+| [3: Book and clock](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Day_3_Period_3_Syllabus.md) | Match an opening prefix; validate its proposed move; fall back to native search; distinguish target and hard time budgets; add aspiration windows and retries. | A stored suggestion must cross the engine's legality boundary. Time control then decides how long the fallback searches, while aspiration reuses the prior score as a prediction. | What happens when no book line matches? What happens when a narrow score window was wrong? |
+| [4: Explain the result](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Day_3_Period_4_Syllabus.md) | Follow table moves to form the principal variation; attach it to a completed iteration's report; verify; observe the scheduled games. | Students can explain a predicted continuation only after they understand where its stored moves came from. | Is the displayed line a promise of what the opponent will play? Does a book move alone prove that a book was consulted? |
+
+Keep this progression concrete: first draw two move orders reaching one board,
+then draw a single table entry, and only then discuss a dictionary holding many
+entries. Before null-move pruning, revisit a pawn ending where being forced to
+move is a disadvantage. That example gives meaning to the material guard.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| Position and move | `(board, white, castling, en_passant)` and `(start, target, promotion)`. | Row 0 is rank 8 and column 0 is file a. Copy-make and the final king-safety filter retain the Remus1 contract. |
+| Position key | `hash((tuple(board), white, castling, en_passant))`. | The temporary board tuple makes its contents hashable. Side to move and rights distinguish otherwise identical boards. The returned integer is a fingerprint, not a collision-free identity or a persistent file format. |
+| Table entry | `table[key] = (depth, score, bound, move)`. | Depth limits when a result can answer a search request. `EXACT`, `LOWER`, and `UPPER` express whether the stored score is a result or a bound. The move can help ordering even if the depth is insufficient. |
+| Killer moves | A list of 128 independently created two-item lists. | Each root-relative ply remembers up to two moves that produced quiet cutoffs. Index by ply, not remaining depth. Rows must not alias one another. |
+| Pawns and file counts | `pawns = ([], [])`; two ten-element count lists. Index 0 means White; 1 means Black. | Real files occupy slots 1 through 8. Empty padding at 0 and 9 lets the isolated-pawn test inspect both neighbors without special edge branches. |
+| Opening book | A list of `(side, line)` tuples; `line` is a list of UCI move strings. | A simple prefix scan matches the supplied repertoire. An empty side label permits both sides; `White` and `Black` labels select repertoire use for that side. |
+| Played game moves | `played`, local to `uci.main()`, contains UCI strings from the position command. | These strings match opening-book prefixes. They are not search history, hash keys, or a repetition detector. |
+| Search state | `nodes`, `deadline`, `best_move`, and `killers`; plus local `score`, `seconds`, and `longest` in `think()`. | Search counters and current best move reset per request. The table and killer lists persist in the running process. |
+
+`pawn_terms()` counts each additional same-file pawn as a doubled-pawn penalty,
+checks neighboring file counts for isolation, and scans enemy pawns on the same
+or adjacent files for passed-pawn status. `PASSED_BONUS` is indexed by distance in
+ranks toward promotion, with opposite rank directions for the two colors.
+The final score is still converted from White-minus-Black to the side-to-move
+perspective exactly once.
+
+## State ownership, classes, and Python scope
+
+`SearchTimeout` remains the only custom class. Position and move aliases in the
+annotated source describe ordinary containers. New capabilities are modules and
+functions, not a growing inheritance hierarchy.
+
+`import transposition_table as tt` gives search an explicit module boundary:
+`tt.probe()` and `tt.store()` communicate through that module's dictionary.
+`table[key] = ...` and `table.clear()` mutate the existing dictionary, so they do
+not require a `global table` declaration. Assigning `best_move` or incrementing
+`nodes` does require `global` inside search functions. Assigning a killer row
+mutates the outer list rather than rebinding its module name.
+
+The killer initialization loop appends a fresh `[None, None]` each time. Replacing
+it with `[[None, None]] * 128` would make all plies share the same row. Similarly,
+`pawns = ([], [])` contains two distinct mutable lists inside an immutable tuple.
+The tuple groups sides; it does not prohibit appending pawn squares.
+
+Putting `MATE_SCORE` in `board.py` lets both search and the table import it without
+creating a search/table import cycle. `move_text()` likewise gives UCI and the
+principal-variation reporter one formatting function. Imports form a dependency
+graph; alphabetical source order is not a teaching dependency order.
+
+The JSON tables load during evaluation import. `load_book()` runs explicitly at
+UCI startup; a missing book leaves native search available. `book` is populated
+by appending, so repeatedly calling the loader is not an idempotent reload.
+The normal program calls it once. This engine does not provide a complete
+new-game reset protocol for all caches; avoid presenting those caches as local
+to a single game or making concurrent searches share this module state.
+
+## Control flow and function call tree
+
+![Remus3 module dependencies](../../utils/mermaid/Remus3/modules.svg)
+
+This is a teaching map; repeated rule helpers are grouped. The [complete function diagram](../../utils/mermaid/Remus3/full_elk.svg)
+shows individual dependencies.
+
+```text
+uci.main()
+  startup -> opening_book.load_book()
+  position -> parse_square(), make_move(); retain played move strings
+  go -> read_time(), legal_book_move()
+    opening_book.book_moves() -> prefix matching and shuffle
+    generate_moves(), make_move(), in_check(), move_text()
+    if a legal book move exists: return it without search
+    otherwise: search.think()
+      alpha_beta()
+        count_node(), in_check(); extend checks
+        at depth boundary: quiescence() -> evaluate() and tactical recursion
+        otherwise: position_key(), tt.probe()
+        evaluate() -> pawn_terms()
+        has_pieces(); optional reduced null-move alpha_beta()
+        ordered_moves() -> generate_moves()
+        make_move(), in_check(), recursive alpha_beta()
+        update killers and root best_move; tt.store()
+      retry aspiration failures as needed
+      principal_variation() -> position_key(), tt.probe(), move_text(), make_move()
+      print completed-depth info; apply time decisions
+  format and print bestmove
+```
+
+At non-root nodes, a sufficiently deep exact hit can return immediately. A lower
+bound cuts off only when it reaches beta; an upper bound is useful for return
+only when it is at or below alpha. The root does not use this early return path:
+it must establish a move for the current request. Stored moves influence ordering
+by matching moves generated in the current position.
+
+Before storing a result, search compares `best_score` with the original alpha
+and beta. A fail-high result is `LOWER`; a fail-low result is `UPPER`; an interior
+result is `EXACT`. Mate scores are adjusted on storage and reversed on probing so
+root-relative ply does not give a reused mate an incorrect distance.
+
+The null position changes side, preserves the board and castling rights, and
+clears en passant. It is a hypothetical pass, not a legal chess move. The search
+requires a non-root node, no check, sufficient depth, a static score at least
+beta, and some non-pawn material. It also prevents consecutive null probes with
+`can_null=False`. The board can be shared for this probe because actual moves
+still create copies.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Python dictionary keyed by a board fingerprint | A short `store()`/`probe()` interface exposes reuse without teaching fixed-size buckets, replacement ages, or incremental hashing. | Building the tuple and hash scans the board. A hash collision can confuse entries because the full position is not retained for comparison. |
+| Four-field entry and named bound constants | Keeps the cache's meaning visible when unpacked. | This is search information at a depth, not merely a remembered evaluation. Bounds and mate normalization are essential to its interpretation. |
+| Whole-table clearing at capacity | Avoids a replacement-policy subsystem students would have to type. | `len(table) > MAX_ENTRIES` is checked before insertion, so the dictionary can temporarily exceed two million entries. Clearing loses useful work and can cause pauses; this is an entry limit, not a fixed MiB allocation. |
+| Two killer moves per ply | A small hint improves move ordering without a position-indexed structure. | The same ply can describe different boards. The generator must still supply the move, and legality must still be checked. |
+| Ten pawn-file counters with zero padding | Removes separate a-file and h-file isolation cases and reuses counts across pawns. | Building counts has a cost. The small fixed list is chosen for clarity and concise indexing, not as a universal superiority claim over dictionaries. |
+| Supplied text book with prefix matching | Keeps opening data out of student source and makes the chosen continuation inspectable. | It scans lines rather than maintaining a trie or indexed position book. Missing data falls back to search; a candidate still needs native legality validation. |
+| Aspiration and adaptive time | Uses the previous score and move to guide the next iteration. | Wrong predictions cause re-searches; unstable choices can consume more time. These techniques are not free reductions in work. |
+
+Starting at depth 4, aspiration begins within 50 centipawns of the previous
+score. A failed side of the window is widened to the full score limit and the
+search is retried. This recovery is part of the algorithm, not an optional error
+path. For ordinary clock input, UCI computes a target from remaining time and
+increment, then caps the longer allowance. `think()` samples a hard deadline
+inside recursion and checks half the target between iterations; a changed best
+move can increase the target by a factor of 1.5, up to the longer allowance.
+Clock sampling remains approximate, especially before the first usable move.
+
+## Worked example to teach at the board
+
+Use `g1f3 g8f6 b1c3 b8c6` and `b1c3 b8c6 g1f3 g8f6`. Both sequences reach the same
+board with White to move, rights 15, and no en passant square. Therefore their
+key inputs are equal, despite different game move lists. This is a transposition.
+Ask why a visually identical board with different castling rights must use a
+different key input.
+
+Give the table a paper entry `(4, 80, LOWER, move)`. A non-root depth-3 request with
+beta 60 can return 80 because the stored lower bound already exceeds the cutoff.
+A request with beta 100 cannot treat 80 as an exact result. A depth-5 request
+cannot use that depth-4 entry as a completed answer, but can try its stored move
+first. This exercise should precede reading the probe conditionals.
+
+Then separate two kinds of memory: the book matches the sequence of played move
+strings, while the transposition table matches position fingerprints. Finally,
+use 60,000 milliseconds remaining and no increment: UCI sets a target of 2
+seconds and a longer allowance of 6 seconds. Ask students where those values
+become a deadline and an iteration decision, rather than promising an exact
+six-second maximum or an exact two-second move.
+
+## Verification, misconceptions, and limits
+
+The Period 1 and 2 UCI startup checks establish loading and imports, not cache or
+search correctness. The completed student `verify_remus3.py` checks its reference
+cases and ends with `Remus3 passes every test`. Ask students to distinguish a legal
+book reply from proof of which code path produced it. No supplied verifier or
+book data contributes to typing totals.
+
+The principal variation is reconstructed from stored moves, not copied from the
+active recursion stack. Its display follows entries without a separate complete
+legality filter, and it stops when an entry or move is absent. Treat it as an
+explanation aid, not a promise, a proof, or an independent legality check. Table
+collisions, replacement, and different search depths are relevant limitations.
+
+The board hash is not collision-free. The null-move material guard reduces some
+zugzwang risks but does not prove the shortcut safe in every ending. Quiescence
+retains Remus2's selective capture/promotion behavior and does not become a full
+check-evasion or draw detector. There is still no halfmove counter or repetition
+history in this version.
+
+Cached results and killers persist, and random book ordering can change the path
+taken. Controlled comparisons must specify cache state, starting position, search
+limits, and book use. The [benchmark discussion](../../docs/remus_versions.md#measuring-speed-and-playing-strength)
+explains the recorded version measurements. A shorter search on one position or
+one classroom win does not isolate any individual enhancement's speed or Elo.
 
 ## Line-by-line source reference
 

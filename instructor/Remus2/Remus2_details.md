@@ -1,4 +1,184 @@
-# Remus2: instructor source reference
+# Remus2: instructor guide and source reference
+
+## Instructor overview and learning goals
+
+Teach Remus2 as a legal engine that can compare futures. Begin with the reliable
+position and move contracts from [Remus1](../Remus1/Remus1_details.md#instructor-overview-and-learning-goals).
+Then introduce a numerical judgment of a position, show how an opponent can spoil
+an attractive move, and only then express that alternating choice recursively.
+The central learning objective is explaining why a move is preferred, not merely
+reading a larger search-depth number.
+
+Remus2 has 300 runtime lines of Python. Day 2 asks for 123 lines because the
+12-line random search is replaced: `189 - 12 + 123 = 300`. Supplied verification
+programs and JSON values are not student typing. The movement rules remain the
+foundation; `evaluation.py` is new, `search.py` becomes a recursive search, and
+the UCI engine name changes. Use the [Day 2 syllabus](../../Day%202%20-%20Remus2%20searches%20ahead/Day_2_Syllabus.md)
+for timing and the annotated reference below for exact source statements.
+
+## Recommended teaching sequence
+
+| Period | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| [1: Evaluation](../../Day%202%20-%20Remus2%20searches%20ahead/Day_2_Period_1_Syllabus.md) | Recall the position tuple; score material; add square bonuses; mirror Black's table lookup; return the score from the side-to-move perspective. | Recursion needs a meaningful leaf value. Perspective must be settled before the first negation in negamax. | Why does changing only the side to move reverse the evaluation's sign? |
+| [2: Ordering and quiescence](../../Day%202%20-%20Remus2%20searches%20ahead/Day_2_Period_2_Syllabus.md) | Draw a tiny minimax tree and an alpha-beta cutoff; order captures; count nodes; discuss timeout unwinding; trace a capture and recapture in quiescence. | Give the search window a concrete meaning before coding its helpers. A defended capture explains why a depth boundary is an imperfect stopping point. | Why is capturing a pawn with a queen not necessarily worth a pawn? Why can sorting help without changing the evaluator? |
+| [3: Alpha-beta and iterative deepening](../../Day%202%20-%20Remus2%20searches%20ahead/Day_2_Period_3_Syllabus.md) | Reuse candidate, child, and legality filtering; recurse with the opposite perspective; handle no legal moves; extend checks; repeat at increasing depths; run the verifier. | The recursive loop is Remus1's legal-move loop with an opponent's answer inserted before the choice. | What belongs to one recursive call, and what belongs to the whole search? |
+| [4: Observe play](../../Day%202%20-%20Remus2%20searches%20ahead/Day_2_Period_4_Syllabus.md) | Read a completed-depth report; compare concrete moves with Remus1; play the scheduled team game; distinguish observations from measurements. | Students connect the score and tree to visible decisions after their code passes reference checks. | Which move reflects looking ahead? What does one game fail to establish about speed or Elo? |
+
+A small paper tree belongs in Period 2 even though `alpha_beta()` is typed in
+Period 3. Explain its meaning before its dependencies, but keep the typing order
+in the syllabus. At the end of Period 2, `think()` is absent from the partially
+rewritten search file, so `uci.py` is not yet a valid startup check. The period
+correctly calls for loading `search.py` instead.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| Board, position, and move | The same 64-integer board, four-field position tuple, and three-field move tuple as Remus1. | Row 0 is rank 8 and column 0 is file a. Candidate children still receive independent board lists; no recursive caller changes its parent's board. |
+| Material values | `PIECE_VALUES`, indexed by piece kind: pawn 100, minor 300, rook 500, queen 900. | Values are centipawns. The king's material value is 0 because terminal mate scores, not a material trade, represent losing the king. |
+| Piece-square tables | Supplied JSON lists converted into module-level tuples; `TABLES[kind][square]`. | One lookup shape covers all kinds. `ZERO_TABLE` fills unused entries for empty squares, rooks, and queens. Black uses a rank reflection, not a rotation that exchanges files. |
+| Ordered candidates | A list of `(priority, move)` tuples, sorted in descending order. | Python compares tuple fields in order. Equal priorities fall back to the move tuple's square numbers and promotion code, providing a deterministic tie order without a custom comparison function. |
+| Recursive frame | Local `position`, `depth`, `ply`, `alpha`, `beta`, and temporary child scores. | Each call has its own bindings. `depth` is work remaining; `ply` is distance from the root. Check extensions mean they are not interchangeable. |
+| Search-wide state | Module variables `nodes`, `deadline`, and `best_move`, reset by `think()`. | These values span recursive calls. They belong to one active search in one process, not to an individual position. |
+| Timeout signal | `SearchTimeout`, an empty subclass of `Exception`. | Its type identifies an intentional search interruption and separates it from programming errors. |
+
+The evaluator accumulates a White-minus-Black score, then changes its sign if
+Black is to move. A Black piece on square `s` uses
+`(7 - s // 8) * 8 + s % 8` to read the same table from its own end of the board.
+For example, White's e2 and Black's e7 use the same relative square. Table values
+are chess knowledge; reading them from a supplied file removes transcription
+without changing their numerical contribution.
+
+## State ownership, classes, and Python scope
+
+There is still no `Board`, `Piece`, or `Search` class. The only custom class is
+`SearchTimeout`. `pass` supplies its empty body; the class needs no fields because
+its purpose is control flow, not storing a search result. Instructor `Position`
+and `Move` aliases remain type descriptions rather than constructors.
+
+`global nodes` is required in `count_node()` because `nodes += 1` rebinds the
+module's integer. `global best_move` is required where a root improvement assigns
+a new move. Reading `deadline` does not require `global`. `think()` explicitly
+resets all three search variables before a new request. This short interface
+avoids threading a context argument through every call, but it is not reentrant
+or safe for two simultaneous searches in the same module instance.
+
+A recursive call does not overwrite its caller's local `alpha`. It returns a
+number, which the caller negates and may use to update its own bound. The board
+copy is equally important: an exception can unwind multiple frames without undoing
+moves. `SearchTimeout` is caught at the iterative-deepening boundary; unrelated
+exceptions are not swallowed as ordinary timeouts.
+
+The JSON file is read once when `evaluation` is imported. `Path(__file__)` anchors
+the lookup to the module's location rather than the terminal's working directory,
+and `with` closes the file after loading. The tuples are reused at every leaf;
+there is no file I/O inside `evaluate()`.
+
+## Control flow and function call tree
+
+![Remus2 module dependencies](../../utils/mermaid/Remus2/modules.svg)
+
+This teaching tree groups repeated calls. Use the [complete function diagram](../../utils/mermaid/Remus2/full_elk.svg)
+when discussing individual dependencies.
+
+```text
+uci.main()
+  position command -> parse_square() -> make_move() for each game move
+  go command -> read_time() -> search.think()
+    initialize deadline, nodes, and best_move
+    for each increasing depth: alpha_beta()
+      count_node() [may raise SearchTimeout]
+      in_check() -> is_attacked()
+      at depth boundary: quiescence()
+        count_node(), evaluate(), ordered_moves()
+        make_move(), in_check(), recursive quiescence()
+      otherwise: ordered_moves() -> generate_moves()
+      for each legal child: make_move(), in_check(), recursive alpha_beta()
+      update root best_move; return a score or bound
+    print info for a completed iteration; catch SearchTimeout
+  format and print bestmove
+```
+
+In negamax, `score = -alpha_beta(child, ..., -beta, -alpha)` expresses the same
+optimization at every level: each player maximizes a score from its own viewpoint.
+Negating a window reverses its endpoints. `alpha` is the current lower threshold
+for improvement; reaching `beta` establishes enough for a cutoff. Do not describe
+every returned value as an exact position score: a cutoff can provide a bound.
+
+`stand_pat` is the static evaluation before making another tactical move. It
+lets quiescence keep the current score unless a searched continuation improves
+it. The capture loop then asks whether a capture and possible recapture change
+that judgment. This is a stopping model, not permission to pass a turn in chess;
+its limitations when in check are described below.
+
+At an ordinary node with no legal move, check means a mate score and no check means
+stalemate, scored 0. `MATE_SCORE - ply` prefers earlier wins and later losses.
+When the current player is in check, the search adds one to remaining depth before
+considering quiescence. `think()` repeats searches from depth 1 through at most 64,
+using the current root best move to order the next root search.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Negamax rather than separate maximizing and minimizing functions | One recursive function and one sign convention express both players. | The perspective conversion must be correct in evaluation, recursive returns, and windows. A missing negation is a logic error, not a small scoring difference. |
+| Alpha-beta with move ordering | Bounds can eliminate branches that cannot improve the choice in the modeled search. Promising captures are tried early. | Ordering sorts a complete candidate list at each node. Its benefit depends on the resulting cutoffs; a priority is not an evaluated score. |
+| Built-in sorting of `(priority, move)` | Uses Python's built-in tuple ordering without a lambda or comparator students must implement. | Tie order is consequential at equal scores and should not be changed casually in a supposedly behavior-preserving edit. |
+| Quiescence after the depth boundary | Looks beyond a defended capture instead of trusting its immediate material gain. | It adds nodes and uses a selective tactical model; it does not solve every horizon effect. |
+| Iterative deepening | Establishes a usable move early and supplies a root ordering hint for later searches. | Earlier depths are repeated. The extra work can be worthwhile, but iteration itself is not free. |
+| Clock sampling every 1,024 counted nodes | Reduces repeated calls to the timing function while retaining simple interruption logic. | Timing is approximate. The first usable root move is protected from timeout, and the requested deadline can be exceeded. |
+| An exception for timeout | Leaves nested recursion without adding a status flag to every score return. | This is deliberate nonlocal control flow. Explain where the exception is caught and which state can be partially updated. |
+
+A module-level context is a small-program tradeoff, not a claim that globals are
+universally faster or better than objects. Likewise, smaller source and fewer
+nodes are different measurements. The [recorded benchmark discussion](../../docs/remus_versions.md#measuring-speed-and-playing-strength)
+provides evidence for complete versions, not an isolated speed or Elo guarantee
+for every statement here.
+
+## Worked example to teach at the board
+
+Use invented leaf values, clearly labeled as a paper example rather than engine
+output. At the root, move A lets the opponent choose between positions scoring
++20 and +40 from the opponent's viewpoint. The opponent chooses +40, so A returns
+-40 to the root. The root's alpha becomes -40.
+
+Now try move B. Its child receives a beta of +40 because the parent window is
+negated. If the opponent's first reply already scores +80, the child can cut off:
+the opponent has an option that leaves the root at -80, so B cannot beat A's -40.
+The root need not discover whether another reply is even worse. Ask the student
+to identify whose viewpoint each sign represents before naming any variables.
+
+Next show queen takes a defended pawn. The first board snapshot adds a pawn, but
+a recapture can lose the queen. Have students say where ordinary depth ends and
+where quiescence continues. Finally, trace two iterative-deepening passes and
+identify the shared best move versus each call's local alpha.
+
+## Verification, misconceptions, and limits
+
+Period 1's silent module run checks syntax, imports, and loading JSON, not the
+correctness of evaluation. Period 3's supplied `verify_remus2.py` checks reference
+move generation, evaluation/search cases, and legal UCI replies; success ends
+with `Remus2 passes every test`. Preserve the Remus1 rule results before trusting
+stronger search. None of the supplied verifier code contributes to typing totals.
+
+The current quiescence function uses standing pat and capture priorities. It does
+not have a full separate in-check evasion search, and its recursion does not check
+all terminal or draw conditions. An en passant destination is empty, so this
+ordering does not classify it as an ordinary capture. Queen promotions receive
+priority; underpromotions do not receive that bonus. Teach the implemented
+selection, not an idealized claim that every tactical continuation is included.
+
+`best_move` can change during an iteration that later times out. The function
+returns the best root move retained so far; it does not separately preserve a
+last-completed-iteration move. `info` lines are printed only after completed
+iterations. The node counter counts calls to the search routines, including
+quiescence, rather than unique positions or a pure count of evaluations.
+
+Remus2 has no transposition table, opening book, repetition history, or pondering.
+The UCI loop is synchronous while it searches. Its tests and scheduled games
+exercise specific behavior; use controlled positions and measured elapsed time
+for speed claims, and an appropriate match study for playing-strength claims.
 
 ## Line-by-line source reference
 

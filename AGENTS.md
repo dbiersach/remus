@@ -289,8 +289,14 @@ also play without internet access or a successful tablebase response.
   matplotlib supplies science graphs; python-chess and Ruff are designer/verifier
   dependencies. Engines import only standard-library and sibling engine modules.
 - `instructor/Remus1` through `Remus4` hold annotated solutions. Each private
-  RemusN_details.md contains only Line-by-line source reference and Source coverage
-  and identity. `instructor/science` holds completed science programs.
+  RemusN_details.md begins with consistently named instructor sections covering
+  learning goals, the period-by-period teaching sequence, data structures, state
+  ownership and Python scope, control flow and call trees, design tradeoffs,
+  worked examples, and verification limits. Preserve the Line-by-line source
+  reference and Source coverage and identity sections after these overviews.
+  Keep pedagogical explanations aligned with the current engine and day/period
+  syllabuses; distinguish measured performance from rationale for smaller or
+  clearer code. `instructor/science` holds completed science programs.
 - `Day N - .../RemusN` contains the merged RemusN.md, remusN.bat, verify_remusN.py,
   and supplied data. Complete generated student Python is retained temporarily for
   testing and Lucas Chess. Setup on a student clone removes runtime .py files only,
