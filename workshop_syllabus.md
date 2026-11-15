@@ -48,13 +48,13 @@ The games use the student pair's completed engines. Run the corresponding verifi
 
 ## Day 1: Remus1, legal chess at random
 
-**Goal for the day:** `Day 1 - Remus1 plays legal chess/Remus1` holds an engine that generates legal moves and chooses one at random. The student pair tests its code with `verify_remusN.py` (with your version number in place of N), then each student plays the student pair's Remus1 in Lucas Chess.
+**Goal for the day:** `Day 1 - Remus1 plays legal chess/Remus1` holds an engine that generates legal moves and chooses one at random. The student pair tests its code with `verify_remusN.py` (with your version number in place of N), then the student pair plays together as a team against its Remus1 in Lucas Chess.
 
 ### P1, 8:30 to 10:00: Set up, and the board
 
 | Time | Activity |
 | --- | --- |
-| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools, clone the repository, run `setup_student.ps1 -StudentCopy`, and open `Remus.code-workspace`. Initialize and close Lucas Chess, then run `docs/install_lucas_engines.py` in VS Code. Expect registration messages and Remus1 through Remus8 in External engines. This records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
+| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools and Lucas Chess, clone the repository, open Lucas Chess once to initialize it, then close it. Run `setup_student.ps1 -StudentCopy`, which automatically registers Remus1 through Remus8, and open `Remus.code-workspace`. Expect registration messages and Remus1 through Remus8 in External engines. This records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
 | 9:15 to 9:30 | On the teacher's laptop, the teacher demonstrates a completed Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](docs/lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
 | 9:30 to 9:40 | Each student pair opens its `Day 1 - Remus1 plays legal chess/Remus1` folder in VS Code. The folder holds `remusN.bat`, the one line that starts the engine, and `verify_remusN.py` (with your version number in place of N), which tests the finished engine; the student pair types the engine modules from the screenshots. |
 | 9:40 to 10:00 | Type `board.py` (15 code lines): the piece numbers, the starting position, and square names. The reminder before typing: row 0 is rank 8, column 0 is file a, so a8 is square 0 and h1 is square 63. |
@@ -82,7 +82,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
 | 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](docs/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
 | 3:10 to 3:50 | Type `search.py` of `Day 1 - Remus1 plays legal chess/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
 | 3:50 to 4:05 | Press Run Python File in `Day 1 - Remus1 plays legal chess/Remus1/verify_remus1.py` and fix any file it names until the terminal prints `Remus1 passes every test`. |
-| 4:05 to 4:30 | One round of the student pair against the student pair's Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |
+| 4:05 to 4:30 | The student pair plays together as a team in one 10+0 game against its Remus1: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |
 
 **Checkpoint:** Remus1 is complete, 189 code lines, and it passes every test in `verify_remusN.py` (with your version number in place of N).
 
@@ -120,7 +120,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:25 | Start one round of the student pair's Remus2 against the student pair's Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2 reports completed iterations in half-moves, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
-| 3:25 to 4:05 | One round of the student pair against the student pair's Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| 3:25 to 4:05 | The student pair plays together as a team in one 10+0 game against its Remus2: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 | 4:05 to 4:30, if time remains | One round of the student pair's Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 
 **Checkpoint:** Remus2 is complete, 300 code lines, and it passes every test in `verify_remusN.py` (with your version number in place of N).
@@ -164,7 +164,7 @@ new lines, then tests it in P4. The code at each checkpoint includes the functio
 | --- | --- |
 | 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). |
 | 3:20 to 4:30 | Press Run Python File in `Day 3 - Remus3 adds the biggest gains/Remus3/verify_remus3.py` until the terminal prints `Remus3 passes every test`. Then play one round of the student pair's Remus3 against the student pair's Remus2, two 10-minute games played at once in two Lucas workers. Once Remus3 leaves the book, compare the search depths both engines report. Remus3 also reports its predicted line beside its score; Remus2 does not report a principal variation. Different game positions make this an observation, not a controlled speed test. Each student pair compares an opening sequence with `Day 3 - Remus3 adds the biggest gains/Remus3/opening_book.txt`. Matching a listed move alone does not prove it came from the book. |
-| If time remains | One round of the student pair against the student pair's Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If time remains | The student pair plays together as a team in one 10+0 game against its Remus3: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 | If more time remains | One round of the student pair's Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.
@@ -207,7 +207,7 @@ Play stops at 4:30, the end of the period, even in the middle of a game.
 | 3:00 to 3:30 | Reminder of the rule of the square. In `pawn_terms()`, add the pawn race, rooks on open files, and `king_safety()` (about 35 code lines). Change the name line to `id name Remus4`. |
 | 3:30 to 4:00 | Press Run Python File in `Day 4 - Remus4 adds everything else/Remus4/verify_remus4.py` until the terminal prints `Remus4 passes every test`. Then play one round of the student pair's Remus4 against the student pair's Remus3, two 10-minute games played at once in two Lucas workers. |
 | 4:00 to 4:30 | One round of the student pair's Remus4 against Remus5, two 10-minute games played at once in two Lucas workers. Remus5 is the student pair's Remus4 written in Rust, with the same evaluation and search and a larger table, so compare the reported search depths and game results. This round does not isolate speed from table size or prove a playing-strength difference. |
-| If time remains | One round of the student pair against the student pair's Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If time remains | The student pair plays together as a team in one 10+0 game against its Remus4: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.
 

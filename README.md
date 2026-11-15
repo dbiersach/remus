@@ -125,23 +125,33 @@ modules so students can type them. Do not run initial setup over existing studen
    Expect download progress and a new Remus folder. Changing directory normally
    prints nothing. Cloning does not run an engine.
 
-3. Prepare the student workspace:
+3. Install Lucas Chess from its [official download page](https://lucaschess.pythonanywhere.com/downloads)
+   if it is not already installed. Use its default location under
+   `%LOCALAPPDATA%\Programs\LucasChessR`. Open it once to create its configuration,
+   then close it. Keep Lucas Chess closed while setup registers the engines.
+
+4. Prepare the student workspace:
 
    ```powershell
    .\setup_student.ps1 -StudentCopy
    ```
 
    The script installs the VS Code extensions and runs `uv sync` to prepare Python
-   3.14 and dependencies in `.venv`. It removes development material, Git history,
+   3.14 and dependencies in `.venv`. It automatically runs
+   `docs/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
+   It removes development material, Git history,
    and the temporary Python engine modules. It keeps each engine guide, verifier,
    launcher, and supplied data, and keeps the Day 5 starter programs and Rust engines.
-   Expect installation messages and `Workshop setup complete`. On success the script
+   Expect installation messages, engine registration messages, and
+   `Workshop setup complete`. If Lucas Chess is missing, uninitialized, or open,
+   setup stops with instructions. Registration must succeed before setup removes
+   student files or marks the workspace ready. On success the script
    deletes itself. On failure it remains available for retry; read the error before
    continuing. Add `-WhatIf` to preview cleanup without installing or deleting anything.
    If script execution is blocked, use
    `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` and retry.
 
-4. Open the workspace:
+5. Open the workspace:
 
    ```powershell
    code Remus.code-workspace
@@ -150,11 +160,8 @@ modules so students can type them. Do not run initial setup over existing studen
    VS Code opens with the project interpreter and formatting settings. Open a Python
    file and confirm the Run Python File button is available. This checks editor setup.
 
-5. Install Lucas Chess from its [official download page](https://lucaschess.pythonanywhere.com/downloads)
-   if it is not already installed. Open it once to create its configuration, then close it.
-   In VS Code, open `docs/install_lucas_engines.py` and press Run Python File.
-   Expect messages naming Remus1 through Remus8 and a saved-list or already-registered
-   message. Reopen Lucas Chess and confirm those entries under External engines.
+6. Reopen Lucas Chess and confirm Remus1 through Remus8 under **External engines**.
+   Setup registers them automatically; no separate registration step is needed.
    Registration records launch paths; Python engines cannot play until their modules
    have been typed and their verifier passes.
 

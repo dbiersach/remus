@@ -21,7 +21,7 @@ Lucas Chess runs the student pair's own engines from the day folders. Run the su
 | 3:00 to 3:30 | Reminder of the rule of the square. In `pawn_terms()`, add the pawn race, rooks on open files, and `king_safety()` (about 35 code lines). Change the name line to `id name Remus4`. |
 | 3:30 to 4:00 | Press Run Python File in `Day 4 - Remus4 adds everything else/Remus4/verify_remus4.py` until the terminal prints `Remus4 passes every test`. Then play one round of the student pair's Remus4 against the student pair's Remus3, two 10-minute games played at once in two Lucas workers. |
 | 4:00 to 4:30 | One round of the student pair's Remus4 against Remus5, two 10-minute games played at once in two Lucas workers. Remus5 is the student pair's Remus4 written in Rust, with the same evaluation and search and a larger table, so compare the reported search depths and game results. This round does not isolate speed from table size or prove a playing-strength difference. |
-| If time remains | One round of the student pair against the student pair's Remus4, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If time remains | The student pair plays together as a team in one 10+0 game against its Remus4: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.
 
@@ -70,4 +70,4 @@ The terminal prints actual results beside `(expected ...)` references. A `PROBLE
 
 ## Done when
 
-The terminal reports `Remus4 passes every test` for the student pair's code. The student pair has observed its Remus4 against the student pair's Remus3 and Remus5 in Lucas Chess and recorded the game results. A round against the student pair follows if time remains.
+The terminal reports `Remus4 passes every test` for the student pair's code. The student pair has observed its Remus4 against the student pair's Remus3 and Remus5 in Lucas Chess and recorded the game results. One team game against Remus4 follows if time remains.

@@ -17,7 +17,7 @@ if (Test-Path -LiteralPath $readyFile) {
     Write-Host 'This student workspace is already prepared. Existing student code is preserved.'
     return
 }
-foreach ($requiredFile in @('pyproject.toml', 'uv.lock', '.python-version', 'Remus.code-workspace', 'install_vscode_extensions.ps1')) {
+foreach ($requiredFile in @('pyproject.toml', 'uv.lock', '.python-version', 'Remus.code-workspace', 'install_vscode_extensions.ps1', 'docs/install_lucas_engines.py')) {
     if (-not (Test-Path -LiteralPath (Join-Path $workshopRoot $requiredFile) -PathType Leaf)) {
         throw "Not a complete workshop clone: missing $requiredFile"
     }
@@ -79,11 +79,25 @@ foreach ($name in $privateNames) {
 }
 
 if ($WhatIfPreference) {
-    Write-Host 'Preview: install VS Code extensions, run uv sync, remove temporary engine modules and private materials, then delete this setup script.'
+    Write-Host 'Preview: require Lucas Chess installed, initialized, and closed; install VS Code extensions, run uv sync, register Remus1 through Remus8 in Lucas Chess, remove temporary engine modules and private materials, then delete this setup script.'
     foreach ($folder in $engineFolders) { Write-Host "Keep the guide, version verifier, launcher, and supplied data in $folder" }
     foreach ($path in $cleanupPaths) { Write-Host "Would remove: $path" }
     return
 }
+
+$lucasFolder = Join-Path $env:LOCALAPPDATA 'Programs\LucasChessR'
+if (-not (Test-Path -LiteralPath (Join-Path $lucasFolder 'bin\LucasR.exe') -PathType Leaf)) {
+    throw 'Install Lucas Chess in its default location, open it once, close it, then rerun setup. No student files were removed.'
+}
+if (-not (Test-Path -LiteralPath (Join-Path $lucasFolder 'UserData\__Config__') -PathType Container)) {
+    throw 'Open Lucas Chess once to initialize its configuration, close it, then rerun setup. No student files were removed.'
+}
+function Assert-LucasClosed {
+    if (Get-Process -Name 'LucasR' -ErrorAction SilentlyContinue) {
+        throw 'Close Lucas Chess before running setup so it cannot overwrite the engine registrations. No student files were removed.'
+    }
+}
+Assert-LucasClosed
 
 Get-Command uv -ErrorAction Stop | Out-Null
 Get-Command code -ErrorAction Stop | Out-Null
@@ -93,6 +107,9 @@ try {
         & (Join-Path $workshopRoot 'install_vscode_extensions.ps1')
         & uv sync
         if ($LASTEXITCODE -ne 0) { throw "uv sync failed with exit code $LASTEXITCODE. No student files were removed." }
+        Assert-LucasClosed
+        & (Join-Path $workshopRoot '.venv\Scripts\python.exe') (Join-Path $workshopRoot 'docs\install_lucas_engines.py')
+        if ($LASTEXITCODE -ne 0) { throw "Lucas Chess engine registration failed with exit code $LASTEXITCODE. No student files were removed. Fix the reported problem and rerun setup." }
     }
     else { return }
 
@@ -113,7 +130,7 @@ try {
         Remove-Item -LiteralPath $path -Recurse -Force
     }
     @{ prepared = $true; layout = 1 } | ConvertTo-Json | Set-Content -LiteralPath $readyFile -Encoding utf8
-    Write-Host 'Workshop setup complete. The Python engine folders contain their guides, verifiers, launchers, and supplied data. Type the engine modules from the period screenshots.'
+    Write-Host 'Workshop setup complete. Remus1 through Remus8 are registered in Lucas Chess. The Python engine folders contain their guides, verifiers, launchers, and supplied data. Type the engine modules from the period screenshots.'
 }
 finally { Pop-Location }
 

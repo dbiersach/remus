@@ -23,7 +23,7 @@ Lucas Chess runs the student pair's own engines from the day folders. Run the su
 | 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](../docs/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
 | 3:10 to 3:50 | Type `search.py` of `Day 1 - Remus1 plays legal chess/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
 | 3:50 to 4:05 | Press Run Python File in `Day 1 - Remus1 plays legal chess/Remus1/verify_remus1.py` and fix any file it names until the terminal prints `Remus1 passes every test`. |
-| 4:05 to 4:30 | One round of the student pair against the student pair's Remus1, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |
+| 4:05 to 4:30 | The student pair plays together as a team in one 10+0 game against its Remus1: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |
 
 ## What the student pair types this period
 
@@ -60,4 +60,4 @@ The terminal prints actual results beside `(expected ...)` references. A `PROBLE
 
 ## Done when
 
-The terminal reports `Remus1 passes every test` for the student pair's code, and each student has played the student pair's Remus1 in Lucas Chess.
+The terminal reports `Remus1 passes every test` for the student pair's code, and the student pair has played together as a team against its Remus1 in Lucas Chess.

@@ -64,7 +64,9 @@ ideas for the first time.
 - Lucas Chess plays the student-written day-local engines after verification.
   Teacher demonstrations can use private completed copies on the teacher's laptop.
 - Students create no online accounts. Initial setup clones the public repository,
-  runs setup_student.ps1 -StudentCopy, installs extensions, and runs uv sync.
+  installs and initializes Lucas Chess, then closes it before running
+  setup_student.ps1 -StudentCopy. Setup installs extensions, runs uv sync, and
+  automatically registers Remus1 through Remus8 with docs/install_lucas_engines.py.
   It removes Git metadata, private solutions, designer tools, and temporary runtime
   Python files while keeping each verify_remusN.py. It deletes itself only on success.
   Never run cleanup on the author checkout or over completed student work.

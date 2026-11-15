@@ -50,7 +50,7 @@
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:25 | Start one round of the student pair's Remus2 against the student pair's Remus1, two 10-minute games played at once in two Lucas workers (Part 4 of the guide), to see what the search buys over a random choice. Beside each engine's score, Lucas Chess shows the depth of its search: Remus2 reports completed iterations in half-moves, and Remus1, which picks a move at random, shows none. Each student pair reads its results tab. |
-| 3:25 to 4:05 | One round of the student pair against the student pair's Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| 3:25 to 4:05 | The student pair plays together as a team in one 10+0 game against its Remus2: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 | 4:05 to 4:30, if time remains | One round of the student pair's Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 
 [`Day_2_Period_4_Syllabus.md`](Day_2_Period_4_Syllabus.md) gives the goal, typing instructions, file and line references, and completion checks for this period.

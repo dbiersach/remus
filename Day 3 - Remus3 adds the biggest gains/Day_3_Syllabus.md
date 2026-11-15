@@ -54,7 +54,7 @@
 | --- | --- |
 | 3:00 to 3:20 | Add `principal_variation()` and the `pv` of the `info` line (about 13 code lines). |
 | 3:20 to 4:30 | Press Run Python File in `Day 3 - Remus3 adds the biggest gains/Remus3/verify_remus3.py` until the terminal prints `Remus3 passes every test`. Then play one round of the student pair's Remus3 against the student pair's Remus2, two 10-minute games played at once in two Lucas workers. Once Remus3 leaves the book, compare the search depths both engines report. Remus3 also reports its predicted line beside its score; Remus2 does not report a principal variation. Different game positions make this an observation, not a controlled speed test. Each student pair compares an opening sequence with `Day 3 - Remus3 adds the biggest gains/Remus3/opening_book.txt`. Matching a listed move alone does not prove it came from the book. |
-| If time remains | One round of the student pair against the student pair's Remus3, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
+| If time remains | The student pair plays together as a team in one 10+0 game against its Remus3: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). |
 | If more time remains | One round of the student pair's Remus3 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. A student pair that also played Stockfish 1500 on Day 2 compares the results. |
 
 Play stops at 4:30, the end of the period, even in the middle of a game.

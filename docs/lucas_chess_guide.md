@@ -11,7 +11,7 @@ This guide shows four things:
 
 1. Start Lucas Chess.
 2. Find the engines in Lucas Chess.
-3. Play a game against Remus1, as each student does at the end of Day 1.
+3. Play one team game against Remus1, as each student pair does at the end of Day 1.
 4. Run tournaments between the versions: Remus2 against Remus1, Remus3 against Remus2,
    and Remus4 against Remus3.
 
@@ -36,14 +36,16 @@ The buttons along the top open menus. This guide uses **Play** and **Engines**.
 
 ## Part 2: Find the engines
 
-Every class laptop already lists the Remus engines, because step 6 of the Day 1
-setup runs [`install_lucas_engines.py`](install_lucas_engines.py). Nobody adds an
-engine by hand. During setup, the installer prints an entry for each engine and
+Every class laptop already lists the Remus engines because
+`setup_student.ps1 -StudentCopy` automatically runs
+[`install_lucas_engines.py`](install_lucas_engines.py). Install Lucas Chess in its
+default location, open it once, and close it before running setup. Nobody adds an
+engine by hand or runs a separate registration step. During setup, the installer prints an entry for each engine and
 ends with `Saved ... engines in ...` or `Nothing changed: every engine is already
 registered`. A missing installation or file message means it has not completed.
-Start Lucas Chess once to create its configuration, then close it before running
-the installer. Registration saves paths and settings; it does not launch or test
-the engines.
+If setup reports that Lucas Chess is missing, uninitialized, or open, follow the
+message and rerun setup. Registration saves paths and settings; it does not launch
+or test the engines.
 
 **Step 1.** Click **Engines**, then **External engines**.
 
@@ -55,21 +57,25 @@ If a name is missing, follow the setup registration step before continuing.
 
 ![The Remus engines in the list](../images/lucas_chess/03_external_engines.jpg)
 
-## Part 3: Play against Remus yourself
+## Part 3: Play against Remus as a team
+
+The student pair plays together as a team in one game against Remus. Discuss each
+move and agree on it before moving a piece. Choose whether to play White or Black.
 
 **Step 1.** Click **Play**, then **Play against an engine**.
 
 ![The Play menu](../images/lucas_chess/04_play_menu.jpg)
 
 **Step 2.** Under **Opponent**, click the wide button with the engine's name, then
-choose **External engines** and **Remus1**. Under **Side you play with**, pick White,
-Black, or Random.
+choose **External engines** and **Remus1**. Under **Side you play with**, pick White
+or Black for the student pair.
 
 ![Choose Remus as your opponent](../images/lucas_chess/05_choose_remus.jpg)
 
 **Step 3.** Open the **Time** tab and tick **Activate the time control**. Set **Total
 minutes** to 10 and **Seconds added per move** to 0, so each side has 10 minutes for
-the whole game.
+the whole game. This is **10+0**: 10 minutes per side, with no increment. One game
+can use up to 20 minutes on the clocks; allow additional time for setup.
 
 ![Turn on the clock](../images/lucas_chess/06_time_control.jpg)
 
@@ -93,10 +99,11 @@ move** to keep your move, or **Try again** to take it back.
 
 To end a game early, click **Cancel** and answer **Yes**, then click **Close**.
 
-Days 1 and 2 schedule a student round against the student pair's finished version;
-Days 3 and 4 include it only if time remains. Each round has two games, one per
-student, with one student playing White and the other Black. Record wins, draws, losses, and unfinished
-games separately. These observations do not establish a reliable strength rating.
+Days 1 and 2 schedule one team game against the student pair's finished version;
+Days 3 and 4 include it only if time remains. Select that day's Remus version in
+Step 2 and use the same 10+0 settings. The student pair chooses White or Black
+for its single game. Record whether the game was a win, draw, loss, or unfinished.
+These observations do not establish a reliable strength rating.
 
 ## Part 4: Run a tournament between two versions
 

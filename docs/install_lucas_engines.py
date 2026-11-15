@@ -35,7 +35,7 @@ for module_name in ("Code", "Code.Engines", "Code.Engines.Engines"):
     if module_name not in sys.modules:
         sys.modules[module_name] = types.ModuleType(module_name)
 OPTION = type("OpcionUCI", (), {"__module__": "Code.Engines.Engines"})
-sys.modules[OPTION.__module__].OpcionUCI = OPTION
+setattr(sys.modules[OPTION.__module__], OPTION.__name__, OPTION)
 
 
 class SettingsReader(pickle.Unpickler):
@@ -161,15 +161,15 @@ def main():
     lucas_folder = Path(os.environ["LOCALAPPDATA"], "Programs", "LucasChessR")
     config_folder = lucas_folder / "UserData" / "__Config__"
     if not config_folder.is_dir():
-        print(f"Lucas Chess is not installed: {config_folder} does not exist")
-        return
+        print(f"Lucas Chess is not installed or initialized: {config_folder} does not exist")
+        sys.exit(1)
 
     engine_paths = {}
     for name, file_name in ENGINE_FILES.items():
         engine_paths[name] = remus_folder / file_name
         if not engine_paths[name].is_file():
             print(f"Nothing changed: {engine_paths[name]} does not exist")
-            return
+            sys.exit(1)
 
     file_path = config_folder / "ExtEngines.pk"
     engines = read_engines(file_path)
