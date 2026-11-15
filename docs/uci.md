@@ -194,8 +194,10 @@ Remus7 and Remus8 expose Hash with default 512 MiB and
 1024/2048 MiB alternatives. Remus7 and Remus8 expose Threads with default
 4; all their search threads share the engine process's one table. These are the
 settings for the 8 GB, four-core workshop laptops. Saved Lucas Chess options can
-override them: use Hash 512 and Threads 4 in both the external-engine and tournament
-entries. Each simultaneous engine process needs its own table and search threads.
+override them. Student setup's registration script sets Hash 512 and Threads 4
+in external-engine entries, replacing older selections while keeping other options.
+Existing tournament entries are separate; select Hash 512 and Threads 4 there too.
+Each simultaneous engine process needs its own table and search threads.
 
 ## Pondering
 

@@ -272,11 +272,13 @@ Remus6 to Remus8 advertise `Ponder` and `LichessTablebase`. Ponder defaults to f
 enable it in the external-engine and tournament entries when it is part of the
 experiment. Tablebase advice defaults to true and can fall back to native search.
 Remus7 and Remus8 default to four search threads and 512 MiB Hash for the workshop's
-8 GB, four-core laptops. In each engine's **External engines** options, select
-**Hash = 512** and **Threads = 4**. Check the tournament's separate engine entry too:
-saved values such as 2048 and 16 override the executable defaults. The registration
-script preserves saved options, so rerunning setup does not reset those values.
-See each engine's guide for supported options.
+8 GB, four-core laptops. Student setup's registration script sets **Hash = 512**
+and **Threads = 4** in their external-engine entries, replacing older values such
+as 2048 and 16 while preserving other options. Running the registration script
+again also reapplies these two settings; do not repeat student cleanup.
+Existing tournament entries are separate: check their options and select
+**Hash = 512** and **Threads = 4** there too. See each engine's guide for supported
+options.
 
 Each running engine has its own table and search threads. Two Remus7 or Remus8
 processes at these settings request 1 GiB of hash memory and eight search threads

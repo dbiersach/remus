@@ -176,8 +176,9 @@ an unpinned-pawn shortcut for legal-move existence, lazy ordering of the first t
 moves, bitmask selection of central holes, static evaluation only when pruning needs it,
 and transposition-table prefetching. These preserve native scores and the sequential
 search order. Parallel scheduling can still change visited nodes and results. The
-[technique descriptions and measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
-explain the conditions and limits of the reported speedups.
+[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t7)
+explains the implementations; the [speed measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
+give the conditions and limits of the reported speedups.
 
 ### Lazy SMP scheduling
 
@@ -201,9 +202,10 @@ requested size. A same-size request preserves cached results. Worker stacks, heu
 tables, and worker state use additional memory.
 
 The workshop's 8 GB, four-core laptops use the defaults: Hash 512 and Threads 4.
-Check both the Lucas Chess external-engine and tournament entries for saved
-values that override these defaults; the registration script preserves saved
-options. Each simultaneous engine process has its own table and threads, so
+Student setup's registration script sets these two values in Lucas Chess
+external-engine entries even when older values are saved, and preserves other
+options. Existing tournament entries are separate; select Hash 512 and Threads 4
+there too. Each simultaneous engine process has its own table and threads, so
 memory demand adds up and concurrent searches compete for the laptop's cores.
 The published Elo measurement used 16 threads and a 2 GiB table on the benchmark
 computer, not this laptop configuration.

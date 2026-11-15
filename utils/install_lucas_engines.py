@@ -4,8 +4,9 @@ Register the day-local Python engines and supplied Rust executables in Lucas Che
 Run with Lucas Chess closed. Expect registration messages, then reopen External
 engines to see Remus1 to Remus8. Registration checks paths, not chess behavior.
 Student pairs run their version's verifier before playing their Python engine.
-Unrelated entries and saved options are preserved; GUI opening books are disabled
-for Remus so that its own legal move selection determines play.
+Remus7 and Remus8 use Hash 512 MiB and Threads 4, replacing saved values.
+Unrelated entries and other saved options are preserved; GUI opening books are
+disabled for Remus so that its own legal move selection determines play.
 """
 
 # cspell:ignore autor
@@ -29,6 +30,9 @@ ENGINE_FILES = {
     "Remus7": "rust_engines/Remus7/remus7.exe",
     "Remus8": "rust_engines/Remus8/remus8.exe",
 }
+
+# Explicit selections keep student laptops within the workshop resource settings.
+WORKSHOP_OPTIONS = {"Hash": "512", "Threads": 4}
 
 
 for module_name in ("Code", "Code.Engines", "Code.Engines.Engines"):
@@ -71,6 +75,37 @@ def write_engines(engines: list[dict | bytes], file_path: Path) -> None:
         else:
             engine_list.append(pickle.dumps(engine, protocol=4))
     file_path.write_bytes(pickle.dumps(engine_list, protocol=4))
+
+
+def set_workshop_options(engine: dict, name: str) -> bool:
+    """Set Remus7/8 resource options in both the GUI cache and launch overrides.
+
+    Return True when settings change. Other options, including pondering and
+    diagnostics, retain their saved values. Hash is a combo string; Threads is
+    a spin integer in the Lucas Chess option format.
+    """
+    if name not in ("Remus7", "Remus8"):
+        return False
+    changed = False
+    selected = []
+    for option_name, value in engine.get("_li_changed_options", []) or []:
+        if option_name.casefold() not in ("hash", "threads"):
+            selected.append((option_name, value))
+    for option_name, value in WORKSHOP_OPTIONS.items():
+        selected.append((option_name, value))
+        for option in engine.get("_li_uci_options", []) or []:
+            if (
+                option.name.casefold() == option_name.casefold()
+                and option.valor != value
+            ):
+                option.valor = value
+                changed = True
+    if selected != engine.get("_li_changed_options"):
+        engine["_li_changed_options"] = selected
+        changed = True
+    if changed:
+        print(f"{name}: Hash = 512 MiB, Threads = 4")
+    return changed
 
 
 def new_engine(name: str, engine_path: Path) -> dict:
@@ -135,12 +170,13 @@ def register_engine(
         if isinstance(engine, bytes):
             continue
         if (bin_folder / engine["path_exe"]).resolve() == engine_path:
+            changed = set_workshop_options(engine, name)
             if engine.get("book") != "-":
                 engine["book"] = "-"
                 print(f"{name} uses only its own opening book")
                 return True
             print(f"{name} is already registered as {engine['key']}")
-            return False
+            return changed
 
     for engine in engines:
         if isinstance(engine, bytes):
@@ -149,10 +185,13 @@ def register_engine(
             print(f"{name} moved from {engine['path_exe']} to {engine_path}")
             engine["path_exe"] = str(engine_path)
             engine["book"] = "-"
+            set_workshop_options(engine, name)
             return True
 
     print(f"{name} added, and it runs {engine_path}")
-    engines.append(new_engine(name, engine_path))
+    engine = new_engine(name, engine_path)
+    set_workshop_options(engine, name)
+    engines.append(engine)
     return True
 
 
@@ -161,7 +200,9 @@ def main():
     lucas_folder = Path(os.environ["LOCALAPPDATA"], "Programs", "LucasChessR")
     config_folder = lucas_folder / "UserData" / "__Config__"
     if not config_folder.is_dir():
-        print(f"Lucas Chess is not installed or initialized: {config_folder} does not exist")
+        print(
+            f"Lucas Chess is not installed or initialized: {config_folder} does not exist"
+        )
         sys.exit(1)
 
     engine_paths = {}

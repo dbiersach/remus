@@ -321,8 +321,9 @@ an unpinned-pawn shortcut for legal-move existence, lazy ordering of the first t
 moves, bitmask selection of central holes, static evaluation only when pruning needs it,
 and transposition-table prefetching. These preserve native scores and the sequential
 search order. Parallel scheduling can still change visited nodes and results. The
-[technique descriptions and measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
-explain the conditions and limits of the reported speedups.
+[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t7)
+explains the implementations; the [speed measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
+give the conditions and limits of the reported speedups.
 
 ## Memory and transposition table
 

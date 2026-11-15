@@ -310,7 +310,10 @@ also play without internet access or a successful tablebase response.
 - The Lucas installer registers day-local Python launchers and Rust executables,
   with GUI opening books disabled. It reuses a matching executable path or updates
   a matching Remus name before adding an entry. It preserves unrelated engines
-  and saved options; it does not remove old aliases or existing duplicates.
+  and saved options except Remus7/8 Hash and Threads, which it sets to 512 MiB
+  and 4 in the external-engine entries, including cached GUI values and explicit
+  launch overrides. Existing tournament entries are separate and unchanged.
+  It does not remove old aliases or existing duplicates.
   Registration checks launch paths, not chess behavior. Python engines become
   playable only after students type the modules and pass their verifier.
 - `utils/images/Day1` through `Day5` hold period-prefixed code and science images;

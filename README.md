@@ -144,6 +144,9 @@ modules so students can type them. Do not run initial setup over existing studen
    The script installs the VS Code extensions and runs `uv sync` to prepare Python
    3.14 and dependencies in `.venv`. It automatically runs
    `utils/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
+   Registration sets Remus7 and Remus8 to Hash 512 MiB and Threads 4, replacing
+   older values in their external-engine entries. Other saved options are kept;
+   existing tournament entries have separate settings.
    It removes development material, Git history, and the temporary Python engine
    modules. It keeps each engine guide, verifier,
    launcher, and supplied data, and keeps the Day 5 starter programs and Rust engines.
