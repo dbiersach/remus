@@ -6,7 +6,7 @@ solutions live privately under `instructor/Remus1` through `Remus4`; testing cop
 live in each Day folder's `RemusN` subfolder. Remus5 through Remus8 are Rust-only
 engines under `rust_engines`, with all their engine documentation beside their source.
 [`docs/remus_versions.md`](docs/remus_versions.md) describes the versions and
-[`workshop_syllabus.md`](docs/workshop_syllabus.md) describes the five days.
+[`docs/workshop_syllabus.md`](docs/workshop_syllabus.md) describes the five days.
 
 This file holds every project and style rule, so that every AI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
@@ -63,13 +63,29 @@ ideas for the first time.
   verifier checks reference cases; it does not establish Elo or exhaustive correctness.
 - Lucas Chess plays the student-written day-local engines after verification.
   Teacher demonstrations can use private completed copies on the teacher's laptop.
-- Students create no online accounts. Initial setup clones the public repository,
-  installs and initializes Lucas Chess, then closes it before running
-  utils/setup_student.ps1 -StudentCopy. Setup installs extensions, runs uv sync, and
-  automatically registers Remus1 through Remus8 with utils/install_lucas_engines.py.
-  It removes Git metadata, private solutions, designer tools, and temporary runtime
-  Python files while keeping each verify_remusN.py. It deletes itself only on success.
-  Never run cleanup on the author checkout or over completed student work.
+  Against Remus, the student pair plays together in one 10+0 game and chooses
+  White or Black. Engine-versus-engine rounds use two opposite-color games at
+  10+0, running together in two Lucas workers. Each game can use 20 minutes on
+  the clocks; allow setup time and preserve the optional-game qualifications.
+- Students create no online accounts. Follow [README setup](README.md#setup) in a
+  fresh student clone. Install Lucas Chess in its default location under
+  `%LOCALAPPDATA%\Programs\LucasChessR`. Complete any first-run prompts, wait for
+  its main window so configuration files exist, then close it.
+- From the cloned Remus folder in PowerShell, run
+  `.\utils\setup_student.ps1 -StudentCopy`. It installs extensions through
+  `utils/install_vscode_extensions.ps1`, runs `uv sync`, and automatically runs
+  `utils/install_lucas_engines.py`. Registration must succeed before cleanup.
+  Missing, uninitialized, or open Lucas Chess stops setup with instructions.
+- Setup removes Git metadata, private solutions, designer tools, and temporary
+  runtime Python modules in the four Day engine folders. It keeps each
+  `verify_remusN.py`, engine guide, launcher, supplied data, Day 5 starter program,
+  Rust engine, and asset folder. It deletes itself only on success. Never run it
+  on the author checkout or over completed student work.
+- After `Workshop setup complete`, open `Remus.code-workspace` and reopen Lucas
+  Chess to confirm Remus1 through Remus8 under External engines. If entries need
+  repair, close Lucas Chess and run `utils/install_lucas_engines.py` from VS Code.
+  This repairs registration without repeating cleanup. Keep the full workspace
+  open and expand the Day folders in VS Code's Explorer.
 - After setup students use VS Code's Run Python File button, Lucas Chess, and File
   Explorer. No student types Git or uv commands again during the workshop; supplied
   remusN.bat launchers invoke uv automatically. The teacher writes no code in class.
@@ -204,7 +220,7 @@ concurrent processes never append to a shared diagnostic file. Preserve old logs
 | Native Python engine | Board, rules, moves, search, evaluation, move choice |
 | UCI adapter, `uci.py` | `uci`, `isready`, `position startpos moves ...`, `go`, `quit`; only protocol lines on stdout; `bestmove 0000` only with no legal move |
 | Tablebase adapter, Remus6 through Remus8 | Root advice from Lichess over HTTPS; FEN/JSON boundary, cache, cooldown, bounded wait, native legality validation, and search fallback |
-| GUI | Lucas Chess, which starts `remusN.bat` and hosts Remus as an external UCI engine |
+| GUI | Lucas Chess starts day-local Python `remusN.bat` launchers or `rust_engines/RemusN/remusN.exe` and hosts Remus over UCI |
 | Checks | `admin/verify_engines.py`, outside the engines |
 
 The engine must run without Lucas Chess or `python-chess` installed. Tablebase-enabled engines must
@@ -241,6 +257,13 @@ also play without internet access or a successful tablebase response.
   source or line-reference changes run `admin/make_code_images.py --check`, then
   capture changed screenshots. Check actual PNG/JPEG signatures and extensions.
 
+- For setup or layout changes, test a fresh student clone. Use isolated VS Code
+  extension/user-data directories and a copied, initialized Lucas configuration.
+  Exercise real extension installation and `uv sync` when testing the full setup.
+  Check all eight launch paths, cleanup, retained verifiers/data/assets, and every
+  student-facing local Markdown link after cleanup. Preserve verification logs
+  and never use the author checkout as the cleanup target.
+
 ### Project setup and layout
 
 - Python 3.14 is managed by uv. `.venv` is the sole workshop environment.
@@ -263,15 +286,24 @@ also play without internet access or a successful tablebase response.
   embedded books, remusN.exe, remusN.md, and RemusN_details.md. There is no -Rust
   suffix and no active Python version above Remus4. Preserve source algorithms
   during layout and identity changes.
-- `docs` is flat and contains only .md/.pdf guides and briefs.
-- `utils` contains setup_student.ps1, install_vscode_extensions.ps1, and
-  install_lucas_engines.py, plus the images and mermaid asset folders. The installer
-  registers day-local Python launchers and rust_engines executables, with Lucas
-  books disabled. Registration does not test chess behavior.
+- `docs` is flat and contains only Markdown and PDF files, including
+  `docs/workshop_syllabus.md`, shared guides, and briefs. Day and period
+  syllabuses remain in their Day folders.
+- `utils` contains `setup_student.ps1`, `install_vscode_extensions.ps1`, and
+  `install_lucas_engines.py`, plus the `images` and `mermaid` asset folders.
+  Setup derives the workspace root from the parent of its own directory; keep
+  all helper, cleanup, and self-deletion paths relative to that root.
+- The Lucas installer registers day-local Python launchers and Rust executables,
+  with GUI opening books disabled. It reuses a matching executable path or updates
+  a matching Remus name before adding an entry. It preserves unrelated engines
+  and saved options; it does not remove old aliases or existing duplicates.
+  Registration checks launch paths, not chess behavior. Python engines become
+  playable only after students type the modules and pass their verifier.
 - `utils/images/Day1` through `Day5` hold period-prefixed code and science images;
   utils/images/chess_tutor, utils/images/lucas_chess, and utils/images/color_swatches hold guide assets.
   `utils/mermaid/Remus1` through `Remus8` and utils/mermaid/chess_tutor hold diagram sources,
-  rendered SVGs, and manifests. Never recreate asset folders inside Day or docs.
+  rendered SVGs, and manifests. Never recreate asset folders at the workspace
+  root or inside Day folders or `docs`.
 - Designer scripts live under ignored `admin`, resolve the workspace from their own
   path, and are listed in admin/README.md. Use workshop_paths.py for shared paths.
   Private game records live under admin/played_games. Preserve historical records
@@ -280,7 +312,8 @@ also play without internet access or a successful tablebase response.
   deleted. The retired Python5 source and documentation are preserved there.
 - Maintain source counts, links, code screenshots, diagram manifests, guides, briefs,
   and syllabus workflow together. Display "Lines of code", not physical-line counts,
-  for student typing totals. The line numbers used beside screenshots remain useful.
+  for student typing totals. Tables may use `TLOC` if Total Lines of Code is
+  explained before the table. Screenshot line numbers remain useful for typing.
 
 ## Part 2: Python style
 
@@ -293,10 +326,14 @@ also play without internet access or a successful tablebase response.
 
 ### Script and module structure
 
-Every engine file starts with a docstring whose first line is the filename. A longer
+Every annotated Python engine file under `instructor` starts with a docstring
+whose first line is the filename. A longer
 docstring adds a blank line and a short description of what the file teaches or does.
 Engine files carry no shebang (David, 2026-11-03): students and teachers run them with
 VS Code's Run button, which uses the project's `.venv` that the workspace file selects.
+Generated student modules omit docstrings, explanatory comments, and type hints.
+The annotation rules below apply to instructor solutions and reusable tooling,
+not to the stripped code students type.
 
 ```python
 """search.py
@@ -326,7 +363,8 @@ if __name__ == "__main__":
     main()
 ```
 
-The engine modules other than `uci.py` define functions only and print nothing, so
+The engine modules other than `uci.py` load data and define constants and functions
+without printing or starting games, so
 students type no self-check code. Engine modules import each other, and `uci.py`
 imports nearly all of them; a module that printed at import time would send stray
 text to Lucas Chess and break the protocol. A designer script prints what it checked
@@ -473,7 +511,7 @@ the course repositories: ruff's default rules plus `I` (import order), `C4`
 formats the code.
 
 The code must also show no type errors in VS Code's Pylance. Check an engine with
-`uvx pyright engines_instructor/Remus2`. When a function can return `None`, such as `think()` or
+`uvx pyright instructor/Remus2`. When a function can return `None`, such as `think()` or
 `legal_book_move()`, test for `None` before using the result.
 
 ### American spelling
