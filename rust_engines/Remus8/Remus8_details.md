@@ -1756,96 +1756,104 @@ Copy a position and apply captures, castling, promotion, and state changes.
 | Line | Exact source | Explanation |
 | ---: | --- | --- |
 | 1 | <code>//! Play a move. As in Remus5, make&#95;move() copies the position, plays the move on the</code> | Source explanation: Play a move. As in Remus5, make&#95;move() copies the position, plays the move on the |
-| 2 | <code>//! copy, and returns the new position, so the search never takes a move back.</code> | Source explanation: copy, and returns the new position, so the search never takes a move back. |
-| 3 | <code></code> | Blank line separating related declarations or steps. |
-| 4 | <code>use crate::board::{EMPTY, KEYS, KING, Move, PAWN, Position, WHITE};</code> | Bring the named items into scope; no chess search runs here. |
-| 5 | <code>use crate::board::{move&#95;promotion, move&#95;start, move&#95;target};</code> | Bring the named items into scope; no chess search runs here. |
-| 6 | <code></code> | Blank line separating related declarations or steps. |
-| 7 | <code>// The castling rights that a move from or to each square turns off for good</code> | Source explanation: The castling rights that a move from or to each square turns off for good |
-| 8 | <code>const fn build&#95;rights() -&gt; &#91;u8; 64&#93; {</code> | Declare build&#95;rights(); its parameters and return type define the interface. |
-| 9 | <code>    let mut table = &#91;0; 64&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 10 | <code>    table&#91;60&#93; = 3; // e1</code> | Update the named state using the expression and assignment operator shown. |
-| 11 | <code>    table&#91;63&#93; = 1; // h1</code> | Update the named state using the expression and assignment operator shown. |
-| 12 | <code>    table&#91;56&#93; = 2; // a1</code> | Update the named state using the expression and assignment operator shown. |
-| 13 | <code>    table&#91;4&#93; = 12; // e8</code> | Update the named state using the expression and assignment operator shown. |
-| 14 | <code>    table&#91;7&#93; = 4; // h8</code> | Update the named state using the expression and assignment operator shown. |
-| 15 | <code>    table&#91;0&#93; = 8; // a8</code> | Update the named state using the expression and assignment operator shown. |
-| 16 | <code>    table</code> | Evaluate or continue this expression in build&#95;rights(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 17 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 18 | <code></code> | Blank line separating related declarations or steps. |
-| 19 | <code>static RIGHTS&#95;OF&#95;SQUARE: &#91;u8; 64&#93; = build&#95;rights();</code> | Define RIGHTS&#95;OF&#95;SQUARE, including its explicit type and initial value. |
+| 2 | <code>//! copy, and returns the new position. The move loops of the search make the copy</code> | Source explanation: copy, and returns the new position. The move loops of the search make the copy |
+| 3 | <code>//! themselves and call play&#95;move() on it, which saves a second copy. Either way the</code> | Source explanation: themselves and call play&#95;move() on it, which saves a second copy. Either way the |
+| 4 | <code>//! parent position stays as it was, so the search never takes a move back.</code> | Source explanation: parent position stays as it was, so the search never takes a move back. |
+| 5 | <code></code> | Blank line separating related declarations or steps. |
+| 6 | <code>use crate::board::{EMPTY, KEYS, KING, Move, PAWN, Position, WHITE};</code> | Bring the named items into scope; no chess search runs here. |
+| 7 | <code>use crate::board::{move&#95;promotion, move&#95;start, move&#95;target};</code> | Bring the named items into scope; no chess search runs here. |
+| 8 | <code></code> | Blank line separating related declarations or steps. |
+| 9 | <code>// The castling rights that a move from or to each square turns off for good</code> | Source explanation: The castling rights that a move from or to each square turns off for good |
+| 10 | <code>const fn build&#95;rights() -&gt; &#91;u8; 64&#93; {</code> | Declare build&#95;rights(); its parameters and return type define the interface. |
+| 11 | <code>    let mut table = &#91;0; 64&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 12 | <code>    table&#91;60&#93; = 3; // e1</code> | Update the named state using the expression and assignment operator shown. |
+| 13 | <code>    table&#91;63&#93; = 1; // h1</code> | Update the named state using the expression and assignment operator shown. |
+| 14 | <code>    table&#91;56&#93; = 2; // a1</code> | Update the named state using the expression and assignment operator shown. |
+| 15 | <code>    table&#91;4&#93; = 12; // e8</code> | Update the named state using the expression and assignment operator shown. |
+| 16 | <code>    table&#91;7&#93; = 4; // h8</code> | Update the named state using the expression and assignment operator shown. |
+| 17 | <code>    table&#91;0&#93; = 8; // a8</code> | Update the named state using the expression and assignment operator shown. |
+| 18 | <code>    table</code> | Evaluate or continue this expression in build&#95;rights(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 19 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 | 20 | <code></code> | Blank line separating related declarations or steps. |
-| 21 | <code>/// Return the position after the move, including the special moves.</code> | Source explanation: Return the position after the move, including the special moves. |
-| 22 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
-| 23 | <code>pub fn make&#95;move(position: &amp;Position, mv: Move) -&gt; Position {</code> | Declare make&#95;move(); its parameters and return type define the interface. |
-| 24 | <code>    let mut next = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 25 | <code>    let start = move&#95;start(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 26 | <code>    let target = move&#95;target(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 27 | <code>    let promotion = move&#95;promotion(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 28 | <code>    let mut piece = next.board&#91;start&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 29 | <code>    let kind = piece &amp; 7;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 30 | <code>    let is&#95;pawn = kind == PAWN;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 31 | <code>    let distance = start.abs&#95;diff(target);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 32 | <code></code> | Blank line separating related declarations or steps. |
-| 33 | <code>    // A capture or pawn move restarts the fifty-move count</code> | Source explanation: A capture or pawn move restarts the fifty-move count |
-| 34 | <code>    if is&#95;pawn &#124;&#124; next.board&#91;target&#93; != EMPTY {</code> | Test the condition and execute this branch only when it matches. |
-| 35 | <code>        next.halfmove = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 36 | <code>    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 37 | <code>        next.halfmove += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 38 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 39 | <code>    // En passant: the captured pawn stands beside the pawn that moves</code> | Source explanation: En passant: the captured pawn stands beside the pawn that moves |
-| 40 | <code>    if is&#95;pawn &amp;&amp; target as i8 == next.en&#95;passant {</code> | Test the condition and execute this branch only when it matches. |
-| 41 | <code>        next.remove&#95;piece(start / 8 &#42; 8 + target % 8);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 42 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 43 | <code>    // Castling: the king moves two squares, and the rook jumps to the square it crossed</code> | Source explanation: Castling: the king moves two squares, and the rook jumps to the square it crossed |
-| 44 | <code>    if kind == KING &amp;&amp; distance == 2 {</code> | Test the condition and execute this branch only when it matches. |
-| 45 | <code>        let rook = if target &gt; start { start + 3 } else { start - 4 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 46 | <code>        let rook&#95;piece = next.board&#91;rook&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 47 | <code>        next.remove&#95;piece(rook);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 48 | <code>        next.put&#95;piece((start + target) / 2, rook&#95;piece);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 49 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 50 | <code>    // A two-square pawn move lets an enemy pawn capture it en passant on the next move</code> | Source explanation: A two-square pawn move lets an enemy pawn capture it en passant on the next move |
-| 51 | <code>    if next.en&#95;passant &gt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 52 | <code>        next.key ^= KEYS.en&#95;passant&#91;next.en&#95;passant as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 53 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 54 | <code>    next.en&#95;passant = -1;</code> | Update the named state using the expression and assignment operator shown. |
-| 55 | <code>    if is&#95;pawn &amp;&amp; distance == 16 {</code> | Test the condition and execute this branch only when it matches. |
-| 56 | <code>        let skipped = (start + target) / 2;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 57 | <code>        next.en&#95;passant = skipped as i8;</code> | Update the named state using the expression and assignment operator shown. |
-| 58 | <code>        next.key ^= KEYS.en&#95;passant&#91;skipped&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 59 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 60 | <code>    if promotion != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 61 | <code>        piece = promotion + (piece &amp; WHITE);</code> | Update the named state using the expression and assignment operator shown. |
+| 21 | <code>static RIGHTS&#95;OF&#95;SQUARE: &#91;u8; 64&#93; = build&#95;rights();</code> | Define RIGHTS&#95;OF&#95;SQUARE, including its explicit type and initial value. |
+| 22 | <code></code> | Blank line separating related declarations or steps. |
+| 23 | <code>/// Return the position after the move, including the special moves.</code> | Source explanation: Return the position after the move, including the special moves. |
+| 24 | <code>#&#91;inline(always)&#93;</code> | Compiler attribute controlling the following declaration. |
+| 25 | <code>pub fn make&#95;move(position: &amp;Position, mv: Move) -&gt; Position {</code> | Declare make&#95;move(); its parameters and return type define the interface. |
+| 26 | <code>    let mut next = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 27 | <code>    play&#95;move(&amp;mut next, mv);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 28 | <code>    next</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 29 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 30 | <code></code> | Blank line separating related declarations or steps. |
+| 31 | <code>/// Play the move, including the special moves, on the position itself. The caller</code> | Source explanation: Play the move, including the special moves, on the position itself. The caller |
+| 32 | <code>/// passes a fresh copy of the parent position, never the parent.</code> | Source explanation: passes a fresh copy of the parent position, never the parent. |
+| 33 | <code>pub fn play&#95;move(next: &amp;mut Position, mv: Move) {</code> | Declare play&#95;move(); its parameters and return type define the interface. |
+| 34 | <code>    let start = move&#95;start(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 35 | <code>    let target = move&#95;target(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 36 | <code>    let promotion = move&#95;promotion(mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 37 | <code>    let mut piece = next.board&#91;start&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 38 | <code>    let kind = piece &amp; 7;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 39 | <code>    let is&#95;pawn = kind == PAWN;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 40 | <code>    let distance = start.abs&#95;diff(target);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 41 | <code></code> | Blank line separating related declarations or steps. |
+| 42 | <code>    // A capture or pawn move restarts the fifty-move count</code> | Source explanation: A capture or pawn move restarts the fifty-move count |
+| 43 | <code>    if is&#95;pawn &#124;&#124; next.board&#91;target&#93; != EMPTY {</code> | Test the condition and execute this branch only when it matches. |
+| 44 | <code>        next.halfmove = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 45 | <code>    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 46 | <code>        next.halfmove += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 47 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 48 | <code>    // En passant: the captured pawn stands beside the pawn that moves</code> | Source explanation: En passant: the captured pawn stands beside the pawn that moves |
+| 49 | <code>    if is&#95;pawn &amp;&amp; target as i8 == next.en&#95;passant {</code> | Test the condition and execute this branch only when it matches. |
+| 50 | <code>        next.remove&#95;piece(start / 8 &#42; 8 + target % 8);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 51 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 52 | <code>    // Castling: the king moves two squares, and the rook jumps to the square it crossed</code> | Source explanation: Castling: the king moves two squares, and the rook jumps to the square it crossed |
+| 53 | <code>    if kind == KING &amp;&amp; distance == 2 {</code> | Test the condition and execute this branch only when it matches. |
+| 54 | <code>        let rook = if target &gt; start { start + 3 } else { start - 4 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 55 | <code>        let rook&#95;piece = next.board&#91;rook&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 56 | <code>        next.remove&#95;piece(rook);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 57 | <code>        next.put&#95;piece((start + target) / 2, rook&#95;piece);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 58 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 59 | <code>    // A two-square pawn move lets an enemy pawn capture it en passant on the next move</code> | Source explanation: A two-square pawn move lets an enemy pawn capture it en passant on the next move |
+| 60 | <code>    if next.en&#95;passant &gt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 61 | <code>        next.key ^= KEYS.en&#95;passant&#91;next.en&#95;passant as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
 | 62 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 63 | <code>    if next.board&#91;target&#93; != EMPTY {</code> | Test the condition and execute this branch only when it matches. |
-| 64 | <code>        next.remove&#95;piece(target);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 65 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 66 | <code>    next.remove&#95;piece(start);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 67 | <code>    next.put&#95;piece(target, piece);</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 68 | <code></code> | Blank line separating related declarations or steps. |
-| 69 | <code>    let rights = next.castling &amp; !(RIGHTS&#95;OF&#95;SQUARE&#91;start&#93; &#124; RIGHTS&#95;OF&#95;SQUARE&#91;target&#93;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 70 | <code>    if rights != next.castling {</code> | Test the condition and execute this branch only when it matches. |
-| 71 | <code>        next.key ^= KEYS.castling&#91;next.castling as usize&#93; ^ KEYS.castling&#91;rights as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 72 | <code>        next.castling = rights;</code> | Update the named state using the expression and assignment operator shown. |
-| 73 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 74 | <code>    next.white = !next.white;</code> | Update the named state using the expression and assignment operator shown. |
-| 75 | <code>    next.key ^= KEYS.black;</code> | Update the named state using the expression and assignment operator shown. |
-| 76 | <code>    next</code> | Evaluate or continue this expression in make&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 77 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 78 | <code></code> | Blank line separating related declarations or steps. |
-| 79 | <code>/// Return the position with the other side to move and no en passant square.</code> | Source explanation: Return the position with the other side to move and no en passant square. |
-| 80 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
-| 81 | <code>pub fn make&#95;null&#95;move(position: &amp;Position) -&gt; Position {</code> | Declare make&#95;null&#95;move(); its parameters and return type define the interface. |
-| 82 | <code>    let mut next = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 83 | <code>    if next.en&#95;passant &gt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 84 | <code>        next.key ^= KEYS.en&#95;passant&#91;next.en&#95;passant as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 85 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 86 | <code>    next.en&#95;passant = -1;</code> | Update the named state using the expression and assignment operator shown. |
-| 87 | <code>    next.halfmove += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 88 | <code>    next.white = !next.white;</code> | Update the named state using the expression and assignment operator shown. |
-| 89 | <code>    next.key ^= KEYS.black;</code> | Update the named state using the expression and assignment operator shown. |
-| 90 | <code>    next</code> | Evaluate or continue this expression in make&#95;null&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 91 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 63 | <code>    next.en&#95;passant = -1;</code> | Update the named state using the expression and assignment operator shown. |
+| 64 | <code>    if is&#95;pawn &amp;&amp; distance == 16 {</code> | Test the condition and execute this branch only when it matches. |
+| 65 | <code>        let skipped = (start + target) / 2;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 66 | <code>        next.en&#95;passant = skipped as i8;</code> | Update the named state using the expression and assignment operator shown. |
+| 67 | <code>        next.key ^= KEYS.en&#95;passant&#91;skipped&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 68 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 69 | <code>    if promotion != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 70 | <code>        piece = promotion + (piece &amp; WHITE);</code> | Update the named state using the expression and assignment operator shown. |
+| 71 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 72 | <code>    if next.board&#91;target&#93; != EMPTY {</code> | Test the condition and execute this branch only when it matches. |
+| 73 | <code>        next.remove&#95;piece(target);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 74 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 75 | <code>    next.remove&#95;piece(start);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 76 | <code>    next.put&#95;piece(target, piece);</code> | Evaluate or continue this expression in play&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 77 | <code></code> | Blank line separating related declarations or steps. |
+| 78 | <code>    let rights = next.castling &amp; !(RIGHTS&#95;OF&#95;SQUARE&#91;start&#93; &#124; RIGHTS&#95;OF&#95;SQUARE&#91;target&#93;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 79 | <code>    if rights != next.castling {</code> | Test the condition and execute this branch only when it matches. |
+| 80 | <code>        next.key ^= KEYS.castling&#91;next.castling as usize&#93; ^ KEYS.castling&#91;rights as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 81 | <code>        next.castling = rights;</code> | Update the named state using the expression and assignment operator shown. |
+| 82 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 83 | <code>    next.white = !next.white;</code> | Update the named state using the expression and assignment operator shown. |
+| 84 | <code>    next.key ^= KEYS.black;</code> | Update the named state using the expression and assignment operator shown. |
+| 85 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 86 | <code></code> | Blank line separating related declarations or steps. |
+| 87 | <code>/// Return the position with the other side to move and no en passant square.</code> | Source explanation: Return the position with the other side to move and no en passant square. |
+| 88 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
+| 89 | <code>pub fn make&#95;null&#95;move(position: &amp;Position) -&gt; Position {</code> | Declare make&#95;null&#95;move(); its parameters and return type define the interface. |
+| 90 | <code>    let mut next = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 91 | <code>    if next.en&#95;passant &gt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 92 | <code>        next.key ^= KEYS.en&#95;passant&#91;next.en&#95;passant as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 93 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 94 | <code>    next.en&#95;passant = -1;</code> | Update the named state using the expression and assignment operator shown. |
+| 95 | <code>    next.halfmove += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 96 | <code>    next.white = !next.white;</code> | Update the named state using the expression and assignment operator shown. |
+| 97 | <code>    next.key ^= KEYS.black;</code> | Update the named state using the expression and assignment operator shown. |
+| 98 | <code>    next</code> | Evaluate or continue this expression in make&#95;null&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 99 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 
 ### move_generation.rs
 
@@ -2431,7 +2439,7 @@ Native move selection, iterative deepening, alpha-beta, quiescence, and ordering
 | 15 | <code>};</code> | Close the preceding block, expression, call, or collection. |
 | 16 | <code>use crate::evaluation::{PIECE&#95;VALUES, evaluate};</code> | Bring the named items into scope; no chess search runs here. |
 | 17 | <code>use crate::exchange::exchange&#95;score;</code> | Bring the named items into scope; no chess search runs here. |
-| 18 | <code>use crate::make&#95;move::{make&#95;move, make&#95;null&#95;move};</code> | Bring the named items into scope; no chess search runs here. |
+| 18 | <code>use crate::make&#95;move::{make&#95;move, make&#95;null&#95;move, play&#95;move};</code> | Bring the named items into scope; no chess search runs here. |
 | 19 | <code>use crate::move&#95;generation::{MoveList, StackList, generate&#95;captures, generate&#95;moves};</code> | Bring the named items into scope; no chess search runs here. |
 | 20 | <code>use crate::parallel&#95;search::{Candidate, Job, Pool, Progress, SPLIT&#95;DEPTH, SPLIT&#95;PLY, Split};</code> | Bring the named items into scope; no chess search runs here. |
 | 21 | <code>use crate::search&#95;control::SearchControl;</code> | Bring the named items into scope; no chess search runs here. |
@@ -2954,688 +2962,712 @@ Native move selection, iterative deepening, alpha-beta, quiescence, and ordering
 | 538 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
 | 539 | <code>            return false;</code> | Leave the current function with the displayed result. |
 | 540 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 541 | <code>        let child = make&#95;move(&amp;split.position, candidate.mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 542 | <code>        self.table.prefetch(child.key);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 543 | <code>        let length = self.history.len();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 544 | <code>        let nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 545 | <code>        let accounted = self.work.cutoff&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 546 | <code>        let stopped = self.work.stop&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 547 | <code>        let result = self.search&#95;sibling(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 548 | <code>            &amp;child,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 549 | <code>            split.depth,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 550 | <code>            split.ply,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 551 | <code>            alpha,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 552 | <code>            split.beta,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 553 | <code>            candidate.reduce,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 554 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
-| 555 | <code>        self.history.truncate(length);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 556 | <code>        if split.is&#95;canceled() {</code> | Test the condition and execute this branch only when it matches. |
-| 557 | <code>            self.work.cutoff&#95;discarded&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 558 | <code>            self.work.cutoff&#95;discarded&#95;nodes +=</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 559 | <code>                (self.nodes - nodes).saturating&#95;sub(self.work.cutoff&#95;discarded&#95;nodes - accounted);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 560 | <code>            return false;</code> | Leave the current function with the displayed result. |
-| 561 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 562 | <code>        let Ok(score) = result else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 563 | <code>            self.work.stop&#95;discarded&#95;nodes +=</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 564 | <code>                (self.nodes - nodes).saturating&#95;sub(self.work.stop&#95;discarded&#95;nodes - stopped);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 565 | <code>            return false;</code> | Leave the current function with the displayed result. |
-| 566 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 567 | <code>        match split.publish(candidate.mv, score) {</code> | Select an arm by matching the expression against the listed patterns. |
-| 568 | <code>            Some(true) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 569 | <code>                self.pool.cutoffs.fetch&#95;add(1, Relaxed);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 570 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 571 | <code>            Some(false) =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
-| 572 | <code>            None =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 573 | <code>                self.work.cutoff&#95;discarded&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 574 | <code>                self.work.cutoff&#95;discarded&#95;nodes += (self.nodes - nodes)</code> | Update the named state using the expression and assignment operator shown. |
-| 575 | <code>                    .saturating&#95;sub(self.work.cutoff&#95;discarded&#95;nodes - accounted);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 576 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 577 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 578 | <code>        true</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 579 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 580 | <code></code> | Blank line separating related declarations or steps. |
-| 581 | <code>    /// Borrow one descendant task, preserving the suspended search&#x27;s full context.</code> | Source explanation: Borrow one descendant task, preserving the suspended search&#x27;s full context. |
-| 582 | <code>    fn help&#95;descendant(&amp;mut self, scope: &amp;Arc&lt;Split&gt;) -&gt; bool {</code> | Declare help&#95;descendant(); its parameters and return type define the interface. |
-| 583 | <code>        if self.help&#95;depth &gt;= MAX&#95;HELP&#95;DEPTH &#124;&#124; self.poll().is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
-| 584 | <code>            return false;</code> | Leave the current function with the displayed result. |
-| 585 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 586 | <code>        let Some(task) = self.pool.try&#95;help(scope) else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 587 | <code>            return false;</code> | Leave the current function with the displayed result. |
-| 588 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 589 | <code>        self.pool.end&#95;wait(scope);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 590 | <code>        let started = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 591 | <code>        let waits = self.work.wait&#95;ns;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 592 | <code>        let nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 593 | <code>        let history = std::mem::replace(&amp;mut self.history, task.split.history.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 594 | <code>        let branch = self.branch.replace(task.split.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 595 | <code>        let research = self.research&#95;level;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 596 | <code>        let best = self.best&#95;move;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 597 | <code>        self.research&#95;level = u32::from(task.split.research);</code> | Update the named state using the expression and assignment operator shown. |
-| 598 | <code>        self.help&#95;depth += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 599 | <code>        self.work.help&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 600 | <code>        self.search&#95;split&#95;move(&amp;task.split, task.candidate, task.alpha);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 601 | <code>        self.help&#95;depth -= 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 602 | <code>        if self.help&#95;depth == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 603 | <code>            self.work.help&#95;nodes += self.nodes - nodes;</code> | Update the named state using the expression and assignment operator shown. |
-| 604 | <code>            self.work.help&#95;ns +=</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 605 | <code>                (started.elapsed().as&#95;nanos() as u64).saturating&#95;sub(self.work.wait&#95;ns - waits);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 606 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 607 | <code>        if research == 0 &amp;&amp; task.split.research {</code> | Test the condition and execute this branch only when it matches. |
-| 608 | <code>            self.work.research&#95;nodes += self.nodes - nodes;</code> | Update the named state using the expression and assignment operator shown. |
-| 609 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 610 | <code>        self.research&#95;level = research;</code> | Update the named state using the expression and assignment operator shown. |
-| 611 | <code>        self.best&#95;move = best;</code> | Update the named state using the expression and assignment operator shown. |
-| 612 | <code>        self.history = history;</code> | Update the named state using the expression and assignment operator shown. |
-| 613 | <code>        self.branch = branch;</code> | Update the named state using the expression and assignment operator shown. |
-| 614 | <code>        self.flush&#95;nodes();</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 615 | <code>        // Completion is visible only after this worker restores its suspended state.</code> | Source explanation: Completion is visible only after this worker restores its suspended state. |
-| 616 | <code>        drop(task);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 617 | <code>        self.pool.begin&#95;wait(scope);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 618 | <code>        true</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 619 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 620 | <code></code> | Blank line separating related declarations or steps. |
-| 621 | <code>    /// Help only descendants; cancellation drains participants without starting work.</code> | Source explanation: Help only descendants; cancellation drains participants without starting work. |
-| 622 | <code>    fn drain&#95;split(&amp;mut self, split: &amp;Arc&lt;Split&gt;) {</code> | Declare drain&#95;split(); its parameters and return type define the interface. |
-| 623 | <code>        let can&#95;help = self.help&#95;depth &lt; MAX&#95;HELP&#95;DEPTH;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 624 | <code>        if can&#95;help {</code> | Test the condition and execute this branch only when it matches. |
-| 625 | <code>            self.pool.begin&#95;wait(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 626 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 627 | <code>        loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
-| 628 | <code>            let mut state = split.progress.lock().unwrap();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 629 | <code>            if state.helpers == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 630 | <code>                state.closed = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 631 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 632 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 633 | <code>            drop(state);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 634 | <code>            let &#95; = self.poll();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 635 | <code>            let canceled = self.stop.load(Relaxed) &#124;&#124; split.is&#95;canceled();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 636 | <code>            if !canceled &amp;&amp; self.help&#95;descendant(split) {</code> | Test the condition and execute this branch only when it matches. |
-| 637 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 638 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 639 | <code>            let waiting = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 640 | <code>            state = split.progress.lock().unwrap();</code> | Update the named state using the expression and assignment operator shown. |
-| 641 | <code>            if state.helpers != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 642 | <code>                let (next, &#95;) = split</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 643 | <code>                    .changed</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 644 | <code>                    .wait&#95;timeout(state, Duration::from&#95;millis(1))</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 645 | <code>                    .unwrap();</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 646 | <code>                state = next;</code> | Update the named state using the expression and assignment operator shown. |
-| 647 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 648 | <code>            drop(state);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 649 | <code>            let elapsed = waiting.elapsed().as&#95;nanos() as u64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 650 | <code>            self.work.wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
-| 651 | <code>            // Classify by state at the start of the wait, with at most 1 ms resolution.</code> | Source explanation: Classify by state at the start of the wait, with at most 1 ms resolution. |
-| 652 | <code>            if canceled {</code> | Test the condition and execute this branch only when it matches. |
-| 653 | <code>                self.work.cancel&#95;wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
-| 654 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 655 | <code>                self.work.result&#95;wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
-| 656 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 657 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 658 | <code>        if can&#95;help {</code> | Test the condition and execute this branch only when it matches. |
-| 659 | <code>            self.pool.end&#95;wait(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 660 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 661 | <code>        self.pool.retire(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 662 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 663 | <code></code> | Blank line separating related declarations or steps. |
-| 664 | <code>    fn search&#95;sibling(</code> | Declare search&#95;sibling(); its parameters and return type define the interface. |
-| 665 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 666 | <code>        child: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 667 | <code>        depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 668 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 669 | <code>        alpha: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 670 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 671 | <code>        reduce: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 672 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 673 | <code>        let mut score = -self.alpha&#95;beta(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 674 | <code>            child,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 675 | <code>            depth - 1 - i32::from(reduce),</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 676 | <code>            ply + 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 677 | <code>            -alpha - 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 678 | <code>            -alpha,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 679 | <code>            true,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 680 | <code>        )?;</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 681 | <code>        if score &gt; alpha &amp;&amp; (reduce &#124;&#124; score &lt; beta) {</code> | Test the condition and execute this branch only when it matches. |
-| 682 | <code>            score = -self.research(</code> | Update the named state using the expression and assignment operator shown. |
-| 683 | <code>                child,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 684 | <code>                depth - 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 685 | <code>                ply + 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 686 | <code>                -beta,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 687 | <code>                -alpha,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 688 | <code>                if reduce { Research::Lmr } else { Research::Pvs },</code> | Test the condition and execute this branch only when it matches. |
-| 689 | <code>            )?;</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 690 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 691 | <code>        Ok(score)</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 692 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 693 | <code></code> | Blank line separating related declarations or steps. |
-| 694 | <code>    /// Reserve real idle workers, then search and drain this split before returning.</code> | Source explanation: Reserve real idle workers, then search and drain this split before returning. |
-| 695 | <code>    #&#91;allow(clippy::too&#95;many&#95;arguments)&#93;</code> | Compiler attribute controlling the following declaration. |
-| 696 | <code>    fn split&#95;remaining(</code> | Declare split&#95;remaining(); its parameters and return type define the interface. |
-| 697 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 698 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 699 | <code>        entries: &amp;mut &#91;u64&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 700 | <code>        depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 701 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 702 | <code>        alpha: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 703 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 704 | <code>        best&#95;score: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 705 | <code>        best: Move,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 706 | <code>        check: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 707 | <code>    ) -&gt; Option&lt;Result&lt;(i32, Move, usize), SearchTimeout&gt;&gt; {</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 708 | <code>        if depth &lt; SPLIT&#95;DEPTH</code> | Test the condition and execute this branch only when it matches. |
-| 709 | <code>            &#124;&#124; ply &gt; SPLIT&#95;PLY</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 710 | <code>            &#124;&#124; (!self.pool.has&#95;idle() &amp;&amp; !self.pool.has&#95;waiter(self.branch.as&#95;ref()))</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 711 | <code>        {</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 712 | <code>            return None;</code> | Leave the current function with the displayed result. |
-| 713 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 714 | <code>        // place&#95;next() orders only the moves the search has reached, and a split</code> | Source explanation: place&#95;next() orders only the moves the search has reached, and a split |
-| 715 | <code>        // hands out every move left, so those go into order here</code> | Source explanation: hands out every move left, so those go into order here |
-| 716 | <code>        entries.sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 717 | <code>        let mut candidates = Vec::with&#95;capacity(entries.len());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 718 | <code>        let mut legal&#95;count = 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 719 | <code>        for &amp;entry in entries.iter() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 720 | <code>            let mv = entry&#95;move(entry);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 721 | <code>            let child = make&#95;move(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 722 | <code>            if in&#95;check(&amp;child, position.white) {</code> | Test the condition and execute this branch only when it matches. |
-| 723 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 724 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 725 | <code>            legal&#95;count += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 726 | <code>            let quiet = captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 727 | <code>            let calm = quiet &amp;&amp; !check &amp;&amp; !in&#95;check(&amp;child, !position.white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 728 | <code>            let reduce = depth &gt;= 3 &amp;&amp; legal&#95;count &gt; 3 &amp;&amp; calm &amp;&amp; !self.killers&#91;ply&#93;.contains(&amp;mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 729 | <code>            candidates.push(Candidate { mv, reduce });</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 730 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 731 | <code>        if candidates.len() &lt; 2 {</code> | Test the condition and execute this branch only when it matches. |
-| 732 | <code>            return None;</code> | Leave the current function with the displayed result. |
-| 733 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 734 | <code>        let helpers = self.pool.reserve(candidates.len() - 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 735 | <code>        if helpers.is&#95;empty() &amp;&amp; !self.pool.has&#95;waiter(self.branch.as&#95;ref()) {</code> | Test the condition and execute this branch only when it matches. |
-| 736 | <code>            return None;</code> | Leave the current function with the displayed result. |
-| 737 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 738 | <code>        let split = Arc::new(Split {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 739 | <code>            position: &#42;position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 740 | <code>            history: self.history.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 741 | <code>            moves: candidates,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 742 | <code>            depth,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 743 | <code>            ply,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 744 | <code>            beta,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 745 | <code>            parent: self.branch.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 746 | <code>            canceled: AtomicBool::new(false),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 747 | <code>            research: self.research&#95;level != 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 748 | <code>            progress: Mutex::new(Progress {</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 749 | <code>                next: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 750 | <code>                helpers: helpers.len(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 751 | <code>                closed: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 752 | <code>                alpha,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 753 | <code>                score: best&#95;score,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 754 | <code>                best,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 755 | <code>            }),</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 756 | <code>            changed: Condvar::new(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 757 | <code>        });</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 758 | <code>        self.pool.splits.fetch&#95;add(1, Relaxed);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 759 | <code>        self.pool.publish(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 760 | <code>        for helper in helpers {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 761 | <code>            if helper.send(Job::Search(split.clone())).is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
-| 762 | <code>                split.helper&#95;done();</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 763 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 764 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 765 | <code>        let parent = self.branch.replace(split.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 766 | <code>        self.search&#95;split(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 767 | <code>        self.branch = parent;</code> | Update the named state using the expression and assignment operator shown. |
-| 768 | <code>        self.drain&#95;split(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 769 | <code>        let state = split.progress.lock().unwrap();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 770 | <code>        if split.is&#95;canceled() {</code> | Test the condition and execute this branch only when it matches. |
-| 771 | <code>            self.work.cutoff&#95;unclaimed&#95;tasks += (split.moves.len() - state.next) as u64;</code> | Update the named state using the expression and assignment operator shown. |
-| 772 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 773 | <code>        let result = (state.score, state.best, legal&#95;count);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 774 | <code>        drop(state);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 775 | <code>        Some(self.poll().map(&#124;()&#124; result))</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 776 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 777 | <code></code> | Blank line separating related declarations or steps. |
-| 778 | <code>    /// Search captures and queen promotions, or every legal evasion in check.</code> | Source explanation: Search captures and queen promotions, or every legal evasion in check. |
-| 779 | <code>    /// Checkmate and stalemate take precedence over standing pat or pruning.</code> | Source explanation: Checkmate and stalemate take precedence over standing pat or pruning. |
-| 780 | <code>    fn quiescence(</code> | Declare quiescence(); its parameters and return type define the interface. |
-| 781 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 782 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 783 | <code>        mut alpha: i32,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 784 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 785 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 786 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 787 | <code>        self.count&#95;node()?;</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 788 | <code>        let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 789 | <code>        let check = in&#95;check(position, white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 790 | <code>        if !has&#95;legal&#95;move(position, check) {</code> | Test the condition and execute this branch only when it matches. |
-| 791 | <code>            return Ok(if check { -(MATE&#95;SCORE - ply as i32) } else { 0 });</code> | Leave the current function with the displayed result. |
-| 792 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 793 | <code>        if self.is&#95;draw(position) {</code> | Test the condition and execute this branch only when it matches. |
-| 794 | <code>            return Ok(0);</code> | Leave the current function with the displayed result. |
-| 795 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 796 | <code>        let stand&#95;pat = evaluate(position);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 797 | <code>        if ply &gt;= MAX&#95;PLY {</code> | Test the condition and execute this branch only when it matches. |
-| 798 | <code>            return Ok(stand&#95;pat); // Bound the stack during long checking sequences</code> | Leave the current function with the displayed result. |
-| 799 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 800 | <code>        if !check {</code> | Test the condition and execute this branch only when it matches. |
-| 801 | <code>            if stand&#95;pat &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 802 | <code>                return Ok(stand&#95;pat);</code> | Leave the current function with the displayed result. |
-| 803 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 804 | <code>            alpha = alpha.max(stand&#95;pat);</code> | Update the named state using the expression and assignment operator shown. |
-| 805 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 806 | <code></code> | Blank line separating related declarations or steps. |
-| 807 | <code>        let mut entries = EntryList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 808 | <code>        if check {</code> | Test the condition and execute this branch only when it matches. |
-| 809 | <code>            ordered&#95;moves(</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 810 | <code>                position,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 811 | <code>                NO&#95;MOVE,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 812 | <code>                &#91;NO&#95;MOVE; 2&#93;,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 813 | <code>                &amp;self.quiet&#95;history&#91;usize::from(!white)&#93;,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 814 | <code>                &amp;mut entries,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 815 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
-| 816 | <code>            entries.as&#95;mut&#95;slice().sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 817 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 818 | <code>            let mut list = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 819 | <code>            generate&#95;captures(position, &amp;mut list);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 820 | <code>            for &amp;mut mv in list.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 821 | <code>                let priority = capture&#95;priority(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 822 | <code>                if priority &gt;= CAPTURE {</code> | Test the condition and execute this branch only when it matches. |
-| 823 | <code>                    entries.add(sort&#95;entry(priority, mv));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 824 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 825 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 826 | <code>            entries.as&#95;mut&#95;slice().sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 827 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 828 | <code>        for &amp;mut entry in entries.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 829 | <code>            let mv = entry&#95;move(entry);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 830 | <code>            let child = make&#95;move(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 831 | <code>            if in&#95;check(&amp;child, white) {</code> | Test the condition and execute this branch only when it matches. |
-| 832 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 833 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 834 | <code>            if !check &amp;&amp; move&#95;promotion(mv) == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 835 | <code>                let victim = PIECE&#95;VALUES&#91;captured&#95;kind(position, mv) as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 836 | <code>                if stand&#95;pat + victim + DELTA&#95;MARGIN &lt; alpha {</code> | Test the condition and execute this branch only when it matches. |
-| 837 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 838 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 839 | <code>                let exchange =</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 840 | <code>                    exchange&#95;score(&amp;position.board, &amp;position.by&#95;kind, &amp;position.by&#95;side, mv);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 841 | <code>                if exchange &lt; 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 842 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 843 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 844 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 845 | <code>            // Evasions can repeat a position, so quiescence keeps the path too.</code> | Source explanation: Evasions can repeat a position, so quiescence keeps the path too. |
-| 846 | <code>            self.history.push(position.key);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 847 | <code>            let result = self.quiescence(&amp;child, -beta, -alpha, ply + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 848 | <code>            self.history.pop();</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 849 | <code>            let score = -result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 850 | <code>            if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 851 | <code>                return Ok(score);</code> | Leave the current function with the displayed result. |
-| 852 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 853 | <code>            alpha = alpha.max(score);</code> | Update the named state using the expression and assignment operator shown. |
-| 854 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 855 | <code>        Ok(alpha)</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 856 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 857 | <code></code> | Blank line separating related declarations or steps. |
-| 858 | <code>    /// Return true for the fifty-move rule or a repeated position.</code> | Source explanation: Return true for the fifty-move rule or a repeated position. |
-| 859 | <code>    #&#91;inline(always)&#93;</code> | Compiler attribute controlling the following declaration. |
-| 860 | <code>    fn is&#95;draw(&amp;self, position: &amp;Position) -&gt; bool {</code> | Declare is&#95;draw(); its parameters and return type define the interface. |
-| 861 | <code>        if position.halfmove &gt;= 100 {</code> | Test the condition and execute this branch only when it matches. |
-| 862 | <code>            return true;</code> | Leave the current function with the displayed result. |
-| 863 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 864 | <code>        // The slice history&#91;len - halfmove:&#93; of Remus5, where a negative start counts</code> | Source explanation: The slice history&#91;len - halfmove:&#93; of Remus5, where a negative start counts |
-| 865 | <code>        // back from the end of the list</code> | Source explanation: back from the end of the list |
-| 866 | <code>        let length = self.history.len() as i64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 867 | <code>        let mut start = length - i64::from(position.halfmove);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 868 | <code>        if start &lt; 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 869 | <code>            start = (length + start).max(0);</code> | Update the named state using the expression and assignment operator shown. |
-| 870 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 871 | <code>        self.history&#91;start as usize..&#93;.contains(&amp;position.key)</code> | Evaluate or continue this expression in is&#95;draw(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 872 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 873 | <code></code> | Blank line separating related declarations or steps. |
-| 874 | <code>    /// Return the score for the side to move, searching depth moves ahead.</code> | Source explanation: Return the score for the side to move, searching depth moves ahead. |
-| 875 | <code>    fn alpha&#95;beta(</code> | Declare alpha&#95;beta(); its parameters and return type define the interface. |
-| 876 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 877 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 878 | <code>        mut depth: i32,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 879 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 880 | <code>        mut alpha: i32,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 881 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 882 | <code>        can&#95;null: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 883 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 884 | <code>        self.count&#95;node()?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 885 | <code>        let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 886 | <code>        let key = position.key;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 887 | <code>        let check = in&#95;check(position, white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 888 | <code>        if ply &gt; 0 &amp;&amp; self.is&#95;draw(position) {</code> | Test the condition and execute this branch only when it matches. |
-| 889 | <code>            if check &amp;&amp; !has&#95;legal&#95;move(position, true) {</code> | Test the condition and execute this branch only when it matches. |
-| 890 | <code>                return Ok(-(MATE&#95;SCORE - ply as i32));</code> | Leave the current function with the displayed result. |
-| 891 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 892 | <code>            return Ok(0);</code> | Leave the current function with the displayed result. |
+| 541 | <code>        let mut child = split.position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 542 | <code>        play&#95;move(&amp;mut child, candidate.mv);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 543 | <code>        self.table.prefetch(child.key);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 544 | <code>        let length = self.history.len();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 545 | <code>        let nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 546 | <code>        let accounted = self.work.cutoff&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 547 | <code>        let stopped = self.work.stop&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 548 | <code>        let result = self.search&#95;sibling(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 549 | <code>            &amp;child,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 550 | <code>            split.depth,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 551 | <code>            split.ply,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 552 | <code>            alpha,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 553 | <code>            split.beta,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 554 | <code>            candidate.reduce,</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 555 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
+| 556 | <code>        self.history.truncate(length);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 557 | <code>        if split.is&#95;canceled() {</code> | Test the condition and execute this branch only when it matches. |
+| 558 | <code>            self.work.cutoff&#95;discarded&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 559 | <code>            self.work.cutoff&#95;discarded&#95;nodes +=</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 560 | <code>                (self.nodes - nodes).saturating&#95;sub(self.work.cutoff&#95;discarded&#95;nodes - accounted);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 561 | <code>            return false;</code> | Leave the current function with the displayed result. |
+| 562 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 563 | <code>        let Ok(score) = result else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 564 | <code>            self.work.stop&#95;discarded&#95;nodes +=</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 565 | <code>                (self.nodes - nodes).saturating&#95;sub(self.work.stop&#95;discarded&#95;nodes - stopped);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 566 | <code>            return false;</code> | Leave the current function with the displayed result. |
+| 567 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 568 | <code>        match split.publish(candidate.mv, score) {</code> | Select an arm by matching the expression against the listed patterns. |
+| 569 | <code>            Some(true) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 570 | <code>                self.pool.cutoffs.fetch&#95;add(1, Relaxed);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 571 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 572 | <code>            Some(false) =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 573 | <code>            None =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 574 | <code>                self.work.cutoff&#95;discarded&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 575 | <code>                self.work.cutoff&#95;discarded&#95;nodes += (self.nodes - nodes)</code> | Update the named state using the expression and assignment operator shown. |
+| 576 | <code>                    .saturating&#95;sub(self.work.cutoff&#95;discarded&#95;nodes - accounted);</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 577 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 578 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 579 | <code>        true</code> | Evaluate or continue this expression in search&#95;split&#95;move(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 580 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 581 | <code></code> | Blank line separating related declarations or steps. |
+| 582 | <code>    /// Borrow one descendant task, preserving the suspended search&#x27;s full context.</code> | Source explanation: Borrow one descendant task, preserving the suspended search&#x27;s full context. |
+| 583 | <code>    fn help&#95;descendant(&amp;mut self, scope: &amp;Arc&lt;Split&gt;) -&gt; bool {</code> | Declare help&#95;descendant(); its parameters and return type define the interface. |
+| 584 | <code>        if self.help&#95;depth &gt;= MAX&#95;HELP&#95;DEPTH &#124;&#124; self.poll().is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
+| 585 | <code>            return false;</code> | Leave the current function with the displayed result. |
+| 586 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 587 | <code>        let Some(task) = self.pool.try&#95;help(scope) else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 588 | <code>            return false;</code> | Leave the current function with the displayed result. |
+| 589 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 590 | <code>        self.pool.end&#95;wait(scope);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 591 | <code>        let started = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 592 | <code>        let waits = self.work.wait&#95;ns;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 593 | <code>        let nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 594 | <code>        let history = std::mem::replace(&amp;mut self.history, task.split.history.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 595 | <code>        let branch = self.branch.replace(task.split.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 596 | <code>        let research = self.research&#95;level;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 597 | <code>        let best = self.best&#95;move;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 598 | <code>        self.research&#95;level = u32::from(task.split.research);</code> | Update the named state using the expression and assignment operator shown. |
+| 599 | <code>        self.help&#95;depth += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 600 | <code>        self.work.help&#95;tasks += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 601 | <code>        self.search&#95;split&#95;move(&amp;task.split, task.candidate, task.alpha);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 602 | <code>        self.help&#95;depth -= 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 603 | <code>        if self.help&#95;depth == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 604 | <code>            self.work.help&#95;nodes += self.nodes - nodes;</code> | Update the named state using the expression and assignment operator shown. |
+| 605 | <code>            self.work.help&#95;ns +=</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 606 | <code>                (started.elapsed().as&#95;nanos() as u64).saturating&#95;sub(self.work.wait&#95;ns - waits);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 607 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 608 | <code>        if research == 0 &amp;&amp; task.split.research {</code> | Test the condition and execute this branch only when it matches. |
+| 609 | <code>            self.work.research&#95;nodes += self.nodes - nodes;</code> | Update the named state using the expression and assignment operator shown. |
+| 610 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 611 | <code>        self.research&#95;level = research;</code> | Update the named state using the expression and assignment operator shown. |
+| 612 | <code>        self.best&#95;move = best;</code> | Update the named state using the expression and assignment operator shown. |
+| 613 | <code>        self.history = history;</code> | Update the named state using the expression and assignment operator shown. |
+| 614 | <code>        self.branch = branch;</code> | Update the named state using the expression and assignment operator shown. |
+| 615 | <code>        self.flush&#95;nodes();</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 616 | <code>        // Completion is visible only after this worker restores its suspended state.</code> | Source explanation: Completion is visible only after this worker restores its suspended state. |
+| 617 | <code>        drop(task);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 618 | <code>        self.pool.begin&#95;wait(scope);</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 619 | <code>        true</code> | Evaluate or continue this expression in help&#95;descendant(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 620 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 621 | <code></code> | Blank line separating related declarations or steps. |
+| 622 | <code>    /// Help only descendants; cancellation drains participants without starting work.</code> | Source explanation: Help only descendants; cancellation drains participants without starting work. |
+| 623 | <code>    fn drain&#95;split(&amp;mut self, split: &amp;Arc&lt;Split&gt;) {</code> | Declare drain&#95;split(); its parameters and return type define the interface. |
+| 624 | <code>        let can&#95;help = self.help&#95;depth &lt; MAX&#95;HELP&#95;DEPTH;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 625 | <code>        if can&#95;help {</code> | Test the condition and execute this branch only when it matches. |
+| 626 | <code>            self.pool.begin&#95;wait(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 627 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 628 | <code>        loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
+| 629 | <code>            let mut state = split.progress.lock().unwrap();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 630 | <code>            if state.helpers == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 631 | <code>                state.closed = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 632 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 633 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 634 | <code>            drop(state);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 635 | <code>            let &#95; = self.poll();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 636 | <code>            let canceled = self.stop.load(Relaxed) &#124;&#124; split.is&#95;canceled();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 637 | <code>            if !canceled &amp;&amp; self.help&#95;descendant(split) {</code> | Test the condition and execute this branch only when it matches. |
+| 638 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 639 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 640 | <code>            let waiting = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 641 | <code>            state = split.progress.lock().unwrap();</code> | Update the named state using the expression and assignment operator shown. |
+| 642 | <code>            if state.helpers != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 643 | <code>                let (next, &#95;) = split</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 644 | <code>                    .changed</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 645 | <code>                    .wait&#95;timeout(state, Duration::from&#95;millis(1))</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 646 | <code>                    .unwrap();</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 647 | <code>                state = next;</code> | Update the named state using the expression and assignment operator shown. |
+| 648 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 649 | <code>            drop(state);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 650 | <code>            let elapsed = waiting.elapsed().as&#95;nanos() as u64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 651 | <code>            self.work.wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
+| 652 | <code>            // Classify by state at the start of the wait, with at most 1 ms resolution.</code> | Source explanation: Classify by state at the start of the wait, with at most 1 ms resolution. |
+| 653 | <code>            if canceled {</code> | Test the condition and execute this branch only when it matches. |
+| 654 | <code>                self.work.cancel&#95;wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
+| 655 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 656 | <code>                self.work.result&#95;wait&#95;ns += elapsed;</code> | Update the named state using the expression and assignment operator shown. |
+| 657 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 658 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 659 | <code>        if can&#95;help {</code> | Test the condition and execute this branch only when it matches. |
+| 660 | <code>            self.pool.end&#95;wait(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 661 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 662 | <code>        self.pool.retire(split);</code> | Evaluate or continue this expression in drain&#95;split(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 663 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 664 | <code></code> | Blank line separating related declarations or steps. |
+| 665 | <code>    fn search&#95;sibling(</code> | Declare search&#95;sibling(); its parameters and return type define the interface. |
+| 666 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 667 | <code>        child: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 668 | <code>        depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 669 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 670 | <code>        alpha: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 671 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 672 | <code>        reduce: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 673 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 674 | <code>        let mut score = -self.alpha&#95;beta(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 675 | <code>            child,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 676 | <code>            depth - 1 - i32::from(reduce),</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 677 | <code>            ply + 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 678 | <code>            -alpha - 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 679 | <code>            -alpha,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 680 | <code>            true,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 681 | <code>        )?;</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 682 | <code>        if score &gt; alpha &amp;&amp; (reduce &#124;&#124; score &lt; beta) {</code> | Test the condition and execute this branch only when it matches. |
+| 683 | <code>            score = -self.research(</code> | Update the named state using the expression and assignment operator shown. |
+| 684 | <code>                child,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 685 | <code>                depth - 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 686 | <code>                ply + 1,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 687 | <code>                -beta,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 688 | <code>                -alpha,</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 689 | <code>                if reduce { Research::Lmr } else { Research::Pvs },</code> | Test the condition and execute this branch only when it matches. |
+| 690 | <code>            )?;</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 691 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 692 | <code>        Ok(score)</code> | Evaluate or continue this expression in search&#95;sibling(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 693 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 694 | <code></code> | Blank line separating related declarations or steps. |
+| 695 | <code>    /// Reserve real idle workers, then search and drain this split before returning.</code> | Source explanation: Reserve real idle workers, then search and drain this split before returning. |
+| 696 | <code>    #&#91;allow(clippy::too&#95;many&#95;arguments)&#93;</code> | Compiler attribute controlling the following declaration. |
+| 697 | <code>    fn split&#95;remaining(</code> | Declare split&#95;remaining(); its parameters and return type define the interface. |
+| 698 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 699 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 700 | <code>        entries: &amp;mut &#91;u64&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 701 | <code>        depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 702 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 703 | <code>        alpha: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 704 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 705 | <code>        best&#95;score: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 706 | <code>        best: Move,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 707 | <code>        check: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 708 | <code>    ) -&gt; Option&lt;Result&lt;(i32, Move, usize), SearchTimeout&gt;&gt; {</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 709 | <code>        if depth &lt; SPLIT&#95;DEPTH</code> | Test the condition and execute this branch only when it matches. |
+| 710 | <code>            &#124;&#124; ply &gt; SPLIT&#95;PLY</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 711 | <code>            &#124;&#124; (!self.pool.has&#95;idle() &amp;&amp; !self.pool.has&#95;waiter(self.branch.as&#95;ref()))</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 712 | <code>        {</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 713 | <code>            return None;</code> | Leave the current function with the displayed result. |
+| 714 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 715 | <code>        // place&#95;next() orders only the moves the search has reached, and a split</code> | Source explanation: place&#95;next() orders only the moves the search has reached, and a split |
+| 716 | <code>        // hands out every move left, so those go into order here</code> | Source explanation: hands out every move left, so those go into order here |
+| 717 | <code>        entries.sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 718 | <code>        let mut candidates = Vec::with&#95;capacity(entries.len());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 719 | <code>        let mut legal&#95;count = 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 720 | <code>        for &amp;entry in entries.iter() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 721 | <code>            let mv = entry&#95;move(entry);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 722 | <code>            let mut child = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 723 | <code>            play&#95;move(&amp;mut child, mv);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 724 | <code>            if in&#95;check(&amp;child, position.white) {</code> | Test the condition and execute this branch only when it matches. |
+| 725 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 726 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 727 | <code>            legal&#95;count += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 728 | <code>            let quiet = captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 729 | <code>            let calm = quiet &amp;&amp; !check &amp;&amp; !in&#95;check(&amp;child, !position.white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 730 | <code>            let reduce = depth &gt;= 3 &amp;&amp; legal&#95;count &gt; 3 &amp;&amp; calm &amp;&amp; !self.killers&#91;ply&#93;.contains(&amp;mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 731 | <code>            candidates.push(Candidate { mv, reduce });</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 732 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 733 | <code>        if candidates.len() &lt; 2 {</code> | Test the condition and execute this branch only when it matches. |
+| 734 | <code>            return None;</code> | Leave the current function with the displayed result. |
+| 735 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 736 | <code>        let helpers = self.pool.reserve(candidates.len() - 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 737 | <code>        if helpers.is&#95;empty() &amp;&amp; !self.pool.has&#95;waiter(self.branch.as&#95;ref()) {</code> | Test the condition and execute this branch only when it matches. |
+| 738 | <code>            return None;</code> | Leave the current function with the displayed result. |
+| 739 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 740 | <code>        let split = Arc::new(Split {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 741 | <code>            position: &#42;position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 742 | <code>            history: self.history.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 743 | <code>            moves: candidates,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 744 | <code>            depth,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 745 | <code>            ply,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 746 | <code>            beta,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 747 | <code>            parent: self.branch.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 748 | <code>            canceled: AtomicBool::new(false),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 749 | <code>            research: self.research&#95;level != 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 750 | <code>            progress: Mutex::new(Progress {</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 751 | <code>                next: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 752 | <code>                helpers: helpers.len(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 753 | <code>                closed: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 754 | <code>                alpha,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 755 | <code>                score: best&#95;score,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 756 | <code>                best,</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 757 | <code>            }),</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 758 | <code>            changed: Condvar::new(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 759 | <code>        });</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 760 | <code>        self.pool.splits.fetch&#95;add(1, Relaxed);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 761 | <code>        self.pool.publish(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 762 | <code>        for helper in helpers {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 763 | <code>            if helper.send(Job::Search(split.clone())).is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
+| 764 | <code>                split.helper&#95;done();</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 765 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 766 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 767 | <code>        let parent = self.branch.replace(split.clone());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 768 | <code>        self.search&#95;split(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 769 | <code>        self.branch = parent;</code> | Update the named state using the expression and assignment operator shown. |
+| 770 | <code>        self.drain&#95;split(&amp;split);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 771 | <code>        let state = split.progress.lock().unwrap();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 772 | <code>        if split.is&#95;canceled() {</code> | Test the condition and execute this branch only when it matches. |
+| 773 | <code>            self.work.cutoff&#95;unclaimed&#95;tasks += (split.moves.len() - state.next) as u64;</code> | Update the named state using the expression and assignment operator shown. |
+| 774 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 775 | <code>        let result = (state.score, state.best, legal&#95;count);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 776 | <code>        drop(state);</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 777 | <code>        Some(self.poll().map(&#124;()&#124; result))</code> | Evaluate or continue this expression in split&#95;remaining(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 778 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 779 | <code></code> | Blank line separating related declarations or steps. |
+| 780 | <code>    /// Search captures and queen promotions, or every legal evasion in check.</code> | Source explanation: Search captures and queen promotions, or every legal evasion in check. |
+| 781 | <code>    /// Checkmate and stalemate take precedence over standing pat or pruning.</code> | Source explanation: Checkmate and stalemate take precedence over standing pat or pruning. |
+| 782 | <code>    fn quiescence(</code> | Declare quiescence(); its parameters and return type define the interface. |
+| 783 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 784 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 785 | <code>        mut alpha: i32,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 786 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 787 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 788 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 789 | <code>        self.count&#95;node()?;</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 790 | <code>        let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 791 | <code>        let check = in&#95;check(position, white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 792 | <code>        let mated = -(MATE&#95;SCORE - ply as i32);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 793 | <code>        // Out of check, a position with no legal move is stalemate. In check the loop</code> | Source explanation: Out of check, a position with no legal move is stalemate. In check the loop |
+| 794 | <code>        // below tries every evasion, so it finds checkmate itself; only the two early</code> | Source explanation: below tries every evasion, so it finds checkmate itself; only the two early |
+| 795 | <code>        // returns ask first, because checkmate comes before a draw or a stand pat.</code> | Source explanation: returns ask first, because checkmate comes before a draw or a stand pat. |
+| 796 | <code>        if !check &amp;&amp; !has&#95;legal&#95;move(position, false) {</code> | Test the condition and execute this branch only when it matches. |
+| 797 | <code>            return Ok(0);</code> | Leave the current function with the displayed result. |
+| 798 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 799 | <code>        if self.is&#95;draw(position) {</code> | Test the condition and execute this branch only when it matches. |
+| 800 | <code>            if check &amp;&amp; !has&#95;legal&#95;move(position, true) {</code> | Test the condition and execute this branch only when it matches. |
+| 801 | <code>                return Ok(mated);</code> | Leave the current function with the displayed result. |
+| 802 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 803 | <code>            return Ok(0);</code> | Leave the current function with the displayed result. |
+| 804 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 805 | <code>        let stand&#95;pat = evaluate(position);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 806 | <code>        if ply &gt;= MAX&#95;PLY {</code> | Test the condition and execute this branch only when it matches. |
+| 807 | <code>            if check &amp;&amp; !has&#95;legal&#95;move(position, true) {</code> | Test the condition and execute this branch only when it matches. |
+| 808 | <code>                return Ok(mated);</code> | Leave the current function with the displayed result. |
+| 809 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 810 | <code>            return Ok(stand&#95;pat); // Bound the stack during long checking sequences</code> | Leave the current function with the displayed result. |
+| 811 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 812 | <code>        if !check {</code> | Test the condition and execute this branch only when it matches. |
+| 813 | <code>            if stand&#95;pat &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 814 | <code>                return Ok(stand&#95;pat);</code> | Leave the current function with the displayed result. |
+| 815 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 816 | <code>            alpha = alpha.max(stand&#95;pat);</code> | Update the named state using the expression and assignment operator shown. |
+| 817 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 818 | <code></code> | Blank line separating related declarations or steps. |
+| 819 | <code>        let mut entries = EntryList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 820 | <code>        if check {</code> | Test the condition and execute this branch only when it matches. |
+| 821 | <code>            ordered&#95;moves(</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 822 | <code>                position,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 823 | <code>                NO&#95;MOVE,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 824 | <code>                &#91;NO&#95;MOVE; 2&#93;,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 825 | <code>                &amp;self.quiet&#95;history&#91;usize::from(!white)&#93;,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 826 | <code>                &amp;mut entries,</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 827 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
+| 828 | <code>            entries.as&#95;mut&#95;slice().sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 829 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 830 | <code>            let mut list = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 831 | <code>            generate&#95;captures(position, &amp;mut list);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 832 | <code>            for &amp;mut mv in list.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 833 | <code>                let priority = capture&#95;priority(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 834 | <code>                if priority &gt;= CAPTURE {</code> | Test the condition and execute this branch only when it matches. |
+| 835 | <code>                    entries.add(sort&#95;entry(priority, mv));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 836 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 837 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 838 | <code>            entries.as&#95;mut&#95;slice().sort&#95;unstable&#95;by(&#124;a, b&#124; b.cmp(a));</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 839 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 840 | <code>        let mut has&#95;evasion = false;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 841 | <code>        for &amp;mut entry in entries.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 842 | <code>            let mv = entry&#95;move(entry);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 843 | <code>            let mut child = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 844 | <code>            play&#95;move(&amp;mut child, mv);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 845 | <code>            if in&#95;check(&amp;child, white) {</code> | Test the condition and execute this branch only when it matches. |
+| 846 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 847 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 848 | <code>            has&#95;evasion = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 849 | <code>            if !check &amp;&amp; move&#95;promotion(mv) == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 850 | <code>                let victim = PIECE&#95;VALUES&#91;captured&#95;kind(position, mv) as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 851 | <code>                if stand&#95;pat + victim + DELTA&#95;MARGIN &lt; alpha {</code> | Test the condition and execute this branch only when it matches. |
+| 852 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 853 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 854 | <code>                // A piece that takes one worth at least as much cannot lose material,</code> | Source explanation: A piece that takes one worth at least as much cannot lose material, |
+| 855 | <code>                // so only the other captures play out the exchange. A king, worth 0</code> | Source explanation: so only the other captures play out the exchange. A king, worth 0 |
+| 856 | <code>                // in PIECE&#95;VALUES, never plays it out: its legal captures land on</code> | Source explanation: in PIECE&#95;VALUES, never plays it out: its legal captures land on |
+| 857 | <code>                // squares that no enemy piece attacks.</code> | Source explanation: squares that no enemy piece attacks. |
+| 858 | <code>                let attacker = position.board&#91;move&#95;start(mv)&#93; &amp; 7;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 859 | <code>                if PIECE&#95;VALUES&#91;attacker as usize&#93; &gt; victim</code> | Test the condition and execute this branch only when it matches. |
+| 860 | <code>                    &amp;&amp; exchange&#95;score(&amp;position.board, &amp;position.by&#95;kind, &amp;position.by&#95;side, mv) &lt; 0</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 861 | <code>                {</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 862 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 863 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 864 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 865 | <code>            // Evasions can repeat a position, so quiescence keeps the path too.</code> | Source explanation: Evasions can repeat a position, so quiescence keeps the path too. |
+| 866 | <code>            self.history.push(position.key);</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 867 | <code>            let result = self.quiescence(&amp;child, -beta, -alpha, ply + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 868 | <code>            self.history.pop();</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 869 | <code>            let score = -result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 870 | <code>            if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 871 | <code>                return Ok(score);</code> | Leave the current function with the displayed result. |
+| 872 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 873 | <code>            alpha = alpha.max(score);</code> | Update the named state using the expression and assignment operator shown. |
+| 874 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 875 | <code>        if check &amp;&amp; !has&#95;evasion {</code> | Test the condition and execute this branch only when it matches. |
+| 876 | <code>            return Ok(mated); // Checkmate: no evasion is legal</code> | Leave the current function with the displayed result. |
+| 877 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 878 | <code>        Ok(alpha)</code> | Evaluate or continue this expression in quiescence(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 879 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 880 | <code></code> | Blank line separating related declarations or steps. |
+| 881 | <code>    /// Return true for the fifty-move rule or a repeated position.</code> | Source explanation: Return true for the fifty-move rule or a repeated position. |
+| 882 | <code>    #&#91;inline(always)&#93;</code> | Compiler attribute controlling the following declaration. |
+| 883 | <code>    fn is&#95;draw(&amp;self, position: &amp;Position) -&gt; bool {</code> | Declare is&#95;draw(); its parameters and return type define the interface. |
+| 884 | <code>        if position.halfmove &gt;= 100 {</code> | Test the condition and execute this branch only when it matches. |
+| 885 | <code>            return true;</code> | Leave the current function with the displayed result. |
+| 886 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 887 | <code>        // The slice history&#91;len - halfmove:&#93; of Remus5, where a negative start counts</code> | Source explanation: The slice history&#91;len - halfmove:&#93; of Remus5, where a negative start counts |
+| 888 | <code>        // back from the end of the list</code> | Source explanation: back from the end of the list |
+| 889 | <code>        let length = self.history.len() as i64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 890 | <code>        let mut start = length - i64::from(position.halfmove);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 891 | <code>        if start &lt; 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 892 | <code>            start = (length + start).max(0);</code> | Update the named state using the expression and assignment operator shown. |
 | 893 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 894 | <code>        if ply &gt;= MAX&#95;PLY {</code> | Test the condition and execute this branch only when it matches. |
-| 895 | <code>            return self.quiescence(position, alpha, beta, ply);</code> | Leave the current function with the displayed result. |
-| 896 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 897 | <code>        if check {</code> | Test the condition and execute this branch only when it matches. |
-| 898 | <code>            depth += 1; // Never stop the search in check</code> | Update the named state using the expression and assignment operator shown. |
-| 899 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 900 | <code>        if depth &lt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 901 | <code>            return self.quiescence(position, alpha, beta, ply);</code> | Leave the current function with the displayed result. |
-| 902 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 903 | <code>        let mut first = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 904 | <code>        self.metrics.probes += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 905 | <code>        if let Some(stored) = self.table.probe(key, ply as i32) {</code> | Test the condition and execute this branch only when it matches. |
-| 906 | <code>            self.metrics.hits += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 907 | <code>            first = stored.mv;</code> | Update the named state using the expression and assignment operator shown. |
-| 908 | <code>            if ply &gt; 0</code> | Test the condition and execute this branch only when it matches. |
-| 909 | <code>                &amp;&amp; stored.depth &gt;= depth</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 910 | <code>                &amp;&amp; (stored.bound == EXACT</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 911 | <code>                    &#124;&#124; (stored.bound == LOWER &amp;&amp; stored.score &gt;= beta)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 912 | <code>                    &#124;&#124; (stored.bound == UPPER &amp;&amp; stored.score &lt;= alpha))</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 913 | <code>            {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 914 | <code>                self.metrics.cutoffs += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 915 | <code>                self.metrics.refreshes += u64::from(self.table.refresh(key, &amp;stored));</code> | Update the named state using the expression and assignment operator shown. |
-| 916 | <code>                return Ok(stored.score);</code> | Leave the current function with the displayed result. |
-| 917 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 918 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 919 | <code>        // Only two tests read the score, both out of check: null move at depth 3 and</code> | Source explanation: Only two tests read the score, both out of check: null move at depth 3 and |
-| 920 | <code>        // up, and futility at depth 1. Every other node skips the evaluation.</code> | Source explanation: up, and futility at depth 1. Every other node skips the evaluation. |
-| 921 | <code>        let needs&#95;score = !check &amp;&amp; (depth == 1 &#124;&#124; (depth &gt;= 3 &amp;&amp; can&#95;null &amp;&amp; ply &gt; 0));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 922 | <code>        let static&#95;score = if needs&#95;score { evaluate(position) } else { 0 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 923 | <code>        // Null move: let the opponent move twice. If the side to move still stands above</code> | Source explanation: Null move: let the opponent move twice. If the side to move still stands above |
-| 924 | <code>        // beta with a shallower search, its real moves will too.</code> | Source explanation: beta with a shallower search, its real moves will too. |
-| 925 | <code>        if can&#95;null</code> | Test the condition and execute this branch only when it matches. |
-| 926 | <code>            &amp;&amp; !check</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 927 | <code>            &amp;&amp; ply &gt; 0</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 928 | <code>            &amp;&amp; depth &gt;= 3</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 929 | <code>            &amp;&amp; static&#95;score &gt;= beta</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 930 | <code>            &amp;&amp; has&#95;pieces(position)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 931 | <code>            &amp;&amp; has&#95;legal&#95;move(position, false)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 932 | <code>        {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 933 | <code>            let null = make&#95;null&#95;move(position);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 934 | <code>            self.table.prefetch(null.key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 935 | <code>            self.history.push(key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 936 | <code>            let result = self.alpha&#95;beta(&amp;null, depth - 3, ply + 1, -beta, -beta + 1, false);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 937 | <code>            self.history.pop();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 938 | <code>            if -result? &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 939 | <code>                return Ok(beta);</code> | Leave the current function with the displayed result. |
+| 894 | <code>        self.history&#91;start as usize..&#93;.contains(&amp;position.key)</code> | Evaluate or continue this expression in is&#95;draw(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 895 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 896 | <code></code> | Blank line separating related declarations or steps. |
+| 897 | <code>    /// Return the score for the side to move, searching depth moves ahead.</code> | Source explanation: Return the score for the side to move, searching depth moves ahead. |
+| 898 | <code>    fn alpha&#95;beta(</code> | Declare alpha&#95;beta(); its parameters and return type define the interface. |
+| 899 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 900 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 901 | <code>        mut depth: i32,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 902 | <code>        ply: usize,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 903 | <code>        mut alpha: i32,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 904 | <code>        beta: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 905 | <code>        can&#95;null: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 906 | <code>    ) -&gt; Result&lt;i32, SearchTimeout&gt; {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 907 | <code>        self.count&#95;node()?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 908 | <code>        let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 909 | <code>        let key = position.key;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 910 | <code>        let check = in&#95;check(position, white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 911 | <code>        if ply &gt; 0 &amp;&amp; self.is&#95;draw(position) {</code> | Test the condition and execute this branch only when it matches. |
+| 912 | <code>            if check &amp;&amp; !has&#95;legal&#95;move(position, true) {</code> | Test the condition and execute this branch only when it matches. |
+| 913 | <code>                return Ok(-(MATE&#95;SCORE - ply as i32));</code> | Leave the current function with the displayed result. |
+| 914 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 915 | <code>            return Ok(0);</code> | Leave the current function with the displayed result. |
+| 916 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 917 | <code>        if ply &gt;= MAX&#95;PLY {</code> | Test the condition and execute this branch only when it matches. |
+| 918 | <code>            return self.quiescence(position, alpha, beta, ply);</code> | Leave the current function with the displayed result. |
+| 919 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 920 | <code>        if check {</code> | Test the condition and execute this branch only when it matches. |
+| 921 | <code>            depth += 1; // Never stop the search in check</code> | Update the named state using the expression and assignment operator shown. |
+| 922 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 923 | <code>        if depth &lt;= 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 924 | <code>            return self.quiescence(position, alpha, beta, ply);</code> | Leave the current function with the displayed result. |
+| 925 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 926 | <code>        let mut first = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 927 | <code>        self.metrics.probes += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 928 | <code>        if let Some(stored) = self.table.probe(key, ply as i32) {</code> | Test the condition and execute this branch only when it matches. |
+| 929 | <code>            self.metrics.hits += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 930 | <code>            first = stored.mv;</code> | Update the named state using the expression and assignment operator shown. |
+| 931 | <code>            if ply &gt; 0</code> | Test the condition and execute this branch only when it matches. |
+| 932 | <code>                &amp;&amp; stored.depth &gt;= depth</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 933 | <code>                &amp;&amp; (stored.bound == EXACT</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 934 | <code>                    &#124;&#124; (stored.bound == LOWER &amp;&amp; stored.score &gt;= beta)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 935 | <code>                    &#124;&#124; (stored.bound == UPPER &amp;&amp; stored.score &lt;= alpha))</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 936 | <code>            {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 937 | <code>                self.metrics.cutoffs += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 938 | <code>                self.metrics.refreshes += u64::from(self.table.refresh(key, &amp;stored));</code> | Update the named state using the expression and assignment operator shown. |
+| 939 | <code>                return Ok(stored.score);</code> | Leave the current function with the displayed result. |
 | 940 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
 | 941 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 942 | <code>        self.history.push(key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 943 | <code>        let original&#95;alpha = alpha;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 944 | <code>        let result = (&#124;&#124; {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 945 | <code>            let mut best&#95;score = -MATE&#95;SCORE - 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 946 | <code>            let mut best = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 947 | <code>            let mut legal&#95;count = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 948 | <code>            let mut entries = EntryList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 949 | <code>            ordered&#95;moves(</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 950 | <code>                position,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 951 | <code>                first,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 952 | <code>                self.killers&#91;ply&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 953 | <code>                &amp;self.quiet&#95;history&#91;usize::from(!white)&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 954 | <code>                &amp;mut entries,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 955 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
-| 956 | <code>            let entries = entries.as&#95;mut&#95;slice();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 957 | <code>            for index in 0..entries.len() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 958 | <code>                place&#95;next(entries, index);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 959 | <code>                let mv = entry&#95;move(entries&#91;index&#93;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 960 | <code>                let child = make&#95;move(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 961 | <code>                if depth &gt; 1 {</code> | Test the condition and execute this branch only when it matches. |
-| 962 | <code>                    // The child looks itself up in the table; at depth 1 it goes</code> | Source explanation: The child looks itself up in the table; at depth 1 it goes |
-| 963 | <code>                    // straight to quiescence, which does not</code> | Source explanation: straight to quiescence, which does not |
-| 964 | <code>                    self.table.prefetch(child.key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 965 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 966 | <code>                if in&#95;check(&amp;child, white) {</code> | Test the condition and execute this branch only when it matches. |
-| 967 | <code>                    continue; // Illegal: it leaves the king attacked</code> | Skip the rest of this iteration and advance the loop. |
-| 968 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 969 | <code>                legal&#95;count += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 970 | <code>                let quiet = captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 971 | <code>                let calm = quiet &amp;&amp; !check &amp;&amp; !in&#95;check(&amp;child, !white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 972 | <code>                // Futility: one move from the leaves, a quiet move cannot lift a position far</code> | Source explanation: Futility: one move from the leaves, a quiet move cannot lift a position far |
-| 973 | <code>                // below alpha</code> | Source explanation: below alpha |
-| 974 | <code>                if depth == 1 &amp;&amp; calm &amp;&amp; legal&#95;count &gt; 1 &amp;&amp; static&#95;score + FUTILITY&#95;MARGIN &lt;= alpha</code> | Test the condition and execute this branch only when it matches. |
-| 975 | <code>                {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 976 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 977 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 978 | <code>                let mut score;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 979 | <code>                if legal&#95;count == 1 {</code> | Test the condition and execute this branch only when it matches. |
-| 980 | <code>                    score = -self.alpha&#95;beta(&amp;child, depth - 1, ply + 1, -beta, -alpha, true)?;</code> | Update the named state using the expression and assignment operator shown. |
-| 981 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 982 | <code>                    // Late move reduction: a late quiet move gets one ply less</code> | Source explanation: Late move reduction: a late quiet move gets one ply less |
-| 983 | <code>                    let reduce = depth &gt;= 3</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 984 | <code>                        &amp;&amp; legal&#95;count &gt; 3</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 985 | <code>                        &amp;&amp; calm</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 986 | <code>                        &amp;&amp; mv != self.killers&#91;ply&#93;&#91;0&#93;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 987 | <code>                        &amp;&amp; mv != self.killers&#91;ply&#93;&#91;1&#93;;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 988 | <code>                    // Principal variation search: prove the move is no better than alpha with</code> | Source explanation: Principal variation search: prove the move is no better than alpha with |
-| 989 | <code>                    // a null window, and search again if it is</code> | Source explanation: a null window, and search again if it is |
-| 990 | <code>                    let reduced&#95;depth = depth - 1 - i32::from(reduce);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 991 | <code>                    score = -self.alpha&#95;beta(</code> | Update the named state using the expression and assignment operator shown. |
-| 992 | <code>                        &amp;child,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 993 | <code>                        reduced&#95;depth,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 994 | <code>                        ply + 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 995 | <code>                        -alpha - 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 996 | <code>                        -alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 997 | <code>                        true,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 998 | <code>                    )?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 999 | <code>                    if score &gt; alpha &amp;&amp; (reduce &#124;&#124; score &lt; beta) {</code> | Test the condition and execute this branch only when it matches. |
-| 1000 | <code>                        score = -self.research(</code> | Update the named state using the expression and assignment operator shown. |
-| 1001 | <code>                            &amp;child,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1002 | <code>                            depth - 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1003 | <code>                            ply + 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1004 | <code>                            -beta,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1005 | <code>                            -alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1006 | <code>                            if reduce { Research::Lmr } else { Research::Pvs },</code> | Test the condition and execute this branch only when it matches. |
-| 1007 | <code>                        )?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1008 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1009 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1010 | <code>                if score &gt; best&#95;score {</code> | Test the condition and execute this branch only when it matches. |
-| 1011 | <code>                    best&#95;score = score;</code> | Update the named state using the expression and assignment operator shown. |
-| 1012 | <code>                    best = mv;</code> | Update the named state using the expression and assignment operator shown. |
-| 1013 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1014 | <code>                if score &gt; alpha {</code> | Test the condition and execute this branch only when it matches. |
-| 1015 | <code>                    alpha = score;</code> | Update the named state using the expression and assignment operator shown. |
-| 1016 | <code>                    if ply == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 1017 | <code>                        self.best&#95;move = mv;</code> | Update the named state using the expression and assignment operator shown. |
-| 1018 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1019 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1020 | <code>                if legal&#95;count == 1</code> | Test the condition and execute this branch only when it matches. |
-| 1021 | <code>                    &amp;&amp; score &lt; beta</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1022 | <code>                    &amp;&amp; let Some(result) = self.split&#95;remaining(</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1023 | <code>                        position,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1024 | <code>                        &amp;mut entries&#91;index + 1..&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1025 | <code>                        depth,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1026 | <code>                        ply,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1027 | <code>                        alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1028 | <code>                        beta,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1029 | <code>                        best&#95;score,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1030 | <code>                        best,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1031 | <code>                        check,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1032 | <code>                    )</code> | Close the preceding block, expression, call, or collection. |
-| 1033 | <code>                {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1034 | <code>                    let (split&#95;score, split&#95;best, count) = result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1035 | <code>                    best&#95;score = split&#95;score;</code> | Update the named state using the expression and assignment operator shown. |
-| 1036 | <code>                    best = split&#95;best;</code> | Update the named state using the expression and assignment operator shown. |
-| 1037 | <code>                    legal&#95;count = count;</code> | Update the named state using the expression and assignment operator shown. |
-| 1038 | <code>                    if best&#95;score &gt; alpha &amp;&amp; ply == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 1039 | <code>                        self.best&#95;move = best;</code> | Update the named state using the expression and assignment operator shown. |
-| 1040 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1041 | <code>                    if best&#95;score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 1042 | <code>                        self.record&#95;cutoff(position, best, depth, ply);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1043 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1044 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1045 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1046 | <code>                if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 1047 | <code>                    if quiet {</code> | Test the condition and execute this branch only when it matches. |
-| 1048 | <code>                        let entry = &amp;mut self.quiet&#95;history&#91;usize::from(!white)&#93;&#91;move&#95;start(mv)&#93;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1049 | <code>                            &#91;move&#95;target(mv)&#93;;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1050 | <code>                        &#42;entry = HISTORY&#95;LIMIT.min(&#42;entry + depth &#42; depth);</code> | Update the named state using the expression and assignment operator shown. |
-| 1051 | <code>                        if self.killers&#91;ply&#93;&#91;0&#93; != mv {</code> | Test the condition and execute this branch only when it matches. |
-| 1052 | <code>                            self.killers&#91;ply&#93; = &#91;mv, self.killers&#91;ply&#93;&#91;0&#93;&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 1053 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 1054 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1055 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1056 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1057 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1058 | <code>            Ok((best&#95;score, best, legal&#95;count))</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1059 | <code>        })();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1060 | <code>        self.history.pop();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1061 | <code>        let (best&#95;score, best, legal&#95;count) = result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1062 | <code>        if legal&#95;count == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 1063 | <code>            // Checkmate, worse the sooner it comes, or stalemate</code> | Source explanation: Checkmate, worse the sooner it comes, or stalemate |
-| 1064 | <code>            return Ok(if check { -(MATE&#95;SCORE - ply as i32) } else { 0 });</code> | Leave the current function with the displayed result. |
-| 1065 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1066 | <code>        let mut bound = EXACT;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1067 | <code>        if best&#95;score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 1068 | <code>            bound = LOWER;</code> | Update the named state using the expression and assignment operator shown. |
-| 1069 | <code>        } else if best&#95;score &lt;= original&#95;alpha {</code> | Test the condition and execute this branch only when it matches. |
-| 1070 | <code>            bound = UPPER;</code> | Update the named state using the expression and assignment operator shown. |
-| 1071 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1072 | <code>        self.metrics.stores += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 1073 | <code>        let stored = self</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1074 | <code>            .table</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1075 | <code>            .store(key, depth, best&#95;score, bound, best, ply as i32);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1076 | <code>        self.metrics.replacements += u64::from(stored.replaced);</code> | Update the named state using the expression and assignment operator shown. |
-| 1077 | <code>        self.metrics.protected += u64::from(stored.protected);</code> | Update the named state using the expression and assignment operator shown. |
-| 1078 | <code>        Ok(best&#95;score)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1079 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 1080 | <code></code> | Blank line separating related declarations or steps. |
-| 1081 | <code>    fn record&#95;cutoff(&amp;mut self, position: &amp;Position, mv: Move, depth: i32, ply: usize) {</code> | Declare record&#95;cutoff(); its parameters and return type define the interface. |
-| 1082 | <code>        if captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 1083 | <code>            let entry = &amp;mut self.quiet&#95;history&#91;usize::from(!position.white)&#93;&#91;move&#95;start(mv)&#93;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1084 | <code>                &#91;move&#95;target(mv)&#93;;</code> | Evaluate or continue this expression in record&#95;cutoff(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1085 | <code>            &#42;entry = HISTORY&#95;LIMIT.min(&#42;entry + depth &#42; depth);</code> | Update the named state using the expression and assignment operator shown. |
-| 1086 | <code>            if self.killers&#91;ply&#93;&#91;0&#93; != mv {</code> | Test the condition and execute this branch only when it matches. |
-| 1087 | <code>                self.killers&#91;ply&#93; = &#91;mv, self.killers&#91;ply&#93;&#91;0&#93;&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 1088 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 942 | <code>        // Only two tests read the score, both out of check: null move at depth 3 and</code> | Source explanation: Only two tests read the score, both out of check: null move at depth 3 and |
+| 943 | <code>        // up, and futility at depth 1. Every other node skips the evaluation.</code> | Source explanation: up, and futility at depth 1. Every other node skips the evaluation. |
+| 944 | <code>        let needs&#95;score = !check &amp;&amp; (depth == 1 &#124;&#124; (depth &gt;= 3 &amp;&amp; can&#95;null &amp;&amp; ply &gt; 0));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 945 | <code>        let static&#95;score = if needs&#95;score { evaluate(position) } else { 0 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 946 | <code>        // Null move: let the opponent move twice. If the side to move still stands above</code> | Source explanation: Null move: let the opponent move twice. If the side to move still stands above |
+| 947 | <code>        // beta with a shallower search, its real moves will too.</code> | Source explanation: beta with a shallower search, its real moves will too. |
+| 948 | <code>        if can&#95;null</code> | Test the condition and execute this branch only when it matches. |
+| 949 | <code>            &amp;&amp; !check</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 950 | <code>            &amp;&amp; ply &gt; 0</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 951 | <code>            &amp;&amp; depth &gt;= 3</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 952 | <code>            &amp;&amp; static&#95;score &gt;= beta</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 953 | <code>            &amp;&amp; has&#95;pieces(position)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 954 | <code>            &amp;&amp; has&#95;legal&#95;move(position, false)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 955 | <code>        {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 956 | <code>            let null = make&#95;null&#95;move(position);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 957 | <code>            self.table.prefetch(null.key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 958 | <code>            self.history.push(key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 959 | <code>            let result = self.alpha&#95;beta(&amp;null, depth - 3, ply + 1, -beta, -beta + 1, false);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 960 | <code>            self.history.pop();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 961 | <code>            if -result? &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 962 | <code>                return Ok(beta);</code> | Leave the current function with the displayed result. |
+| 963 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 964 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 965 | <code>        self.history.push(key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 966 | <code>        let original&#95;alpha = alpha;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 967 | <code>        let result = (&#124;&#124; {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 968 | <code>            let mut best&#95;score = -MATE&#95;SCORE - 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 969 | <code>            let mut best = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 970 | <code>            let mut legal&#95;count = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 971 | <code>            let mut entries = EntryList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 972 | <code>            ordered&#95;moves(</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 973 | <code>                position,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 974 | <code>                first,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 975 | <code>                self.killers&#91;ply&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 976 | <code>                &amp;self.quiet&#95;history&#91;usize::from(!white)&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 977 | <code>                &amp;mut entries,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 978 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
+| 979 | <code>            let entries = entries.as&#95;mut&#95;slice();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 980 | <code>            for index in 0..entries.len() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 981 | <code>                place&#95;next(entries, index);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 982 | <code>                let mv = entry&#95;move(entries&#91;index&#93;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 983 | <code>                let mut child = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 984 | <code>                play&#95;move(&amp;mut child, mv);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 985 | <code>                if depth &gt; 1 {</code> | Test the condition and execute this branch only when it matches. |
+| 986 | <code>                    // The child looks itself up in the table; at depth 1 it goes</code> | Source explanation: The child looks itself up in the table; at depth 1 it goes |
+| 987 | <code>                    // straight to quiescence, which does not</code> | Source explanation: straight to quiescence, which does not |
+| 988 | <code>                    self.table.prefetch(child.key);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 989 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 990 | <code>                if in&#95;check(&amp;child, white) {</code> | Test the condition and execute this branch only when it matches. |
+| 991 | <code>                    continue; // Illegal: it leaves the king attacked</code> | Skip the rest of this iteration and advance the loop. |
+| 992 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 993 | <code>                legal&#95;count += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 994 | <code>                let quiet = captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 995 | <code>                let calm = quiet &amp;&amp; !check &amp;&amp; !in&#95;check(&amp;child, !white);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 996 | <code>                // Futility: one move from the leaves, a quiet move cannot lift a position far</code> | Source explanation: Futility: one move from the leaves, a quiet move cannot lift a position far |
+| 997 | <code>                // below alpha</code> | Source explanation: below alpha |
+| 998 | <code>                if depth == 1 &amp;&amp; calm &amp;&amp; legal&#95;count &gt; 1 &amp;&amp; static&#95;score + FUTILITY&#95;MARGIN &lt;= alpha</code> | Test the condition and execute this branch only when it matches. |
+| 999 | <code>                {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1000 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 1001 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1002 | <code>                let mut score;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1003 | <code>                if legal&#95;count == 1 {</code> | Test the condition and execute this branch only when it matches. |
+| 1004 | <code>                    score = -self.alpha&#95;beta(&amp;child, depth - 1, ply + 1, -beta, -alpha, true)?;</code> | Update the named state using the expression and assignment operator shown. |
+| 1005 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 1006 | <code>                    // Late move reduction: a late quiet move gets one ply less</code> | Source explanation: Late move reduction: a late quiet move gets one ply less |
+| 1007 | <code>                    let reduce = depth &gt;= 3</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1008 | <code>                        &amp;&amp; legal&#95;count &gt; 3</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1009 | <code>                        &amp;&amp; calm</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1010 | <code>                        &amp;&amp; mv != self.killers&#91;ply&#93;&#91;0&#93;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1011 | <code>                        &amp;&amp; mv != self.killers&#91;ply&#93;&#91;1&#93;;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1012 | <code>                    // Principal variation search: prove the move is no better than alpha with</code> | Source explanation: Principal variation search: prove the move is no better than alpha with |
+| 1013 | <code>                    // a null window, and search again if it is</code> | Source explanation: a null window, and search again if it is |
+| 1014 | <code>                    let reduced&#95;depth = depth - 1 - i32::from(reduce);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1015 | <code>                    score = -self.alpha&#95;beta(</code> | Update the named state using the expression and assignment operator shown. |
+| 1016 | <code>                        &amp;child,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1017 | <code>                        reduced&#95;depth,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1018 | <code>                        ply + 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1019 | <code>                        -alpha - 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1020 | <code>                        -alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1021 | <code>                        true,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1022 | <code>                    )?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1023 | <code>                    if score &gt; alpha &amp;&amp; (reduce &#124;&#124; score &lt; beta) {</code> | Test the condition and execute this branch only when it matches. |
+| 1024 | <code>                        score = -self.research(</code> | Update the named state using the expression and assignment operator shown. |
+| 1025 | <code>                            &amp;child,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1026 | <code>                            depth - 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1027 | <code>                            ply + 1,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1028 | <code>                            -beta,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1029 | <code>                            -alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1030 | <code>                            if reduce { Research::Lmr } else { Research::Pvs },</code> | Test the condition and execute this branch only when it matches. |
+| 1031 | <code>                        )?;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1032 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1033 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1034 | <code>                if score &gt; best&#95;score {</code> | Test the condition and execute this branch only when it matches. |
+| 1035 | <code>                    best&#95;score = score;</code> | Update the named state using the expression and assignment operator shown. |
+| 1036 | <code>                    best = mv;</code> | Update the named state using the expression and assignment operator shown. |
+| 1037 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1038 | <code>                if score &gt; alpha {</code> | Test the condition and execute this branch only when it matches. |
+| 1039 | <code>                    alpha = score;</code> | Update the named state using the expression and assignment operator shown. |
+| 1040 | <code>                    if ply == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 1041 | <code>                        self.best&#95;move = mv;</code> | Update the named state using the expression and assignment operator shown. |
+| 1042 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1043 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1044 | <code>                if legal&#95;count == 1</code> | Test the condition and execute this branch only when it matches. |
+| 1045 | <code>                    &amp;&amp; score &lt; beta</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1046 | <code>                    &amp;&amp; let Some(result) = self.split&#95;remaining(</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1047 | <code>                        position,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1048 | <code>                        &amp;mut entries&#91;index + 1..&#93;,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1049 | <code>                        depth,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1050 | <code>                        ply,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1051 | <code>                        alpha,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1052 | <code>                        beta,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1053 | <code>                        best&#95;score,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1054 | <code>                        best,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1055 | <code>                        check,</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1056 | <code>                    )</code> | Close the preceding block, expression, call, or collection. |
+| 1057 | <code>                {</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1058 | <code>                    let (split&#95;score, split&#95;best, count) = result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1059 | <code>                    best&#95;score = split&#95;score;</code> | Update the named state using the expression and assignment operator shown. |
+| 1060 | <code>                    best = split&#95;best;</code> | Update the named state using the expression and assignment operator shown. |
+| 1061 | <code>                    legal&#95;count = count;</code> | Update the named state using the expression and assignment operator shown. |
+| 1062 | <code>                    if best&#95;score &gt; alpha &amp;&amp; ply == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 1063 | <code>                        self.best&#95;move = best;</code> | Update the named state using the expression and assignment operator shown. |
+| 1064 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1065 | <code>                    if best&#95;score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 1066 | <code>                        self.record&#95;cutoff(position, best, depth, ply);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1067 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1068 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1069 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1070 | <code>                if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 1071 | <code>                    if quiet {</code> | Test the condition and execute this branch only when it matches. |
+| 1072 | <code>                        let entry = &amp;mut self.quiet&#95;history&#91;usize::from(!white)&#93;&#91;move&#95;start(mv)&#93;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1073 | <code>                            &#91;move&#95;target(mv)&#93;;</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1074 | <code>                        &#42;entry = HISTORY&#95;LIMIT.min(&#42;entry + depth &#42; depth);</code> | Update the named state using the expression and assignment operator shown. |
+| 1075 | <code>                        if self.killers&#91;ply&#93;&#91;0&#93; != mv {</code> | Test the condition and execute this branch only when it matches. |
+| 1076 | <code>                            self.killers&#91;ply&#93; = &#91;mv, self.killers&#91;ply&#93;&#91;0&#93;&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 1077 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
+| 1078 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1079 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1080 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1081 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1082 | <code>            Ok((best&#95;score, best, legal&#95;count))</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1083 | <code>        })();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1084 | <code>        self.history.pop();</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1085 | <code>        let (best&#95;score, best, legal&#95;count) = result?;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1086 | <code>        if legal&#95;count == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 1087 | <code>            // Checkmate, worse the sooner it comes, or stalemate</code> | Source explanation: Checkmate, worse the sooner it comes, or stalemate |
+| 1088 | <code>            return Ok(if check { -(MATE&#95;SCORE - ply as i32) } else { 0 });</code> | Leave the current function with the displayed result. |
 | 1089 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1090 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 1091 | <code></code> | Blank line separating related declarations or steps. |
-| 1092 | <code>    /// Return the line of best play that the table holds, as UCI text.</code> | Source explanation: Return the line of best play that the table holds, as UCI text. |
-| 1093 | <code>    fn principal&#95;variation(&amp;self, position: &amp;Position, depth: i32) -&gt; String {</code> | Declare principal&#95;variation(); its parameters and return type define the interface. |
-| 1094 | <code>        let mut line = String::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1095 | <code>        let mut current = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1096 | <code>        for &#95; in 0..depth {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 1097 | <code>            let Some(stored) = self.table.probe(current.key, 0) else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1098 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1099 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
-| 1100 | <code>            let mut moves = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1101 | <code>            generate&#95;moves(&amp;current, &amp;mut moves);</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1102 | <code>            if !moves.as&#95;mut&#95;slice().contains(&amp;stored.mv)</code> | Test the condition and execute this branch only when it matches. |
-| 1103 | <code>                &#124;&#124; in&#95;check(&amp;make&#95;move(&amp;current, stored.mv), current.white)</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1104 | <code>            {</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1105 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1106 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1107 | <code>            line.push(&#x27; &#x27;);</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1108 | <code>            line.push&#95;str(&amp;move&#95;text(stored.mv));</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1109 | <code>            current = make&#95;move(&amp;current, stored.mv);</code> | Update the named state using the expression and assignment operator shown. |
-| 1110 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1111 | <code>        line</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1112 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 1113 | <code></code> | Blank line separating related declarations or steps. |
-| 1114 | <code>    /// Return a legal cached reply after the selected move.</code> | Source explanation: Return a legal cached reply after the selected move. |
-| 1115 | <code>    fn ponder&#95;reply(&amp;self, position: &amp;Position, mv: Move) -&gt; Move {</code> | Declare ponder&#95;reply(); its parameters and return type define the interface. |
-| 1116 | <code>        let child = make&#95;move(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1117 | <code>        if let Some(stored) = self.table.probe(child.key, 0) {</code> | Test the condition and execute this branch only when it matches. |
-| 1118 | <code>            let mut moves = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1119 | <code>            generate&#95;moves(&amp;child, &amp;mut moves);</code> | Evaluate or continue this expression in ponder&#95;reply(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1120 | <code>            for &amp;mut reply in moves.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 1121 | <code>                if reply == stored.mv &amp;&amp; !in&#95;check(&amp;make&#95;move(&amp;child, reply), child.white) {</code> | Test the condition and execute this branch only when it matches. |
-| 1122 | <code>                    return reply;</code> | Leave the current function with the displayed result. |
-| 1123 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1124 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1125 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1126 | <code>        NO&#95;MOVE</code> | Evaluate or continue this expression in ponder&#95;reply(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1127 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 1128 | <code></code> | Blank line separating related declarations or steps. |
-| 1129 | <code>    /// Search one move deeper at a time and return the best move, or NO&#95;MOVE when there</code> | Source explanation: Search one move deeper at a time and return the best move, or NO&#95;MOVE when there |
-| 1130 | <code>    /// is no legal move. The search plans to use seconds, takes longer when the best</code> | Source explanation: is no legal move. The search plans to use seconds, takes longer when the best |
-| 1131 | <code>    /// move keeps changing, and never runs past longest. A depth limit replaces the</code> | Source explanation: move keeps changing, and never runs past longest. A depth limit replaces the |
-| 1132 | <code>    /// clock, for the workshop designer&#x27;s checks.</code> | Source explanation: clock, for the workshop designer&#x27;s checks. |
-| 1133 | <code>    fn think(</code> | Declare think(); its parameters and return type define the interface. |
-| 1134 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1135 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 1136 | <code>        game&#95;history: &amp;&#91;u64&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 1137 | <code>        mut seconds: f64,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1138 | <code>        longest: f64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 1139 | <code>        depth&#95;limit: Option&lt;i32&gt;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 1140 | <code>    ) -&gt; Move {</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1141 | <code>        self.begin&#95;search();</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1142 | <code>        let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1143 | <code>        let mut completed&#95;move = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1144 | <code>        let mut stdout = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1145 | <code>        &#x27;deepening: for depth in 1..=MAX&#95;DEPTH {</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1146 | <code>            let total = self.reported&#95;nodes();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1147 | <code>            if self.main&#95;control().poll(total) {</code> | Test the condition and execute this branch only when it matches. |
-| 1148 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1149 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1150 | <code>            let previous = self.best&#95;move;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1151 | <code>            let (mut alpha, mut beta) = (-MATE&#95;SCORE - 1, MATE&#95;SCORE + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1152 | <code>            if depth &gt;= 4 {</code> | Test the condition and execute this branch only when it matches. |
-| 1153 | <code>                alpha = score - ASPIRATION&#95;WINDOW;</code> | Update the named state using the expression and assignment operator shown. |
-| 1154 | <code>                beta = score + ASPIRATION&#95;WINDOW;</code> | Update the named state using the expression and assignment operator shown. |
-| 1155 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1156 | <code>            let mut retry = false;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1157 | <code>            loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
-| 1158 | <code>                self.history.clear();</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1159 | <code>                self.history.extend&#95;from&#95;slice(game&#95;history);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1160 | <code>                let attempt&#95;nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1161 | <code>                let stopped&#95;nodes = self.work.stop&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1162 | <code>                let result = if retry {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1163 | <code>                    self.research(position, depth, 0, alpha, beta, Research::Aspiration)</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1164 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 1165 | <code>                    self.alpha&#95;beta(position, depth, 0, alpha, beta, true)</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1166 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
-| 1167 | <code>                match result {</code> | Select an arm by matching the expression against the listed patterns. |
-| 1168 | <code>                    Ok(found) =&gt; score = found,</code> | Handle this matching pattern with the expression or block on its right. |
-| 1169 | <code>                    Err(SearchTimeout) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 1170 | <code>                        self.work.stop&#95;discarded&#95;nodes += (self.nodes - attempt&#95;nodes)</code> | Update the named state using the expression and assignment operator shown. |
-| 1171 | <code>                            .saturating&#95;sub(self.work.stop&#95;discarded&#95;nodes - stopped&#95;nodes);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1172 | <code>                        break &#x27;deepening;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1173 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 1174 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1175 | <code>                // Outside the window: search again with that side open</code> | Source explanation: Outside the window: search again with that side open |
-| 1176 | <code>                if score &lt;= alpha {</code> | Test the condition and execute this branch only when it matches. |
-| 1177 | <code>                    alpha = -MATE&#95;SCORE - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 1178 | <code>                    retry = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 1179 | <code>                } else if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
-| 1180 | <code>                    beta = MATE&#95;SCORE + 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 1181 | <code>                    retry = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 1182 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 1183 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1184 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 1185 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1186 | <code>            if self.best&#95;move == NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 1187 | <code>                break; // No legal move</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1188 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1189 | <code>            completed&#95;move = self.best&#95;move;</code> | Update the named state using the expression and assignment operator shown. |
-| 1190 | <code>            let line = self.principal&#95;variation(position, depth);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1191 | <code>            let info = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1192 | <code>                &quot;info depth {depth} score cp {score} nodes {} pv{line}&quot;,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1193 | <code>                self.reported&#95;nodes()</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1194 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
-| 1195 | <code>            let &#95; = writeln!(stdout, &quot;{info}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1196 | <code>            let &#95; = stdout.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1197 | <code>            // A best move that changes needs more time to settle</code> | Source explanation: A best move that changes needs more time to settle |
-| 1198 | <code>            let changed = previous != NO&#95;MOVE &amp;&amp; self.best&#95;move != previous;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1199 | <code>            if changed {</code> | Test the condition and execute this branch only when it matches. |
-| 1200 | <code>                seconds = (seconds &#42; 1.5).min(longest);</code> | Update the named state using the expression and assignment operator shown. |
-| 1201 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1202 | <code>            self.main&#95;control()</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1203 | <code>                .completed(depth, seconds / 2.0, score, changed);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1204 | <code>            self.main&#95;control().log&#95;search(&amp;info);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1205 | <code>            if score.abs() &gt; MATE&#95;SCORE - 100 {</code> | Test the condition and execute this branch only when it matches. |
-| 1206 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 1207 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1208 | <code>            match depth&#95;limit {</code> | Select an arm by matching the expression against the listed patterns. |
-| 1209 | <code>                Some(limit) if depth &gt;= limit =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
-| 1210 | <code>                None if self.main&#95;control().soft&#95;finished(seconds / 2.0) =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
-| 1211 | <code>                &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 1090 | <code>        let mut bound = EXACT;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1091 | <code>        if best&#95;score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 1092 | <code>            bound = LOWER;</code> | Update the named state using the expression and assignment operator shown. |
+| 1093 | <code>        } else if best&#95;score &lt;= original&#95;alpha {</code> | Test the condition and execute this branch only when it matches. |
+| 1094 | <code>            bound = UPPER;</code> | Update the named state using the expression and assignment operator shown. |
+| 1095 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1096 | <code>        self.metrics.stores += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 1097 | <code>        let stored = self</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1098 | <code>            .table</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1099 | <code>            .store(key, depth, best&#95;score, bound, best, ply as i32);</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1100 | <code>        self.metrics.replacements += u64::from(stored.replaced);</code> | Update the named state using the expression and assignment operator shown. |
+| 1101 | <code>        self.metrics.protected += u64::from(stored.protected);</code> | Update the named state using the expression and assignment operator shown. |
+| 1102 | <code>        Ok(best&#95;score)</code> | Evaluate or continue this expression in alpha&#95;beta(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1103 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 1104 | <code></code> | Blank line separating related declarations or steps. |
+| 1105 | <code>    fn record&#95;cutoff(&amp;mut self, position: &amp;Position, mv: Move, depth: i32, ply: usize) {</code> | Declare record&#95;cutoff(); its parameters and return type define the interface. |
+| 1106 | <code>        if captured&#95;kind(position, mv) == EMPTY &amp;&amp; move&#95;promotion(mv) == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 1107 | <code>            let entry = &amp;mut self.quiet&#95;history&#91;usize::from(!position.white)&#93;&#91;move&#95;start(mv)&#93;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1108 | <code>                &#91;move&#95;target(mv)&#93;;</code> | Evaluate or continue this expression in record&#95;cutoff(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1109 | <code>            &#42;entry = HISTORY&#95;LIMIT.min(&#42;entry + depth &#42; depth);</code> | Update the named state using the expression and assignment operator shown. |
+| 1110 | <code>            if self.killers&#91;ply&#93;&#91;0&#93; != mv {</code> | Test the condition and execute this branch only when it matches. |
+| 1111 | <code>                self.killers&#91;ply&#93; = &#91;mv, self.killers&#91;ply&#93;&#91;0&#93;&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 1112 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1113 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1114 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 1115 | <code></code> | Blank line separating related declarations or steps. |
+| 1116 | <code>    /// Return the line of best play that the table holds, as UCI text.</code> | Source explanation: Return the line of best play that the table holds, as UCI text. |
+| 1117 | <code>    fn principal&#95;variation(&amp;self, position: &amp;Position, depth: i32) -&gt; String {</code> | Declare principal&#95;variation(); its parameters and return type define the interface. |
+| 1118 | <code>        let mut line = String::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1119 | <code>        let mut current = &#42;position;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1120 | <code>        for &#95; in 0..depth {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 1121 | <code>            let Some(stored) = self.table.probe(current.key, 0) else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1122 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1123 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
+| 1124 | <code>            let mut moves = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1125 | <code>            generate&#95;moves(&amp;current, &amp;mut moves);</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1126 | <code>            if !moves.as&#95;mut&#95;slice().contains(&amp;stored.mv)</code> | Test the condition and execute this branch only when it matches. |
+| 1127 | <code>                &#124;&#124; in&#95;check(&amp;make&#95;move(&amp;current, stored.mv), current.white)</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1128 | <code>            {</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1129 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1130 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1131 | <code>            line.push(&#x27; &#x27;);</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1132 | <code>            line.push&#95;str(&amp;move&#95;text(stored.mv));</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1133 | <code>            current = make&#95;move(&amp;current, stored.mv);</code> | Update the named state using the expression and assignment operator shown. |
+| 1134 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1135 | <code>        line</code> | Evaluate or continue this expression in principal&#95;variation(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1136 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 1137 | <code></code> | Blank line separating related declarations or steps. |
+| 1138 | <code>    /// Return a legal cached reply after the selected move.</code> | Source explanation: Return a legal cached reply after the selected move. |
+| 1139 | <code>    fn ponder&#95;reply(&amp;self, position: &amp;Position, mv: Move) -&gt; Move {</code> | Declare ponder&#95;reply(); its parameters and return type define the interface. |
+| 1140 | <code>        let child = make&#95;move(position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1141 | <code>        if let Some(stored) = self.table.probe(child.key, 0) {</code> | Test the condition and execute this branch only when it matches. |
+| 1142 | <code>            let mut moves = MoveList::new();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1143 | <code>            generate&#95;moves(&amp;child, &amp;mut moves);</code> | Evaluate or continue this expression in ponder&#95;reply(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1144 | <code>            for &amp;mut reply in moves.as&#95;mut&#95;slice() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 1145 | <code>                if reply == stored.mv &amp;&amp; !in&#95;check(&amp;make&#95;move(&amp;child, reply), child.white) {</code> | Test the condition and execute this branch only when it matches. |
+| 1146 | <code>                    return reply;</code> | Leave the current function with the displayed result. |
+| 1147 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1148 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1149 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1150 | <code>        NO&#95;MOVE</code> | Evaluate or continue this expression in ponder&#95;reply(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1151 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 1152 | <code></code> | Blank line separating related declarations or steps. |
+| 1153 | <code>    /// Search one move deeper at a time and return the best move, or NO&#95;MOVE when there</code> | Source explanation: Search one move deeper at a time and return the best move, or NO&#95;MOVE when there |
+| 1154 | <code>    /// is no legal move. The search plans to use seconds, takes longer when the best</code> | Source explanation: is no legal move. The search plans to use seconds, takes longer when the best |
+| 1155 | <code>    /// move keeps changing, and never runs past longest. A depth limit replaces the</code> | Source explanation: move keeps changing, and never runs past longest. A depth limit replaces the |
+| 1156 | <code>    /// clock, for the workshop designer&#x27;s checks.</code> | Source explanation: clock, for the workshop designer&#x27;s checks. |
+| 1157 | <code>    fn think(</code> | Declare think(); its parameters and return type define the interface. |
+| 1158 | <code>        &amp;mut self,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1159 | <code>        position: &amp;Position,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 1160 | <code>        game&#95;history: &amp;&#91;u64&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 1161 | <code>        mut seconds: f64,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1162 | <code>        longest: f64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 1163 | <code>        depth&#95;limit: Option&lt;i32&gt;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 1164 | <code>    ) -&gt; Move {</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1165 | <code>        self.begin&#95;search();</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1166 | <code>        let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1167 | <code>        let mut completed&#95;move = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1168 | <code>        let mut stdout = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1169 | <code>        &#x27;deepening: for depth in 1..=MAX&#95;DEPTH {</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1170 | <code>            let total = self.reported&#95;nodes();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1171 | <code>            if self.main&#95;control().poll(total) {</code> | Test the condition and execute this branch only when it matches. |
+| 1172 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1173 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1174 | <code>            let previous = self.best&#95;move;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1175 | <code>            let (mut alpha, mut beta) = (-MATE&#95;SCORE - 1, MATE&#95;SCORE + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1176 | <code>            if depth &gt;= 4 {</code> | Test the condition and execute this branch only when it matches. |
+| 1177 | <code>                alpha = score - ASPIRATION&#95;WINDOW;</code> | Update the named state using the expression and assignment operator shown. |
+| 1178 | <code>                beta = score + ASPIRATION&#95;WINDOW;</code> | Update the named state using the expression and assignment operator shown. |
+| 1179 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1180 | <code>            let mut retry = false;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1181 | <code>            loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
+| 1182 | <code>                self.history.clear();</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1183 | <code>                self.history.extend&#95;from&#95;slice(game&#95;history);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1184 | <code>                let attempt&#95;nodes = self.nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1185 | <code>                let stopped&#95;nodes = self.work.stop&#95;discarded&#95;nodes;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1186 | <code>                let result = if retry {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1187 | <code>                    self.research(position, depth, 0, alpha, beta, Research::Aspiration)</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1188 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 1189 | <code>                    self.alpha&#95;beta(position, depth, 0, alpha, beta, true)</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1190 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
+| 1191 | <code>                match result {</code> | Select an arm by matching the expression against the listed patterns. |
+| 1192 | <code>                    Ok(found) =&gt; score = found,</code> | Handle this matching pattern with the expression or block on its right. |
+| 1193 | <code>                    Err(SearchTimeout) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 1194 | <code>                        self.work.stop&#95;discarded&#95;nodes += (self.nodes - attempt&#95;nodes)</code> | Update the named state using the expression and assignment operator shown. |
+| 1195 | <code>                            .saturating&#95;sub(self.work.stop&#95;discarded&#95;nodes - stopped&#95;nodes);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1196 | <code>                        break &#x27;deepening;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1197 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 1198 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1199 | <code>                // Outside the window: search again with that side open</code> | Source explanation: Outside the window: search again with that side open |
+| 1200 | <code>                if score &lt;= alpha {</code> | Test the condition and execute this branch only when it matches. |
+| 1201 | <code>                    alpha = -MATE&#95;SCORE - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 1202 | <code>                    retry = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 1203 | <code>                } else if score &gt;= beta {</code> | Test the condition and execute this branch only when it matches. |
+| 1204 | <code>                    beta = MATE&#95;SCORE + 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 1205 | <code>                    retry = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 1206 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 1207 | <code>                    break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1208 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 1209 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1210 | <code>            if self.best&#95;move == NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 1211 | <code>                break; // No legal move</code> | Leave the selected loop, with a value where the expression supplies one. |
 | 1212 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 1213 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1214 | <code>        let total = self.reported&#95;nodes();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1215 | <code>        let control = self.main&#95;control();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 1216 | <code>        control.nodes = total;</code> | Update the named state using the expression and assignment operator shown. |
-| 1217 | <code>        if completed&#95;move != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 1218 | <code>            self.best&#95;move = completed&#95;move;</code> | Update the named state using the expression and assignment operator shown. |
-| 1219 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 1220 | <code>        self.best&#95;move</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 1221 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 1222 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 1213 | <code>            completed&#95;move = self.best&#95;move;</code> | Update the named state using the expression and assignment operator shown. |
+| 1214 | <code>            let line = self.principal&#95;variation(position, depth);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1215 | <code>            let info = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1216 | <code>                &quot;info depth {depth} score cp {score} nodes {} pv{line}&quot;,</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1217 | <code>                self.reported&#95;nodes()</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1218 | <code>            );</code> | Close the preceding block, expression, call, or collection. |
+| 1219 | <code>            let &#95; = writeln!(stdout, &quot;{info}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1220 | <code>            let &#95; = stdout.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1221 | <code>            // A best move that changes needs more time to settle</code> | Source explanation: A best move that changes needs more time to settle |
+| 1222 | <code>            let changed = previous != NO&#95;MOVE &amp;&amp; self.best&#95;move != previous;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1223 | <code>            if changed {</code> | Test the condition and execute this branch only when it matches. |
+| 1224 | <code>                seconds = (seconds &#42; 1.5).min(longest);</code> | Update the named state using the expression and assignment operator shown. |
+| 1225 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1226 | <code>            self.main&#95;control()</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1227 | <code>                .completed(depth, seconds / 2.0, score, changed);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1228 | <code>            self.main&#95;control().log&#95;search(&amp;info);</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1229 | <code>            if score.abs() &gt; MATE&#95;SCORE - 100 {</code> | Test the condition and execute this branch only when it matches. |
+| 1230 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 1231 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1232 | <code>            match depth&#95;limit {</code> | Select an arm by matching the expression against the listed patterns. |
+| 1233 | <code>                Some(limit) if depth &gt;= limit =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
+| 1234 | <code>                None if self.main&#95;control().soft&#95;finished(seconds / 2.0) =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
+| 1235 | <code>                &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 1236 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 1237 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1238 | <code>        let total = self.reported&#95;nodes();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1239 | <code>        let control = self.main&#95;control();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 1240 | <code>        control.nodes = total;</code> | Update the named state using the expression and assignment operator shown. |
+| 1241 | <code>        if completed&#95;move != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 1242 | <code>            self.best&#95;move = completed&#95;move;</code> | Update the named state using the expression and assignment operator shown. |
+| 1243 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 1244 | <code>        self.best&#95;move</code> | Evaluate or continue this expression in think(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 1245 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 1246 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 
 ### search_control.rs
 
@@ -4839,7 +4871,7 @@ Store and retrieve bounded search results using position keys.
 
 ## Source coverage and identity
 
-The reference covers all 15 runtime Rust modules and all 4,507 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
+The reference covers all 15 runtime Rust modules and all 4,539 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
 
 | Source | SHA-256 |
 | --- | --- |
@@ -4848,11 +4880,11 @@ The reference covers all 15 runtime Rust modules and all 4,507 physical source l
 | [src/evaluation.rs](src/evaluation.rs) | `f17631363f0026923bf69659a0d722c3a1d2accda5f30a0894cbd5406ac5905a` |
 | [src/exchange.rs](src/exchange.rs) | `c1b1fe90c897dccafcf28744abb1b2d127397f0c073ea0051bf75cf76b50e892` |
 | [src/main.rs](src/main.rs) | `b7b4ed8e268f6a2bf699ca3609cd3113e51b4f8ee60c76f1af1b583471725148` |
-| [src/make_move.rs](src/make_move.rs) | `0fb0a99aeae26a9e125532a2f888267077766f06906d0a4a501ca11f54d34460` |
+| [src/make_move.rs](src/make_move.rs) | `4938de91a0a73b973c936fe698821881b85f50b11e0475eecff0668379bf9957` |
 | [src/move_generation.rs](src/move_generation.rs) | `f66d5bf0e3e2ad3bd248df7c47aad3f6f4c9d84f7cc569dc5a8376f5f33e7db3` |
 | [src/opening_book.rs](src/opening_book.rs) | `37dbe9750c830b6a4132d199555ffe06fd63d834303ceb874866dd821e69f865` |
 | [src/parallel_search.rs](src/parallel_search.rs) | `214b7e3c54283c96ed8eff42426a1abb03ab2279c1399a81e442a9acb7ef8ba5` |
-| [src/search.rs](src/search.rs) | `5de2ed80cb0d81825ee0d42529c0813148e78489d372cd00de58b374efb81427` |
+| [src/search.rs](src/search.rs) | `17f224ccaab165220225ebd27f738242ff5213e0983bd70eba34f1faeec7d828` |
 | [src/search_control.rs](src/search_control.rs) | `28d749ef579b690c0bcf6f7b1b25ae35abf5ea4ced3825fda50fc2d6255d98f5` |
 | [src/search_metrics.rs](src/search_metrics.rs) | `2f18a00dfec15ef59890102ca8e916252321ea12eb6c5ca66379a2278bdec31b` |
 | [src/table_metrics.rs](src/table_metrics.rs) | `17a22b54527c25bd5d24e3a3e615b36d7f96732ce3a0dbf93af30b73ddd8f9e9` |
