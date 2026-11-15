@@ -18,7 +18,7 @@
 Remus8 is a native Rust chess engine for Windows 11. It uses Young Brothers Wait
 Concept (YBWC) parallel alpha-beta search: a worker searches the first legal move at a
 node, then shares remaining moves with idle helpers when the subtree is large enough. It
-retains Remus5's evaluation, legal move generation, opening book, root Lichess tablebase
+retains Remus7's evaluation, legal move generation, opening book, root Lichess tablebase
 advice, and UCI pondering.
 
 This supplied Rust engine is outside the five-day workshop. Student pairs do

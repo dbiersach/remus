@@ -50,10 +50,11 @@ The games use the student pair's completed engines. Run the corresponding verifi
 - **Play your own engine.** Lucas Chess runs Python engine in the student pair's day folder after it passes its verifier. Games display moves and clocks and exercise
   that engine through its launcher. Short rounds illustrate behavior without
   establishing a reliable rating. Remus5 through Remus8 are supplied Rust engines.
-- **Use setup once.** Follow the root README to prepare the student clone. Setup
-  installs dependencies and extensions and removes temporary Python solutions.
-  It retains the guides, verifiers, data, and launchers. After setup no student
-  types Git or uv commands; the launcher invokes uv automatically.
+- **Use the prepared laptop.** The instructor completes the
+  [laptop preparation guide](instructor_laptop_setup.md) before Day 1. Students
+  receive the guides, verifiers, data, and launchers, then create their own engine
+  modules. No student types Git or uv commands in class; launchers invoke uv
+  automatically.
 
 ## Day 1: Remus1, legal chess at random
 
@@ -63,7 +64,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
 
 | Time | Activity |
 | --- | --- |
-| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools, clone the repository, and install Lucas Chess in its default location. Open Lucas Chess, complete any first-run prompts, wait for its main window, then close it. From the cloned Remus folder in PowerShell, run `.\utils\setup_student.ps1 -StudentCopy`. Expect registration messages and `Workshop setup complete`; setup deletes itself on success. Open `Remus.code-workspace`, then reopen Lucas Chess and confirm Remus1 through Remus8 under External engines. Registration records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
+| 8:30 to 9:15 | Get familiar with the laptop prepared by the instructor before Day 1. Open `Remus.code-workspace`, locate the Day folders, and preview a lesson screenshot. Open Lucas Chess and find Remus1 through Remus8 under External engines. Their names confirm saved registrations, not tested play. The Python engines become playable after their modules are typed and verified. Practice the driver and navigator roles; no downloads, online accounts, or installation commands are needed in class. |
 | 9:15 to 9:30 | On the teacher's laptop, the teacher demonstrates a completed Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
 | 9:30 to 9:40 | In the open Remus workspace, each student pair expands `Day 1 - Remus1 plays legal chess/Remus1` in VS Code's Explorer. The folder holds `remusN.bat`, the one line that starts the engine, and `verify_remusN.py` (with your version number in place of N), which tests the finished engine; the student pair types the engine modules from the screenshots. |
 | 9:40 to 10:00 | Type `board.py` (15 code lines): the piece numbers, the starting position, and square names. The reminder before typing: row 0 is rank 8, column 0 is file a, so a8 is square 0 and h1 is square 63. |

@@ -1,6 +1,176 @@
-# Remus5 source reference
+# Remus5: instructor guide and source reference
 
-Read [the engine overview](remus5.md) for the algorithms, options, and measurement limits. This reference shows every source line, including comments and spacing, with structural annotations. Original source comments carry the algorithm-specific reasoning. Source identity is not a behavior test.
+## Instructor overview and learning goals
+
+Teach Remus5 as a change in how the computer carries out familiar chess work.
+Begin with the position, copy-make, legality filter, evaluation, and negamax
+already learned in Remus4. Then show how fixed-size values, compiled loops, and
+bit operations reduce the cost of those operations. Do not introduce Rust as a
+new collection of chess rules.
+
+Remus5 is the first supplied Rust version. Students do not type its source during
+the five-day workshop. Use these sections for an instructor-led extension after
+Remus4, without assigning extra work to its four periods. The
+[engine overview](remus5.md) lists configuration and measurements; this guide
+explains the representation and dependencies before the exact source reference.
+
+The core search ideas follow Remus4, but the representation, hashing, and table
+replacement differ. A fixed-depth comparison must account for those differences;
+compilation alone is not evidence that every visited node remains identical.
+
+## Recommended teaching sequence
+
+| Step | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| 1. Preserve the contract | Recall the 64 squares, piece codes, move tuple, side, rights, en passant, and halfmove counter. Trace one copied move. | Familiar chess state separates language changes from algorithm changes. | Which fields describe the current board, and which preserve history? |
+| 2. Make storage explicit | Introduce `Position`, its fixed arrays, `Move = u16`, and immutable versus mutable borrows. | Students can understand the data before the methods that maintain it. | Why is a copied Rust array independent of the original? |
+| 3. Add derived views | Build `by_kind`, `by_side`, and a position key; trace `put_piece()` and `remove_piece()`. | One source of truth needs consistent auxiliary indexes before fast queries can be trusted. | What breaks if a captured pawn remains in a bitboard? |
+| 4. Generate and validate | Explain attack masks, sliding rays, fixed-capacity move lists, and copy-make followed by king safety. | Faster movement queries must preserve the rules established in Remus1. | Why is a bit in an attack mask not proof of a legal move? |
+| 5. Reuse the search | Map Python search globals to `Search`, then trace ordering, quiescence, alpha-beta, and iterative deepening. | The algorithm is familiar; ownership and error propagation are the new ideas. | What replaces the Python timeout exception? |
+| 6. Bound memory and expose the engine | Explain four-entry table buckets, replacement, the embedded book, and UCI. | Storage and external behavior become understandable after the native search. | Why does a larger table change reuse without changing the evaluator? |
+
+Teach one square mask before a whole attack table and one table bucket before
+512 MiB of storage. Return to the full request path only after students can trace
+the small examples. Rust keywords should answer a concrete ownership or storage
+question rather than become a separate vocabulary lesson.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| `Position` | A `Copy` struct containing `[u8; 64]`, piece-kind and side masks, a `u64` key, and rule fields. | Row 0 is rank 8; column 0 is file a. Piece kinds and the White bit retain Python's meanings. Every field is copied by value. |
+| Bitboards | `by_kind: [u64; 7]` and `by_side: [u64; 2]`. | Bit `s` represents square `s`. Intersect a kind mask with a side mask to find that side's pieces. The masks must agree with `board` after every change. |
+| Packed move | A `u16`: start in bits 9 to 14, target in bits 3 to 8, promotion in bits 0 to 2. | Numerical ordering matches the Python tuple order. Zero is `NO_MOVE`; a8-to-a8 is not a legal move. This alias is not a distinct validating type. |
+| Position key | XOR of deterministic piece-square, side, rights, and en passant keys. | Piece operations update the fingerprint incrementally. The halfmove clock is separate; a fingerprint is not collision-free identity. |
+| `StackList<T, SIZE>` | Fixed backing array and a used length; `MoveList` has capacity 256. | Candidate generation avoids a heap allocation at every node. Capacity remains a program invariant, not an automatically growing collection. |
+| `Search` | Owns counters, deadline, best move, history, killers, diagnostics, and a table. | Mutable search state belongs to this instance rather than Python module globals. |
+| Transposition table | A boxed allocation of 64-byte aligned buckets, each with four 16-byte entries. | Fixed 512 MiB capacity, low-bit indexing, depth/age replacement, and exact/lower/upper bounds. Allocation failure disables caching. |
+| Book | `Vec<BookLine>` with move strings borrowed from embedded static text. | `include_str!` incorporates `opening_book.txt` at build time. Runtime file lookup is unnecessary; edits require rebuilding. |
+
+The board array answers "what is on e4?"; bitboards answer "where are all White
+knights?" Keeping both spends storage to make two frequent questions cheap.
+`Position` methods centralize their updates so special moves do not each need
+an independent mask-maintenance implementation.
+
+## State ownership, classes, and Rust scope
+
+Rust uses structs and `impl` blocks here, not an inheritance hierarchy.
+`&Position` borrows a position for reading. In `make_move()`, `let mut next =
+*position` copies the entire value; mutations affect `next`. Unlike a Python
+tuple holding a list, this struct's arrays do not share a separately allocated
+mutable board. `&mut self` gives a method exclusive mutable access to its search
+or table while the borrow lasts.
+
+A `Vec` owns growable heap storage; a slice borrows a view. Use history and book
+lines to introduce vectors, then contrast them with the fixed move buffer used
+in frequent recursive calls. Neither Rust nor an annotation makes an incorrect
+chess-state update correct: ownership rules and chess invariants solve different
+problems.
+
+`Result<i32, SearchTimeout>` carries either a search score or an interruption.
+The `?` operator returns an error to the caller; it is not a thrown Python
+exception. The null-move branch saves its recursive result, pops history, and then applies
+`?`. The ordinary move loop can return early through `?` before its final pop.
+The next search attempt rebuilds history from the supplied game history, so do
+not claim that every interrupted frame restores its path automatically.
+`Option<Instant>` distinguishes a timed deadline from an absent one without a
+special numerical sentinel.
+
+`const fn` builds attack, rights, and key tables during compilation where used
+in constant/static initialization. `static` tables are shared read-only data.
+Compiler inlining attributes are implementation hints; they are not proof of a
+speedup. The small `unsafe` allocation boundary in the table needs explicit
+alignment, initialization, and ownership reasoning that ordinary safe code does
+not discharge for it.
+
+## Control flow and function call tree
+
+![Remus5 module dependencies](../../utils/mermaid/Remus5/modules.svg)
+
+This tree groups repeated calls and omits diagnostic formatting. The
+[architecture views](remus5.md#architecture-and-call-diagrams) provide the module
+and search diagrams.
+
+```text
+main() -> run() on a thread with an explicit stack size
+  load_book(); Position::start(); Search::new()
+  position command -> parse_move(), make_move(), game-history keys
+  go command -> legal_book_move() when eligible
+    otherwise Search::think()
+      iterative deepening and aspiration retries
+      Search::alpha_beta()
+        count_node(), draw/check tests, Table::probe()
+        depth boundary -> quiescence()
+        evaluate(), optional make_null_move() and reduced recursion
+        ordered_moves() -> generate_moves()
+        make_move() -> Position::remove_piece()/put_piece()
+        in_check() -> is_attacked()
+        recursive searches, killers, Table::store()
+      principal variation and completed-depth reports
+  move_text(); print bestmove
+```
+
+A move drawn from the book still passes native generation and king-safety
+checks. `go depth N` bypasses the book for native-search comparisons. The UCI
+boundary also accepts FEN positions for checks, whereas the workshop Python
+adapter uses start-position move lists. Parsing input is separate from proving
+that arbitrary input describes a valid chess game.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Compiled typed arrays and loops | Avoids Python object and interpreter overhead in repeated board operations. | Porting introduces explicit integer sizes and conversion rules. Equivalent-looking arithmetic still needs verification. |
+| Bitboards plus square array | Intersections and bit scans replace many repeated square-by-square queries. | Every move must maintain redundant views consistently; more state is copied. |
+| Incremental XOR key | Changes only the key components affected by a move. | Rights, side, en passant, captures, and promotion must all participate correctly; collisions remain possible. |
+| Packed moves and ordering entries | Small values fit compact buffers and preserve deterministic tuple tie order. | Bit fields are less self-explanatory than Python tuples; use encoding helpers at every boundary. |
+| Stack move buffers | Avoids repeated general-purpose allocation in the recursive hot path. | Deep recursion consumes stack space. The explicit 64 MiB stack is a resource choice, not free memory. |
+| Fixed bucket table | Predictable capacity and local replacement avoid whole-dictionary clearing. | Replacements can discard useful results. The 512 MiB is table storage, not total process memory. |
+| Separate `Search` instance | Makes ownership visible and supports resetting search state deliberately. | This version still has one native search worker and a synchronous command loop. |
+
+Rust signed division truncates toward zero. Evaluation uses `div_euclid()` where
+Python's `//` rounding must be retained. Show the negative case before calling
+a numerical translation equivalent. Students do not type this Rust optimization
+layer; its larger source size serves execution speed and explicit control.
+
+## Worked example to teach at the board
+
+Encode e2-e4: start 52, target 36, promotion 0 gives
+`52 * 512 + 36 * 8 = 26912`. Decoding must recover `(52, 36, 0)`.
+Trace `make_move()` on `Position::start()`: e2 is cleared, e4 contains White's
+pawn, White's and the pawn-kind masks move the bit, en passant becomes e3 (44),
+rights remain 15, the clock resets, and Black moves next. The original value is
+unchanged.
+
+For the key, cross out the White-pawn key at e2 and add the one at e4, then add
+the new en passant component and toggle the side component. Compare the result
+with reconstructing a `Position` from its plain fields. Explain why incremental
+maintenance can be quicker while a full rebuild is a useful independent check.
+
+For arithmetic, compare `-1 / 24` in Rust with Python's `-1 // 24`. The first is
+0; the second is -1. `(-1_i32).div_euclid(24)` supplies -1. A rounding difference
+of one centipawn can affect ordering or a bound even when the formulas look alike.
+
+## Verification, misconceptions, and limits
+
+Start with known move counts and state invariants, then evaluation, fixed-depth
+search, and finally timing. The start position has 20 one-ply and 400 two-ply
+legal continuations. A `go perft 2` response of `perft 400` checks that example;
+it does not measure playing strength. Use the
+[verification instructions](remus5.md#verification-and-limitations) for broader checks.
+
+Compare search moves, scores, and node counts under stated cache and book
+conditions. Different table capacities and replacement policies can change reuse.
+Do not promise universal node-for-node identity with Python based only on the
+port's intent. Build success checks compilation, and source hashes check file
+identity; neither substitutes for chess checks.
+
+Remus5 retains the compact search's selective quiescence and repetition model.
+It does not provide Remus6's check-aware quiescence, command polling, tablebase
+adapter, or pondering. Explain these limits before presenting Remus6's additions.
+The [version measurements](../../docs/remus_versions.md#measuring-speed-and-playing-strength)
+report complete-engine results under their recorded conditions, not an isolated
+speed or Elo contribution from each Rust feature.
 
 ## Line-by-line source reference
 

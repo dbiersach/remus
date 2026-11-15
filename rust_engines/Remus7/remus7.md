@@ -18,7 +18,7 @@
 Remus7 is an experimental Windows Rust engine using Lazy SMP. Its main worker and
 helpers search the same root independently and share one transposition table. The main
 worker selects the move. Native rules, evaluation, root-only Lichess advice, embedded
-opening book, and GUI-driven pondering follow Remus5's design. Student pairs do not type
+opening book, and GUI-driven pondering follow Remus6's design. Student pairs do not type
 this engine.
 
 ## Enhancements over the previous version

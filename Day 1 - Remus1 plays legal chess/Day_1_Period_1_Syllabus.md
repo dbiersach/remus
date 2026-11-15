@@ -22,7 +22,7 @@ The first file is `board.py`, because every other file of the engine imports it.
 
 | Time | Activity |
 | --- | --- |
-| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools, clone the repository, and install Lucas Chess in its default location. Open Lucas Chess, complete any first-run prompts, wait for its main window, then close it. From the cloned Remus folder in PowerShell, run `.\utils\setup_student.ps1 -StudentCopy`. Expect registration messages and `Workshop setup complete`; setup deletes itself on success. Open `Remus.code-workspace`, then reopen Lucas Chess and confirm Remus1 through Remus8 under External engines. Registration records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
+| 8:30 to 9:15 | Get familiar with the laptop prepared by the instructor before Day 1. Open `Remus.code-workspace`, locate the Day folders, and preview a lesson screenshot. Open Lucas Chess and find Remus1 through Remus8 under External engines. Their names confirm saved registrations, not tested play. The Python engines become playable after their modules are typed and verified. Practice the driver and navigator roles; no downloads, online accounts, or installation commands are needed in class. |
 | 9:15 to 9:30 | On the teacher's laptop, the teacher demonstrates a completed Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](../docs/lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
 | 9:30 to 9:40 | In the open Remus workspace, each student pair expands `Day 1 - Remus1 plays legal chess/Remus1` in VS Code's Explorer. The folder holds `remus1.bat`, the one line that starts the engine, and `verify_remus1.py`, which tests the finished engine; the student pair types the engine modules from the screenshots. |
 | 9:40 to 10:00 | Type `board.py` (15 code lines): the piece numbers, the starting position, and square names. The reminder before typing: row 0 is rank 8, column 0 is file a, so a8 is square 0 and h1 is square 63. |
@@ -53,7 +53,10 @@ Lines 5 to 9 build the starting position. `BACK_RANK = [ROOK, KNIGHT, BISHOP, QU
 
 Preserve the blank lines shown in the screenshot so its line references match your file. VS Code also fixes the spacing when it saves the file.
 
-For the engine installer, expect messages naming Remus1 to Remus8, followed by `Saved ... engines in ...` or `Nothing changed: every engine is already registered`. A message that Lucas Chess is not installed or an engine path does not exist means registration did not complete. Reopen Lucas Chess and confirm the eight External engines entries. Registration records their paths; it does not run a game or verify student code.
+The instructor prepares and checks the laptop before the workshop using the
+[instructor preparation guide](../docs/instructor_laptop_setup.md). If an engine
+entry or lesson image is missing, ask the instructor to repair it. Students do
+not rerun setup or install software during this period.
 
 ## Done when
 

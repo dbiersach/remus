@@ -82,8 +82,10 @@ and wait for permission before starting it.
   White or Black. Engine-versus-engine rounds use two opposite-color games at
   10+0, running together in two Lucas workers. Each game can use 20 minutes on
   the clocks; allow setup time and preserve the optional-game qualifications.
-- Students create no online accounts. Follow [README setup](README.md#setup) in a
-  fresh student clone. Install Lucas Chess in its default location under
+- Students create no online accounts. The instructor completes
+  [laptop preparation](docs/instructor_laptop_setup.md) before Day 1 in a separate
+  classroom clone under the Windows account students will use. Install Lucas Chess
+  in its default location under
   `%LOCALAPPDATA%\Programs\LucasChessR`. Complete any first-run prompts, wait for
   its main window so configuration files exist, then close it.
 - From the cloned Remus folder in PowerShell, run
@@ -310,7 +312,13 @@ also play without internet access or a successful tablebase response.
 - `rust_engines/Remus5` through `Remus8` contain all active Rust code, Cargo metadata,
   embedded books, remusN.exe, remusN.md, and RemusN_details.md. There is no -Rust
   suffix and no active Python version above Remus4. Preserve source algorithms
-  during layout and identity changes.
+  during layout and identity changes. Each Rust RemusN_details.md begins with the
+  same eight teaching sections as the Python guides, using "Rust scope" in place
+  of "Python scope". Explain the progression from the previous version, ownership,
+  data structures, control flow, and measured versus intended performance. These
+  are optional instructor extensions, not additional student typing periods.
+  Preserve authored introductions when regenerating line-by-line references;
+  admin/make_rust_details.py retains the prefix before the reference heading.
 - `docs` is flat and contains only Markdown and PDF files, including
   `docs/workshop_syllabus.md`, shared guides, and briefs. Day and period
   syllabuses remain in their Day folders.

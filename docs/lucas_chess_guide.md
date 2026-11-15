@@ -37,18 +37,15 @@ The buttons along the top open menus. This guide uses **Play** and **Engines**.
 
 ## Part 2: Find the engines
 
-Follow the [README setup steps](../README.md#setup) in a fresh student clone.
-Install Lucas Chess in its default location, complete any first-run prompts,
-wait for its main window, and close it. From the cloned Remus folder in PowerShell,
-run `.\utils\setup_student.ps1 -StudentCopy`. This automatically runs
-[`install_lucas_engines.py`](../utils/install_lucas_engines.py), so no separate
-registration step is needed. The installer prints an entry for each engine and
-ends with `Saved ... engines in ...` or `Nothing changed: every engine is already
-registered`. A missing installation or file message means it has not completed.
-If setup reports that Lucas Chess is missing, uninitialized, or open, follow the
-message and rerun setup. Registration saves paths and settings; it does not launch
-or test the engines. After `Workshop setup complete`, setup deletes itself.
-Open `Remus.code-workspace`, then reopen Lucas Chess to check the engine list.
+For the workshop, the instructor follows the
+[laptop preparation guide](instructor_laptop_setup.md) before Day 1. It covers
+installation, first-run initialization, student cleanup, and automatic registration
+of Remus1 through Remus8. Students use the prepared workspace and engine entries;
+they do not download tools or run setup in class.
+
+For home use with the completed engines, follow the [README setup steps](../README.md#setup).
+Registration saves program paths and settings; it does not launch or test chess
+behavior. Open `Remus.code-workspace`, then open Lucas Chess to check the list.
 
 **Step 1.** Click **Engines**, then **External engines**.
 
@@ -237,8 +234,8 @@ so every tournament in Part 4 works the same way at home. Remus and its `remusN.
 launcher run on Windows only.
 
 To play your own Remus at home, copy the Remus folder from your USB drive to a Windows
-computer, install `uv`, and run `uv sync` once in the Remus folder, the same setup as
-on Day 1 (see the setup steps in the top `README.md`). In Lucas Chess, click **Engines**,
+computer, install `uv`, and run `uv sync` once in the Remus folder, as described
+in the [README setup instructions](../README.md#setup). In Lucas Chess, click **Engines**,
 **External engines**, and **New**. The window that opens shows only `.exe` files, so
 paste the full path of your `remusN.bat` into the **File name** box and click **Open**.
 Choose the file in the student pair's own folder, for example

@@ -1,6 +1,178 @@
-# Remus6 source reference
+# Remus6: instructor guide and source reference
 
-Read [the engine overview](remus6.md) for the algorithms, options, and measurement limits. This reference shows every source line, including comments and spacing, with structural annotations. Original source comments carry the algorithm-specific reasoning. Source identity is not a behavior test.
+## Instructor overview and learning goals
+
+Teach Remus6 as three separate changes to [Remus5](../Remus5/Remus5_details.md):
+more complete tactical boundary handling, less work per searched position, and
+a responsive boundary between search and the outside world. These are different
+reasons for adding code. A faster loop should preserve its intended result; a
+new evaluation term deliberately changes the score; a tablebase query supplies
+external advice that must be validated.
+
+The position struct, packed move, bitboards, incremental key, and copy-make
+contract remain the foundation. Students do not type this supplied Rust engine.
+Use the progression below after explaining Remus5, rather than inserting these
+topics into the Python workshop periods. The [engine overview](remus6.md) contains
+the operational settings and measurements.
+
+## Recommended teaching sequence
+
+| Step | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| 1. Revisit tactical stopping | Contrast an ordinary quiet leaf, checkmate, stalemate, and a leaf where the king is checked. Trace en passant as a real capture. | Terminal and legality semantics must precede shortcuts that omit work. | Why is standing pat invalid as a way to escape check? |
+| 2. Improve ordering and evaluation | Explain quiet-move history, backward pawns, central holes, knight outposts, and king cover. | These are deliberate chess-model changes, distinct from faster implementation. | How does search history differ from the list used for repetition? |
+| 3. Avoid repeated work | Introduce pawn caching, conditional evaluation, early move selection, ray lookups, legal-move existence, and prefetch. | Students can identify the result that each optimization must preserve. | Which terms can be reused when only a king moves? |
+| 4. Explain bounded storage | Compare multiply-shift indexing and Windows-backed table allocation with Remus5's table. | Fixed capacity and allocation ownership are concrete before concurrency appears. | Does zero-filled allocation mean the whole table has been physically touched? |
+| 5. Keep input responsive | Follow the input channel, command queue, `SearchControl`, deadlines, and cancellation. | Input can arrive while a recursive search is active without letting two threads mutate chess state. | Which thread may change the current position? |
+| 6. Add root services | Explain tablebase eligibility and fallback, then normal, infinite, and ponder modes. | External advice and time control are understandable once the native search is independent. | What happens when the network fails or a predicted reply is wrong? |
+
+Do not teach all the speed techniques as one unexplained block. For each, first
+show the repeated operation, then the condition permitting less work, and finally
+the check that its result remains acceptable.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| `Position` and `Move` | Remus5's value struct and packed `u16`; row 0 is rank 8 and column 0 is file a. | The square array, kind/side masks, and incremental key must remain synchronized. |
+| `Search` | Owns history, killers, quiet history, table, counters, and `SearchControl`. | There is one native search worker; input and network helper threads do not search chess trees. |
+| Quiet history | `[[[i32; 64]; 64]; 2]`, indexed by side, start, and target. | A bounded ordering hint for quiet cutoffs, separate from repetition history and from evaluation. Scores remain below killer priorities. |
+| Pawn cache | Thread-local `RefCell<Vec<PawnEntry>>`, with 8,192 entries. | Each entry stores exact White/Black pawn masks, structure score, passed masks, attacks, and file counts. A matching hash index alone is insufficient. |
+| Dynamic evaluation inputs | Current kings, rooks, other pieces, phase, and side to move. | King cover, rook files, pawn races, and other position-dependent terms must use current state rather than a pawn-only cached final score. |
+| `SearchControl` | Input receiver, pending `VecDeque<String>`, mode enum, timestamps, and ponder-credit fields. | One controller consumes commands and owns timing decisions. The queue preserves commands that must be handled after cancellation. |
+| `Tablebase` | Response cache keyed by complete API FEN, at most one pending receiver, and a cooldown timestamp. | A late response belongs to its original FEN, not whichever root is current when it arrives. |
+| Table | Four 16-byte entries per aligned 64-byte bucket, fixed at 512 MiB. | Multiply-shift indexing uses the 64-bit key range. A failed allocation disables caching; no smaller table is silently selected. |
+
+The pawn cache is an example of choosing the correct dependency boundary. Moving
+a knight often leaves pawn structure unchanged. Moving a king can also leave
+that cached structure unchanged, but the king's exposure and a passed pawn's
+race against it must be recalculated.
+
+## State ownership, classes, and Rust scope
+
+The `Search` struct still owns mutable chess-search state. `SearchControl::new()`
+starts an input thread that sends command strings over a channel; it does not
+borrow the live board and alter it. The search thread polls the receiver during
+search. This keeps a single owner of the position while allowing `stop` and
+`isready` to be noticed without finishing a whole search first.
+
+`Mode` makes normal search, pondering, and infinite analysis explicit enum
+variants. `Option` represents absent cache results or pending requests.
+`Result` carries timeout/cancellation through recursive calls. State restoration
+must happen before propagating an error wherever a caller intends to keep using
+that state; the operator `?` does not automatically pop a history vector.
+
+The pawn cache uses interior mutability: `RefCell` permits a temporary mutable
+borrow through the thread-local container and checks borrow discipline at
+runtime. It is not a lock for sharing between threads. In this version the
+search uses its own cache; the same declaration gives each search thread an
+independent cache in later parallel engines.
+
+The table's raw pointer and `Drop` implementation form a small explicit resource
+boundary around Windows allocation and release. `unsafe` does not disable chess
+checks elsewhere. Its obligations include valid alignment, initialized entry
+representation, bounded indexing, and releasing the allocation only after use.
+
+## Control flow and function call tree
+
+![Remus6 module dependencies](../../utils/mermaid/Remus6/modules.svg)
+
+See the [search and control diagrams](remus6.md#architecture-and-call-diagrams)
+for the same responsibilities drawn as separate views.
+
+```text
+main() -> run()
+  SearchControl::new() -> input thread -> channel of command strings
+  position command -> Position construction and game-history replay
+  go command -> SearchControl::begin()
+    eligible normal timed root -> Tablebase::lookup()
+      eligible(), position_fen(), response cache or bounded fetch
+      response_move() -> native legal-move validation
+    if no tablebase move -> legal_book_move() when eligible
+    if no selected move -> Search::think()
+      alpha_beta() -> table probe, conditional evaluation, move loop
+        place_next() -> next ordered candidate
+        make_move(), in_check(), recursive search
+        depth boundary -> quiescence()
+          has_legal_move(), draw check, evaluate()
+          all evasions when checked; selected captures otherwise
+          exchange_score(), recursive quiescence()
+        Table::store()
+      count_node() -> SearchControl::poll()
+  legal_choice(); wait if needed; emit bestmove and optional predicted reply
+```
+
+For eligible roots, tablebase advice is attempted before the book, then native
+search is the fallback. Fixed-depth checks bypass both root shortcuts. Network
+requests never occur inside recursive search and are not used while pondering.
+The lookup waits at most one second and one quarter of the move budget; elapsed
+lookup time reduces the remaining native-search allowance.
+
+Pondering is computation on the opponent's time, requested by the GUI with
+`go ponder`, not merely an enabled checkbox. For a replayed predicted reply,
+this implementation prepares the position before that reply, covering other
+replies too. On a hit it ends that search and searches the reached position on
+its own clock using the prepared table. Depth credit is reduced by one and must
+be recovered. A book answer waits for hit or stop without doing native ponder work.
+See [time management](remus6.md#time-management-and-pondering) for the timing rules.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Check-aware quiescence and legal-move existence | Prevents standing pat or pruning from replacing a required check response or hiding a terminal result. | Terminal checks add work; the fast existence path must satisfy its non-check and pawn-line conditions. |
+| Explicit en passant victim detection | Gives capture ordering and material accounting the actual captured pawn. | An empty destination cannot be used as the sole capture test. |
+| Lazy ordering of the first three entries | Avoids sorting the remaining candidates when an early cutoff ends the node. | If search continues, the remainder is sorted. The intended order matches the complete entry sort. |
+| Evaluate only where a pruning test needs it | Skips unused static evaluations in internal nodes. | Quiescence and applicable null/futility tests still need their values. This does not remove evaluation from search. |
+| Pawn-only cache | Reuses structure work across positions with the same pawns. | The cache consumes about 1 MiB per thread and must not retain king-dependent scores as pawn-only facts. |
+| Branch-free ray arithmetic, masks, and prefetch | Uses machine operations to reduce branches and overlap potential table access latency. | Performance depends on hardware and access patterns. Prefetch does not guarantee a hit or change a result. |
+| Channel-based input | Separates blocking input from the search's recursive work. | Commands are noticed at polling points, not at every CPU instruction. A separate input thread is not parallel chess search. |
+| Root-only tablebase adapter | Keeps HTTP/JSON and failure handling outside the native chess recursion. | Eligibility, response category, legal moves, repetition, and remaining time still need native checks. |
+
+The board and native search remain usable without the optional service. The
+`reqwest`, `serde_json`, and `httpdate` dependencies serve the network boundary;
+they are not hidden move generators. HTTP 429 creates a cooldown of at least
+60 seconds, honoring a longer Retry-After value. Failed or uncertain advice
+falls back to native selection.
+
+## Worked example to teach at the board
+
+Consider a checked king at the nominal depth boundary. Ask whether a favorable
+material score permits "do nothing." It does not. `quiescence()` first checks
+for a legal move, scores mate or stalemate when appropriate, and searches legal
+evasions while in check. Its ordinary standing-pat and capture-pruning shortcuts
+apply only outside check.
+
+Next leave both pawn masks fixed and move a rook from a closed file to an open
+file. The pawn cache can return the same counts and structure score; the rook's
+file bonus must use its new square. Move a king and ask which additional terms
+must change. This is the same dependency reasoning students use when deciding
+whether a function can safely reuse a prior result.
+
+Finally give a normal root a two-second maximum budget. The tablebase wait cap
+is `min(1 second, 2 seconds / 4) = 0.5 seconds`. If no valid answer arrives, native
+search receives the reduced remaining allowance. A late response is cached under
+its own FEN. It is never applied blindly to the next position.
+
+## Verification, misconceptions, and limits
+
+Compare legal move counts first, then boundary cases: checked leaves, mate before
+draw scoring, stalemate, en passant, and timeout behavior. For speed-only changes,
+compare fixed-depth results with external root services disabled. New evaluation
+terms need their own expected scores; they are not expected to preserve Remus5's
+scores. The [verification guide](remus6.md#verification-and-limitations) separates
+native checks from optional network checks.
+
+A successful fallback is evidence of offline operation, not evidence that the
+remote tablebase was queried successfully. A legal returned move alone does not
+identify whether it came from the book, service, or native search; use the source
+reporting and diagnostics when investigating that distinction.
+
+The repetition model remains a search shortcut rather than complete tournament
+adjudication, and the table key does not encode all history context. Quiescence
+still selects its tactical candidates rather than exploring every legal
+continuation outside check. Pondering, extra evaluation, and caching can change
+work and timing; none guarantees a fixed Elo gain on every machine.
 
 ## Line-by-line source reference
 

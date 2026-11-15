@@ -1,6 +1,170 @@
-# Remus7 source reference
+# Remus7: instructor guide and source reference
 
-Read [the engine overview](remus7.md) for the algorithms, options, and measurement limits. This reference shows every source line, including comments and spacing, with structural annotations. Original source comments carry the algorithm-specific reasoning. Source identity is not a behavior test.
+## Instructor overview and learning goals
+
+Teach Remus7 as several searchers exchanging useful results without dividing
+all moves among them. It builds on [Remus6](../Remus6/Remus6_details.md): the board,
+evaluation, legal-move rules, tactical search, root tablebase boundary, and
+pondering model remain the foundation. The central change is Lazy SMP, meaning
+symmetric multiprocessing with largely independent searches of the same root.
+
+A helper does not own a permanent subset of root moves, and the final answer is
+not a vote. The main worker selects the move; helpers populate a shared
+transposition table that the main worker can reuse. This is the key distinction
+to establish before introducing locks, atomics, or speed measurements.
+
+This supplied engine is an optional instructor-led extension after Remus6;
+students do not type it during the Python workshop. The [engine overview](remus7.md)
+contains its options, diagrams, and performance results.
+
+## Recommended teaching sequence
+
+| Step | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| 1. Begin with one worker | Revisit Remus6's recursive search and instance-owned mutable state. | Parallelism needs a correct sequential baseline. | Which values belong to one path through the tree? |
+| 2. Separate private and shared state | Draw two `Worker` boxes and one `Table` box; add stop and node counters. | Ownership decisions come before thread creation. | Why must workers not share one mutable history vector? |
+| 3. Explain Lazy SMP | Start each worker at the same root; show depth offsets and table hints changing traversal. | Students understand the intended cooperation before its synchronization. | Can two workers legitimately search the same position? |
+| 4. Make sharing safe | Introduce `Arc`, atomic words, packed entries, and key validation. | Reference counting, atomic access, and valid cache contents are three different requirements. | Does `Arc` alone make a dictionary safe to mutate concurrently? |
+| 5. Control lifetime | Follow scoped threads, the main controller, stop signaling, joining, and option changes. | No new search or table replacement may race an old worker. | Why must resizing wait for helpers to finish? |
+| 6. Measure useful work | Compare total nodes, elapsed time, completed depth, retries, and main-worker decisions. | More activity can include duplicated or unhelpful work. | Can higher nodes per second accompany worse time to a useful result? |
+
+Use a two-worker paper exercise before the default four. Explain atomics as
+individual shared operations, then explain why a table entry spans more than
+one such operation. Do not start by assigning every CPU a move; that teaches a
+different algorithm.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| `Position`, `Move`, masks, and keys | Remus6's value types; row 0 is rank 8 and column 0 is file a. | Each recursive child is still a copy. Sharing a root for reading does not allow workers to mutate it. |
+| `Worker` | Owns history, killers, quiet history, best move, local counts, and metrics. | Mutable heuristics and path state are private to a worker. Only the main worker has `Some(SearchControl)`. |
+| `Search` | Owns the main worker, helper worker values, shared table handle, and shared counters. | It starts helper threads for a search and joins them before returning. Worker values can persist between searches even though helper threads are scoped to each call. |
+| Shared table | `Arc<Table>` containing 64-byte buckets of four pairs of `AtomicU64`. | Each 16-byte slot contains validation information and packed score/move/depth/bound/age data. No ordinary mutable entry is shared unsafely. |
+| Shared cancellation and node totals | `Arc<AtomicBool>` and `Arc<AtomicU64>`. | Workers poll cancellation and publish count batches. The exact final total includes each joined worker's remaining local nodes. |
+| Pawn cache | Remus6's thread-local pawn cache. | Threads do not lock a common pawn cache. Its storage is additional to the shared Hash allocation. |
+| Hash and thread options | Hash defaults to 512 MiB; Threads defaults to 4 including the main worker. | One table is shared within an engine process. A second engine process has its own table and workers. |
+
+The shared table does not contain the workers' call stacks. A table result can
+supply a bound or ordering move; it cannot replace the caller's current board,
+path history, or interruption state. Helpers begin at slightly different depth
+offsets, and timing affects which hints become visible first.
+
+## State ownership, classes, and Rust scope
+
+`Arc` is an atomically reference-counted owner. Cloning an `Arc<Table>` creates
+another handle to the same allocation, not a 512 MiB copy. Each worker can hold
+a handle until it finishes. That controls lifetime, but safe concurrent access
+still depends on the table's atomic representation and access protocol.
+
+`std::thread::scope` bounds helper-thread lifetime to `Search::think()`. Helpers
+borrow their own worker values and the common read-only root/history input.
+The main worker alone consumes UCI commands and decides when the timed search
+ends; helpers observe a shared stop flag. On completion the main worker signals
+stop, and the scope joins helpers before the caller publishes the final result.
+
+The table uses relaxed atomic operations for its deliberately lossy cache. A
+slot's two words are not one atomic transaction. Readers combine the validation
+word with the score/move/depth/bound payload and accept a matching key. Age bits
+are excluded from that validation and refreshed separately. Concurrent writes
+can turn a useful entry into a miss; the protocol is not a general-purpose
+transactional database or a proof that hash collisions are impossible.
+
+`unsafe impl Send` and `Sync` on the raw-pointer-backed table are explicit
+promises by its implementation. They rely on atomic bucket access, valid
+allocation, and lifetime discipline. These declarations do not make arbitrary
+pointer dereferences safe. Teach the small boundary and its obligations rather
+than suggesting that Rust automatically proves the whole algorithm correct.
+
+## Control flow and function call tree
+
+![Remus7 module dependencies](../../utils/mermaid/Remus7/modules.svg)
+
+The [search and control views](remus7.md#architecture-and-call-diagrams) expand
+the grouped paths below.
+
+```text
+main() -> run() -> root selection and SearchControl setup
+  optional validated tablebase/book move, otherwise Search::think()
+    Table::new_search(); clear shared stop and node totals
+    thread::scope()
+      spawn scoped helpers -> Worker::help(root, game_history, id)
+        offset iterative deepening -> alpha_beta() -> shared table
+      main Worker::think(root, game_history, time/depth limits)
+        iterative deepening -> alpha_beta() -> shared table
+        count_node() -> main SearchControl polling
+      main sets stop; helper recursion exits; scope joins helpers
+    combine final local counts and metrics
+    return main worker's selected move
+  native legality check; print one bestmove
+```
+
+Each worker's recursive search retains Remus6's ordering, check-aware quiescence,
+selective search, and evaluation. The helpers' root searches are independent;
+shared table writes are the main mechanism by which one search helps another.
+Only the main worker reports its completed principal iterations as the chosen
+analysis, rather than merging unrelated lines into a fabricated principal variation.
+
+Hash or thread-count changes occur between searches. Hash replacement drops
+worker references to the old allocation before installing the new one, after
+scoped work has ended. Pondering still follows the position-before-reply model:
+on a hit the reached position is searched using prepared table information,
+not a second simultaneous owner of the main controller.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Independent searches of one root | Reuses the sequential algorithm without a branch-dispatch scheduler. | Workers duplicate work; useful speedup is not proportional to thread count. |
+| One authoritative main worker | Keeps time decisions, UCI handling, and final move selection coherent. | A helper's apparently better isolated result is not automatically promoted to the final answer. |
+| Private history and heuristics | Avoids locking on every push, pop, killer update, or quiet-history update. | Different traversal and hints can make workers diverge; memory use grows with worker count. |
+| Shared atomic table | Allows frequent result exchange without a mutex around every probe. | Cache races may lose entries, and shared memory bandwidth can limit scaling. |
+| Batched node accounting | Avoids a shared atomic increment at every node. | Live aggregate counts can lag; final joined counts provide the complete total. |
+| Per-search scoped threads | Makes completion and borrowing boundaries explicit. | Thread startup/join costs are paid for each search; thread-local caches follow actual thread lifetime. |
+| Four threads and 512 MiB by default | Fits the intended workshop configuration better than the rating-test settings. | The table is not the process's whole footprint; worker stacks and caches consume more memory. |
+
+The existing rating results obtained with 16 threads and 2 GiB remain measurements
+of that configuration, not predictions for the four-thread classroom laptop.
+Do not justify more threads solely by available logical processors; useful depth,
+latency, and memory pressure need measurement on the actual machine.
+
+## Worked example to teach at the board
+
+Draw two workers searching the same root. Worker A reaches position P at depth 4
+and stores a lower bound of +80, with a candidate move. Later, worker B reaches
+P at a non-root depth-3 node with beta +60. The bound is sufficient for a cutoff
+if the entry validates and passes the usual depth checks. With beta +100 it is
+not an exact answer, although the move can still guide ordering.
+
+Now imagine B reaches P before A publishes the entry. B performs its own search.
+Both executions are permitted: the shared cache changes opportunities for reuse,
+not the ownership of B's board. This explains why scheduling can alter node
+counts and search paths without any worker using a global mutable position.
+
+For lifetime, give each worker a card representing an `Arc` handle to one table.
+Request a Hash change. First stop and join all active workers, then replace their
+handles; do not release the table while a helper may still probe it. Counting
+handles explains lifetime, while the atomic slot protocol explains access.
+
+## Verification, misconceptions, and limits
+
+Begin with **Threads = 1**, a fresh process, and native fixed-depth searches to
+compare against the sequential baseline. Then test multiple workers for legal
+results, prompt cancellation, correct new-game/option transitions, and final
+worker completion. Follow the [verification guide](remus7.md#verification-and-limitations).
+Parallel searches need not reproduce identical node counts or principal
+variations across runs because table contents arrive in a different order.
+
+Distinguish total processed nodes from unique positions and from useful work.
+A helper can increase the total while repeating a branch the main worker also
+searched. Diagnostics expose worker work and re-search costs; a throughput number
+alone does not establish a playing-strength improvement.
+
+The shared table is a best-effort optimization, not a repository of proven chess
+truths. Score bounds, collision checks, depth requirements, draw-history limits,
+and legal move validation still matter. Changing ownership does not remove the
+inherited heuristic limits. The next version changes how work is assigned,
+not what `Arc` means or how the pieces move.
 
 ## Line-by-line source reference
 

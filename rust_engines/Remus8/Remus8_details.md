@@ -1,6 +1,196 @@
-# Remus8 source reference
+# Remus8: instructor guide and source reference
 
-Read [the engine overview](remus8.md) for the algorithms, options, and measurement limits. This reference shows every source line, including comments and spacing, with structural annotations. Original source comments carry the algorithm-specific reasoning. Source identity is not a behavior test.
+## Instructor overview and learning goals
+
+Teach Remus8 as coordinated sharing of search branches. It builds on
+[Remus7](../Remus7/Remus7_details.md), retaining the native chess implementation,
+shared atomic table, worker-local heuristics, root services, and controller.
+It replaces Lazy SMP's independent root searches with Young Brothers Wait Concept
+(YBWC): search the first legal child before offering the remaining siblings to
+helpers. A strong first result can make later work cheaper or unnecessary.
+
+This is an alternative parallel organization, not Lazy SMP plus a second layer
+of independent root searches. One iterative-deepening owner coordinates a
+persistent helper pool. The purpose of the extra structures is to assign work,
+publish bounds, cancel obsolete branches, and finish safely.
+
+Use this supplied engine as an instructor extension after Remus7; students do
+not type it in the Python workshop. Its [engine overview](remus8.md) documents
+options and measurements. The teaching goal is explaining why workers wait and
+what makes a result safe to use, not memorizing every scheduling counter.
+
+## Recommended teaching sequence
+
+| Step | Introduce in this order | Why this order works | Ask the student to explain |
+| --- | --- | --- | --- |
+| 1. Establish the first bound | Draw a sequential alpha-beta node; search its first child; reconsider the remaining moves with the improved alpha. | Students see why immediate parallel dispatch can waste work. | What work disappears if the first move already reaches beta? |
+| 2. Create one split | Package the position, history, remaining legal candidates, depth, and window. | A helper needs enough context to reproduce a branch's meaning. | Why is a move alone not a sufficient job description? |
+| 3. Claim and publish | Trace the shared next index, alpha snapshot, full-depth recovery, and result publication. | Exclusive claims and valid returned bounds are the scheduler's basic contract. | What happens when alpha improves while another move is being searched? |
+| 4. Explain lifetime and cancellation | Introduce parent links, cancellation, helper counts, completion notification, and draining. | A cutoff can make results unnecessary before workers have actually stopped. | Why is requesting cancellation not the same as completing the search? |
+| 5. Add descendant helping | Let a waiting owner work strictly below its own split, saving and restoring local context. | Useful waiting requires dependency rules; arbitrary work stealing is not this implementation. | Why should a waiting worker not take work from its ancestor? |
+| 6. Measure the coordination cost | Compare active work, re-searches, result waiting, and cancellation waiting. | Fewer duplicate branches can be offset by communication and waiting. | Which counter would distinguish lack of work from slow cancellation? |
+
+Start with two workers and three siblings. Add nested splits only after students
+can trace one claim, one published result, and one cancellation. Keep native
+chess rules and evaluation off the scheduling diagram unless they are needed to
+explain the result being communicated.
+
+## Data structures and invariants
+
+| Structure | Representation and ownership | Rationale and invariant |
+| --- | --- | --- |
+| Native position and moves | Remus7's copied structs, masks, keys, and packed moves. | Row 0 is rank 8 and column 0 is file a. A split does not create a second chess representation. |
+| `Worker` | Private recursive state, heuristics, metrics, current branch, and helping depth. | A worker must restore suspended context after helping a descendant. Only the main worker owns the controller. |
+| `Search` | Main worker, persistent helper senders/join handles, shared `Pool`, table, and stop/counter handles. | Helper threads survive individual searches; shutdown joins them before releasing shared resources. |
+| `Candidate` | A move and a precomputed reduction flag. | The flag records the ordering-dependent reduction decision from the split's candidate sequence. |
+| `Job` | Enum variants `Search(Arc<Split>)` and `Quit`. | The channel carries explicit work or shutdown instructions. |
+| `Split` | Copied position, cloned history, candidate vector, depth, ply, beta, parent handle, cancellation flag, progress mutex, and condition variable. | Helpers search the same parent context. The split must remain alive while any helper can access it. |
+| `Progress` | Next unclaimed index, helper count, closed flag, alpha, best score, and best move. | The mutex protects related updates together; claim order and published bounds cannot be updated as unrelated plain fields. |
+| `Pool` and help registry | Idle worker senders, availability counts, generation, metrics, waiting scopes, and weak references to open splits. | The registry coordinates eligible work without keeping retired open splits alive solely through registry ownership. |
+| Shared table | Remus7's `Arc<Table>` with atomic bucket entries. | It shares search knowledge, while split progress shares the work assignment itself. These are separate mechanisms. |
+
+Splitting is restricted to depth at least 5 and ply at most 16, with enough
+remaining legal candidates and an available helper or eligible waiting owner.
+A small subtree stays sequential. The implementation requires at least two
+remaining candidates, allowing the owner to contribute alongside a helper.
+Nested helping is capped at two levels to bound suspended worker frames.
+
+## State ownership, classes, and Rust scope
+
+`Arc<Split>` shares lifetime; `Mutex<Progress>` protects coordinated state;
+`Condvar` lets a waiting owner sleep until progress changes. Each has a different
+role. A worker claims a candidate and an alpha snapshot under the mutex, releases
+the lock, performs expensive recursive work, then reacquires the lock to publish.
+Holding the progress lock throughout recursive search would serialize the work
+and obstruct completion.
+
+`Weak<Split>` lets the open-work registry refer to a split without becoming its
+permanent owner. Upgrading may fail when a split has expired, which is an ordinary
+case to skip. Parent handles express ancestry so cancellation reaches descendants
+and the helping rules can distinguish descendants from siblings or ancestors.
+
+A `HelpTask` guard uses `Drop` to decrement helper participation when its scope
+ends. Before that guard is dropped, the worker restores its suspended history,
+branch, and accounting state. Resource cleanup follows scope, but logical
+restoration still needs explicit code; `Drop` cannot infer which search context
+should be restored.
+
+The registry-to-split lock order is deliberate. A waiting owner does not hold
+its split's progress lock while attempting to claim descendant work. Teach this
+as avoiding a circular dependency between workers and locks, not as a claim that
+using a mutex automatically prevents deadlock.
+
+Thread count and Hash changes shut down and join helpers before reconfiguration.
+`Search` also shuts down its helpers when dropped. Persistent threads save
+repeated startup work but require a more explicit lifetime protocol than
+Remus7's per-search scoped helper threads.
+
+## Control flow and function call tree
+
+![Remus8 module dependencies](../../utils/mermaid/Remus8/modules.svg)
+
+The [architecture views](remus8.md#architecture-and-call-diagrams) show the
+scheduler beside the native search and UCI controller.
+
+```text
+main() -> root services and Search::think()
+  Pool::begin() starts a search generation
+  main Worker::think() -> iterative deepening -> alpha_beta()
+    search first legal child sequentially
+    if no cutoff, consider split_remaining()
+      check depth/ply/resources; collect remaining legal candidates
+      reserve helpers; construct and publish Arc<Split>
+      send Job::Search to reserved helper channels
+      owner and helpers -> search_split()
+        Split::claim() gives candidate and alpha snapshot
+        search_split_move() -> native probe and required re-search
+        Split::publish() updates result or signals cutoff
+      owner -> drain_split()
+        help_descendant() when permitted, otherwise wait for change
+        restore suspended state before marking helped task complete
+      all participating helpers finish; retire split
+    store valid result in shared table; return toward root
+  combine completed worker metrics; return selected move
+  root legality check; controller wait if needed; print bestmove
+```
+
+A worker searches a candidate using the alpha snapshot obtained at its claim.
+Principal variation search (PVS) first asks a narrow-window question; late-move
+reduction (LMR) may ask it at reduced depth. An improving reduced result must
+recover full depth before it can justify the stronger result. A cutoff can be
+published as a bound; it need not be an exact minimax value.
+
+When a result reaches beta, the split is canceled so descendants and other
+participants stop obsolete work. The owner still drains participants before
+returning. Cancellation is scoped: canceling one split is not permission to
+abandon unrelated work elsewhere. Global stop remains available for the whole
+search through the main controller and shared flag.
+
+Pondering and tablebase eligibility follow the Remus6/7 model. The scheduler
+changes native branch execution, not the network boundary. Remus8 also exposes
+`PonderHitMinPercent`, default 25, to configure the ordinary own-clock reserve
+after a hit; that setting does not remove hard deadlines or cancellation.
+
+## Design rationale and tradeoffs
+
+| Choice | What it saves or makes clear | Cost or boundary to explain |
+| --- | --- | --- |
+| Search the first child before splitting | Establishes a useful bound and can avoid dispatching siblings after an immediate cutoff. | Helpers may wait while the first child runs; the first child is not guaranteed to be best. |
+| Persistent helper pool | Avoids starting threads for every search request or every sibling. | Channels, shutdown, generations, and stale-context prevention require explicit coordination. |
+| Coarse split thresholds | Keeps small recursive tasks from paying scheduling overhead. | Some available cores remain idle; a fully occupied CPU is not the objective by itself. |
+| One claim index under a mutex | Assigns each candidate once within that split. | This does not prevent repeated positions elsewhere, transpositions, or deliberate re-searches. |
+| Alpha snapshots and bounded retries | Gives a helper a consistent window for its probe and recovery. | Concurrent improvements can make ongoing work less useful; stale snapshots may produce additional work. |
+| Descendant-only helping | Lets an owner waiting on its descendants contribute to their completion. | Saving context and maintaining ancestry add code; depth caps deliberately limit helping. |
+| Explicit draining | Prevents old workers from publishing into a completed search or racing option changes. | Time spent waiting for cancellation is real latency, even when the search result is already known. |
+| Separate wait and re-search metrics | Distinguishes useful computation from coordination cost. | Measurements add bookkeeping and need careful interpretation; total nodes alone misses the distinction. |
+
+The objective is useful parallel search, not the shortest possible Rust source.
+The workshop's minimal Python implementations establish the algorithm; this
+version demonstrates why coordinating several workers requires additional
+state and explicit completion rules. Performance must justify that complexity
+on the intended hardware.
+
+## Worked example to teach at the board
+
+Use invented scores with alpha initially -100 and beta +50. The first child
+returns +20. The owner raises alpha to +20, then offers remaining moves B and C
+at an eligible split. A helper claims B with alpha +20 while the owner claims C.
+Both use their own child position and private recursive history.
+
+Suppose B returns a verified bound of +60. Publishing it reaches beta, cancels
+the split, and notifies participants. C may already be searching with the older
++20 snapshot; it must observe cancellation and finish its task. The owner waits
+for participation to drain before returning the cutoff. The bound +60 is enough
+to reject the parent alternative; computing an exact value for every sibling
+would be wasted work.
+
+Now make B create a deeper split and let the owner finish C first. While waiting,
+the owner may help an unclaimed task strictly below its own split. It saves its
+history and branch, adopts the descendant's context, searches, restores its
+original context, and only then marks the help task complete. It must not help
+an ancestor whose completion depends on its own suspended work.
+
+## Verification, misconceptions, and limits
+
+Start with one worker to check native behavior, then exercise splits with more
+workers. Test early cutoffs, nested splits, timeout, `stop`, replacement position
+commands, thread-count changes, Hash changes, and shutdown. Required observations
+include legal output, eventual worker completion, and no stale results after a
+new request. See the [verification guide](remus8.md#verification-and-limitations).
+
+A shallow search may never meet the split-depth threshold and therefore does
+not test YBWC scheduling, even if Threads is greater than one. A successful
+compile or a starting-position move count cannot establish deadlock freedom or
+cancellation correctness. Fixed-depth parallel results can vary with scheduling
+and shared-table contents; a sequential comparison and concurrency stress checks
+answer different questions.
+
+Use elapsed time to useful depth, re-search costs, active time, result waiting,
+and cancellation waiting alongside node throughput. YBWC does not guarantee
+linear scaling or superiority on every position. The default is four search
+threads and a 512 MiB shared table; recorded Elo tests with 16 threads and 2 GiB
+must retain those conditions in any comparison. Neither concurrency design
+removes the inherited search heuristics or history-dependent cache limitations.
 
 ## Line-by-line source reference
 
