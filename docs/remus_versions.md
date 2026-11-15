@@ -44,7 +44,7 @@ explains saved GUI overrides and resource use.
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus5](../rust_engines/Remus5/remus5.md) | 2738 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
-| [Remus6](../rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,911 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus6](../rust_engines/Remus6/remus6.md) | 2824 | Super Grandmaster | Rust | 2,911 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 | [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,330 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 | [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,941 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
@@ -419,7 +419,7 @@ explains its score against those levels. The 27 games that Stockfish lost on tim
 are left out, because Stockfish ran out of time in long endgames whatever the
 position on the board.
 
-Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2591 to 2885; Remus6: 2697 to 2921; Remus7: 2815 to 3236; Remus8: 2900 to 3297.
+Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2591 to 2885; Remus6: 2721 to 2926; Remus7: 2815 to 3236; Remus8: 2900 to 3297.
 
 Remus1's 300 figure is a rough estimate, not a fitted benchmark result. Random
 move choice does not guarantee a loss in every game.
@@ -438,7 +438,7 @@ and does not establish a strength difference against human players.
 
 Remus5 and Remus6 played against limited-strength Stockfish at 15 minutes per side
 with no increment at 2500, 2650, 2800, 2950, and 3100, half with each color:
-Remus6 played 50 games, 10 at each level, and Remus5 played 29, five to seven at
+Remus6 played 60 games, 12 at each level, and Remus5 played 29, five to seven at
 each level. Each searches on one thread, so each played eight games at once, each on its own
 fast core shared with that game's Stockfish, as in the 200-game runs. A full-strength
 Stockfish judge on the slow cores ended a game when one side stayed ten pawns ahead
@@ -446,6 +446,14 @@ for three looks in a row or the score stayed level late in the game, and it scor
 the final position of any time forfeit; the limited Stockfish players used a 200 ms
 Move Overhead, and none lost on time. Remus6 pondered on Stockfish's time and used
 its default root tablebase lookups; Remus5 offers neither.
+
+Remus6 played 50 of its 60 games before
+[speed techniques T8 to T10](#rust-speed-techniques-t1-to-t10) joined its source and
+10 games with them. T8 to T10 change no move, score, or node count at a fixed depth
+and speed the search by about 9%, so one rating fits all 60 games. The 10 later games
+alone score 6 of 10, a rating of 2895 with a 95% interval of 2641 to 3149; the 50
+earlier games alone give 2809 with an interval of 2697 to 2921. Ten games cannot
+separate the two builds.
 
 Remus7 and Remus8 each played 20 games under the same time control, with pondering
 and tablebase lookups. They used a 2048 MiB table and 16
@@ -532,8 +540,8 @@ search reaches: fixed-depth searches find nearly the same node counts with 512 M
 GiB, and 2 GiB tables. The evaluation sets the ceiling, because a deeper search finds
 the best move according to the engine's evaluation. The positional terms of Remus6 to
 Remus8 are modest. Remus6 shows how small these steps are: it adds pondering, tablebase
-lookups, the positional terms, and the speed techniques to a single thread, and its 2809
-sits about 70 points above Remus5's 2738, inside the 95% intervals of both engines.
+lookups, the positional terms, and the speed techniques to a single thread, and its 2824
+sits about 85 points above Remus5's 2738, inside the 95% intervals of both engines.
 
 Measurement uncertainty also matters. Stockfish's UCI_Elo setting stops at 3190, and
 Remus8 scores 6 of 11 points at 2990 and above, so the ladder has little room above it.
