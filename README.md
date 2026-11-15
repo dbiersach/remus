@@ -55,7 +55,7 @@ The supplied data files do not have to be typed and don't represent code.
 | [Remus3](Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | Remember positions, order moves, and use an opening book |
 | [Remus4](Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | Refine search, recognize draws, and improve endgame play |
 | [Remus5](rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | Run Remus4's core algorithms as compiled code with a larger table |
-| [Remus6](rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,893 | Add positional terms, speed techniques, pondering, and tablebase advice |
+| [Remus6](rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,893 | Add positional terms, speed techniques, pondering, and tablebase advice |
 | [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,268 | Use Lazy SMP (symmetric multiprocessing): search threads share a table |
 | [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,877 | Use Young Brothers Wait Concept (YBWC): search the first move before splitting work |
 
@@ -128,10 +128,11 @@ modules so students can type them. Do not run initial setup over existing studen
 
 3. Install Lucas Chess from its [official download page](https://lucaschess.pythonanywhere.com/downloads)
    if it is not already installed. Use its default location under
-   `%LOCALAPPDATA%\Programs\LucasChessR`. Open it once to create its configuration,
-   then close it. Keep Lucas Chess closed while setup registers the engines.
+   `%LOCALAPPDATA%\Programs\LucasChessR`. Open it, complete any first-run prompts,
+   and wait for its main window so it creates its configuration files. Then close
+   it. Keep Lucas Chess closed while setup registers the engines.
 
-4. Prepare the student workspace:
+4. From the cloned Remus folder in PowerShell, prepare the student workspace:
 
    ```powershell
    .\utils\setup_student.ps1 -StudentCopy
@@ -140,8 +141,8 @@ modules so students can type them. Do not run initial setup over existing studen
    The script installs the VS Code extensions and runs `uv sync` to prepare Python
    3.14 and dependencies in `.venv`. It automatically runs
    `utils/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
-   It removes development material, Git history,
-   and the temporary Python engine modules. It keeps each engine guide, verifier,
+   It removes development material, Git history, and the temporary Python engine
+   modules. It keeps each engine guide, verifier,
    launcher, and supplied data, and keeps the Day 5 starter programs and Rust engines.
    Expect installation messages, engine registration messages, and
    `Workshop setup complete`. If Lucas Chess is missing, uninitialized, or open,
@@ -164,7 +165,8 @@ modules so students can type them. Do not run initial setup over existing studen
 6. Reopen Lucas Chess and confirm Remus1 through Remus8 under **External engines**.
    Setup registers them automatically; no separate registration step is needed.
    Registration records launch paths; Python engines cannot play until their modules
-   have been typed and their verifier passes.
+   have been typed and their verifier passes. If an entry is missing, follow the
+   [registration repair instructions](docs/lucas_chess_guide.md#part-2-find-the-engines).
 
 After setup, use VS Code's Run Python File button, Lucas Chess, and File Explorer.
 No further Git or uv commands need to be typed during the workshop. The supplied

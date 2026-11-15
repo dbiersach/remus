@@ -2,8 +2,9 @@
 
 Remus has no board window of its own. It reads moves as text and answers with text.
 **Lucas Chess** is the chess app on every class laptop, and it gives Remus a board,
-pieces, and clocks. Lucas Chess starts Remus through the file `remusN.bat` and talks
-to Remus in UCI, the Universal Chess Interface: Lucas sends `position startpos moves
+pieces, and clocks. Lucas Chess starts Python versions through `remusN.bat` in
+their Day folders and Rust versions through `remusN.exe` under `rust_engines`.
+It talks to Remus in UCI, the Universal Chess Interface: Lucas sends `position startpos moves
 e2e4` and `go`, and Remus answers `bestmove c7c5`. [`uci.md`](uci.md) explains that
 conversation line by line.
 
@@ -36,16 +37,18 @@ The buttons along the top open menus. This guide uses **Play** and **Engines**.
 
 ## Part 2: Find the engines
 
-Every class laptop already lists the Remus engines because
-`utils/setup_student.ps1 -StudentCopy` automatically runs
-[`install_lucas_engines.py`](../utils/install_lucas_engines.py). Install Lucas Chess in its
-default location, open it once, and close it before running setup. Nobody adds an
-engine by hand or runs a separate registration step. During setup, the installer prints an entry for each engine and
+Follow the [README setup steps](../README.md#setup) in a fresh student clone.
+Install Lucas Chess in its default location, complete any first-run prompts,
+wait for its main window, and close it. From the cloned Remus folder in PowerShell,
+run `.\utils\setup_student.ps1 -StudentCopy`. This automatically runs
+[`install_lucas_engines.py`](../utils/install_lucas_engines.py), so no separate
+registration step is needed. The installer prints an entry for each engine and
 ends with `Saved ... engines in ...` or `Nothing changed: every engine is already
 registered`. A missing installation or file message means it has not completed.
 If setup reports that Lucas Chess is missing, uninitialized, or open, follow the
 message and rerun setup. Registration saves paths and settings; it does not launch
-or test the engines.
+or test the engines. After `Workshop setup complete`, setup deletes itself.
+Open `Remus.code-workspace`, then reopen Lucas Chess to check the engine list.
 
 **Step 1.** Click **Engines**, then **External engines**.
 
@@ -53,7 +56,10 @@ or test the engines.
 
 **Step 2.** The window lists Remus1 through Remus8. Click
 **Close**. Seeing a name confirms a saved entry, not that its program can play.
-If a name is missing, follow the setup registration step before continuing.
+If a name is missing after setup succeeds, close Lucas Chess. In VS Code, open
+`utils/install_lucas_engines.py` and press Run Python File. Expect registration
+messages, then reopen Lucas Chess and check the list again. This repairs saved
+engine paths without deleting student work; do not repeat student cleanup.
 
 ![The Remus engines in the list](../utils/images/lucas_chess/03_external_engines.jpg)
 
