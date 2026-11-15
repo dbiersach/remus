@@ -32,7 +32,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `move_generation.py`
 
-![move_generation.py, lines 1 to 67](../images/Day1/period3_move_generation_lines_1_to_67.png)
+![move_generation.py, lines 1 to 67](../utils/images/Day1/period3_move_generation_lines_1_to_67.png)
 
 Create `move_generation.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 67 lines when it is done. Lines 1 and 2 import `PIECE_STEPS` and `is_attacked()` from `attacks.py` and the piece numbers from `board.py`.
 

@@ -30,15 +30,15 @@ the letter L. You can also double-click the Lucas Chess icon on the desktop.
 Always start Lucas Chess one of these two ways. Both start it from its own folder,
 and Lucas needs that folder to run engine-against-engine games.
 
-![The Lucas Chess main window](../images/lucas_chess/01_main_window.jpg)
+![The Lucas Chess main window](../utils/images/lucas_chess/01_main_window.jpg)
 
 The buttons along the top open menus. This guide uses **Play** and **Engines**.
 
 ## Part 2: Find the engines
 
 Every class laptop already lists the Remus engines because
-`setup_student.ps1 -StudentCopy` automatically runs
-[`install_lucas_engines.py`](install_lucas_engines.py). Install Lucas Chess in its
+`utils/setup_student.ps1 -StudentCopy` automatically runs
+[`install_lucas_engines.py`](../utils/install_lucas_engines.py). Install Lucas Chess in its
 default location, open it once, and close it before running setup. Nobody adds an
 engine by hand or runs a separate registration step. During setup, the installer prints an entry for each engine and
 ends with `Saved ... engines in ...` or `Nothing changed: every engine is already
@@ -49,13 +49,13 @@ or test the engines.
 
 **Step 1.** Click **Engines**, then **External engines**.
 
-![The Engines menu](../images/lucas_chess/02_engines_menu.jpg)
+![The Engines menu](../utils/images/lucas_chess/02_engines_menu.jpg)
 
 **Step 2.** The window lists Remus1 through Remus8. Click
 **Close**. Seeing a name confirms a saved entry, not that its program can play.
 If a name is missing, follow the setup registration step before continuing.
 
-![The Remus engines in the list](../images/lucas_chess/03_external_engines.jpg)
+![The Remus engines in the list](../utils/images/lucas_chess/03_external_engines.jpg)
 
 ## Part 3: Play against Remus as a team
 
@@ -64,20 +64,20 @@ move and agree on it before moving a piece. Choose whether to play White or Blac
 
 **Step 1.** Click **Play**, then **Play against an engine**.
 
-![The Play menu](../images/lucas_chess/04_play_menu.jpg)
+![The Play menu](../utils/images/lucas_chess/04_play_menu.jpg)
 
 **Step 2.** Under **Opponent**, click the wide button with the engine's name, then
 choose **External engines** and **Remus1**. Under **Side you play with**, pick White
 or Black for the student pair.
 
-![Choose Remus as your opponent](../images/lucas_chess/05_choose_remus.jpg)
+![Choose Remus as your opponent](../utils/images/lucas_chess/05_choose_remus.jpg)
 
 **Step 3.** Open the **Time** tab and tick **Activate the time control**. Set **Total
 minutes** to 10 and **Seconds added per move** to 0, so each side has 10 minutes for
 the whole game. This is **10+0**: 10 minutes per side, with no increment. One game
 can use up to 20 minutes on the clocks; allow additional time for setup.
 
-![Turn on the clock](../images/lucas_chess/06_time_control.jpg)
+![Turn on the clock](../utils/images/lucas_chess/06_time_control.jpg)
 
 **Step 4.** Click **Accept**, then **Continue**. If you chose White, drag a piece
 to make your first move; if you chose Black, wait for Remus to move first. Expect
@@ -85,7 +85,7 @@ Remus's move on the board and in the move list, with the clocks changing sides.
 This exercises the student pair's code through the launcher and GUI for the positions
 reached; it does not replace the verifier's reference checks.
 
-![A game against Remus1](../images/lucas_chess/07_playing_remus.jpg)
+![A game against Remus1](../utils/images/lucas_chess/07_playing_remus.jpg)
 
 The screenshot shows White playing e4, Nc3, and Nf3, with Remus1 answering Nf6, g6,
 and c5. These are examples, not expected test moves: Remus1 chooses randomly and
@@ -123,7 +123,7 @@ and the same steps apply to the other two.
 the menu in the picture from Part 2). Click **New**, type the name `Remus2 vs Remus1`,
 and click **Accept**.
 
-![Name the new tournament](../images/lucas_chess/08_new_tournament.jpg)
+![Name the new tournament](../utils/images/lucas_chess/08_new_tournament.jpg)
 
 **Step 2.** The **Configuration** tab opens. Lucas can stop a game early and give the
 win to whichever side is far ahead. To watch every game to the end, set **Minimum
@@ -131,37 +131,37 @@ centipawns to assign winner** to `0` and **Minimum movements to assign draw** to
 A centipawn is one hundredth of a pawn, so 350 centipawns means "ahead by three and a
 half pawns".
 
-![Set both adjudication boxes to 0](../images/lucas_chess/09_play_to_the_end.jpg)
+![Set both adjudication boxes to 0](../utils/images/lucas_chess/09_play_to_the_end.jpg)
 
 **Step 3.** Open the **Engines** tab and click **Import**. Choose **External
 engines**, then **Remus2**. Click **Import** again, and choose **External engines**,
 then **Remus1**.
 
-![Import the engines](../images/lucas_chess/10_import_remus.jpg)
+![Import the engines](../utils/images/lucas_chess/10_import_remus.jpg)
 
 **Step 4.** The tab shows two engines. Click a name to see its settings on the right.
 For each Remus entry, use **Modify** and set **Opening book** to **`<None>`**,
 not **`<By default>`**, so Lucas does not choose its moves from a GUI book. Saved
 settings confirm configuration only; the engine is exercised when a game runs.
 
-![Both engines in the tournament](../images/lucas_chess/11_two_engines.jpg)
+![Both engines in the tournament](../utils/images/lucas_chess/11_two_engines.jpg)
 
 **Step 5.** Open the **Games queued** tab and click **New**. Set **Rounds** to 1,
 **Total minutes** to 10, and **Seconds added per move** to 0, and click **Accept**. Each
 engine gets 10 minutes on its clock for the whole game.
 
-![Choose the rounds and the clock](../images/lucas_chess/12_new_games.jpg)
+![Choose the rounds and the clock](../utils/images/lucas_chess/12_new_games.jpg)
 
 **Step 6.** One round makes two games, so each engine plays once with White and once
 with Black. The **Time** column shows 600 seconds.
 
-![Two games wait to be played](../images/lucas_chess/13_games_queued.jpg)
+![Two games wait to be played](../utils/images/lucas_chess/13_games_queued.jpg)
 
 **Step 7.** Click **Launch workers** at the top of the window and choose **2**. A
 worker is another Lucas window that plays one game at a time, so two workers play both
 games of the round at once.
 
-![Remus2 plays Remus1](../images/lucas_chess/14_game_running.jpg)
+![Remus2 plays Remus1](../utils/images/lucas_chess/14_game_running.jpg)
 
 Expect each worker window to show a board, clocks, and a growing move list. The
 number after a move is the engine's estimate in pawns; +1.80 estimates an advantage
@@ -180,9 +180,9 @@ opening books when a legal continuation is available. The box at the bottom righ
 can show the engine's predicted line; it is neither a guaranteed continuation nor
 proof that a particular move came from the book.
 
-![Remus3 plays Remus2](../images/lucas_chess/15_remus3_vs_remus2.jpg)
+![Remus3 plays Remus2](../utils/images/lucas_chess/15_remus3_vs_remus2.jpg)
 
-![Remus4 plays Remus3](../images/lucas_chess/16_remus4_vs_remus3.jpg)
+![Remus4 plays Remus3](../utils/images/lucas_chess/16_remus4_vs_remus3.jpg)
 
 The list of tournaments keeps each one, so you can open it later to read its results.
 Compare recorded wins, draws, and losses, keeping unfinished games separate. One
@@ -190,7 +190,7 @@ round illustrates play; it does not establish an Elo rating, prove one version i
 stronger, or isolate an enhancement's effect. Reported depths in different game
 positions are not a controlled speed comparison.
 
-![The three tournaments in the list](../images/lucas_chess/17_three_tournaments.jpg)
+![The three tournaments in the list](../utils/images/lucas_chess/17_three_tournaments.jpg)
 
 ### A tournament against Stockfish 1500
 
@@ -220,7 +220,7 @@ engines**, **Remus5**, **Modify**. Its file should end in
 The ELO box is saved GUI metadata; zero here does not mean the engine has zero
 playing strength.
 
-![Remus5 points to the supplied Rust executable](../images/lucas_chess/18_remus5_path.jpg)
+![Remus5 points to the supplied Rust executable](../utils/images/lucas_chess/18_remus5_path.jpg)
 
 ## Lucas Chess at home
 

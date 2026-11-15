@@ -35,19 +35,19 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `evaluation.py`
 
-![evaluation.py, lines 4 to 6](../images/Day4/period3_evaluation_lines_4_to_6.png)
+![evaluation.py, lines 4 to 6](../utils/images/Day4/period3_evaluation_lines_4_to_6.png)
 
-![evaluation.py, lines 14 to 16](../images/Day4/period3_evaluation_lines_14_to_16.png)
+![evaluation.py, lines 14 to 16](../utils/images/Day4/period3_evaluation_lines_14_to_16.png)
 
-![evaluation.py, lines 24 to 30](../images/Day4/period3_evaluation_lines_24_to_30.png)
+![evaluation.py, lines 24 to 30](../utils/images/Day4/period3_evaluation_lines_24_to_30.png)
 
-![evaluation.py, lines 62 to 71](../images/Day4/period3_evaluation_lines_62_to_71.png)
+![evaluation.py, lines 62 to 71](../utils/images/Day4/period3_evaluation_lines_62_to_71.png)
 
-![evaluation.py, lines 77 to 79](../images/Day4/period3_evaluation_lines_77_to_79.png)
+![evaluation.py, lines 77 to 79](../utils/images/Day4/period3_evaluation_lines_77_to_79.png)
 
-![evaluation.py, lines 86 to 109](../images/Day4/period3_evaluation_lines_86_to_109.png)
+![evaluation.py, lines 86 to 109](../utils/images/Day4/period3_evaluation_lines_86_to_109.png)
 
-![evaluation.py, lines 114 to 115](../images/Day4/period3_evaluation_lines_114_to_115.png)
+![evaluation.py, lines 114 to 115](../utils/images/Day4/period3_evaluation_lines_114_to_115.png)
 
 `evaluation.py` grows from 79 lines to 116. Keep `piece_square_tables.json` beside the module; it already contains both king tables. The edits, from the top down:
 

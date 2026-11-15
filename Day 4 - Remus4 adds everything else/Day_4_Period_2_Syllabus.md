@@ -34,7 +34,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `exchange.py`
 
-![exchange.py, lines 1 to 41](../images/Day4/period2_exchange_lines_1_to_41.png)
+![exchange.py, lines 1 to 41](../utils/images/Day4/period2_exchange_lines_1_to_41.png)
 
 Create `exchange.py` in `Day 4 - Remus4 adds everything else/Remus4`. It has 41 lines when it is done.
 
@@ -46,13 +46,13 @@ Create `exchange.py` in `Day 4 - Remus4 adds everything else/Remus4`. It has 41 
 
 ### `search.py`
 
-![search.py, line 17](../images/Day4/period2_search_line_17.png)
+![search.py, line 17](../utils/images/Day4/period2_search_line_17.png)
 
-![search.py, line 22](../images/Day4/period2_search_line_22.png)
+![search.py, line 22](../utils/images/Day4/period2_search_line_22.png)
 
-![search.py, line 70](../images/Day4/period2_search_line_70.png)
+![search.py, line 70](../utils/images/Day4/period2_search_line_70.png)
 
-![search.py, lines 78 to 85](../images/Day4/period2_search_lines_78_to_85.png)
+![search.py, lines 78 to 85](../utils/images/Day4/period2_search_lines_78_to_85.png)
 
 `search.py` grows from 224 lines to 233, all of it at the top of the file and in `quiescence()`.
 

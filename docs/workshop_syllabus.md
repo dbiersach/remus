@@ -54,8 +54,8 @@ The games use the student pair's completed engines. Run the corresponding verifi
 
 | Time | Activity |
 | --- | --- |
-| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools and Lucas Chess, clone the repository, open Lucas Chess once to initialize it, then close it. Run `setup_student.ps1 -StudentCopy`, which automatically registers Remus1 through Remus8, and open `Remus.code-workspace`. Expect registration messages and Remus1 through Remus8 in External engines. This records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
-| 9:15 to 9:30 | On the teacher's laptop, the teacher demonstrates a completed Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](docs/lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
+| 8:30 to 9:15 | Follow the setup steps in the top `README.md`: install the tools and Lucas Chess, clone the repository, open Lucas Chess once to initialize it, then close it. Run `utils/setup_student.ps1 -StudentCopy`, which automatically registers Remus1 through Remus8, and open `Remus.code-workspace`. Expect registration messages and Remus1 through Remus8 in External engines. This records paths; it does not test play. Python engines become playable after their modules are typed and verified. |
+| 9:15 to 9:30 | On the teacher's laptop, the teacher demonstrates a completed Remus2 against Stockfish 1500 in Lucas Chess (Part 4 of the [Lucas Chess guide](lucas_chess_guide.md)), so the class sees the engine it will build by tomorrow afternoon. |
 | 9:30 to 9:40 | Each student pair opens its `Day 1 - Remus1 plays legal chess/Remus1` folder in VS Code. The folder holds `remusN.bat`, the one line that starts the engine, and `verify_remusN.py` (with your version number in place of N), which tests the finished engine; the student pair types the engine modules from the screenshots. |
 | 9:40 to 10:00 | Type `board.py` (15 code lines): the piece numbers, the starting position, and square names. The reminder before typing: row 0 is rank 8, column 0 is file a, so a8 is square 0 and h1 is square 63. |
 
@@ -79,7 +79,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
 
 | Time | Activity |
 | --- | --- |
-| 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](docs/uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
+| 3:00 to 3:10 | How Lucas Chess and Remus talk: read [`uci.md`](uci.md) together. A move is legal only if the mover's own king is not attacked after it. |
 | 3:10 to 3:50 | Type `search.py` of `Day 1 - Remus1 plays legal chess/Remus1` (12 code lines), whose `think()` plays a random legal move, then `uci.py` (44 code lines). |
 | 3:50 to 4:05 | Press Run Python File in `Day 1 - Remus1 plays legal chess/Remus1/verify_remus1.py` and fix any file it names until the terminal prints `Remus1 passes every test`. |
 | 4:05 to 4:30 | The student pair plays together as a team in one 10+0 game against its Remus1: 10 minutes per side, with no increment. The student pair chooses White or Black and agrees on each move (Part 3 of the guide). Its moves are legal but chosen at random; watch how it misses threats. |

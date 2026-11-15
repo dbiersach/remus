@@ -173,7 +173,7 @@ of `uci.py`, and both search modules use orange. Conceptual nodes use the color 
 the module they represent; external files and programs use gray. Labels identify
 the module even when colors are difficult to distinguish.
 
-![Remus8 module references](../../mermaid/Remus8/modules.svg)
+![Remus8 module references](../../utils/mermaid/Remus8/modules.svg)
 
 ### Search and control views
 
@@ -182,17 +182,17 @@ arrows can collapse intermediate helpers; they are conceptual flow, not executio
 frequency or a complete compiler-derived call graph. Named functions are checked
 against source definitions. The manifest records source hashes to detect drift.
 
-![Remus8 search structure](../../mermaid/Remus8/search.svg)
+![Remus8 search structure](../../utils/mermaid/Remus8/search.svg)
 
-![Remus8 ponder control flow](../../mermaid/Remus8/ponder.svg)
+![Remus8 ponder control flow](../../utils/mermaid/Remus8/ponder.svg)
 
 The ponder view shows both UCI hit forms and book waiting. Exact reserve percentages and caps are defined in [Time management and pondering](#time-management-and-pondering).
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Modules](../../mermaid/Remus8/modules.svg) | 15 | 37 | [Mermaid](../../mermaid/Remus8/modules.mmd) |
-| [Search](../../mermaid/Remus8/search.svg) | 28 | 37 | [Mermaid](../../mermaid/Remus8/search.mmd) |
-| [Ponder](../../mermaid/Remus8/ponder.svg) | 15 | 18 | [Mermaid](../../mermaid/Remus8/ponder.mmd) |
+| [Modules](../../utils/mermaid/Remus8/modules.svg) | 15 | 37 | [Mermaid](../../utils/mermaid/Remus8/modules.mmd) |
+| [Search](../../utils/mermaid/Remus8/search.svg) | 28 | 37 | [Mermaid](../../utils/mermaid/Remus8/search.mmd) |
+| [Ponder](../../utils/mermaid/Remus8/ponder.svg) | 15 | 18 | [Mermaid](../../utils/mermaid/Remus8/ponder.mmd) |
 
 Open SVGs in a browser to zoom without losing text clarity. Matching `.mmd` files are editable Mermaid sources; render with Mermaid CLI 12.2.0 and the supplied ELK layout settings.
 

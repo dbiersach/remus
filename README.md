@@ -11,10 +11,10 @@ at a time in plain Python. The supplied Rust versions extend the same ideas.
 <table>
   <tr>
     <td width="39%" valign="top">
-      <a href="docs/lucas_chess_guide.md"><img src="images/lucas_chess/14_game_running.jpg" alt="Remus2 plays Remus1 in Lucas Chess, with the board, both clocks, and the score of each move" width="100%"></a>
+      <a href="docs/lucas_chess_guide.md"><img src="utils/images/lucas_chess/14_game_running.jpg" alt="Remus2 plays Remus1 in Lucas Chess, with the board, both clocks, and the score of each move" width="100%"></a>
     </td>
     <td width="61%" valign="top">
-      <a href="mermaid/Remus2/modules.svg"><img src="mermaid/Remus2/modules.svg" alt="The module call diagram of Remus2" width="100%"></a>
+      <a href="utils/mermaid/Remus2/modules.svg"><img src="utils/mermaid/Remus2/modules.svg" alt="The module call diagram of Remus2" width="100%"></a>
     </td>
   </tr>
   <tr>
@@ -89,11 +89,12 @@ On Day 5 they apply the same search ideas to science problems.
 | Each `Day N - .../RemusN` | `RemusN.md`, `remusN.bat`, `verify_remusN.py`, supplied data, and the engine modules the student pair types |
 | `Day 5 - Solve a science problem with chess AI` | Day and period syllabuses and the two science starter programs |
 | `rust_engines/Remus5` through `Remus8` | Supplied Rust engines, executable files, source, and engine documentation; students do not type Rust |
-| `docs` | Shared guides, briefs, and the Lucas Chess engine installer |
-| `images` | Code screenshots, science figures, chess illustrations, and guide screenshots, grouped into named subfolders |
-| `mermaid` | Diagram sources, rendered SVGs, and manifests, grouped by engine or topic |
+| `docs` | Shared guides and briefs, containing only Markdown and PDF files |
+| `utils` | Student setup, VS Code extension installation, and Lucas Chess engine registration scripts |
+| `utils/images` | Code screenshots, science figures, chess illustrations, and guide screenshots, grouped into named subfolders |
+| `utils/mermaid` | Diagram sources, rendered SVGs, and manifests, grouped by engine or topic |
 
-The [workshop syllabus](workshop_syllabus.md) leads through each day.
+The [workshop syllabus](docs/workshop_syllabus.md) leads through each day.
 The [version guide](docs/remus_versions.md) explains the engine progression.
 Remus2 to Remus4 receive `piece_square_tables.json`; Remus3 and Remus4 also
 receive `opening_book.txt`. Student pairs do not type those data files.
@@ -133,12 +134,12 @@ modules so students can type them. Do not run initial setup over existing studen
 4. Prepare the student workspace:
 
    ```powershell
-   .\setup_student.ps1 -StudentCopy
+   .\utils\setup_student.ps1 -StudentCopy
    ```
 
    The script installs the VS Code extensions and runs `uv sync` to prepare Python
    3.14 and dependencies in `.venv`. It automatically runs
-   `docs/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
+   `utils/install_lucas_engines.py` to register Remus1 through Remus8 in Lucas Chess.
    It removes development material, Git history,
    and the temporary Python engine modules. It keeps each engine guide, verifier,
    launcher, and supplied data, and keeps the Day 5 starter programs and Rust engines.

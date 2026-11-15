@@ -29,19 +29,19 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 
 Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess AI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
 
-![search(), lines 214 to 225](../images/Day5/period3_phase_hunt_lines_214_to_225.png)
+![search(), lines 214 to 225](../utils/images/Day5/period3_phase_hunt_lines_214_to_225.png)
 
 ### The graphs
 
 When `phase_hunt.py` finishes, it has opened two graphs, one window at a time: the graph of powder 12 from Period 2, and this graph of the verdicts. Close each window and the program continues. The student pair types none of the graph code.
 
-![Right, can't tell, and wrong for greedy and for search](../images/Day5/period3_verdicts.png)
+![Right, can't tell, and wrong for greedy and for search](../utils/images/Day5/period3_verdicts.png)
 
 These pictures explain the search and the tie between gold and silver.
 
-![The tree of phase sets](../images/Day5/period3_search_tree.png)
+![The tree of phase sets](../utils/images/Day5/period3_search_tree.png)
 
-![Gold and silver](../images/Day5/period3_gold_and_silver.png)
+![Gold and silver](../utils/images/Day5/period3_gold_and_silver.png)
 
 ## Done when
 

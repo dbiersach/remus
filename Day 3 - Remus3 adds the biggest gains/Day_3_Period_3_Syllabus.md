@@ -43,7 +43,7 @@ In File Explorer, confirm that the supplied `opening_book.txt` is present in `Da
 
 ### `opening_book.py`
 
-![opening_book.py, lines 1 to 26](../images/Day3/period3_opening_book_lines_1_to_26.png)
+![opening_book.py, lines 1 to 26](../utils/images/Day3/period3_opening_book_lines_1_to_26.png)
 
 Create `opening_book.py` in `Day 3 - Remus3 adds the biggest gains/Remus3`. It has 26 lines when it is done.
 
@@ -53,9 +53,9 @@ Create `opening_book.py` in `Day 3 - Remus3 adds the biggest gains/Remus3`. It h
 
 ### `search.py`
 
-![search.py, line 20](../images/Day3/period3_search_line_20.png)
+![search.py, line 20](../utils/images/Day3/period3_search_line_20.png)
 
-![search.py, lines 150 to 178](../images/Day3/period3_search_lines_150_to_178.png)
+![search.py, lines 150 to 178](../utils/images/Day3/period3_search_lines_150_to_178.png)
 
 `search.py` grows from 167 lines to 180, all in `think()` except one constant.
 
@@ -72,19 +72,19 @@ In `think()`, from the top down:
 
 ### `uci.py`
 
-![uci.py, lines 3 to 7](../images/Day3/period3_uci_lines_3_to_7.png)
+![uci.py, lines 3 to 7](../utils/images/Day3/period3_uci_lines_3_to_7.png)
 
-![uci.py, lines 17 to 23](../images/Day3/period3_uci_lines_17_to_23.png)
+![uci.py, lines 17 to 23](../utils/images/Day3/period3_uci_lines_17_to_23.png)
 
-![uci.py, line 27](../images/Day3/period3_uci_line_27.png)
+![uci.py, line 27](../utils/images/Day3/period3_uci_line_27.png)
 
-![uci.py, line 29](../images/Day3/period3_uci_line_29.png)
+![uci.py, line 29](../utils/images/Day3/period3_uci_line_29.png)
 
-![uci.py, line 35](../images/Day3/period3_uci_line_35.png)
+![uci.py, line 35](../utils/images/Day3/period3_uci_line_35.png)
 
-![uci.py, lines 41 to 42](../images/Day3/period3_uci_lines_41_to_42.png)
+![uci.py, lines 41 to 42](../utils/images/Day3/period3_uci_lines_41_to_42.png)
 
-![uci.py, lines 47 to 61](../images/Day3/period3_uci_lines_47_to_61.png)
+![uci.py, lines 47 to 61](../utils/images/Day3/period3_uci_lines_47_to_61.png)
 
 `uci.py` grows from 51 lines to 68. The edits, from the top down:
 

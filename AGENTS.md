@@ -6,7 +6,7 @@ solutions live privately under `instructor/Remus1` through `Remus4`; testing cop
 live in each Day folder's `RemusN` subfolder. Remus5 through Remus8 are Rust-only
 engines under `rust_engines`, with all their engine documentation beside their source.
 [`docs/remus_versions.md`](docs/remus_versions.md) describes the versions and
-[`workshop_syllabus.md`](workshop_syllabus.md) describes the five days.
+[`workshop_syllabus.md`](docs/workshop_syllabus.md) describes the five days.
 
 This file holds every project and style rule, so that every AI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
@@ -65,8 +65,8 @@ ideas for the first time.
   Teacher demonstrations can use private completed copies on the teacher's laptop.
 - Students create no online accounts. Initial setup clones the public repository,
   installs and initializes Lucas Chess, then closes it before running
-  setup_student.ps1 -StudentCopy. Setup installs extensions, runs uv sync, and
-  automatically registers Remus1 through Remus8 with docs/install_lucas_engines.py.
+  utils/setup_student.ps1 -StudentCopy. Setup installs extensions, runs uv sync, and
+  automatically registers Remus1 through Remus8 with utils/install_lucas_engines.py.
   It removes Git metadata, private solutions, designer tools, and temporary runtime
   Python files while keeping each verify_remusN.py. It deletes itself only on success.
   Never run cleanup on the author checkout or over completed student work.
@@ -236,8 +236,7 @@ also play without internet access or a successful tablebase response.
   ahead wins, anything closer draws) instead of discarding the game. The limited
   Stockfish players use a 200 ms Move Overhead. `admin/rate_experimental.py`
   implements these rules.
-- Preserve existing logs and completed match evidence. **Matches are paused at
-  David's request. Do not start or resume games without fresh approval.**
+- Preserve existing logs and completed match evidence. **Do not start engine games without fresh approval.**
 - After source/diagram changes run `admin/verify_engine_docs.py`. After screenshot
   source or line-reference changes run `admin/make_code_images.py --check`, then
   capture changed screenshots. Check actual PNG/JPEG signatures and extensions.
@@ -264,12 +263,14 @@ also play without internet access or a successful tablebase response.
   embedded books, remusN.exe, remusN.md, and RemusN_details.md. There is no -Rust
   suffix and no active Python version above Remus4. Preserve source algorithms
   during layout and identity changes.
-- `docs` is flat: shared .md/.pdf guides and install_lucas_engines.py. The installer
+- `docs` is flat and contains only .md/.pdf guides and briefs.
+- `utils` contains setup_student.ps1, install_vscode_extensions.ps1, and
+  install_lucas_engines.py, plus the images and mermaid asset folders. The installer
   registers day-local Python launchers and rust_engines executables, with Lucas
   books disabled. Registration does not test chess behavior.
-- `images/Day1` through `Day5` hold period-prefixed code and science images;
-  images/chess_tutor, images/lucas_chess, and images/color_swatches hold guide assets.
-  `mermaid/Remus1` through `Remus8` and mermaid/chess_tutor hold diagram sources,
+- `utils/images/Day1` through `Day5` hold period-prefixed code and science images;
+  utils/images/chess_tutor, utils/images/lucas_chess, and utils/images/color_swatches hold guide assets.
+  `utils/mermaid/Remus1` through `Remus8` and utils/mermaid/chess_tutor hold diagram sources,
   rendered SVGs, and manifests. Never recreate asset folders inside Day or docs.
 - Designer scripts live under ignored `admin`, resolve the workspace from their own
   path, and are listed in admin/README.md. Use workshop_paths.py for shared paths.

@@ -42,17 +42,17 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `board.py`
 
-![board.py, line 10](../images/Day4/period1_board_line_10.png)
+![board.py, line 10](../utils/images/Day4/period1_board_line_10.png)
 
 Change the starting position to `START_POSITION = (START_BOARD, True, 15, -1, 0)` (line 10). The fifth part, 0, is the halfmove clock: no move has been played yet.
 
 ### `make_move.py`
 
-![make_move.py, line 7](../images/Day4/period1_make_move_line_7.png)
+![make_move.py, line 7](../utils/images/Day4/period1_make_move_line_7.png)
 
-![make_move.py, line 13](../images/Day4/period1_make_move_line_13.png)
+![make_move.py, line 13](../utils/images/Day4/period1_make_move_line_13.png)
 
-![make_move.py, line 27](../images/Day4/period1_make_move_line_27.png)
+![make_move.py, line 27](../utils/images/Day4/period1_make_move_line_27.png)
 
 Three lines change, and the file grows from 26 lines to 27.
 
@@ -62,25 +62,25 @@ Three lines change, and the file grows from 26 lines to 27.
 
 ### `move_generation.py`
 
-![move_generation.py, line 54](../images/Day4/period1_move_generation_line_54.png)
+![move_generation.py, line 54](../utils/images/Day4/period1_move_generation_line_54.png)
 
 Change the first line of `generate_moves()`'s body to `board, white, castling, en_passant = position[0:4]` (line 54). The position has five parts now, and Python refuses to unpack five values into four names, so `position[0:4]` takes the first four. Move generation needs no clock.
 
 ### `search.py`
 
-![search.py, line 20](../images/Day4/period1_search_line_20.png)
+![search.py, line 20](../utils/images/Day4/period1_search_line_20.png)
 
-![search.py, line 32](../images/Day4/period1_search_line_32.png)
+![search.py, line 32](../utils/images/Day4/period1_search_line_32.png)
 
-![search.py, lines 85 to 87](../images/Day4/period1_search_lines_85_to_87.png)
+![search.py, lines 85 to 87](../utils/images/Day4/period1_search_lines_85_to_87.png)
 
-![search.py, lines 102 to 104](../images/Day4/period1_search_lines_102_to_104.png)
+![search.py, lines 102 to 104](../utils/images/Day4/period1_search_lines_102_to_104.png)
 
-![search.py, lines 123 to 170](../images/Day4/period1_search_lines_123_to_170.png)
+![search.py, lines 123 to 170](../utils/images/Day4/period1_search_lines_123_to_170.png)
 
-![search.py, lines 192 to 193](../images/Day4/period1_search_lines_192_to_193.png)
+![search.py, lines 192 to 193](../utils/images/Day4/period1_search_lines_192_to_193.png)
 
-![search.py, line 206](../images/Day4/period1_search_line_206.png)
+![search.py, line 206](../utils/images/Day4/period1_search_line_206.png)
 
 `search.py` grows from 192 lines to 224. The edits, from the top down:
 
@@ -98,15 +98,15 @@ Change the first line of `generate_moves()`'s body to `board, white, castling, e
 
 ### `uci.py`
 
-![uci.py, line 4](../images/Day4/period1_uci_line_4.png)
+![uci.py, line 4](../utils/images/Day4/period1_uci_line_4.png)
 
-![uci.py, line 30](../images/Day4/period1_uci_line_30.png)
+![uci.py, line 30](../utils/images/Day4/period1_uci_line_30.png)
 
-![uci.py, line 43](../images/Day4/period1_uci_line_43.png)
+![uci.py, line 43](../utils/images/Day4/period1_uci_line_43.png)
 
-![uci.py, line 45](../images/Day4/period1_uci_line_45.png)
+![uci.py, line 45](../utils/images/Day4/period1_uci_line_45.png)
 
-![uci.py, line 61](../images/Day4/period1_uci_line_61.png)
+![uci.py, line 61](../utils/images/Day4/period1_uci_line_61.png)
 
 `uci.py` grows from 68 lines to 71.
 

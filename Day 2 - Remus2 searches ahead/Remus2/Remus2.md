@@ -86,7 +86,7 @@ Each box is a source file. An arrow means a function or initialization in the
 first module calls a function in the second. Calls within a module are omitted;
 multiple calls between the same two modules share one arrow.
 
-![Remus2 module overview](../../mermaid/Remus2/modules.svg)
+![Remus2 module overview](../../utils/mermaid/Remus2/modules.svg)
 
 ### Function views
 
@@ -98,10 +98,10 @@ than the focused views.
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Complete function graph](../../mermaid/Remus2/full_elk.svg) | 20 | 29 | [Mermaid](../../mermaid/Remus2/full_elk.mmd) |
-| [Module overview](../../mermaid/Remus2/modules.svg) | 7 | 9 | [Mermaid](../../mermaid/Remus2/modules.mmd) |
-| [UCI and move selection](../../mermaid/Remus2/uci.svg) | 7 | 6 | [Mermaid](../../mermaid/Remus2/uci.mmd) |
-| [Search](../../mermaid/Remus2/search.svg) | 9 | 14 | [Mermaid](../../mermaid/Remus2/search.mmd) |
+| [Complete function graph](../../utils/mermaid/Remus2/full_elk.svg) | 20 | 29 | [Mermaid](../../utils/mermaid/Remus2/full_elk.mmd) |
+| [Module overview](../../utils/mermaid/Remus2/modules.svg) | 7 | 9 | [Mermaid](../../utils/mermaid/Remus2/modules.mmd) |
+| [UCI and move selection](../../utils/mermaid/Remus2/uci.svg) | 7 | 6 | [Mermaid](../../utils/mermaid/Remus2/uci.mmd) |
+| [Search](../../utils/mermaid/Remus2/search.svg) | 9 | 14 | [Mermaid](../../utils/mermaid/Remus2/search.mmd) |
 
 ### Viewing and editing
 
@@ -268,7 +268,7 @@ flowchart TD
 <!-- module-color-legend -->
 Colors identify source modules consistently across Python and Rust: blue is the UCI adapter, orange is search, teal is move generation, tan is move copying, pink is attack checking, and red is evaluation. External programs and launchers use gray. Labels identify each responsibility.
 
-[Open rendered diagram](../../mermaid/Remus2/detail_flow.svg) | [Mermaid source](../../mermaid/Remus2/detail_flow.mmd)
+[Open rendered diagram](../../utils/mermaid/Remus2/detail_flow.svg) | [Mermaid source](../../utils/mermaid/Remus2/detail_flow.mmd)
 
 The diagram shows the search path. This engine has no book path.
 

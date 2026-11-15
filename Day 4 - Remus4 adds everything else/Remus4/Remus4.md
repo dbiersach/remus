@@ -89,7 +89,7 @@ Each box is a source file. An arrow means a function or initialization in the
 first module calls a function in the second. Calls within a module are omitted;
 multiple calls between the same two modules share one arrow.
 
-![Remus4 module overview](../../mermaid/Remus4/modules.svg)
+![Remus4 module overview](../../utils/mermaid/Remus4/modules.svg)
 
 ### Function views
 
@@ -101,11 +101,11 @@ than the focused views.
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Complete function graph](../../mermaid/Remus4/full_elk.svg) | 35 | 56 | [Mermaid](../../mermaid/Remus4/full_elk.mmd) |
-| [Module overview](../../mermaid/Remus4/modules.svg) | 10 | 17 | [Mermaid](../../mermaid/Remus4/modules.mmd) |
-| [UCI and move selection](../../mermaid/Remus4/uci.svg) | 13 | 14 | [Mermaid](../../mermaid/Remus4/uci.mmd) |
-| [Search](../../mermaid/Remus4/search.svg) | 17 | 26 | [Mermaid](../../mermaid/Remus4/search.mmd) |
-| [Evaluation](../../mermaid/Remus4/evaluation.svg) | 5 | 4 | [Mermaid](../../mermaid/Remus4/evaluation.mmd) |
+| [Complete function graph](../../utils/mermaid/Remus4/full_elk.svg) | 35 | 56 | [Mermaid](../../utils/mermaid/Remus4/full_elk.mmd) |
+| [Module overview](../../utils/mermaid/Remus4/modules.svg) | 10 | 17 | [Mermaid](../../utils/mermaid/Remus4/modules.mmd) |
+| [UCI and move selection](../../utils/mermaid/Remus4/uci.svg) | 13 | 14 | [Mermaid](../../utils/mermaid/Remus4/uci.mmd) |
+| [Search](../../utils/mermaid/Remus4/search.svg) | 17 | 26 | [Mermaid](../../utils/mermaid/Remus4/search.mmd) |
+| [Evaluation](../../utils/mermaid/Remus4/evaluation.svg) | 5 | 4 | [Mermaid](../../utils/mermaid/Remus4/evaluation.mmd) |
 
 ### Viewing and editing
 
@@ -309,7 +309,7 @@ flowchart TD
 <!-- module-color-legend -->
 Colors identify source modules consistently across Python and Rust: blue is the UCI adapter, orange is search, teal is move generation, tan is move copying, pink is attack checking, and red is evaluation. External programs and launchers use gray. Labels identify each responsibility.
 
-[Open rendered diagram](../../mermaid/Remus4/detail_flow.svg) | [Mermaid source](../../mermaid/Remus4/detail_flow.mmd)
+[Open rendered diagram](../../utils/mermaid/Remus4/detail_flow.svg) | [Mermaid source](../../utils/mermaid/Remus4/detail_flow.mmd)
 
 The diagram shows the search path. A legal book hit bypasses think(), while cache hits and pruning can shorten the recursive path.
 

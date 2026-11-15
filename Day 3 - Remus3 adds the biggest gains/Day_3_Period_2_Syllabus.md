@@ -37,7 +37,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `transposition_table.py`
 
-![transposition_table.py, lines 1 to 28](../images/Day3/period2_transposition_table_lines_1_to_28.png)
+![transposition_table.py, lines 1 to 28](../utils/images/Day3/period2_transposition_table_lines_1_to_28.png)
 
 Create `transposition_table.py` in `Day 3 - Remus3 adds the biggest gains/Remus3`. It has 28 lines when it is done.
 
@@ -47,17 +47,17 @@ Create `transposition_table.py` in `Day 3 - Remus3 adds the biggest gains/Remus3
 
 ### `search.py`
 
-![search.py, line 3](../images/Day3/period2_search_line_3.png)
+![search.py, line 3](../utils/images/Day3/period2_search_line_3.png)
 
-![search.py, line 20](../images/Day3/period2_search_line_20.png)
+![search.py, line 20](../utils/images/Day3/period2_search_line_20.png)
 
-![search.py, lines 30 to 32](../images/Day3/period2_search_lines_30_to_32.png)
+![search.py, lines 30 to 32](../utils/images/Day3/period2_search_lines_30_to_32.png)
 
-![search.py, lines 35 to 50](../images/Day3/period2_search_lines_35_to_50.png)
+![search.py, lines 35 to 50](../utils/images/Day3/period2_search_lines_35_to_50.png)
 
-![search.py, lines 69 to 70](../images/Day3/period2_search_lines_69_to_70.png)
+![search.py, lines 69 to 70](../utils/images/Day3/period2_search_lines_69_to_70.png)
 
-![search.py, lines 82 to 146](../images/Day3/period2_search_lines_82_to_146.png)
+![search.py, lines 82 to 146](../utils/images/Day3/period2_search_lines_82_to_146.png)
 
 `search.py` grows from 118 lines to 167. The edits, from the top down:
 

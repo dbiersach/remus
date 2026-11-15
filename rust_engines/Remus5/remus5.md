@@ -135,7 +135,7 @@ of `uci.py`, and both search modules use orange. Conceptual nodes use the color 
 the module they represent; external files and programs use gray. Labels identify
 the module even when colors are difficult to distinguish.
 
-![Remus5 module references](../../mermaid/Remus5/modules.svg)
+![Remus5 module references](../../utils/mermaid/Remus5/modules.svg)
 
 ### Search and control views
 
@@ -144,12 +144,12 @@ arrows can collapse intermediate helpers; they are conceptual flow, not executio
 frequency or a complete compiler-derived call graph. Named functions are checked
 against source definitions. The manifest records source hashes to detect drift.
 
-![Remus5 search structure](../../mermaid/Remus5/search.svg)
+![Remus5 search structure](../../utils/mermaid/Remus5/search.svg)
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Modules](../../mermaid/Remus5/modules.svg) | 12 | 27 | [Mermaid](../../mermaid/Remus5/modules.mmd) |
-| [Search](../../mermaid/Remus5/search.svg) | 10 | 11 | [Mermaid](../../mermaid/Remus5/search.mmd) |
+| [Modules](../../utils/mermaid/Remus5/modules.svg) | 12 | 27 | [Mermaid](../../utils/mermaid/Remus5/modules.mmd) |
+| [Search](../../utils/mermaid/Remus5/search.svg) | 10 | 11 | [Mermaid](../../utils/mermaid/Remus5/search.mmd) |
 
 Open SVGs in a browser to zoom without losing text clarity. Matching `.mmd` files are editable Mermaid sources; render with Mermaid CLI 12.2.0 and the supplied ELK layout settings.
 

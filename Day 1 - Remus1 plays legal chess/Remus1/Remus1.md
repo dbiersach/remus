@@ -81,7 +81,7 @@ Each box is a source file. An arrow means a function or initialization in the
 first module calls a function in the second. Calls within a module are omitted;
 multiple calls between the same two modules share one arrow.
 
-![Remus1 module overview](../../mermaid/Remus1/modules.svg)
+![Remus1 module overview](../../utils/mermaid/Remus1/modules.svg)
 
 ### Function views
 
@@ -93,10 +93,10 @@ than the focused views.
 
 | View | Boxes | Arrows | Editable source |
 | --- | ---: | ---: | --- |
-| [Complete function graph](../../mermaid/Remus1/full_elk.svg) | 15 | 18 | [Mermaid](../../mermaid/Remus1/full_elk.mmd) |
-| [Module overview](../../mermaid/Remus1/modules.svg) | 6 | 8 | [Mermaid](../../mermaid/Remus1/modules.mmd) |
-| [UCI and move selection](../../mermaid/Remus1/uci.svg) | 7 | 6 | [Mermaid](../../mermaid/Remus1/uci.mmd) |
-| [Search](../../mermaid/Remus1/search.svg) | 4 | 3 | [Mermaid](../../mermaid/Remus1/search.mmd) |
+| [Complete function graph](../../utils/mermaid/Remus1/full_elk.svg) | 15 | 18 | [Mermaid](../../utils/mermaid/Remus1/full_elk.mmd) |
+| [Module overview](../../utils/mermaid/Remus1/modules.svg) | 6 | 8 | [Mermaid](../../utils/mermaid/Remus1/modules.mmd) |
+| [UCI and move selection](../../utils/mermaid/Remus1/uci.svg) | 7 | 6 | [Mermaid](../../utils/mermaid/Remus1/uci.mmd) |
+| [Search](../../utils/mermaid/Remus1/search.svg) | 4 | 3 | [Mermaid](../../utils/mermaid/Remus1/search.mmd) |
 
 ### Viewing and editing
 
@@ -227,7 +227,7 @@ flowchart TD
 <!-- module-color-legend -->
 Colors identify source modules consistently across Python and Rust: blue is the UCI adapter, orange is search, teal is move generation, tan is move copying, pink is attack checking, and red is evaluation. External programs and launchers use gray. Labels identify each responsibility.
 
-[Open rendered diagram](../../mermaid/Remus1/detail_flow.svg) | [Mermaid source](../../mermaid/Remus1/detail_flow.mmd)
+[Open rendered diagram](../../utils/mermaid/Remus1/detail_flow.svg) | [Mermaid source](../../utils/mermaid/Remus1/detail_flow.mmd)
 
 The verifier is a separate entry point. It imports the same runtime modules, counts
 legal move sequences, and starts an independent uci.py subprocess for a short

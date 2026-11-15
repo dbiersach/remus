@@ -35,7 +35,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `make_move.py`
 
-![make_move.py, lines 1 to 26](../images/Day1/period2_make_move_lines_1_to_26.png)
+![make_move.py, lines 1 to 26](../utils/images/Day1/period2_make_move_lines_1_to_26.png)
 
 Create `make_move.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 26 lines when it is done.
 
@@ -45,7 +45,7 @@ Create `make_move.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 26 li
 
 ### `attacks.py`
 
-![attacks.py, lines 1 to 45](../images/Day1/period2_attacks_lines_1_to_45.png)
+![attacks.py, lines 1 to 45](../utils/images/Day1/period2_attacks_lines_1_to_45.png)
 
 Create `attacks.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 45 lines when it is done.
 

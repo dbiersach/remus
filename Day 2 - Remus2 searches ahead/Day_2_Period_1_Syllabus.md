@@ -37,7 +37,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `evaluation.py`
 
-![evaluation.py, lines 1 to 38](../images/Day2/period1_evaluation_lines_1_to_38.png)
+![evaluation.py, lines 1 to 38](../utils/images/Day2/period1_evaluation_lines_1_to_38.png)
 
 Create `evaluation.py` in `Day 2 - Remus2 searches ahead/Remus2`. It has 38 lines when it is done. The supplied `piece_square_tables.json` is already in this folder. Leave it there; student pairs do not type its numeric values. The same data file contains the tables used on Days 2, 3, and 4.
 

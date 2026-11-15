@@ -35,7 +35,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `search.py`
 
-![search.py, lines 64 to 110](../images/Day2/period3_search_lines_64_to_110.png)
+![search.py, lines 64 to 110](../utils/images/Day2/period3_search_lines_64_to_110.png)
 
 Open `search.py` in `Day 2 - Remus2 searches ahead/Remus2`. It ends at line 63, `return alpha`, the last line of `quiescence()`. Leave two blank lines and type the rest; the file has 110 lines when it is done.
 
@@ -45,7 +45,7 @@ Open `search.py` in `Day 2 - Remus2 searches ahead/Remus2`. It ends at line 63, 
 
 ### `uci.py`
 
-![uci.py, line 21](../images/Day2/period3_uci_line_21.png)
+![uci.py, line 21](../utils/images/Day2/period3_uci_line_21.png)
 
 The copied `uci.py` works for Remus2 unchanged except for one line, the name Lucas Chess shows. Change `print("id name Remus1")` to `print("id name Remus2")` (line 21).
 

@@ -39,11 +39,11 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `board.py`
 
-![board.py, line 3](../images/Day3/period1_board_line_3.png)
+![board.py, line 3](../utils/images/Day3/period1_board_line_3.png)
 
-![board.py, lines 17 to 18](../images/Day3/period1_board_lines_17_to_18.png)
+![board.py, lines 17 to 18](../utils/images/Day3/period1_board_lines_17_to_18.png)
 
-![board.py, lines 29 to 33](../images/Day3/period1_board_lines_29_to_33.png)
+![board.py, lines 29 to 33](../utils/images/Day3/period1_board_lines_29_to_33.png)
 
 `board.py` grows from 21 lines to 33. Type `MATE_SCORE = 100_000` (line 3) under `WHITE = 8`; it is the same constant `search.py` holds today.
 
@@ -53,17 +53,17 @@ At the end of the file, type `def move_text(move):` (line 29) and its four lines
 
 ### `evaluation.py`
 
-![evaluation.py, line 4](../images/Day3/period1_evaluation_line_4.png)
+![evaluation.py, line 4](../utils/images/Day3/period1_evaluation_line_4.png)
 
-![evaluation.py, line 13](../images/Day3/period1_evaluation_line_13.png)
+![evaluation.py, line 13](../utils/images/Day3/period1_evaluation_line_13.png)
 
-![evaluation.py, lines 21 to 54](../images/Day3/period1_evaluation_lines_21_to_54.png)
+![evaluation.py, lines 21 to 54](../utils/images/Day3/period1_evaluation_lines_21_to_54.png)
 
-![evaluation.py, line 60](../images/Day3/period1_evaluation_line_60.png)
+![evaluation.py, line 60](../utils/images/Day3/period1_evaluation_line_60.png)
 
-![evaluation.py, lines 66 to 67](../images/Day3/period1_evaluation_lines_66_to_67.png)
+![evaluation.py, lines 66 to 67](../utils/images/Day3/period1_evaluation_lines_66_to_67.png)
 
-![evaluation.py, lines 74 to 78](../images/Day3/period1_evaluation_lines_74_to_78.png)
+![evaluation.py, lines 74 to 78](../utils/images/Day3/period1_evaluation_lines_74_to_78.png)
 
 `evaluation.py` grows from 38 lines to 79. Keep the supplied JSON file copied with Remus2; it already contains the rook table.
 
@@ -77,7 +77,7 @@ In `evaluate()`, add `pawns = ([], [])` (line 60). Lines 66 and 67 collect pawn 
 
 ### `search.py`
 
-![search.py, lines 4 to 14](../images/Day3/period1_search_lines_4_to_14.png)
+![search.py, lines 4 to 14](../utils/images/Day3/period1_search_lines_4_to_14.png)
 
 `search.py` grows from 110 lines to 118. Replace the import `from board import EMPTY, QUEEN` with the eleven lines from `from board import (` to `)` (lines 4 to 14), one name per line. The block brings in `MATE_SCORE` today and the names that Periods 2 to 4 need: the piece kinds for `has_pieces()`, `position_key()` for the table, and `move_text()` for the line of moves.
 

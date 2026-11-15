@@ -4,11 +4,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$workshopRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+$workshopRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')).TrimEnd('\', '/')
 $readyFile = Join-Path $workshopRoot '.workshop-student.json'
 
 if (-not $StudentCopy) {
-    throw 'Run setup_student.ps1 -StudentCopy only in the cloned student workspace. Add -WhatIf to preview.'
+    throw 'Run .\utils\setup_student.ps1 -StudentCopy only in the cloned student workspace. Add -WhatIf to preview.'
 }
 if (Test-Path -LiteralPath (Join-Path $workshopRoot 'admin/workshop_paths.py')) {
     throw 'This is the protected designer workspace. Prepare a separate student clone.'
@@ -17,7 +17,7 @@ if (Test-Path -LiteralPath $readyFile) {
     Write-Host 'This student workspace is already prepared. Existing student code is preserved.'
     return
 }
-foreach ($requiredFile in @('pyproject.toml', 'uv.lock', '.python-version', 'Remus.code-workspace', 'install_vscode_extensions.ps1', 'docs/install_lucas_engines.py')) {
+foreach ($requiredFile in @('pyproject.toml', 'uv.lock', '.python-version', 'Remus.code-workspace', 'utils/install_vscode_extensions.ps1', 'utils/install_lucas_engines.py')) {
     if (-not (Test-Path -LiteralPath (Join-Path $workshopRoot $requiredFile) -PathType Leaf)) {
         throw "Not a complete workshop clone: missing $requiredFile"
     }
@@ -104,11 +104,11 @@ Get-Command code -ErrorAction Stop | Out-Null
 Push-Location -LiteralPath $workshopRoot
 try {
     if ($PSCmdlet.ShouldProcess($workshopRoot, 'Prepare this student clone, remove solutions and private material, and delete the setup script on success')) {
-        & (Join-Path $workshopRoot 'install_vscode_extensions.ps1')
+        & (Join-Path $workshopRoot 'utils/install_vscode_extensions.ps1')
         & uv sync
         if ($LASTEXITCODE -ne 0) { throw "uv sync failed with exit code $LASTEXITCODE. No student files were removed." }
         Assert-LucasClosed
-        & (Join-Path $workshopRoot '.venv\Scripts\python.exe') (Join-Path $workshopRoot 'docs\install_lucas_engines.py')
+        & (Join-Path $workshopRoot '.venv\Scripts\python.exe') (Join-Path $workshopRoot 'utils\install_lucas_engines.py')
         if ($LASTEXITCODE -ne 0) { throw "Lucas Chess engine registration failed with exit code $LASTEXITCODE. No student files were removed. Fix the reported problem and rerun setup." }
     }
     else { return }
@@ -135,4 +135,4 @@ try {
 finally { Pop-Location }
 
 # This is reached only when every setup step above succeeds.
-Remove-Item -LiteralPath (Get-WorkshopChild 'setup_student.ps1') -Force
+Remove-Item -LiteralPath (Get-WorkshopChild 'utils/setup_student.ps1') -Force

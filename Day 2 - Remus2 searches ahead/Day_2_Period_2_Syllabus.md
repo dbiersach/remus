@@ -34,7 +34,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `search.py`
 
-![search.py, lines 1 to 63](../images/Day2/period2_search_lines_1_to_63.png)
+![search.py, lines 1 to 63](../utils/images/Day2/period2_search_lines_1_to_63.png)
 
 Open `search.py` in `Day 2 - Remus2 searches ahead/Remus2`. It is Remus1's 14-line file, and it becomes 63 lines this period.
 

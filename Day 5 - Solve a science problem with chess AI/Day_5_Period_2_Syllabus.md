@@ -28,27 +28,27 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 
 Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess AI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
 
-![score(), lines 140 to 150](../images/Day5/period2_phase_hunt_lines_140_to_150.png)
+![score(), lines 140 to 150](../utils/images/Day5/period2_phase_hunt_lines_140_to_150.png)
 
-![greedy_phases(), lines 170 to 185](../images/Day5/period2_phase_hunt_lines_170_to_185.png)
+![greedy_phases(), lines 170 to 185](../utils/images/Day5/period2_phase_hunt_lines_170_to_185.png)
 
 ### The graphs
 
 When `phase_hunt.py` finishes the greedy benchmark, matplotlib opens this graph of powder 12. Close the window; `NotImplementedError: Write search()` is the expected stopping point because the student pair has not written Period 3's function. A different exception, or a stop before the greedy results and graph, needs investigation. The student pair types none of the graph code.
 
-![Powder 12 and the greedy answer](../images/Day5/period2_powder_answer.png)
+![Powder 12 and the greedy answer](../utils/images/Day5/period2_powder_answer.png)
 
 These pictures explain the experiment and the two functions of this period.
 
-![The experiment at the beamline](../images/Day5/period2_experiment.png)
+![The experiment at the beamline](../utils/images/Day5/period2_experiment.png)
 
-![The fingerprint of each phase](../images/Day5/period2_fingerprints.png)
+![The fingerprint of each phase](../utils/images/Day5/period2_fingerprints.png)
 
-![The mystery powder](../images/Day5/period2_mystery_powder.png)
+![The mystery powder](../utils/images/Day5/period2_mystery_powder.png)
 
-![Three guesses scored peak by peak](../images/Day5/period2_scoring.png)
+![Three guesses scored peak by peak](../utils/images/Day5/period2_scoring.png)
 
-![Greedy, step by step](../images/Day5/period2_greedy_steps.png)
+![Greedy, step by step](../utils/images/Day5/period2_greedy_steps.png)
 
 ## Done when
 

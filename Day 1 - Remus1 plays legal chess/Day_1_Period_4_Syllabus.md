@@ -38,7 +38,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `search.py`
 
-![search.py, lines 1 to 14](../images/Day1/period4_search_lines_1_to_14.png)
+![search.py, lines 1 to 14](../utils/images/Day1/period4_search_lines_1_to_14.png)
 
 Create `search.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 14 lines when it is done. Line 1 imports Python's `random` module, and lines 3 to 5 import `in_check()`, `make_move()`, and `generate_moves()` from the files typed earlier today.
 
@@ -46,7 +46,7 @@ Create `search.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 14 lines
 
 ### `uci.py`
 
-![uci.py, lines 1 to 51](../images/Day1/period4_uci_lines_1_to_51.png)
+![uci.py, lines 1 to 51](../utils/images/Day1/period4_uci_lines_1_to_51.png)
 
 Create `uci.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has 51 lines when it is done, and it is the file `remus1.bat` runs.
 

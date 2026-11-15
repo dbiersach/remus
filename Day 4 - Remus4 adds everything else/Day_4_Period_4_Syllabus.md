@@ -39,15 +39,15 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `evaluation.py`
 
-![evaluation.py, lines 31 to 54](../images/Day4/period4_evaluation_lines_31_to_54.png)
+![evaluation.py, lines 31 to 54](../utils/images/Day4/period4_evaluation_lines_31_to_54.png)
 
-![evaluation.py, lines 75 to 89](../images/Day4/period4_evaluation_lines_75_to_89.png)
+![evaluation.py, lines 75 to 89](../utils/images/Day4/period4_evaluation_lines_75_to_89.png)
 
-![evaluation.py, line 112](../images/Day4/period4_evaluation_line_112.png)
+![evaluation.py, line 112](../utils/images/Day4/period4_evaluation_line_112.png)
 
-![evaluation.py, lines 133 to 134](../images/Day4/period4_evaluation_lines_133_to_134.png)
+![evaluation.py, lines 133 to 134](../utils/images/Day4/period4_evaluation_lines_133_to_134.png)
 
-![evaluation.py, line 148](../images/Day4/period4_evaluation_line_148.png)
+![evaluation.py, line 148](../utils/images/Day4/period4_evaluation_line_148.png)
 
 `evaluation.py` grows from 116 lines to 150, the finished Remus4 file. The edits, from the top down:
 
@@ -62,7 +62,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `uci.py`
 
-![uci.py, line 36](../images/Day4/period4_uci_line_36.png)
+![uci.py, line 36](../utils/images/Day4/period4_uci_line_36.png)
 
 Change the name line to `print("id name Remus4")` (line 36). Remus4 is complete, and every file in `Day 4 - Remus4 adds everything else/Remus4` now contains the completed code shown in the screenshots.
 

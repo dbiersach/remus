@@ -233,17 +233,17 @@ Cream boxes contain explanatory notes, not commands or replies.
 
 | Participant or element | Color | Meaning | Fill |
 | --- | --- | --- | --- |
-| Lucas Chess | ![Gray](../images/color_swatches/external.svg) Gray | The GUI sends commands, maintains the real board and clocks, and records the game result. | `#f1f5f9` |
-| Remus | ![Blue](../images/color_swatches/uci.svg) Blue | The engine's UCI boundary receives commands and returns search information and moves. | `#dbe8fb` |
-| Opponent | ![Muted green](../images/color_swatches/opponent.svg) Muted green | The opposing player supplies actual moves; a predicted reply is hypothetical until played. | `#e0edd7` |
-| Explanatory note | ![Cream](../images/color_swatches/note.svg) Cream | Context about timing, pondering, board state, or shutdown; no message is transmitted. | `#fff6dd` |
+| Lucas Chess | ![Gray](../utils/images/color_swatches/external.svg) Gray | The GUI sends commands, maintains the real board and clocks, and records the game result. | `#f1f5f9` |
+| Remus | ![Blue](../utils/images/color_swatches/uci.svg) Blue | The engine's UCI boundary receives commands and returns search information and moves. | `#dbe8fb` |
+| Opponent | ![Muted green](../utils/images/color_swatches/opponent.svg) Muted green | The opposing player supplies actual moves; a predicted reply is hypothetical until played. | `#e0edd7` |
+| Explanatory note | ![Cream](../utils/images/color_swatches/note.svg) Cream | Context about timing, pondering, board state, or shutdown; no message is transmitted. | `#fff6dd` |
 
 ### Startup: discover, configure, and synchronize
 
-![Lucas discovers Remus options, enables pondering, and waits for readiness](../mermaid/chess_tutor/uci_startup.svg)
+![Lucas discovers Remus options, enables pondering, and waits for readiness](../utils/mermaid/chess_tutor/uci_startup.svg)
 
-[Open full-size startup diagram](../mermaid/chess_tutor/uci_startup.svg) |
-[Mermaid source](../mermaid/chess_tutor/uci_startup.mmd)
+[Open full-size startup diagram](../utils/mermaid/chess_tutor/uci_startup.svg) |
+[Mermaid source](../utils/mermaid/chess_tutor/uci_startup.mmd)
 
 ### A complete game, from the first move to shutdown
 
@@ -257,10 +257,10 @@ sequence, which produces two results for two separate searches. Only the final
 result supplies Black's actual second move. If native credit is available,
 Remus labels the restarted search `hit_kind=stop_go`; book waiting earns no credit.
 
-![Complete Fool's Mate UCI game, including Lucas pondering, checkmate, quit, and results](../mermaid/chess_tutor/uci_complete_game.svg)
+![Complete Fool's Mate UCI game, including Lucas pondering, checkmate, quit, and results](../utils/mermaid/chess_tutor/uci_complete_game.svg)
 
-[Open full-size complete-game diagram](../mermaid/chess_tutor/uci_complete_game.svg) |
-[Mermaid source](../mermaid/chess_tutor/uci_complete_game.mmd)
+[Open full-size complete-game diagram](../utils/mermaid/chess_tutor/uci_complete_game.svg) |
+[Mermaid source](../utils/mermaid/chess_tutor/uci_complete_game.mmd)
 
 Lucas applies the final move and determines that White is checkmated. Remus does
 not send `0-1` as a UCI command. No predicted reply follows `bestmove d8h4` because
@@ -279,10 +279,10 @@ These are alternatives to the stop-and-go handoff above. On a standard hit the
 existing search continues. On a miss Lucas discards the stopped result and sends
 the actual position. In the miss branch the game continues past the diagram.
 
-![Alternative UCI ponder endings: a standard hit and a changed opponent move](../mermaid/chess_tutor/uci_ponder_branches.svg)
+![Alternative UCI ponder endings: a standard hit and a changed opponent move](../utils/mermaid/chess_tutor/uci_ponder_branches.svg)
 
-[Open full-size ponder alternatives](../mermaid/chess_tutor/uci_ponder_branches.svg) |
-[Mermaid source](../mermaid/chess_tutor/uci_ponder_branches.mmd)
+[Open full-size ponder alternatives](../utils/mermaid/chess_tutor/uci_ponder_branches.svg) |
+[Mermaid source](../utils/mermaid/chess_tutor/uci_ponder_branches.mmd)
 
 ## Discovering options, defaults, and allowed values
 

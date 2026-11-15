@@ -15,7 +15,7 @@ check. You may not make a move that uncovers an enemy piece's line to your king,
 **discovered check** against yourself. Remus checks all three the same way: it makes
 the move on a copy of the board and asks whether its own king is attacked there.
 
-![A Black rook on e8 checks the White king on e1](../images/chess_tutor/pin_check.svg) ![A White knight on e2 blocks the check, so it is pinned](../images/chess_tutor/pin_knight.svg)
+![A Black rook on e8 checks the White king on e1](../utils/images/chess_tutor/pin_check.svg) ![A White knight on e2 blocks the check, so it is pinned](../utils/images/chess_tutor/pin_knight.svg)
 
 *On the left, White is in check and must deal with the rook. On the right, the knight
 on e2 blocks the check, so it is pinned: any knight move would leave the king in
@@ -37,7 +37,7 @@ if it comes back, and a rook captured on its home square loses it too. Remus kee
 the four rights as four on-off switches in one number, and turns a switch off when a
 king or rook leaves its home square or a rook is captured there.
 
-![The six home squares of the kings and rooks](../images/chess_tutor/castling_rights.svg)
+![The six home squares of the kings and rooks](../utils/images/chess_tutor/castling_rights.svg)
 
 *The marked squares are the six home squares that hold the castling rights. A move
 from one of them, or a capture on one of them, turns off a castling right.*
@@ -51,7 +51,7 @@ square beside it, not from the square the capturer moves to. The rare trap: an e
 passant capture can open a line along the rank to your own king, so Remus tests the
 king's safety after the captured pawn is gone.
 
-![White captures en passant from e5 to d6, removing the pawn on d5](../images/chess_tutor/en_passant.svg)
+![White captures en passant from e5 to d6, removing the pawn on d5](../utils/images/chess_tutor/en_passant.svg)
 
 *Black has just played d7 to d5. White's pawn on e5 captures on d6, and the pawn on d5
 leaves the board.*
@@ -64,7 +64,7 @@ rare, but sometimes it is the only move that wins: promoting a pawn to a knight 
 and attack another piece, and a new queen can give stalemate by mistake. One side may end up with
 two queens, so Remus never assumes one queen per side.
 
-![White king c6, bishop b6, and pawn b7 against the Black king on a6](../images/chess_tutor/promotion_puzzle.svg)
+![White king c6, bishop b6, and pawn b7 against the Black king on a6](../utils/images/chess_tutor/promotion_puzzle.svg)
 
 *White to move. A new queen on b8 attacks every square the Black king could go to but
 does not give check, so Black has no legal move and the game is a draw by stalemate. A

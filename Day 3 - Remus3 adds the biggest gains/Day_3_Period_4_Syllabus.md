@@ -38,9 +38,9 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `search.py`
 
-![search.py, lines 150 to 158](../images/Day3/period4_search_lines_150_to_158.png)
+![search.py, lines 150 to 158](../utils/images/Day3/period4_search_lines_150_to_158.png)
 
-![search.py, lines 186 to 187](../images/Day3/period4_search_lines_186_to_187.png)
+![search.py, lines 186 to 187](../utils/images/Day3/period4_search_lines_186_to_187.png)
 
 `search.py` grows from 180 lines to 192, the finished Remus3 file.
 
