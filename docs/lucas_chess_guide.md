@@ -271,8 +271,19 @@ Student pairs do not type these engines.
 Remus6 to Remus8 advertise `Ponder` and `LichessTablebase`. Ponder defaults to false;
 enable it in the external-engine and tournament entries when it is part of the
 experiment. Tablebase advice defaults to true and can fall back to native search.
-Remus7 and Remus8 default to four search threads and 512 MiB Hash. Saved GUI options
-can override engine defaults. See each engine's guide for supported options.
+Remus7 and Remus8 default to four search threads and 512 MiB Hash for the workshop's
+8 GB, four-core laptops. In each engine's **External engines** options, select
+**Hash = 512** and **Threads = 4**. Check the tournament's separate engine entry too:
+saved values such as 2048 and 16 override the executable defaults. The registration
+script preserves saved options, so rerunning setup does not reset those values.
+See each engine's guide for supported options.
+
+Each running engine has its own table and search threads. Two Remus7 or Remus8
+processes at these settings request 1 GiB of hash memory and eight search threads
+in total; Windows, Lucas Chess, and other engine data need additional memory.
+When searches overlap, including pondering, their threads share the four cores.
+The published Elo results used 16 threads and a 2 GiB table on the benchmark
+computer, so they do not establish playing strength on the workshop laptops.
 
 ## Remus opening books
 

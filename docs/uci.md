@@ -192,7 +192,10 @@ matching count checks only that position and depth. See
 Remus5 and Remus6 use fixed 512 MiB tables and advertise no Hash option.
 Remus7 and Remus8 expose Hash with default 512 MiB and
 1024/2048 MiB alternatives. Remus7 and Remus8 expose Threads with default
-4; all their search threads share the engine process's one table.
+4; all their search threads share the engine process's one table. These are the
+settings for the 8 GB, four-core workshop laptops. Saved Lucas Chess options can
+override them: use Hash 512 and Threads 4 in both the external-engine and tournament
+entries. Each simultaneous engine process needs its own table and search threads.
 
 ## Pondering
 

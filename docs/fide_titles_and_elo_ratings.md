@@ -65,8 +65,8 @@ the dates refer to the undisputed title. See the
 
 The rating column gives a player's highest published **FIDE classical Elo** where
 shown, rather than a live rating, rapid rating, or single-tournament performance.
-For the first five champions, it gives a **Chessmetrics historical estimate** of
-peak strength. These estimates reconstruct results from an earlier era; they are
+For the first five champions, Botvinnik, and Smyslov, it gives a **Chessmetrics
+historical estimate** of peak strength. These estimates reconstruct results from an earlier era; they are
 not official FIDE Elo ratings or predictions of what those players would score
 today. The two scales should not be treated as interchangeable. Historical values
 are documented in this
@@ -74,9 +74,9 @@ are documented in this
 recorded values can be checked in the linked player biographies and the
 [peak FIDE rating list](https://en.wikipedia.org/wiki/List_of_chess_players_by_peak_FIDE_rating).
 
-FIDE ratings only cover the later careers of some older champions. In particular,
-Botvinnik's and Smyslov's recorded peaks below do not measure their strength during
-their championship years. A peak rating can also occur after a player's reign.
+Botvinnik and Smyslov reached their prime before official FIDE rating lists began.
+Their entries therefore use historical estimates from their prime rather than
+late-career FIDE ratings. A peak rating can occur before or after a player's reign.
 The year in the rating column identifies the peak, not a title win. Current-title
 status and career peaks are checked through November 15, 2026.
 
@@ -87,8 +87,8 @@ status and career peaks are checked through November 15, 2026.
 | [José Raúl Capablanca](https://en.wikipedia.org/wiki/Jos%C3%A9_Ra%C3%BAl_Capablanca) | 1921 to 1927 | About 2,877 (Chessmetrics; 1921) | Famous for clear positional judgment and exceptional endgames. He showed how coordinated pieces and small advantages could produce wins with apparently simple moves; his instructional writing made those principles accessible. |
 | [Alexander Alekhine](https://en.wikipedia.org/wiki/Alexander_Alekhine) | 1927 to 1935; 1937 to 1946 | About 2,860 (Chessmetrics; 1931) | Combined imaginative attacks with deep calculation and positional preparation. His opening innovations, including the defense bearing his name, and annotated games influenced generations of attacking players. |
 | [Max Euwe](https://en.wikipedia.org/wiki/Max_Euwe) | 1935 to 1937 | About 2,769 (Chessmetrics; 1936) | A logical, well-prepared player who could also handle sharp tactical battles. His books organized opening, middlegame, and planning ideas into clear lessons; he later served as FIDE president. |
-| [Mikhail Botvinnik](https://en.wikipedia.org/wiki/Mikhail_Botvinnik) | 1948 to 1957; 1958 to 1960; 1961 to 1963 | 2,630 (FIDE; 1971, late career) | Made systematic opening preparation, analysis of his own games, and disciplined training central to professional chess. His strategic style and chess school shaped later champions; he also pioneered computer-chess research. |
-| [Vasily Smyslov](https://en.wikipedia.org/wiki/Vasily_Smyslov) | 1957 to 1958 | 2,620 (FIDE; 1971, late career) | Known for harmonious piece coordination, accurate calculation, and outstanding endgame technique. His games and endgame studies show how active pieces and carefully timed exchanges turn small advantages into wins. |
+| [Mikhail Botvinnik](https://en.wikipedia.org/wiki/Mikhail_Botvinnik) | 1948 to 1957; 1958 to 1960; 1961 to 1963 | About 2,885 (Chessmetrics; 1945) | Made systematic opening preparation, analysis of his own games, and disciplined training central to professional chess. His strategic style and chess school shaped later champions; he also pioneered computer-chess research. |
+| [Vasily Smyslov](https://en.wikipedia.org/wiki/Vasily_Smyslov) | 1957 to 1958 | About 2,800 (Chessmetrics; 1956) | Known for harmonious piece coordination, accurate calculation, and outstanding endgame technique. His games and endgame studies show how active pieces and carefully timed exchanges turn small advantages into wins. |
 | [Mikhail Tal](https://en.wikipedia.org/wiki/Mikhail_Tal) | 1960 to 1961 | 2,705 (FIDE; 1980) | An imaginative attacker famous for sacrifices and complicated positions. He demonstrated the practical power of initiative: forcing an opponent to solve difficult problems can matter even when a sacrifice is not objectively best. |
 | [Tigran Petrosian](https://en.wikipedia.org/wiki/Tigran_Petrosian) | 1963 to 1969 | 2,645 (FIDE; 1972) | Excelled at anticipating threats and preventing opponents' plans. His positional exchange sacrifices, giving up a rook for a bishop or knight to gain lasting control, expanded understanding of defense and piece value. |
 | [Boris Spassky](https://en.wikipedia.org/wiki/Boris_Spassky) | 1969 to 1972 | 2,690 (FIDE; 1971) | A versatile player comfortable with direct attacks, quiet maneuvering, and endgames. His flexible approach showed how to choose a plan for the position rather than force every game into one preferred style. |

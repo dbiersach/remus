@@ -39,9 +39,11 @@ Whole-engine rating methods and limitations appear in the final section.
 
 ## Engine defaults and Total Lines of Code (TLOC)
 
-The table lists engine defaults except the Remus7 and Remus8 ELO measurement
-settings: 16 search threads and a 2 GiB transposition table. Their advertised defaults
-are four threads and 512 MiB. Saved GUI settings can override engine defaults.
+The table lists engine defaults. Remus7 and Remus8 use four search threads and a
+512 MiB transposition table for the workshop laptops, which have 8 GB of RAM and
+four CPU cores (two CPUs with two cores each). Saved GUI settings can override
+these defaults. Their listed ELO estimates were measured with 16 search threads
+and a 2 GiB table; they are not measured ratings for the laptop configuration.
 Remus1 chooses a random legal move. Remus2 through Remus6 use one chess search
 thread; Remus7 and Remus8 parallelize chess search.
 
@@ -60,8 +62,8 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus5](../rust_engines/Remus5/remus5.md) | 2738 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
 | [Remus6](../rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,893 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,312 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,921 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,312 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,921 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
 FIDE ratings. See
@@ -76,7 +78,12 @@ See [search measurements](search_logging.md) for aggregation and retention.
 Remus8 additionally exposes `PonderHitMinPercent`, default 25, range 0 to 100.
 Remus6 through Remus8 expose `LichessTablebase`, default true. The
 transposition table in each parallel engine is shared by its workers, not across
-engine processes. All book-enabled Python engines read their own file at startup;
+engine processes. Two simultaneous Remus7 or Remus8 processes request 1 GiB of hash
+memory and eight search threads in total at the defaults. Stacks, other engine
+state, Windows, and Lucas Chess need additional memory. Concurrent searches share
+the laptop's four cores, including searches during the opponent's turn when pondering.
+See the [Lucas Chess guide](lucas_chess_guide.md#supplied-rust-engine-settings) for saved options.
+All book-enabled Python engines read their own file at startup;
 Rust embeds its book at build time. Disable GUI books with explicit `<None>` in tournaments.
 
 Each engine guide uses the same main headings and file-table columns. Python comparisons use
@@ -592,9 +599,9 @@ registered student engines exercise the typed code only for the positions reache
 ### Why Remus5 stays close to Remus8
 
 Remus5 is the Rust implementation of workshop Remus4: one search thread and the
-Remus4 evaluation. Remus8 adds 16 search threads, a 2048 MiB table, pondering,
-tablebase lookups, and positional evaluation, yet it measures only about 360 Elo
-higher, 3099 against 2738. Three effects keep the gap that small.
+Remus4 evaluation. In the recorded benchmark, Remus8 used 16 search threads, a
+2048 MiB table, pondering, tablebase lookups, and positional evaluation, yet it
+measured only about 360 Elo higher, 3099 against 2738. Three effects keep the gap that small.
 
 The first is the diminishing return from deeper search. Each doubling of search
 speed buys roughly 50 to 70 Elo at these depths, and less as the search gets deeper.

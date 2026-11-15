@@ -260,8 +260,11 @@ so `help_nodes` and `research_nodes` overlap and must not be added as separate c
 Use completed-depth time and node counts alongside reduced waiting to judge helping.
 
 An existing Remus7 or Remus8 Lucas Chess entry can retain an explicit Hash value such as 2048 even
-when the executable advertises 512 by default. Set Hash to 512 in both the external
-entry and the tournament entry when selecting the baseline allocation.
+when the executable advertises 512 by default. For the 8 GB, four-core workshop
+laptops, set Hash to 512 and Threads to 4 in both the external entry and the
+tournament entry. The registration script preserves saved options. These are
+per-engine settings: concurrent engines each allocate a table and compete for
+CPU time; the hash size does not include other engine or application memory.
 
 ## Ponder handoff labels
 

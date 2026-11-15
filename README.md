@@ -66,8 +66,11 @@ titles or measured results against people.
 Python makes the ideas approachable. Rust shows how much execution speed can add:
 Remus5 retains Remus4's core algorithms and reaches a much higher benchmark rating
 on one search thread. Remus7 and Remus8 explore the next step, parallel search;
-their listed ratings use 16 threads. Speed and parallelism are central to Remus's
-progression, but algorithms, evaluation, and hardware also matter. Parallelism is
+their listed ratings use 16 threads and a 2 GiB table. The workshop defaults are
+four search threads and a 512 MiB table for each engine on the 8 GB, four-core
+laptops. The listed ratings do not measure this laptop configuration.
+Speed and parallelism are central to Remus's progression, but algorithms,
+evaluation, and hardware also matter. Parallelism is
 not a prerequisite for the single-threaded Remus5 result.
 
 **[Explore the full Remus version guide](docs/remus_versions.md)** for the enhancement

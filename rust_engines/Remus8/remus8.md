@@ -248,6 +248,14 @@ shuts down helpers, releases the old table, and recreates the pool with the new
 allocation. A same-size request preserves cached results. Worker stacks, heuristic
 tables, and split metadata use additional memory.
 
+The workshop's 8 GB, four-core laptops use the defaults: Hash 512 and Threads 4.
+Check both the Lucas Chess external-engine and tournament entries for saved
+values that override these defaults; the registration script preserves saved
+options. Each simultaneous engine process has its own table and threads, so
+memory demand adds up and concurrent searches compete for the laptop's cores.
+The published Elo measurement used 16 threads and a 2 GiB table on the benchmark
+computer, not this laptop configuration.
+
 The shared table protects deeper results for the same position and equal-depth exact
 results against weaker bounds. A depth-qualified table cutoff refreshes the entry's age
 once per search generation. Plain probes and PV reconstruction do not refresh age.

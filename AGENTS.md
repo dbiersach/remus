@@ -164,6 +164,11 @@ and wait for permission before starting it.
     has a fixed 512 MiB table but retains its low-bit indexing and native allocator.
     Remus7 and Remus8 share a configurable table across workers, defaulting to
     512 MiB and four threads, with 1024/2048 MiB experimental sizes.
+    Keep 512 MiB and four threads as the defaults for the workshop's 8 GB laptops
+    with four CPU cores (two CPUs with two cores each). Saved Lucas Chess options
+    can override both settings; check external-engine and tournament entries.
+    Each process needs its own table and threads. Preserve the recorded Elo test
+    conditions of 16 threads and 2 GiB separately from the workshop defaults.
 
 11. Remus6, Remus7, and Remus8 support standard UCI pondering with a `Ponder` check
     option, default false. Return a legal predicted reply with `bestmove` when
