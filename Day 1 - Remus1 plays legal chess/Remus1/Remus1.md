@@ -4,12 +4,14 @@
 
 Remus1 is the engine the student pairs finish at the end of Day 1. It generates legal
 moves but looks no moves ahead: `think()` lists the legal moves and plays one at random.
-The first game in Lucas Chess illustrates random legal play by the engine you wrote. The student pair checks its own move generator with `verify_remus1.py`; a
-single game does not establish that all move-generation rules work. It speaks UCI to Lucas Chess through
+The first game in Lucas Chess illustrates random legal play by the engine you wrote.
+Use `verify_remus1.py` to check reference cases for move generation and UCI replies;
+a single game does not establish that every movement rule works. Remus1 uses UCI (Universal Chess Interface)
+to communicate with Lucas Chess through
 `remus1.bat` and uses only the standard library.
 
-[Remus2](../../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) holds the same `board.py` , `make_move.py` , `attacks.py`
-, and `move_generation.py` , and the same `uci.py` , except that its `id name` line says
+[Remus2](../../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) holds the same `board.py`, `make_move.py`, `attacks.py`,
+and `move_generation.py`, and the same `uci.py`, except that its `id name` line says
 Remus2. Remus2 also adds `evaluation.py` and replaces the 12 lines of this `search.py`
 with alpha-beta search.
 
@@ -56,7 +58,7 @@ This engine advertises no configurable UCI options.
 
 ### Supported commands
 
-`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+`uci`, `isready`, `position startpos moves ...`, timed `go`, and `quit` form the
 normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
 
 ## Architecture and call diagrams
@@ -68,7 +70,8 @@ not Rust call graphs or a trace of one particular search.
 The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
 share blue, and both search modules use orange. Colors identify source modules,
 not execution frequency. An arrow
-points from a caller to a callee, and a loop marks recursion. A small bridge at a
+points from the function making a call to the function being called. A loop marks
+recursion, where a function calls itself. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
 
@@ -114,8 +117,8 @@ and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering
 
 `think()` makes each move that `generate_moves()` lists, keeps it only if the mover's
 own king is not in check afterward, and returns one of the kept moves with
-`random.choice()` . With no legal move, checkmate or stalemate, it returns `None` , and
-`uci.py` sends `bestmove 0000` . The supplied verifier checks reference move-generation counts and legal UCI replies.
+`random.choice()`. With no legal move, checkmate or stalemate, it returns `None`, and
+`uci.py` sends `bestmove 0000`. The supplied verifier checks reference move-generation counts and legal UCI replies.
 
 ## Memory and transposition table
 
@@ -300,7 +303,7 @@ claiming exhaustive correctness.
 | Legal selection | think() makes and filters every candidate before random choice | Pins, discovered checks, and en passant exposure are handled on the child board |
 | Position ownership | make_move() copies its board before editing | Searching candidates preserves the parent; callers must not mutate START_BOARD directly |
 | Playing strength | No evaluation, look-ahead search, or preference for material | Every move tuple in the legal list has equal selection probability, including distinct promotion choices |
-| Input trust | position moves and timing tokens receive no comprehensive validation | Malformed or illegal GUI input can raise exceptions or construct invalid positions |
+| Input assumptions | position moves and timing tokens receive no comprehensive validation | Malformed or illegal GUI input can raise exceptions or construct invalid positions |
 | Castling state | Rights are maintained from legal move history and home-square events | The castling helper assumes the rights imply the correct king and rook are present |
 | Draw adjudication | No repetition history, halfmove clock, or insufficient-material adjudicator | Legal move generation is not a complete game-result adjudicator; the GUI handles such game results |
 | Terminal positions | No legal moves means None and bestmove 0000 | Remus1 does not distinguish checkmate from stalemate in its returned result |
@@ -310,7 +313,7 @@ claiming exhaustive correctness.
 | UCI verification | The checker requires identity, readiness, process success, and legal replies in nine reference cases | Passing does not establish correctness for every position |
 | Shared verifier | Later-version fixtures and branches coexist with Remus1 checks | Their constants are initialized, but Remus1 skips evaluation and scored-search verification |
 
-These findings describe the source's contracts and limits. A movement generator
+The following table describes the inputs the source accepts and its limitations. A movement generator
 can produce only legal moves under its valid-position assumptions while its UCI
 reference check independently tests returned-move legality in its nine supplied cases.
 

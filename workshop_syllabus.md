@@ -6,7 +6,7 @@ chess`, with a page for the day and a page for each period.
 ## The week at a glance
 
 The students already know some coding and know how to play chess, including notation,
-so every period goes to the engine. Each day has four 90-minute periods: P1 8:30 to
+so the workshop focuses on building engines and applying their ideas to science. Each day has four 90-minute periods: P1 8:30 to
 10:00, P2 10:30 to 12:00, P3 1:00 to 2:30, and P4 3:00 to 4:30.
 
 | Day | What the student pairs build | Code lines typed | Ends with |
@@ -17,7 +17,8 @@ so every period goes to the engine. Each day has four 90-minute periods: P1 8:30
 | 4 | Remus4: draw sense, pruning, exchanges, the full evaluation | 146 | Remus4 plays Remus3 and Remus5 |
 | 5 | The science project: where to measure, and which crystals | 57 | Science results and the take-home copy |
 
-Student pairs type only the code: no comments and no docstrings. The code lines
+Student pairs type the code shown in the screenshots, including any `# fmt: skip`
+formatting directives, but no explanatory comments or docstrings. The code lines
 count what they type, the same count as the engine READMEs, and no day asks for more
 than about 200. The supplied verifier is excluded from lines-of-code totals because students never type it.
 
@@ -37,8 +38,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
   Expect the version's success line and elapsed time; `PROBLEM:` or a traceback
   requires a correction. The reference checks cover specific positions and UCI
   legal replies, not all chess positions or Elo.
-- **Play your own engine.** Lucas Chess runs the student pair's day-local Python
-  engine after it passes its verifier. Games display moves and clocks and exercise
+- **Play your own engine.** Lucas Chess runs Python engine in the student pair's day folder after it passes its verifier. Games display moves and clocks and exercise
   that engine through its launcher. Short rounds illustrate behavior without
   establishing a reliable rating. Remus5 through Remus8 are supplied Rust engines.
 - **Use setup once.** Follow the root README to prepare the student clone. Setup
@@ -128,7 +128,7 @@ The games use the student pair's completed engines. Run the corresponding verifi
 ## Day 3: Remus3
 
 **Goal for the day:** the student pair turns its Remus2 into Remus3 by typing the 184
-new lines, then tests it in P4. The planned period states contain the functions they need, but successful startup does not establish that the student pair's implementation plays correctly.
+new lines, then tests it in P4. The code at each checkpoint includes the functions needed to start the engine. Successful startup alone does not test chess behavior.
 
 ### P1, 8:30 to 10:00: Pawn structure, the bishop pair, and the rook table
 
@@ -153,7 +153,7 @@ new lines, then tests it in P4. The planned period states contain the functions 
 
 | Time | Activity |
 | --- | --- |
-| 1:00 to 1:10 | An opening book is a list of good first moves in UCI text. Copy `opening_book.txt` from `Day 3 - Remus3 adds the biggest gains/Remus3` into `Day 3 - Remus3 adds the biggest gains/Remus3` in File Explorer: it is data, not code, so nobody types it. |
+| 1:00 to 1:10 | An opening book is a list of good first moves in UCI text. In File Explorer, confirm that `opening_book.txt` is already in `Day 3 - Remus3 adds the biggest gains/Remus3`. The supplied data files do not have to be typed and don't represent code. |
 | 1:10 to 1:35 | Type `opening_book.py` (21 code lines): `load_book()` and `book_moves()`. |
 | 1:35 to 2:25 | In `think()`, add the aspiration window and the time that grows when the best move changes; in `uci.py`, add `legal_book_move()`, the game's moves, and the hard time limit (about 30 code lines). |
 | 2:25 to 2:30 | Change the name line in `uci.py` to `id name Remus3`. |

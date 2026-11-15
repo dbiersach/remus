@@ -1,6 +1,8 @@
 //! Score a position in centipawns for the side to move. Every table and term matches
 //! evaluation.py in Remus5, and every division rounds down as Python's // does.
 
+use std::cell::RefCell;
+
 use crate::attacks::{KNIGHT_ATTACKS, PAWN_ATTACKS, bishop_attacks, rook_attacks};
 use crate::board::{BISHOP, KING, KNIGHT, PAWN, Position, QUEEN, ROOK};
 
@@ -172,18 +174,75 @@ fn pawn_can_challenge(pawns: u64, side: usize, square: usize) -> bool {
     pawns & adjacent & PASSED_MASKS[1 - side][square] != 0
 }
 
-/// Score backward pawns, central holes, and knight outposts from White's side.
-fn positional_terms(position: &Position, pawns: &[u64; 2], attacks: &[u64; 2]) -> i32 {
-    let mut score = 0;
-    let knights = position.by_kind[KNIGHT as usize];
+/// The part of the evaluation that depends on the pawns alone. Most moves leave the
+/// pawns where they stand, so thousands of positions in one search share an entry.
+#[derive(Clone, Copy)]
+struct PawnEntry {
+    pawns: [u64; 2],        // White's pawns, then Black's: the entry's exact identity
+    score: i32,             // Doubled, isolated, passed, and backward pawns, White's side
+    passed: [u64; 2],       // The passed pawns of each side
+    attacks: [u64; 2],      // The squares each side's pawns attack
+    counts: [[i32; 10]; 2], // Entry col + 1 counts the pawns on file col
+}
+
+const PAWN_CACHE_BITS: u32 = 13; // 8,192 entries, about 1 MiB
+// No position has a pawn on every square, so this entry never matches a real one
+const EMPTY_PAWN_ENTRY: PawnEntry = PawnEntry {
+    pawns: [u64::MAX; 2],
+    score: 0,
+    passed: [0; 2],
+    attacks: [0; 2],
+    counts: [[0; 10]; 2],
+};
+
+thread_local! {
+    // Each search thread keeps its own table, so no thread waits for another
+    static PAWN_CACHE: RefCell<Vec<PawnEntry>> =
+        RefCell::new(vec![EMPTY_PAWN_ENTRY; 1 << PAWN_CACHE_BITS]);
+}
+
+/// Score the pawn structure from White's side: doubled, isolated, passed, and
+/// backward pawns. Every term depends on the pawns alone.
+fn pawn_structure(pawns: &[u64; 2]) -> PawnEntry {
+    let attacks = pawn_attacks(pawns);
+    let mut entry = PawnEntry {
+        pawns: *pawns,
+        score: 0,
+        passed: [0; 2],
+        attacks,
+        counts: [[0; 10]; 2],
+    };
+    // Entry col + 1 counts file col, so the a and h files have an empty file on each side
+    for (side, &own) in pawns.iter().enumerate() {
+        let mut left = own;
+        while left != 0 {
+            let square = left.trailing_zeros() as usize;
+            left &= left - 1;
+            entry.counts[side][square % 8 + 1] += 1;
+        }
+    }
     for side in 0..2 {
-        let enemy = 1 - side;
         let sign = SIGNS[side];
+        let enemy = 1 - side;
         let step = if side == 0 { -8 } else { 8 };
+        for count in entry.counts[side] {
+            entry.score -= sign * DOUBLED_PAWN * (count - 1).max(0);
+        }
         let mut left = pawns[side];
         while left != 0 {
             let square = left.trailing_zeros() as usize;
             left &= left - 1;
+            let row = (square / 8) as i32;
+            let col = square % 8;
+            if entry.counts[side][col] == 0 && entry.counts[side][col + 2] == 0 {
+                entry.score -= sign * ISOLATED_PAWN;
+            }
+            if PASSED_MASKS[side][square] & pawns[enemy] == 0 {
+                entry.passed[side] |= 1_u64 << square;
+                let steps = if side == 0 { row } else { 7 - row }; // Moves to promotion
+                entry.score += sign * PASSED_BONUS[steps as usize];
+            }
+            // A backward pawn cannot advance safely and has no pawn beside or behind it
             let target = square as i32 + step;
             if !(0..64).contains(&target) || attacks[enemy] & (1_u64 << target) == 0 {
                 continue;
@@ -191,19 +250,44 @@ fn positional_terms(position: &Position, pawns: &[u64; 2], attacks: &[u64; 2]) -
             if attacks[side] & (1_u64 << square) != 0 {
                 continue;
             }
-            let col = (square % 8) as i32;
-            let adjacent = file_mask(col - 1) | file_mask(col + 1);
+            let file = col as i32;
+            let adjacent = file_mask(file - 1) | file_mask(file + 1);
             let support_rows = PASSED_MASKS[1 - side][square] | (0xff_u64 << (8 * (square / 8)));
             // Isolated pawns have their own penalty. Support can come from an
             // adjacent-file pawn on this rank or behind it.
             if pawns[side] & adjacent != 0 && pawns[side] & adjacent & support_rows == 0 {
                 let mut penalty = BACKWARD_PAWN;
-                if pawns[enemy] & file_mask(col) == 0 {
+                if pawns[enemy] & file_mask(file) == 0 {
                     penalty += BACKWARD_OPEN_FILE;
                 }
-                score -= sign * penalty;
+                entry.score -= sign * penalty;
             }
         }
+    }
+    entry
+}
+
+/// Return the pawn-structure entry for these pawns, scoring them only on a miss.
+fn probe_pawns(pawns: &[u64; 2]) -> PawnEntry {
+    let mixed =
+        pawns[0].wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ pawns[1].wrapping_mul(0xC2B2_AE3D_27D4_EB4F);
+    let index = (mixed >> (64 - PAWN_CACHE_BITS)) as usize;
+    PAWN_CACHE.with(|table| {
+        let mut table = table.borrow_mut();
+        if table[index].pawns != *pawns {
+            table[index] = pawn_structure(pawns);
+        }
+        table[index]
+    })
+}
+
+/// Score central holes and knight outposts from White's side.
+fn positional_terms(position: &Position, pawns: &[u64; 2], attacks: &[u64; 2]) -> i32 {
+    let mut score = 0;
+    let knights = position.by_kind[KNIGHT as usize];
+    for side in 0..2 {
+        let enemy = 1 - side;
+        let sign = SIGNS[side];
         if knights & position.by_side[enemy] != 0 {
             // Files c to f of this side's third and fourth ranks: rows 5 and 4 for
             // White, rows 2 and 3 for Black. One mask keeps the empty squares there
@@ -270,49 +354,31 @@ fn king_safety(own_pawns: u64, counts: &[i32; 10], king: i32, side: usize, phase
     (score * phase).div_euclid(24)
 }
 
-/// Score the pawns, the rooks that use their files, and the pawn shield of each king,
-/// from White's side.
+/// Score the pawn race, the rooks that use the pawns' files, and the pawn shield of
+/// each king, from White's side. These terms add the kings, rooks, phase, and side to
+/// move to the cached pawn structure.
 #[inline]
 fn pawn_terms(
-    pawns: &[u64; 2],
+    entry: &PawnEntry,
     rooks: &[u64; 2],
     kings: &[i32; 2],
     phase: i32,
     white: bool,
 ) -> i32 {
     let mut score = 0;
-    // Entry col + 1 counts file col, so the a and h files have an empty file on each side
-    let mut counts = [[0_i32; 10]; 2];
-    for side in 0..2 {
-        let mut left = pawns[side];
-        while left != 0 {
-            let square = left.trailing_zeros() as usize;
-            left &= left - 1;
-            counts[side][square % 8 + 1] += 1;
-        }
-    }
+    let counts = &entry.counts;
     for side in 0..2 {
         let sign = SIGNS[side];
         let enemy = 1 - side;
-        for count in counts[side] {
-            score -= sign * DOUBLED_PAWN * (count - 1).max(0);
-        }
-        let mut left = pawns[side];
+        // The pawn race: with no pieces left, a passed pawn whose promotion square the
+        // enemy king cannot reach (the rule of the square) becomes a queen
+        let mut left = if phase == 0 { entry.passed[side] } else { 0 };
         while left != 0 {
             let square = left.trailing_zeros() as usize;
             left &= left - 1;
             let row = (square / 8) as i32;
             let col = square % 8;
-            if counts[side][col] == 0 && counts[side][col + 2] == 0 {
-                score -= sign * ISOLATED_PAWN;
-            }
-            if PASSED_MASKS[side][square] & pawns[enemy] != 0 {
-                continue;
-            }
             let steps = if side == 0 { row } else { 7 - row }; // Moves to promotion
-            score += sign * PASSED_BONUS[steps as usize];
-            // The pawn race: with no pieces left, a pawn whose promotion square the enemy
-            // king cannot reach (the rule of the square) becomes a queen
             let king = kings[enemy];
             let mut king_steps = (king / 8 - 7 * side as i32)
                 .abs()
@@ -320,7 +386,7 @@ fn pawn_terms(
             if white != (side == 0) {
                 king_steps -= 1; // The enemy king moves first
             }
-            if phase == 0 && king_steps > steps.min(5) {
+            if king_steps > steps.min(5) {
                 score += sign * UNSTOPPABLE_PAWN;
             }
         }
@@ -328,9 +394,9 @@ fn pawn_terms(
         while left != 0 {
             let square = left.trailing_zeros() as usize;
             left &= left - 1;
-            let entry = square % 8 + 1;
-            if counts[side][entry] == 0 {
-                let open_file = counts[enemy][entry] == 0;
+            let entry_col = square % 8 + 1;
+            if counts[side][entry_col] == 0 {
+                let open_file = counts[enemy][entry_col] == 0;
                 score += sign
                     * if open_file {
                         ROOK_OPEN_FILE
@@ -339,7 +405,7 @@ fn pawn_terms(
                     };
             }
         }
-        score += sign * king_safety(pawns[side], &counts[side], kings[side], side, phase);
+        score += sign * king_safety(entry.pawns[side], &counts[side], kings[side], side, phase);
     }
     score
 }
@@ -375,7 +441,7 @@ pub fn evaluate(position: &Position) -> i32 {
         position.by_side[0] & kinds[PAWN as usize],
         position.by_side[1] & kinds[PAWN as usize],
     ];
-    let attacks = pawn_attacks(&pawns);
+    let entry = probe_pawns(&pawns);
     let mut rooks = [0_u64; 2];
     let mut bishop_count = [0_u32; 2];
 
@@ -454,8 +520,9 @@ pub fn evaluate(position: &Position) -> i32 {
     if bishop_count[1] >= 2 {
         score -= BISHOP_PAIR;
     }
-    score += material + pawn_terms(&pawns, &rooks, &kings, phase, position.white);
+    score += material + entry.score;
+    score += pawn_terms(&entry, &rooks, &kings, phase, position.white);
     score += mating_bonus(material, &kings, phase);
-    score += positional_terms(position, &pawns, &attacks);
+    score += positional_terms(position, &pawns, &entry.attacks);
     if position.white { score } else { -score }
 }

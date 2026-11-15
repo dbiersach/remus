@@ -48,17 +48,17 @@ excluded.
 | `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves and halfmove counter |
 | `src/attacks.rs` | 147 | 140 | +7 | Attacks and king safety |
 | `src/move_generation.rs` | 166 | 162 | +4 | Pseudo-legal moves and special moves |
-| `src/evaluation.rs` | 408 | 311 | +97 | Material, positional weaknesses, outposts, and king cover |
+| `src/evaluation.rs` | 460 | 311 | +149 | Material, positional weaknesses, outposts, and king cover, with a cache of pawn-structure scores |
 | `src/exchange.rs` | 99 | 95 | +4 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Embedded opening lines |
 | `src/transposition_table.rs` | 171 | 130 | +41 | Fixed 512 MiB search table, multiply-shift indexing, and Windows allocation |
 | `src/search.rs` | 505 | 387 | +118 | Alpha-beta search, cancellation, and ponder timing |
-| `src/search_control.rs` | 307 | 0 | +307 | Input queue, cancellation, and the ponder clock |
+| `src/search_control.rs` | 325 | 0 | +325 | Input queue, cancellation, and the ponder clock |
 | `src/table_metrics.rs` | 34 | 34 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/diagnostics.rs` | 61 | 72 | -11 | Independent persistent search and ponder log writers |
 | `src/tablebase.rs` | 253 | 0 | +253 | FEN, HTTPS, JSON validation, cache, cooldown, and bounded wait |
-| `src/main.rs` | 319 | 191 | +128 | UCI options, legal predictions, root lookup, and search control |
-| **Total** | **2,797** | **1,849** | **+948** | |
+| `src/main.rs` | 345 | 191 | +154 | UCI options, legal predictions, root lookup, pondering before the reply, and search control |
+| **Total** | **2,893** | **1,849** | **+1,044** | |
 
 ### Supporting files
 
@@ -447,9 +447,16 @@ and options.
 
 For example, after Remus6 chooses `e2e4` , it can report
 `bestmove e2e4 ponder e7e5` . The GUI sends the position including both moves, followed
-by `go ponder` . Remus6 searches its response to `e7e5` while the opponent thinks.
+by `go ponder` . Remus6 then searches the position before `e7e5` , with the opponent
+to move, so its table holds a search of every reply the opponent can choose, not only
+the predicted one. A missed prediction then starts its search from a table that
+already covers the reply actually played.
 
-A standard `ponderhit` continues that search and starts the hard move clock. Lucas Chess
+A standard `ponderhit` ends that search, starts the hard move clock, and searches the
+position after `e7e5` from the prepared table. That search first recovers one depth
+less than the ponder search completed, because the position before the reply was
+searched one ply deeper than its children, and completed ponder time counts toward
+the soft target. Lucas Chess
 R6 also uses `stop` , the actual `position` , and a fresh `go` when the prediction
 matches. Remus6 recognizes this handoff when the position command's tokens,
 including the full move history, match exactly and the new search begins within two
@@ -461,7 +468,9 @@ command tokens conservatively miss.
 
 The stop-and-go form starts a native search with retained cache and heuristic
 information. Completed ponder time counts toward the soft target once the new search
-recovers the pondered depth. The gap between commands earns no time credit. Stable hits
+recovers one depth less than the pondered depth. The gap between commands earns no
+time credit. The scores of the pondered position belong to the opponent, so the score
+and best-move signs of doubt start fresh after either hit form. Stable hits
 reserve 25% of the adjusted move plan on the engine's own clock, capped at 25% of the
 hard budget. With at least 60 seconds left on its clock, Remus6 reinvests time when
 the hit depth is below 8, the score falls by at least 35 centipawns between completed

@@ -8,7 +8,7 @@ The student pair searches every set of up to three phases and compares the print
 
 ## The big picture
 
-No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `search()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `search()` scores every set of up to three phases, the way `alpha_beta()` scores every line of moves. `phase_hunt.py` holds every other line already, so the student pair types only the bodies of these functions, from their docstrings. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
+No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `search()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `search()` scores every set of up to three phases, just as the chess search compares possible continuations. Unlike this exhaustive set search, `alpha_beta()` can skip branches that cannot change the result. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
 
 ## The period step by step
 

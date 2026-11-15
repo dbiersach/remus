@@ -4,15 +4,15 @@
 
 ## Goal
 
-Remus3 remembers positions it has searched, tries killer moves first, and prunes with the null move.
+Remus3 stores results for positions it has searched, tries killer moves first, and prunes with the null move.
 
 ## The big picture
 
 The student pair keeps working in `Day 3 - Remus3 adds the biggest gains/Remus3`, on the files copied and edited in Period 1. This period makes the search faster in three ways, adds one new file, and edits `search.py`.
 
-Alpha-beta skips the most moves when it tries the best move first, so a faster search is mostly a better guess of the best move. The transposition table, the new file `transposition_table.py`, remembers every position the search has scored: its key, the depth searched, the score, and the best move. The same position comes up again and again by different move orders, and when it does the search reads the answer instead of searching it again, or at least tries the remembered best move first. Killer moves are quiet moves, moves that capture nothing, that caused a cutoff at the same depth in another line; they often cause one again, so they go right after the captures.
+Alpha-beta skips the most moves when it tries the best move first, so a faster search is mostly a better guess of the best move. The transposition table, the new file `transposition_table.py`, stores results for searched positions: its key, the depth searched, the score, and the best move. The same position comes up again and again by different move orders, and when it does the search reads the answer instead of searching it again, or at least tries the stored best move first. Killer moves are quiet moves, moves that capture nothing, that caused a cutoff at the same depth in another line; they often cause one again, so they go right after the captures.
 
-The null move is a test. If the side to move could pass, letting the opponent move twice, and still stand above beta, a real move will do even better, so the search cuts off without trying any. The test is skipped in check, and when the side to move has only a king and pawns, where passing can be the best move and the test would be wrong.
+The null move is a test. If the side to move could pass, letting the opponent move twice, and still stand above beta, the search assumes that a real move can also reach beta and cuts off without trying those moves. This assumption can fail in zugzwang, where having to move makes the position worse. The test is skipped in check, and when the side to move has only a king and pawns, where passing can be the best move and the test would be wrong.
 
 ## The period step by step
 
@@ -43,7 +43,7 @@ Create `transposition_table.py` in `Day 3 - Remus3 adds the biggest gains/Remus3
 
 `EXACT, LOWER, UPPER = 0, 1, 2` (line 3) names the three kinds of score the table holds: an exact score, a score that is at least this much (the search cut off above beta), and a score that is at most this much (no move reached alpha). `table = {}` (line 6) is the dictionary of positions, from key to entry.
 
-`def store(key, depth, score, bound, move, ply):` (line 9) saves an entry, and clears the whole table when it holds more than `MAX_ENTRIES`, two million positions, so the table never fills the laptop's memory. `def probe(key, ply):` (line 19) reads an entry back, or returns `None` for a position never seen. Both functions adjust a mate score by `ply` (lines 10 to 13 and 24 to 27). A mate is stored as "mate so many moves from this position" rather than "from the root", so a position reached at another depth reads the right distance to mate.
+`def store(key, depth, score, bound, move, ply):` (line 9) saves an entry, and clears the whole table when it holds more than `MAX_ENTRIES`, two million positions, to limit the number of stored entries. The limit counts entries rather than bytes, so memory use also depends on Python object overhead. `def probe(key, ply):` (line 19) reads an entry back, or returns `None` for a position never seen. Both functions adjust a mate score by `ply` (lines 10 to 13 and 24 to 27). A mate is stored as "mate so many moves from this position" rather than "from the root", so a position reached at another depth reads the right distance to mate.
 
 ### `search.py`
 

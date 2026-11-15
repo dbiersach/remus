@@ -23,7 +23,7 @@
 | 8:45 to 9:55 | Type `evaluation.py` (30 code lines): load the supplied JSON tables, set the piece values, and define `evaluate()`. The supplied `piece_square_tables.json` stays beside the module; students type none of its values. Press Run Python File to check syntax, imports, and loading the data file. No output is expected; this does not test evaluation scores. |
 | 9:55 to 10:00 | Swap driver and navigator. |
 
-[`Day_2_Period_1_Syllabus.md`](Day_2_Period_1_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
+[`Day_2_Period_1_Syllabus.md`](Day_2_Period_1_Syllabus.md) gives the goal, typing instructions, file and line references, and completion checks for this period.
 
 ## Period 2, 10:30 to 12:00: Move ordering and quiescence
 
@@ -33,7 +33,7 @@
 | 10:50 to 11:55 | In `Day 2 - Remus2 searches ahead/Remus2`, keep the three import lines of Remus1's `search.py`, change `import random` to `import time`, delete Remus1's random-move `think()`, and type the rest of the top of Remus2's `search.py` (about 50 code lines): the imports and constants, `ordered_moves()`, `count_node()`, and `quiescence()`. |
 | 11:55 to 12:00 | Swap driver and navigator. |
 
-[`Day_2_Period_2_Syllabus.md`](Day_2_Period_2_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
+[`Day_2_Period_2_Syllabus.md`](Day_2_Period_2_Syllabus.md) gives the goal, typing instructions, file and line references, and completion checks for this period.
 
 ## Period 3, 1:00 to 2:30: Alpha-beta and iterative deepening
 
@@ -43,7 +43,7 @@
 | 1:10 to 2:10 | Type `alpha_beta()` and `think()` (about 43 code lines), which finish `search.py`. Change the name line in `uci.py` to `id name Remus2`. |
 | 2:10 to 2:30 | Press Run Python File in `Day 2 - Remus2 searches ahead/Remus2/verify_remus2.py` and fix any file it names until the terminal prints `Remus2 passes every test`. |
 
-[`Day_2_Period_3_Syllabus.md`](Day_2_Period_3_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
+[`Day_2_Period_3_Syllabus.md`](Day_2_Period_3_Syllabus.md) gives the goal, typing instructions, file and line references, and completion checks for this period.
 
 ## Period 4, 3:00 to 4:30: Remus2 against Remus1 and the student pair
 
@@ -53,7 +53,7 @@
 | 3:25 to 4:05 | One round of the student pair against the student pair's Remus2, two 10-minute games: each student plays one game, one with White and one with Black (Part 3 of the guide). |
 | 4:05 to 4:30, if time remains | One round of the student pair's Remus2 against Stockfish 1500, two 10-minute games played at once in two Lucas workers. |
 
-[`Day_2_Period_4_Syllabus.md`](Day_2_Period_4_Syllabus.md) has the period's goal, the big picture of what the student pair types or edits and why, every file that changes with its line numbers, and how the student pair knows it is done.
+[`Day_2_Period_4_Syllabus.md`](Day_2_Period_4_Syllabus.md) gives the goal, typing instructions, file and line references, and completion checks for this period.
 
 ## By the end of the day
 

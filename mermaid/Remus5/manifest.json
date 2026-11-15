@@ -7,7 +7,7 @@
     "exchange.rs": "0d17d128305c95edd191a4265a2d429cd76bd9477e96ec3de30a26922fa450a4",
     "main.rs": "751ae8bbbd8803007da6776e42b647c60f91894c25290a9e71b1ca16018f2ac1",
     "make_move.rs": "4f701e4f884f7b92116f8e8aa2a036f5a35717d09d730fedf3231f01d2c56524",
-    "move_generation.rs": "0672d0d647dc6c3cab6f21633d28fd13e2746de1b36c42a7f11e82a435f1cd64",
+    "move_generation.rs": "ca3fcac09183facdb48dd7048c6b69ff004aacf298eecfa8b2bea997ae3541c4",
     "opening_book.rs": "37dbe9750c830b6a4132d199555ffe06fd63d834303ceb874866dd821e69f865",
     "search.rs": "ec1bd3f10d5cbd757e74723f7dd1630867c57130a92627a247bfd28a2d53d0ac",
     "table_metrics.rs": "29bd32f01788a3e8a749a45f97f802cb02ebd81806bfca55b09870cbed2e4eb9",

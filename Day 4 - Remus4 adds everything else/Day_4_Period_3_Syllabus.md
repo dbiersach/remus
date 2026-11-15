@@ -10,7 +10,7 @@ Remus4 plays endgames: the king comes forward, and the side ahead drives the lon
 
 The student pair keeps working in `Day 4 - Remus4 adds everything else/Remus4`. This period edits only `evaluation.py`, and adds no file.
 
-In the middlegame a king hides behind its pawns, but in the endgame, with few pieces left to attack it, the king is a strong piece that belongs in the center. Remus4 keeps two king tables, the middlegame table of Remus2 and a new endgame table, and blends them by the game phase: a number from 24 with every knight, bishop, rook, and queen on the board, down to 0 with none. With half the pieces gone, the king reads each table half and half. The same pass over the board counts each piece's mobility, the squares it can move to, worth 2 centipawns each.
+In the middlegame a king hides behind its pawns, but in the endgame, with few pieces left to attack it, the king is a strong piece that belongs in the center. Remus4 keeps two king tables, the middlegame table of Remus2 and a new endgame table, and blends them by the game phase: a number from 24 with every knight, bishop, rook, and queen on the board, down to 0 with none. At phase 12, the evaluation gives the two king tables equal weight. The same pass over the board counts each piece's mobility, the squares it can move to, worth 2 centipawns each.
 
 Two endgame rules follow. A side that is ahead by 400 centipawns or more in a late endgame earns a bonus for driving the losing king toward the edge and bringing its own king close, the way every mate against a lone king is won. And a position with no pawns and at most one minor piece, such as king and bishop against king, scores 0, because neither side can mate: this is insufficient material.
 

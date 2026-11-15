@@ -8,7 +8,7 @@ The student pair's science AI chooses where to measure next and compares its mea
 
 ## The big picture
 
-No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py`, a science program that reuses the engine's ideas, not its code: the squares of the sample not yet measured are the legal moves, and the score of a square is its evaluation. `hidden_peak.py` holds every other line already, so the student pair types only the bodies of these functions, from their docstrings. The student pair edits `Day 5 - Solve a science problem with chess AI/hidden_peak.py`.
+No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py`, a science program that reuses the engine's ideas, not its code: the squares of the sample not yet measured are the legal moves, and the score of a square is its evaluation. `hidden_peak.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess AI/hidden_peak.py`.
 
 ## The period step by step
 

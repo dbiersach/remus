@@ -54,4 +54,4 @@ The terminal prints actual results beside `(expected ...)` references. A `PROBLE
 
 ## Done when
 
-The terminal reports `Remus3 passes every test` for the student pair's code. The student pair has observed the student pair's Remus3 against the student pair's Remus2 in Lucas Chess and recorded the game results. Games against the student pair and Stockfish 1500 follow if time remains.
+The terminal reports `Remus3 passes every test` for the student pair's code. The student pair has observed its Remus3 against the student pair's Remus2 in Lucas Chess and recorded the game results. Games against the student pair and Stockfish 1500 follow if time remains.

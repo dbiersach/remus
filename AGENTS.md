@@ -140,9 +140,13 @@ ideas for the first time.
 11. Remus6, Remus7, and Remus8 support standard UCI pondering with a `Ponder` check
     option, default false. Return a legal predicted reply with `bestmove` when
     enabled, but search on the opponent's time only after `go ponder`. Keep
-    reading commands during search. `ponderhit` starts the move clock without
-    restarting the search; completed ponder work counts toward the soft search
-    target. A hit reserves a quarter of the adjusted plan on the engine clock,
+    reading commands during search. In Remus7 and Remus8, `ponderhit` starts the
+    move clock without restarting the search. Remus6 ponders on the position
+    before the predicted reply, so its table covers every reply; `ponderhit` ends
+    that search, starts the move clock, and searches the reached position, which
+    must first recover one depth less than the pondered depth. Its credit after a
+    matching stop-and-go also counts one depth less and starts with no score or
+    signs of doubt. Completed ponder work counts toward the soft search target. A hit reserves a quarter of the adjusted plan on the engine clock,
     capped at a quarter of the hard budget; hard deadlines and cancellation take
     precedence. A matching explicit stop-and-go within two seconds earns credit
     after recovering the prior completed depth. Match complete position-command
@@ -223,6 +227,13 @@ also play without internet access or a successful tablebase response.
 - Tablebase, cache, cancellation, and pondering changes require the corresponding
   designer fixture checks. Live HTTPS checks are optional and must distinguish a
   native fallback from a successful tablebase result. Native search must work offline.
+- Every Elo estimate against limited-strength Stockfish uses a full-strength
+  Stockfish judge on the slow cores (David, 2026-11-14): it ends a game when one
+  side stays ten pawns ahead for three looks in a row or the score stays level late
+  in the game, and it scores the final position of a time forfeit (three pawns
+  ahead wins, anything closer draws) instead of discarding the game. The limited
+  Stockfish players use a 200 ms Move Overhead. `admin/rate_experimental.py`
+  implements these rules.
 - Preserve existing logs and completed match evidence. **Matches are paused at
   David's request. Do not start or resume games without fresh approval.**
 - After source/diagram changes run `admin/verify_engine_docs.py`. After screenshot

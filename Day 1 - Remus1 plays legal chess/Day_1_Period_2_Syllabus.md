@@ -12,7 +12,7 @@ The student pair keeps building Remus1 from nothing in `Day 1 - Remus1 plays leg
 
 `make_move.py` plays one move. It never changes the board it is given: it copies the board, moves the piece on the copy, and returns a new position. This is copy-make, and it means the engine never has to take a move back. The file also handles the three moves that change more than two squares or more than the piece: castling moves a rook too, en passant removes a pawn from a square the capturing pawn never touches, and promotion turns a pawn into another piece.
 
-`attacks.py` answers "is this square attacked?" by looking out from the square itself: if a knight's jump away stands an enemy knight, a knight attacks the square, and the same idea works for every piece. One question built on it, "is my king in check?", is what makes a move legal or not.
+`attacks.py` checks for attacks by looking outward from the target square. For example, an enemy knight on f3 attacks e1 because the squares are one knight jump apart. The function checks each kind of piece in turn. `in_check()` uses the same test on the king's square; the search rejects a move if the moving king remains attacked.
 
 ## The period step by step
 

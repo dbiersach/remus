@@ -6,7 +6,8 @@ Remus3 is [Remus2](../../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.m
 strength for the fewest lines: killer moves, pawn structure, a position key and a
 transposition table, an opening book, aspiration windows, time management, null-move
 pruning, the principal variation, the bishop pair, and the rook table. The student pairs
-type the 184 new lines into their Remus2. It speaks UCI to Lucas Chess through
+type the 184 new lines into the copy of Remus2 in the Day 3 folder. Remus3 uses UCI (Universal Chess Interface)
+to communicate with Lucas Chess through
 `remus3.bat` and uses only the standard library.
 
 [`remus_versions.md`](../../docs/remus_versions.md) explains each step and why Remus3 holds it.
@@ -21,7 +22,7 @@ pruning, a principal variation, the bishop pair, and a rook table. The net incre
 
 ## Source files and lines of code
 
-Comparison baseline: [Remus2](../../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) .
+Comparison baseline: [Remus2](../../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md).
 
 Lines of code count nonblank runtime source lines, excluding standalone comments and docstrings. `verify_remus3.py` is supplied, never typed, and excluded from these counts and tables.
 Change is the net difference, not lines edited or typed. A zero means that file is
@@ -66,7 +67,7 @@ This engine advertises no configurable UCI options.
 
 ### Supported commands
 
-`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+`uci`, `isready`, `position startpos moves ...`, timed `go`, and `quit` form the
 normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
 
 ## Architecture and call diagrams
@@ -78,7 +79,8 @@ not Rust call graphs or a trace of one particular search.
 The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
 share blue, and both search modules use orange. Colors identify source modules,
 not execution frequency. An arrow
-points from a caller to a callee, and a loop marks recursion. A small bridge at a
+points from the function making a call to the function being called. A loop marks
+recursion, where a function calls itself. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
 
@@ -131,8 +133,8 @@ and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering
   step from promotion.
 - **Position key and transposition table (N1, N2).** `position_key()` turns a
   position into one number with Python's `hash()`. Before searching a position,
-  `alpha_beta()` asks the table what an earlier search learned about it: a deep
-  enough score ends the search at once, and the stored best move goes first.
+  `alpha_beta()` reads any stored result. A result from a deep enough search can
+  supply a cutoff; otherwise the stored best move can still guide move ordering.
 - **Opening book (N3).** While the game follows a line of `opening_book.txt`,
   `uci.py` plays the book move at once, after checking it with the move generator.
 - **Aspiration windows (S8).** From depth 4 on, `think()` searches with a window 50
@@ -142,10 +144,9 @@ and [Mermaid CLI](https://github.com/mermaid-js/mermaid-cli) for local rendering
   between depths, and never more than `longest`, the hard limit `uci.py` sets from the
   clock.
 - **Null-move pruning (S2).** `alpha_beta()` lets the opponent move twice with a search
-  three plies shallower. If the side to move still stands above beta, its real moves
-  will too, and the search cuts off. The null move is the same board with the other
+  three plies shallower. If the side to move still stands above beta, the search assumes a real move can also reach beta and cuts off. The null move is the same board with the other
   side to move and no en passant square, so it needs no copy. `has_pieces()` skips
-  the null move in a king and pawn ending, where passing can be the only bad move.
+  the null move in a king and pawn ending, where passing can be better than every legal move.
 - **Principal variation (S4).** After each depth, `principal_variation()` follows the
   table's best moves from the root, and the `info` line shows that line of best play
   after `pv`.
@@ -170,7 +171,7 @@ among collision buckets.
 The supplied `opening_book.txt` contains 43 openings and 13 trap defenses in UCI move
 notation, with 17 openings restricted to White. Every selected move is checked with the
 native generator and king-safety test. Without a legal continuation, the engine uses
-native move selection. Set Lucas Chess's external book to `<None>` , including in
+native move selection. Set Lucas Chess's external book to `<None>`, including in
 tournament entries, so a GUI book cannot override the engine's book.
 
 Python reads the file beside `opening_book.py` at startup. Edit the text file and
@@ -200,7 +201,7 @@ UCI `info` reports search progress. There are no persistent search or ponder log
 cache hit counters.
 
 The search visits far fewer positions for the same depth. To depth 4 from the starting
-position Remus2 visits 17,360 positions and Remus3 2,944, and both choose `g1f3` .
+position Remus2 visits 17,360 positions and Remus3 2,944, and both choose `g1f3`.
 `verify_engines.py` checks Remus3's perft counts against the published counts from six
 positions, and Remus3 finds a forced mate in all ten of its mate puzzles (the key move
 in nine).
@@ -380,7 +381,7 @@ A White pawn advancing from e7 to e8 reaches the promotion rank. The generator e
 
 ### Negamax, a cutoff, and quiescence
 
-Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and its parent need not know whether an even better child continuation exists.
+Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and the parent search can stop without finding the exact best score for that child.
 
 A capture sequence illustrates why a raw depth-boundary evaluation can mislead. A queen taking a defended pawn momentarily removes 100 enemy centipawns, but a recapture can remove the 900-centipawn queen. Quiescence examines tactical continuations to expose such exchanges. It still has the check-evasion and terminal limitations described above, so extending captures alone does not establish full tactical correctness.
 
@@ -418,7 +419,7 @@ The output is pseudo-legal: piece movement and occupancy are checked, but a pinn
 
 ### evaluation.py
 
-A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The source reference explains every numeric row and every additional positional term, including approximations and rounding.
+A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The supplied table data determines the square bonuses; later versions add positional terms with their own approximations and rounding.
 
 <a id="transposition-table-py"></a>
 
@@ -448,7 +449,7 @@ Move ordering changes how quickly bounds are found; it does not replace legality
 
 ### uci.py
 
-The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, trusts incoming tokens, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
+The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, uses incoming tokens without comprehensive validation, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
 
 <a id="remus-bat"></a>
 

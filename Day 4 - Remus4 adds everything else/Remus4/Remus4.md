@@ -3,11 +3,11 @@
 ## Overview
 
 Remus4 is [Remus3](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) with the remaining workshop enhancements in
-[`remus_versions.md`](../../docs/remus_versions.md) : draw sense, the mating bonus and tapered
+[`remus_versions.md`](../../docs/remus_versions.md): draw sense, the mating bonus and tapered
 evaluation, late move reductions, principal variation search, delta and futility
 pruning, rooks on open files, static exchange evaluation, mobility, the pawn race, and
-king safety. The student pairs type the 146 new lines into their Remus3. It speaks UCI
-to Lucas Chess through `remus4.bat` and uses only the standard library.
+king safety. The student pairs type the 146 new lines into the copy of Remus3 in the Day 4 folder. Remus4 uses UCI (Universal Chess Interface)
+to communicate with Lucas Chess through `remus4.bat` and uses only the standard library.
 
 ## Enhancements over the previous version
 
@@ -18,7 +18,7 @@ lines of code.
 
 ## Source files and lines of code
 
-Comparison baseline: [Remus3](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) .
+Comparison baseline: [Remus3](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md).
 
 Lines of code count nonblank runtime source lines, excluding standalone comments and docstrings. `verify_remus4.py` is supplied, never typed, and excluded from these counts and tables.
 Change is the net difference, not lines edited or typed. A zero means that file is
@@ -66,7 +66,7 @@ This engine advertises no configurable UCI options.
 
 ### Supported commands
 
-`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+`uci`, `isready`, `position startpos moves ...`, timed `go`, and `quit` form the
 normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
 
 ## Architecture and call diagrams
@@ -78,7 +78,8 @@ not Rust call graphs or a trace of one particular search.
 The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
 share blue, and both search modules use orange. Colors identify source modules,
 not execution frequency. An arrow
-points from a caller to a callee, and a loop marks recursion. A small bridge at a
+points from the function making a call to the function being called. A loop marks
+recursion, where a function calls itself. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
 
@@ -147,8 +148,7 @@ for each term and its identifier.
   piece, and `ordered_moves()` hands the search each move with
   its priority, so quiescence stops at the first move below `CAPTURE`.
 - **Exchanges reuse the move generator.** `cheapest_attacker()` lists the moves of
-  the attacking side with `generate_moves()` and keeps the cheapest piece whose move
-  moves to the square, so `exchange.py` needs no attack loop of its own.
+  the attacking side with `generate_moves()` and keeps the cheapest piece that can capture on the square, so `exchange.py` needs no attack loop of its own.
 - **Mobility counts moves.** `evaluate()` lists each piece's moves with
   `piece_moves()` and counts them, so it needs no counting function of its own.
 - **Pawn files padded by one.** The pawn counts hold ten files, the eight real ones
@@ -174,7 +174,7 @@ among collision buckets.
 The supplied `opening_book.txt` contains 43 openings and 13 trap defenses in UCI move
 notation, with 17 openings restricted to White. Every selected move is checked with the
 native generator and king-safety test. Without a legal continuation, the engine uses
-native move selection. Set Lucas Chess's external book to `<None>` , including in
+native move selection. Set Lucas Chess's external book to `<None>`, including in
 tournament entries, so a GUI book cannot override the engine's book.
 
 Python reads the file beside `opening_book.py` at startup. Edit the text file and
@@ -210,7 +210,7 @@ Remus3 and 17,360 for Remus2, and on the Kiwipete position 6,486 against Remus3'
 51,527. The pruning has a price: late move reductions search a quiet mating move one ply
 shallower, so Remus4 often finds a slower mate first. In seven of the ten mate puzzles
 of `verify_engines.py` it plays a move that mates more slowly than the key move, and
-`think()` stops as soon as it sees any forced mate. The slower mate still wins the game.
+`think()` stops as soon as a completed iteration reports a forced mate. The slower mate still wins the game.
 
 ## Verification and limitations
 
@@ -395,7 +395,7 @@ A White pawn advancing from e7 to e8 reaches the promotion rank. The generator e
 
 ### Negamax, a cutoff, and quiescence
 
-Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and its parent need not know whether an even better child continuation exists.
+Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and the parent search can stop without finding the exact best score for that child.
 
 A capture sequence illustrates why a raw depth-boundary evaluation can mislead. A queen taking a defended pawn momentarily removes 100 enemy centipawns, but a recapture can remove the 900-centipawn queen. Quiescence examines tactical continuations to expose such exchanges. It still has the check-evasion and terminal limitations described above, so extending captures alone does not establish full tactical correctness.
 
@@ -439,7 +439,7 @@ The output is pseudo-legal: piece movement and occupancy are checked, but a pinn
 
 ### evaluation.py
 
-A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The source reference explains every numeric row and every additional positional term, including approximations and rounding.
+A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The supplied table data determines the square bonuses; later versions add positional terms with their own approximations and rounding.
 
 <a id="exchange-py"></a>
 
@@ -475,7 +475,7 @@ Move ordering changes how quickly bounds are found; it does not replace legality
 
 ### uci.py
 
-The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, trusts incoming tokens, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
+The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, uses incoming tokens without comprehensive validation, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
 
 <a id="remus-bat"></a>
 

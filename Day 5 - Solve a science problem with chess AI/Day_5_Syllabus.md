@@ -17,7 +17,7 @@ they reuse the engine's ideas, not its code.
 
 ## The two programs
 
-Each program aims an idea from the Remus engines at a problem from a synchrotron beamline, such as NSLS-II at Brookhaven.
+Each program applies a Remus search idea to a simulated experiment. A synchrotron produces intense X-rays, and a beamline directs them onto a sample for measurement. NSLS-II at Brookhaven is one such facility. A crystal phase is a distinct atomic arrangement that produces a characteristic pattern of X-ray peaks.
 
 | Program | The question | The chess idea | Day 5 periods |
 | --- | --- | --- | --- |
@@ -55,7 +55,7 @@ Reference results of the finished programs with the supplied settings (`EXPLORE_
 | 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Press Run Python File in `Day 5 - Solve a science problem with chess AI/hidden_peak.py`. With `EXPLORE_WEIGHT = 8`, compare the printed averages: random 54.3; greedy weights 0, 8, and 40: 17.5, 9.4, and 19.4. Close each of the two graph windows to finish. |
 | 9:30 to 10:00 | After matching the default results, change `EXPLORE_WEIGHT`, save, and rerun `Day 5 - Solve a science problem with chess AI/hidden_peak.py`. The program compares weights 0, the chosen value, and 40 over 100 generated samples. It also prints expectimax's 24.7 average over only 10 samples: a separate lookahead demonstration, not the same 100-sample comparison. Record the chosen weight and measured averages; the printed expectation text is a fixed reference. |
 
-[`Day_5_Period_1_Syllabus.md`](Day_5_Period_1_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
+[`Day_5_Period_1_Syllabus.md`](Day_5_Period_1_Syllabus.md) gives the goal, typing instructions, and completion checks for this period.
 
 ## Period 2, 10:30 to 12:00: Name the crystals, the greedy way
 
@@ -65,7 +65,7 @@ Reference results of the finished programs with the supplied settings (`EXPLORE_
 | 10:45 to 11:15 | Write `score()` in `phase_hunt.py` (11 code lines): a point for each explained peak, and a point lost for each left-over peak, missing peak, and phase used. |
 | 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
 
-[`Day_5_Period_2_Syllabus.md`](Day_5_Period_2_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
+[`Day_5_Period_2_Syllabus.md`](Day_5_Period_2_Syllabus.md) gives the goal, typing instructions, and completion checks for this period.
 
 ## Period 3, 1:00 to 2:30: Search every set, and verify
 
@@ -76,7 +76,7 @@ Reference results of the finished programs with the supplied settings (`EXPLORE_
 | 1:50 to 2:15 | Press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
 | 2:15 to 2:30 | The programs that search the same tree on real synchrotron data, and the agent that steers measurements at a beamline. |
 
-[`Day_5_Period_3_Syllabus.md`](Day_5_Period_3_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
+[`Day_5_Period_3_Syllabus.md`](Day_5_Period_3_Syllabus.md) gives the goal, typing instructions, and completion checks for this period.
 
 ## Period 4, 3:00 to 4:30: Science results and take-home
 
@@ -88,7 +88,7 @@ Reference results of the finished programs with the supplied settings (`EXPLORE_
 | 3:45 to 4:20 | Each student pair presents its results, its parameter values, and its answer for powder 12 in three minutes. |
 | 4:20 to 4:30 | What comes next: AI agents that steer real experiments at light sources such as NSLS-II. |
 
-[`Day_5_Period_4_Syllabus.md`](Day_5_Period_4_Syllabus.md) has the period's goal, the big picture, what the student pair writes, and how the student pair knows it is done.
+[`Day_5_Period_4_Syllabus.md`](Day_5_Period_4_Syllabus.md) gives the goal, typing instructions, and completion checks for this period.
 
 ## By the end of the day
 

@@ -8,7 +8,7 @@ Remus1 can list every move of a position, castling, en passant, and promotion in
 
 ## The big picture
 
-The student pair keeps building Remus1 from nothing in `Day 1 - Remus1 plays legal chess/Remus1`, and this period's one file is new there. `move_generation.py` lists every move the side to move can make. It is the longest file of Remus1 and the heart of the rules of chess: once it is right, the engine can never play an illegal move, and every later version uses it unchanged.
+The student pair keeps building Remus1 from nothing in `Day 1 - Remus1 plays legal chess/Remus1`, and this period's one file is new there. `move_generation.py` lists every move the side to move can make. It is Remus1's longest file. Together with move application and the king-safety check, it determines which moves are legal. Later workshop versions reuse these movement rules.
 
 The file lists the moves a piece could make before it checks whether the move leaves its own king in check. That check comes in Period 4, where `search.py` plays each move with `make_move()` and throws away the moves after which `in_check()` says the king is attacked. Listing first and checking after catches pins, discovered checks, and en passant captures that expose the king, with no extra code.
 
@@ -42,7 +42,7 @@ Create `move_generation.py` in `Day 1 - Remus1 plays legal chess/Remus1`. It has
 
 `def piece_moves(board, white, start, steps, slides, moves):` (line 27) moves every other piece. A knight or king takes one step in each direction it has, and a bishop, rook, or queen slides on while the squares are empty. The `while` loop on lines 31 to 34 is the slide, and lines 35 and 36 add the last square if it is empty or holds an enemy piece.
 
-`def castling_moves(board, white, castling, moves):` (line 39) adds castling when the right is still there, the squares between king and rook are empty, and the king does not start on, cross, or land on an attacked square. Line 45 stops early when neither side is open or the king is in check, and lines 47 and 49 test the square the king crosses. The landing square is tested later with every other move, when `search.py` checks the king after the move.
+`def castling_moves(board, white, castling, moves):` (line 39) adds castling when the right is still there, the squares between king and rook are empty, and the king does not start on, cross, or finish on an attacked square. Line 45 stops early when neither side is open or the king is in check, and lines 47 and 49 test the square the king crosses. The destination square is tested later with every other move, when `search.py` checks the king after the move.
 
 `def generate_moves(position):` (line 53) walks through the board with `enumerate(board)`, which supplies the square number and the piece together (line 56). It skips the other side's pieces, sends pawns to `pawn_moves()`, and uses `PIECE_STEPS[kind]` to select every other piece's directions and sliding flag. Bishops, rooks, and queens slide; knights and kings do not. Lines 65 and 66 add castling, and line 67 returns the list.
 

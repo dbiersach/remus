@@ -48,7 +48,7 @@ excluded.
 | `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
 | `src/attacks.rs` | 147 | 147 | 0 | Attack detection and king-safety checks |
 | `src/move_generation.rs` | 166 | 166 | 0 | Pseudo-legal moves, castling, promotions, and en passant |
-| `src/evaluation.rs` | 408 | 408 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
+| `src/evaluation.rs` | 460 | 460 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine, with a cache of pawn-structure scores |
 | `src/exchange.rs` | 99 | 99 | 0 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 253 | 0 | Search depths, scores, bounds, and best moves |
@@ -59,7 +59,7 @@ excluded.
 | `src/table_metrics.rs` | 39 | 39 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
 | `src/main.rs` | 356 | 346 | +10 | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **3,825** | **3,216** | **+609** | |
+| **Total** | **3,877** | **3,268** | **+609** | |
 
 ### Supporting files
 

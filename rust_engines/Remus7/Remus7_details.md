@@ -471,464 +471,531 @@ Score material, piece placement, pawn structure, and king/endgame terms.
 | 1 | <code>//! Score a position in centipawns for the side to move. Every table and term matches</code> | Source explanation: Score a position in centipawns for the side to move. Every table and term matches |
 | 2 | <code>//! evaluation.py in Remus5, and every division rounds down as Python&#x27;s // does.</code> | Source explanation: evaluation.py in Remus5, and every division rounds down as Python&#x27;s // does. |
 | 3 | <code></code> | Blank line separating related declarations or steps. |
-| 4 | <code>use crate::attacks::{KNIGHT&#95;ATTACKS, PAWN&#95;ATTACKS, bishop&#95;attacks, rook&#95;attacks};</code> | Bring the named items into scope; no chess search runs here. |
-| 5 | <code>use crate::board::{BISHOP, KING, KNIGHT, PAWN, Position, QUEEN, ROOK};</code> | Bring the named items into scope; no chess search runs here. |
-| 6 | <code></code> | Blank line separating related declarations or steps. |
-| 7 | <code>/// Return a 64-square table built from files a to d of every rank.</code> | Source explanation: Return a 64-square table built from files a to d of every rank. |
-| 8 | <code>const fn mirrored&#95;table(left&#95;half: &#91;i32; 32&#93;) -&gt; &#91;i32; 64&#93; {</code> | Declare mirrored&#95;table(); its parameters and return type define the interface. |
-| 9 | <code>    let columns = &#91;0, 1, 2, 3, 3, 2, 1, 0&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 10 | <code>    let mut table = &#91;0; 64&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 11 | <code>    let mut row = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 12 | <code>    while row &lt; 8 {</code> | Repeat this block while its condition remains true. |
-| 13 | <code>        let mut col = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 14 | <code>        while col &lt; 8 {</code> | Repeat this block while its condition remains true. |
-| 15 | <code>            table&#91;row &#42; 8 + col&#93; = left&#95;half&#91;row &#42; 4 + columns&#91;col&#93;&#93;;</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 16 | <code>            col += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 17 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 18 | <code>        row += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 19 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 20 | <code>    table</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 21 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 22 | <code></code> | Blank line separating related declarations or steps. |
-| 23 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 24 | <code>static PAWN&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define PAWN&#95;TABLE, including its explicit type and initial value. |
-| 25 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 26 | <code>     50,  50,  50,  50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 27 | <code>     10,  10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 28 | <code>      5,   5,  10,  25,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 29 | <code>      0,   0,   0,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 30 | <code>      5,  -5, -10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 31 | <code>      5,  10,  10, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 32 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 33 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 34 | <code></code> | Blank line separating related declarations or steps. |
-| 35 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 36 | <code>static KNIGHT&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KNIGHT&#95;TABLE, including its explicit type and initial value. |
-| 37 | <code>    -50, -40, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 38 | <code>    -40, -20,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 39 | <code>    -30,   0,  10,  15,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 40 | <code>    -30,   5,  15,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 41 | <code>    -30,   0,  15,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 42 | <code>    -30,   5,  10,  15,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 43 | <code>    -40, -20,   0,   5,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 44 | <code>    -50, -40, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 45 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 46 | <code></code> | Blank line separating related declarations or steps. |
-| 47 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 48 | <code>static BISHOP&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define BISHOP&#95;TABLE, including its explicit type and initial value. |
-| 49 | <code>    -20, -10, -10, -10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 50 | <code>    -10,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 51 | <code>    -10,   0,   5,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 52 | <code>    -10,   5,   5,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 53 | <code>    -10,   0,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 54 | <code>    -10,  10,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 55 | <code>    -10,   5,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 56 | <code>    -20, -10, -10, -10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 57 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 58 | <code></code> | Blank line separating related declarations or steps. |
-| 59 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 60 | <code>static KING&#95;MIDDLE&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KING&#95;MIDDLE&#95;TABLE, including its explicit type and initial value. |
-| 61 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 62 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 4 | <code>use std::cell::RefCell;</code> | Bring the named items into scope; no chess search runs here. |
+| 5 | <code></code> | Blank line separating related declarations or steps. |
+| 6 | <code>use crate::attacks::{KNIGHT&#95;ATTACKS, PAWN&#95;ATTACKS, bishop&#95;attacks, rook&#95;attacks};</code> | Bring the named items into scope; no chess search runs here. |
+| 7 | <code>use crate::board::{BISHOP, KING, KNIGHT, PAWN, Position, QUEEN, ROOK};</code> | Bring the named items into scope; no chess search runs here. |
+| 8 | <code></code> | Blank line separating related declarations or steps. |
+| 9 | <code>/// Return a 64-square table built from files a to d of every rank.</code> | Source explanation: Return a 64-square table built from files a to d of every rank. |
+| 10 | <code>const fn mirrored&#95;table(left&#95;half: &#91;i32; 32&#93;) -&gt; &#91;i32; 64&#93; {</code> | Declare mirrored&#95;table(); its parameters and return type define the interface. |
+| 11 | <code>    let columns = &#91;0, 1, 2, 3, 3, 2, 1, 0&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 12 | <code>    let mut table = &#91;0; 64&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 13 | <code>    let mut row = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 14 | <code>    while row &lt; 8 {</code> | Repeat this block while its condition remains true. |
+| 15 | <code>        let mut col = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 16 | <code>        while col &lt; 8 {</code> | Repeat this block while its condition remains true. |
+| 17 | <code>            table&#91;row &#42; 8 + col&#93; = left&#95;half&#91;row &#42; 4 + columns&#91;col&#93;&#93;;</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 18 | <code>            col += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 19 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 20 | <code>        row += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 21 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 22 | <code>    table</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 23 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 24 | <code></code> | Blank line separating related declarations or steps. |
+| 25 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 26 | <code>static PAWN&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define PAWN&#95;TABLE, including its explicit type and initial value. |
+| 27 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 28 | <code>     50,  50,  50,  50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 29 | <code>     10,  10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 30 | <code>      5,   5,  10,  25,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 31 | <code>      0,   0,   0,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 32 | <code>      5,  -5, -10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 33 | <code>      5,  10,  10, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 34 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 35 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 36 | <code></code> | Blank line separating related declarations or steps. |
+| 37 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 38 | <code>static KNIGHT&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KNIGHT&#95;TABLE, including its explicit type and initial value. |
+| 39 | <code>    -50, -40, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 40 | <code>    -40, -20,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 41 | <code>    -30,   0,  10,  15,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 42 | <code>    -30,   5,  15,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 43 | <code>    -30,   0,  15,  20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 44 | <code>    -30,   5,  10,  15,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 45 | <code>    -40, -20,   0,   5,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 46 | <code>    -50, -40, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 47 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 48 | <code></code> | Blank line separating related declarations or steps. |
+| 49 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 50 | <code>static BISHOP&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define BISHOP&#95;TABLE, including its explicit type and initial value. |
+| 51 | <code>    -20, -10, -10, -10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 52 | <code>    -10,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 53 | <code>    -10,   0,   5,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 54 | <code>    -10,   5,   5,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 55 | <code>    -10,   0,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 56 | <code>    -10,  10,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 57 | <code>    -10,   5,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 58 | <code>    -20, -10, -10, -10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 59 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 60 | <code></code> | Blank line separating related declarations or steps. |
+| 61 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 62 | <code>static KING&#95;MIDDLE&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KING&#95;MIDDLE&#95;TABLE, including its explicit type and initial value. |
 | 63 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 64 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 65 | <code>    -20, -30, -30, -40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 66 | <code>    -10, -20, -20, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 67 | <code>     20,  20,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 68 | <code>     20,  30,  10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 69 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 70 | <code></code> | Blank line separating related declarations or steps. |
-| 71 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 72 | <code>static ROOK&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define ROOK&#95;TABLE, including its explicit type and initial value. |
-| 73 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 74 | <code>      5,  10,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 75 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 76 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 65 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 66 | <code>    -30, -40, -40, -50,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 67 | <code>    -20, -30, -30, -40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 68 | <code>    -10, -20, -20, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 69 | <code>     20,  20,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 70 | <code>     20,  30,  10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 71 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 72 | <code></code> | Blank line separating related declarations or steps. |
+| 73 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 74 | <code>static ROOK&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define ROOK&#95;TABLE, including its explicit type and initial value. |
+| 75 | <code>      0,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 76 | <code>      5,  10,  10,  10,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 77 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 78 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 79 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 80 | <code>      0,   0,   0,   5,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 81 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 82 | <code></code> | Blank line separating related declarations or steps. |
-| 83 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
-| 84 | <code>static KING&#95;END&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KING&#95;END&#95;TABLE, including its explicit type and initial value. |
-| 85 | <code>    -50, -40, -30, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 86 | <code>    -30, -20, -10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 87 | <code>    -30, -10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 88 | <code>    -30, -10,  30,  40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 89 | <code>    -30, -10,  30,  40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 90 | <code>    -30, -10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 91 | <code>    -30, -30,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 92 | <code>    -50, -30, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 93 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 94 | <code></code> | Blank line separating related declarations or steps. |
-| 95 | <code>// What each kind of piece is worth, from empty (0) to king (6)</code> | Source explanation: What each kind of piece is worth, from empty (0) to king (6) |
-| 96 | <code>pub const PIECE&#95;VALUES: &#91;i32; 7&#93; = &#91;0, 100, 300, 300, 500, 900, 0&#93;;</code> | Define PIECE&#95;VALUES, including its explicit type and initial value. |
-| 97 | <code></code> | Blank line separating related declarations or steps. |
-| 98 | <code>// The bonus of a passed pawn by the moves it needs to promote</code> | Source explanation: The bonus of a passed pawn by the moves it needs to promote |
-| 99 | <code>const PASSED&#95;BONUS: &#91;i32; 7&#93; = &#91;0, 120, 80, 50, 30, 15, 10&#93;;</code> | Define PASSED&#95;BONUS, including its explicit type and initial value. |
-| 100 | <code>const MOBILITY&#95;BONUS: i32 = 2; // Per square a knight, bishop, rook, or queen reaches</code> | Define MOBILITY&#95;BONUS, including its explicit type and initial value. |
-| 101 | <code>const BISHOP&#95;PAIR: i32 = 30;</code> | Define BISHOP&#95;PAIR, including its explicit type and initial value. |
-| 102 | <code>const ROOK&#95;OPEN&#95;FILE: i32 = 20; // A file with no pawns</code> | Define ROOK&#95;OPEN&#95;FILE, including its explicit type and initial value. |
-| 103 | <code>const ROOK&#95;HALF&#95;OPEN&#95;FILE: i32 = 10; // A file with only enemy pawns</code> | Define ROOK&#95;HALF&#95;OPEN&#95;FILE, including its explicit type and initial value. |
-| 104 | <code>const DOUBLED&#95;PAWN: i32 = 15; // For each extra pawn on a file</code> | Define DOUBLED&#95;PAWN, including its explicit type and initial value. |
-| 105 | <code>const ISOLATED&#95;PAWN: i32 = 15; // No friendly pawn on a file beside it</code> | Define ISOLATED&#95;PAWN, including its explicit type and initial value. |
-| 106 | <code>const BACKWARD&#95;PAWN: i32 = 18; // Unsupported pawn whose advance meets an enemy pawn attack</code> | Define BACKWARD&#95;PAWN, including its explicit type and initial value. |
-| 107 | <code>const BACKWARD&#95;OPEN&#95;FILE: i32 = 8; // No enemy pawn screens the backward pawn&#x27;s file</code> | Define BACKWARD&#95;OPEN&#95;FILE, including its explicit type and initial value. |
-| 108 | <code>const CENTRAL&#95;HOLE: i32 = 12; // Empty central square an enemy knight can use</code> | Define CENTRAL&#95;HOLE, including its explicit type and initial value. |
-| 109 | <code>const KNIGHT&#95;OUTPOST: i32 = 15; // Advanced knight that enemy pawns cannot challenge</code> | Define KNIGHT&#95;OUTPOST, including its explicit type and initial value. |
-| 110 | <code>const SUPPORTED&#95;OUTPOST: i32 = 15; // Extra bonus for friendly pawn protection</code> | Define SUPPORTED&#95;OUTPOST, including its explicit type and initial value. |
-| 111 | <code>const UNSTOPPABLE&#95;PAWN: i32 = 500; // A passed pawn the enemy king cannot catch</code> | Define UNSTOPPABLE&#95;PAWN, including its explicit type and initial value. |
-| 112 | <code>const SHIELD&#95;PAWN: i32 = 10; // For each pawn in front of a king on its back rank</code> | Define SHIELD&#95;PAWN, including its explicit type and initial value. |
-| 113 | <code>const OPEN&#95;KING&#95;FILE: i32 = 15; // For each file at the king with no friendly pawn</code> | Define OPEN&#95;KING&#95;FILE, including its explicit type and initial value. |
-| 114 | <code></code> | Blank line separating related declarations or steps. |
-| 115 | <code>const fn file&#95;mask(col: i32) -&gt; u64 {</code> | Declare file&#95;mask(); its parameters and return type define the interface. |
-| 116 | <code>    if col &lt; 0 &#124;&#124; col &gt; 7 {</code> | Test the condition and execute this branch only when it matches. |
-| 117 | <code>        0</code> | Evaluate or continue this expression in file&#95;mask(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 118 | <code>    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 119 | <code>        0x0101&#95;0101&#95;0101&#95;0101&#95;u64 &lt;&lt; col</code> | Evaluate or continue this expression in file&#95;mask(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 120 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 121 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 122 | <code></code> | Blank line separating related declarations or steps. |
-| 123 | <code>/// For each side and square, the squares where an enemy pawn can stop a pawn on that</code> | Source explanation: For each side and square, the squares where an enemy pawn can stop a pawn on that |
-| 124 | <code>/// square: ahead of it, on its own file or a file beside it.</code> | Source explanation: square: ahead of it, on its own file or a file beside it. |
-| 125 | <code>const fn build&#95;passed&#95;masks() -&gt; &#91;&#91;u64; 64&#93;; 2&#93; {</code> | Declare build&#95;passed&#95;masks(); its parameters and return type define the interface. |
-| 126 | <code>    let mut table = &#91;&#91;0; 64&#93;; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 127 | <code>    let mut square = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 128 | <code>    while square &lt; 64 {</code> | Repeat this block while its condition remains true. |
-| 129 | <code>        let row = (square / 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 130 | <code>        let col = (square % 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 131 | <code>        let files = file&#95;mask(col - 1) &#124; file&#95;mask(col) &#124; file&#95;mask(col + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 132 | <code>        // Row 0 is rank 8, so the rows ahead of a White pawn have smaller numbers</code> | Source explanation: Row 0 is rank 8, so the rows ahead of a White pawn have smaller numbers |
-| 133 | <code>        let rows&#95;above = if row == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 134 | <code>            0</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 135 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 136 | <code>            u64::MAX &gt;&gt; (64 - 8 &#42; row)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 137 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 138 | <code>        let rows&#95;below = if row == 7 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 139 | <code>            0</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 140 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 141 | <code>            u64::MAX &lt;&lt; (8 &#42; (row + 1))</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 142 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 143 | <code>        table&#91;0&#93;&#91;square&#93; = files &amp; rows&#95;above;</code> | Update the named state using the expression and assignment operator shown. |
-| 144 | <code>        table&#91;1&#93;&#91;square&#93; = files &amp; rows&#95;below;</code> | Update the named state using the expression and assignment operator shown. |
-| 145 | <code>        square += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 146 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 147 | <code>    table</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 148 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 149 | <code></code> | Blank line separating related declarations or steps. |
-| 150 | <code>static PASSED&#95;MASKS: &#91;&#91;u64; 64&#93;; 2&#93; = build&#95;passed&#95;masks();</code> | Define PASSED&#95;MASKS, including its explicit type and initial value. |
+| 80 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 81 | <code>     -5,   0,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 82 | <code>      0,   0,   0,   5,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 83 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 84 | <code></code> | Blank line separating related declarations or steps. |
+| 85 | <code>#&#91;rustfmt::skip&#93;</code> | Compiler attribute controlling the following declaration. |
+| 86 | <code>static KING&#95;END&#95;TABLE: &#91;i32; 64&#93; = mirrored&#95;table(&#91;</code> | Define KING&#95;END&#95;TABLE, including its explicit type and initial value. |
+| 87 | <code>    -50, -40, -30, -20,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 88 | <code>    -30, -20, -10,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 89 | <code>    -30, -10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 90 | <code>    -30, -10,  30,  40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 91 | <code>    -30, -10,  30,  40,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 92 | <code>    -30, -10,  20,  30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 93 | <code>    -30, -30,   0,   0,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 94 | <code>    -50, -30, -30, -30,</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 95 | <code>&#93;);</code> | Evaluate or continue this expression in mirrored&#95;table(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 96 | <code></code> | Blank line separating related declarations or steps. |
+| 97 | <code>// What each kind of piece is worth, from empty (0) to king (6)</code> | Source explanation: What each kind of piece is worth, from empty (0) to king (6) |
+| 98 | <code>pub const PIECE&#95;VALUES: &#91;i32; 7&#93; = &#91;0, 100, 300, 300, 500, 900, 0&#93;;</code> | Define PIECE&#95;VALUES, including its explicit type and initial value. |
+| 99 | <code></code> | Blank line separating related declarations or steps. |
+| 100 | <code>// The bonus of a passed pawn by the moves it needs to promote</code> | Source explanation: The bonus of a passed pawn by the moves it needs to promote |
+| 101 | <code>const PASSED&#95;BONUS: &#91;i32; 7&#93; = &#91;0, 120, 80, 50, 30, 15, 10&#93;;</code> | Define PASSED&#95;BONUS, including its explicit type and initial value. |
+| 102 | <code>const MOBILITY&#95;BONUS: i32 = 2; // Per square a knight, bishop, rook, or queen reaches</code> | Define MOBILITY&#95;BONUS, including its explicit type and initial value. |
+| 103 | <code>const BISHOP&#95;PAIR: i32 = 30;</code> | Define BISHOP&#95;PAIR, including its explicit type and initial value. |
+| 104 | <code>const ROOK&#95;OPEN&#95;FILE: i32 = 20; // A file with no pawns</code> | Define ROOK&#95;OPEN&#95;FILE, including its explicit type and initial value. |
+| 105 | <code>const ROOK&#95;HALF&#95;OPEN&#95;FILE: i32 = 10; // A file with only enemy pawns</code> | Define ROOK&#95;HALF&#95;OPEN&#95;FILE, including its explicit type and initial value. |
+| 106 | <code>const DOUBLED&#95;PAWN: i32 = 15; // For each extra pawn on a file</code> | Define DOUBLED&#95;PAWN, including its explicit type and initial value. |
+| 107 | <code>const ISOLATED&#95;PAWN: i32 = 15; // No friendly pawn on a file beside it</code> | Define ISOLATED&#95;PAWN, including its explicit type and initial value. |
+| 108 | <code>const BACKWARD&#95;PAWN: i32 = 18; // Unsupported pawn whose advance meets an enemy pawn attack</code> | Define BACKWARD&#95;PAWN, including its explicit type and initial value. |
+| 109 | <code>const BACKWARD&#95;OPEN&#95;FILE: i32 = 8; // No enemy pawn screens the backward pawn&#x27;s file</code> | Define BACKWARD&#95;OPEN&#95;FILE, including its explicit type and initial value. |
+| 110 | <code>const CENTRAL&#95;HOLE: i32 = 12; // Empty central square an enemy knight can use</code> | Define CENTRAL&#95;HOLE, including its explicit type and initial value. |
+| 111 | <code>const KNIGHT&#95;OUTPOST: i32 = 15; // Advanced knight that enemy pawns cannot challenge</code> | Define KNIGHT&#95;OUTPOST, including its explicit type and initial value. |
+| 112 | <code>const SUPPORTED&#95;OUTPOST: i32 = 15; // Extra bonus for friendly pawn protection</code> | Define SUPPORTED&#95;OUTPOST, including its explicit type and initial value. |
+| 113 | <code>const UNSTOPPABLE&#95;PAWN: i32 = 500; // A passed pawn the enemy king cannot catch</code> | Define UNSTOPPABLE&#95;PAWN, including its explicit type and initial value. |
+| 114 | <code>const SHIELD&#95;PAWN: i32 = 10; // For each pawn in front of a king on its back rank</code> | Define SHIELD&#95;PAWN, including its explicit type and initial value. |
+| 115 | <code>const OPEN&#95;KING&#95;FILE: i32 = 15; // For each file at the king with no friendly pawn</code> | Define OPEN&#95;KING&#95;FILE, including its explicit type and initial value. |
+| 116 | <code></code> | Blank line separating related declarations or steps. |
+| 117 | <code>const fn file&#95;mask(col: i32) -&gt; u64 {</code> | Declare file&#95;mask(); its parameters and return type define the interface. |
+| 118 | <code>    if col &lt; 0 &#124;&#124; col &gt; 7 {</code> | Test the condition and execute this branch only when it matches. |
+| 119 | <code>        0</code> | Evaluate or continue this expression in file&#95;mask(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 120 | <code>    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 121 | <code>        0x0101&#95;0101&#95;0101&#95;0101&#95;u64 &lt;&lt; col</code> | Evaluate or continue this expression in file&#95;mask(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 122 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 123 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 124 | <code></code> | Blank line separating related declarations or steps. |
+| 125 | <code>/// For each side and square, the squares where an enemy pawn can stop a pawn on that</code> | Source explanation: For each side and square, the squares where an enemy pawn can stop a pawn on that |
+| 126 | <code>/// square: ahead of it, on its own file or a file beside it.</code> | Source explanation: square: ahead of it, on its own file or a file beside it. |
+| 127 | <code>const fn build&#95;passed&#95;masks() -&gt; &#91;&#91;u64; 64&#93;; 2&#93; {</code> | Declare build&#95;passed&#95;masks(); its parameters and return type define the interface. |
+| 128 | <code>    let mut table = &#91;&#91;0; 64&#93;; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 129 | <code>    let mut square = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 130 | <code>    while square &lt; 64 {</code> | Repeat this block while its condition remains true. |
+| 131 | <code>        let row = (square / 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 132 | <code>        let col = (square % 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 133 | <code>        let files = file&#95;mask(col - 1) &#124; file&#95;mask(col) &#124; file&#95;mask(col + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 134 | <code>        // Row 0 is rank 8, so the rows ahead of a White pawn have smaller numbers</code> | Source explanation: Row 0 is rank 8, so the rows ahead of a White pawn have smaller numbers |
+| 135 | <code>        let rows&#95;above = if row == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 136 | <code>            0</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 137 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 138 | <code>            u64::MAX &gt;&gt; (64 - 8 &#42; row)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 139 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 140 | <code>        let rows&#95;below = if row == 7 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 141 | <code>            0</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 142 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 143 | <code>            u64::MAX &lt;&lt; (8 &#42; (row + 1))</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 144 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 145 | <code>        table&#91;0&#93;&#91;square&#93; = files &amp; rows&#95;above;</code> | Update the named state using the expression and assignment operator shown. |
+| 146 | <code>        table&#91;1&#93;&#91;square&#93; = files &amp; rows&#95;below;</code> | Update the named state using the expression and assignment operator shown. |
+| 147 | <code>        square += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 148 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 149 | <code>    table</code> | Evaluate or continue this expression in build&#95;passed&#95;masks(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 150 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 | 151 | <code></code> | Blank line separating related declarations or steps. |
-| 152 | <code>const SIGNS: &#91;i32; 2&#93; = &#91;1, -1&#93;;</code> | Define SIGNS, including its explicit type and initial value. |
+| 152 | <code>static PASSED&#95;MASKS: &#91;&#91;u64; 64&#93;; 2&#93; = build&#95;passed&#95;masks();</code> | Define PASSED&#95;MASKS, including its explicit type and initial value. |
 | 153 | <code></code> | Blank line separating related declarations or steps. |
-| 154 | <code>/// Mark pawn-controlled squares, including squares occupied by friendly pieces.</code> | Source explanation: Mark pawn-controlled squares, including squares occupied by friendly pieces. |
-| 155 | <code>fn pawn&#95;attacks(pawns: &amp;&#91;u64; 2&#93;) -&gt; &#91;u64; 2&#93; {</code> | Declare pawn&#95;attacks(); its parameters and return type define the interface. |
-| 156 | <code>    let mut attacks = &#91;0; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 157 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 158 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 159 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 160 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 161 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 162 | <code>            attacks&#91;side&#93; &#124;= PAWN&#95;ATTACKS&#91;side&#93;&#91;square&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 163 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 164 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 165 | <code>    attacks</code> | Evaluate or continue this expression in pawn&#95;attacks(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 166 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 167 | <code></code> | Blank line separating related declarations or steps. |
-| 168 | <code>/// Can an adjacent-file pawn attack this square, directly or after advancing?</code> | Source explanation: Can an adjacent-file pawn attack this square, directly or after advancing? |
-| 169 | <code>fn pawn&#95;can&#95;challenge(pawns: u64, side: usize, square: usize) -&gt; bool {</code> | Declare pawn&#95;can&#95;challenge(); its parameters and return type define the interface. |
-| 170 | <code>    let col = (square % 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 171 | <code>    let adjacent = file&#95;mask(col - 1) &#124; file&#95;mask(col + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 172 | <code>    pawns &amp; adjacent &amp; PASSED&#95;MASKS&#91;1 - side&#93;&#91;square&#93; != 0</code> | Evaluate or continue this expression in pawn&#95;can&#95;challenge(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 173 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 174 | <code></code> | Blank line separating related declarations or steps. |
-| 175 | <code>/// Score backward pawns, central holes, and knight outposts from White&#x27;s side.</code> | Source explanation: Score backward pawns, central holes, and knight outposts from White&#x27;s side. |
-| 176 | <code>fn positional&#95;terms(position: &amp;Position, pawns: &amp;&#91;u64; 2&#93;, attacks: &amp;&#91;u64; 2&#93;) -&gt; i32 {</code> | Declare positional&#95;terms(); its parameters and return type define the interface. |
-| 177 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 178 | <code>    let knights = position.by&#95;kind&#91;KNIGHT as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 179 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 180 | <code>        let enemy = 1 - side;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 181 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 182 | <code>        let step = if side == 0 { -8 } else { 8 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 183 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 184 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 185 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 186 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 187 | <code>            let target = square as i32 + step;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 188 | <code>            if !(0..64).contains(&amp;target) &#124;&#124; attacks&#91;enemy&#93; &amp; (1&#95;u64 &lt;&lt; target) == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 189 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 190 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 191 | <code>            if attacks&#91;side&#93; &amp; (1&#95;u64 &lt;&lt; square) != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 192 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 193 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 194 | <code>            let col = (square % 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 195 | <code>            let adjacent = file&#95;mask(col - 1) &#124; file&#95;mask(col + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 196 | <code>            let support&#95;rows = PASSED&#95;MASKS&#91;1 - side&#93;&#91;square&#93; &#124; (0xff&#95;u64 &lt;&lt; (8 &#42; (square / 8)));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 197 | <code>            // Isolated pawns have their own penalty. Support can come from an</code> | Source explanation: Isolated pawns have their own penalty. Support can come from an |
-| 198 | <code>            // adjacent-file pawn on this rank or behind it.</code> | Source explanation: adjacent-file pawn on this rank or behind it. |
-| 199 | <code>            if pawns&#91;side&#93; &amp; adjacent != 0 &amp;&amp; pawns&#91;side&#93; &amp; adjacent &amp; support&#95;rows == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 200 | <code>                let mut penalty = BACKWARD&#95;PAWN;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 201 | <code>                if pawns&#91;enemy&#93; &amp; file&#95;mask(col) == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 202 | <code>                    penalty += BACKWARD&#95;OPEN&#95;FILE;</code> | Update the named state using the expression and assignment operator shown. |
-| 203 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 204 | <code>                score -= sign &#42; penalty;</code> | Update the named state using the expression and assignment operator shown. |
-| 205 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 206 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 207 | <code>        if knights &amp; position.by&#95;side&#91;enemy&#93; != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 208 | <code>            // Files c to f of this side&#x27;s third and fourth ranks: rows 5 and 4 for</code> | Source explanation: Files c to f of this side&#x27;s third and fourth ranks: rows 5 and 4 for |
-| 209 | <code>            // White, rows 2 and 3 for Black. One mask keeps the empty squares there</code> | Source explanation: White, rows 2 and 3 for Black. One mask keeps the empty squares there |
-| 210 | <code>            // that an enemy pawn attacks, so the loop visits only those.</code> | Source explanation: that an enemy pawn attacks, so the loop visits only those. |
-| 211 | <code>            let zone: u64 = if side == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 212 | <code>                0x0000&#95;3C3C&#95;0000&#95;0000</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 213 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 214 | <code>                0x0000&#95;0000&#95;3C3C&#95;0000</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 215 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
-| 216 | <code>            let mut holes = zone &amp; !position.occupied() &amp; attacks&#91;enemy&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 217 | <code>            while holes != 0 {</code> | Repeat this block while its condition remains true. |
-| 218 | <code>                let square = holes.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 219 | <code>                holes &amp;= holes - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 220 | <code>                if !pawn&#95;can&#95;challenge(pawns&#91;side&#93;, side, square) {</code> | Test the condition and execute this branch only when it matches. |
-| 221 | <code>                    score -= sign &#42; CENTRAL&#95;HOLE;</code> | Update the named state using the expression and assignment operator shown. |
-| 222 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 223 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 224 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 225 | <code>        let mut left = knights &amp; position.by&#95;side&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 226 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 227 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 228 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 229 | <code>            let view&#95;row = if side == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 230 | <code>                square / 8</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 231 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 232 | <code>                7 - square / 8</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 233 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
-| 234 | <code>            if (2..=4).contains(&amp;view&#95;row)</code> | Test the condition and execute this branch only when it matches. |
-| 235 | <code>                &amp;&amp; (1..=6).contains(&amp;(square % 8))</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 236 | <code>                &amp;&amp; !pawn&#95;can&#95;challenge(pawns&#91;enemy&#93;, enemy, square)</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 237 | <code>            {</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 238 | <code>                let mut bonus = KNIGHT&#95;OUTPOST;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 239 | <code>                if attacks&#91;side&#93; &amp; (1&#95;u64 &lt;&lt; square) != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 240 | <code>                    bonus += SUPPORTED&#95;OUTPOST;</code> | Update the named state using the expression and assignment operator shown. |
-| 241 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 242 | <code>                score += sign &#42; bonus;</code> | Update the named state using the expression and assignment operator shown. |
-| 243 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 244 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 245 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 246 | <code>    score</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 247 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 248 | <code></code> | Blank line separating related declarations or steps. |
-| 249 | <code>/// Score nearby pawn cover, tapering its value as pieces leave the board.</code> | Source explanation: Score nearby pawn cover, tapering its value as pieces leave the board. |
-| 250 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
-| 251 | <code>fn king&#95;safety(own&#95;pawns: u64, counts: &amp;&#91;i32; 10&#93;, king: i32, side: usize, phase: i32) -&gt; i32 {</code> | Declare king&#95;safety(); its parameters and return type define the interface. |
-| 252 | <code>    let row = king / 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 253 | <code>    let view&#95;row = if side == 0 { row } else { 7 - row };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 254 | <code>    if view&#95;row &lt; 5 {</code> | Test the condition and execute this branch only when it matches. |
-| 255 | <code>        return 0; // An advanced king uses its piece-square table</code> | Leave the current function with the displayed result. |
-| 256 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 257 | <code>    let col = king % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 258 | <code>    let forward = if side == 0 { -8 } else { 8 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 259 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 260 | <code>    for c in (col - 1).max(0)..(col + 2).min(8) {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 261 | <code>        if own&#95;pawns &amp; (1&#95;u64 &lt;&lt; (king + forward + c - col)) != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 262 | <code>            score += SHIELD&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
-| 263 | <code>        } else if own&#95;pawns &amp; (1&#95;u64 &lt;&lt; (king + 2 &#42; forward + c - col)) != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 264 | <code>            score += SHIELD&#95;PAWN / 2;</code> | Update the named state using the expression and assignment operator shown. |
+| 154 | <code>const SIGNS: &#91;i32; 2&#93; = &#91;1, -1&#93;;</code> | Define SIGNS, including its explicit type and initial value. |
+| 155 | <code></code> | Blank line separating related declarations or steps. |
+| 156 | <code>/// Mark pawn-controlled squares, including squares occupied by friendly pieces.</code> | Source explanation: Mark pawn-controlled squares, including squares occupied by friendly pieces. |
+| 157 | <code>fn pawn&#95;attacks(pawns: &amp;&#91;u64; 2&#93;) -&gt; &#91;u64; 2&#93; {</code> | Declare pawn&#95;attacks(); its parameters and return type define the interface. |
+| 158 | <code>    let mut attacks = &#91;0; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 159 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 160 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 161 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 162 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 163 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 164 | <code>            attacks&#91;side&#93; &#124;= PAWN&#95;ATTACKS&#91;side&#93;&#91;square&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 165 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 166 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 167 | <code>    attacks</code> | Evaluate or continue this expression in pawn&#95;attacks(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 168 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 169 | <code></code> | Blank line separating related declarations or steps. |
+| 170 | <code>/// Can an adjacent-file pawn attack this square, directly or after advancing?</code> | Source explanation: Can an adjacent-file pawn attack this square, directly or after advancing? |
+| 171 | <code>fn pawn&#95;can&#95;challenge(pawns: u64, side: usize, square: usize) -&gt; bool {</code> | Declare pawn&#95;can&#95;challenge(); its parameters and return type define the interface. |
+| 172 | <code>    let col = (square % 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 173 | <code>    let adjacent = file&#95;mask(col - 1) &#124; file&#95;mask(col + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 174 | <code>    pawns &amp; adjacent &amp; PASSED&#95;MASKS&#91;1 - side&#93;&#91;square&#93; != 0</code> | Evaluate or continue this expression in pawn&#95;can&#95;challenge(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 175 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 176 | <code></code> | Blank line separating related declarations or steps. |
+| 177 | <code>/// The part of the evaluation that depends on the pawns alone. Most moves leave the</code> | Source explanation: The part of the evaluation that depends on the pawns alone. Most moves leave the |
+| 178 | <code>/// pawns where they stand, so thousands of positions in one search share an entry.</code> | Source explanation: pawns where they stand, so thousands of positions in one search share an entry. |
+| 179 | <code>#&#91;derive(Clone, Copy)&#93;</code> | Compiler attribute controlling the following declaration. |
+| 180 | <code>struct PawnEntry {</code> | Declare the struct PawnEntry used by this module. |
+| 181 | <code>    pawns: &#91;u64; 2&#93;,        // White&#x27;s pawns, then Black&#x27;s: the entry&#x27;s exact identity</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 182 | <code>    score: i32,             // Doubled, isolated, passed, and backward pawns, White&#x27;s side</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 183 | <code>    passed: &#91;u64; 2&#93;,       // The passed pawns of each side</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 184 | <code>    attacks: &#91;u64; 2&#93;,      // The squares each side&#x27;s pawns attack</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 185 | <code>    counts: &#91;&#91;i32; 10&#93;; 2&#93;, // Entry col + 1 counts the pawns on file col</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 186 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 187 | <code></code> | Blank line separating related declarations or steps. |
+| 188 | <code>const PAWN&#95;CACHE&#95;BITS: u32 = 13; // 8,192 entries, about 1 MiB</code> | Define PAWN&#95;CACHE&#95;BITS, including its explicit type and initial value. |
+| 189 | <code>// No position has a pawn on every square, so this entry never matches a real one</code> | Source explanation: No position has a pawn on every square, so this entry never matches a real one |
+| 190 | <code>const EMPTY&#95;PAWN&#95;ENTRY: PawnEntry = PawnEntry {</code> | Define EMPTY&#95;PAWN&#95;ENTRY, including its explicit type and initial value. |
+| 191 | <code>    pawns: &#91;u64::MAX; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 192 | <code>    score: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 193 | <code>    passed: &#91;0; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 194 | <code>    attacks: &#91;0; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 195 | <code>    counts: &#91;&#91;0; 10&#93;; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 196 | <code>};</code> | Close the preceding block, expression, call, or collection. |
+| 197 | <code></code> | Blank line separating related declarations or steps. |
+| 198 | <code>thread&#95;local! {</code> | Evaluate or continue this expression in pawn&#95;can&#95;challenge(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 199 | <code>    // Each search thread keeps its own table, so no thread waits for another</code> | Source explanation: Each search thread keeps its own table, so no thread waits for another |
+| 200 | <code>    static PAWN&#95;CACHE: RefCell&lt;Vec&lt;PawnEntry&gt;&gt; =</code> | Define PAWN&#95;CACHE, including its explicit type and initial value. |
+| 201 | <code>        RefCell::new(vec!&#91;EMPTY&#95;PAWN&#95;ENTRY; 1 &lt;&lt; PAWN&#95;CACHE&#95;BITS&#93;);</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 202 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 203 | <code></code> | Blank line separating related declarations or steps. |
+| 204 | <code>/// Score the pawn structure from White&#x27;s side: doubled, isolated, passed, and</code> | Source explanation: Score the pawn structure from White&#x27;s side: doubled, isolated, passed, and |
+| 205 | <code>/// backward pawns. Every term depends on the pawns alone.</code> | Source explanation: backward pawns. Every term depends on the pawns alone. |
+| 206 | <code>fn pawn&#95;structure(pawns: &amp;&#91;u64; 2&#93;) -&gt; PawnEntry {</code> | Declare pawn&#95;structure(); its parameters and return type define the interface. |
+| 207 | <code>    let attacks = pawn&#95;attacks(pawns);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 208 | <code>    let mut entry = PawnEntry {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 209 | <code>        pawns: &#42;pawns,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 210 | <code>        score: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 211 | <code>        passed: &#91;0; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 212 | <code>        attacks,</code> | Evaluate or continue this expression in pawn&#95;structure(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 213 | <code>        counts: &#91;&#91;0; 10&#93;; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 214 | <code>    };</code> | Close the preceding block, expression, call, or collection. |
+| 215 | <code>    // Entry col + 1 counts file col, so the a and h files have an empty file on each side</code> | Source explanation: Entry col + 1 counts file col, so the a and h files have an empty file on each side |
+| 216 | <code>    for (side, &amp;own) in pawns.iter().enumerate() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 217 | <code>        let mut left = own;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 218 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 219 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 220 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 221 | <code>            entry.counts&#91;side&#93;&#91;square % 8 + 1&#93; += 1;</code> | Evaluate or continue this expression in pawn&#95;structure(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 222 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 223 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 224 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 225 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 226 | <code>        let enemy = 1 - side;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 227 | <code>        let step = if side == 0 { -8 } else { 8 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 228 | <code>        for count in entry.counts&#91;side&#93; {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 229 | <code>            entry.score -= sign &#42; DOUBLED&#95;PAWN &#42; (count - 1).max(0);</code> | Update the named state using the expression and assignment operator shown. |
+| 230 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 231 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 232 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 233 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 234 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 235 | <code>            let row = (square / 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 236 | <code>            let col = square % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 237 | <code>            if entry.counts&#91;side&#93;&#91;col&#93; == 0 &amp;&amp; entry.counts&#91;side&#93;&#91;col + 2&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 238 | <code>                entry.score -= sign &#42; ISOLATED&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
+| 239 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 240 | <code>            if PASSED&#95;MASKS&#91;side&#93;&#91;square&#93; &amp; pawns&#91;enemy&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 241 | <code>                entry.passed&#91;side&#93; &#124;= 1&#95;u64 &lt;&lt; square;</code> | Update the named state using the expression and assignment operator shown. |
+| 242 | <code>                let steps = if side == 0 { row } else { 7 - row }; // Moves to promotion</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 243 | <code>                entry.score += sign &#42; PASSED&#95;BONUS&#91;steps as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 244 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 245 | <code>            // A backward pawn cannot advance safely and has no pawn beside or behind it</code> | Source explanation: A backward pawn cannot advance safely and has no pawn beside or behind it |
+| 246 | <code>            let target = square as i32 + step;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 247 | <code>            if !(0..64).contains(&amp;target) &#124;&#124; attacks&#91;enemy&#93; &amp; (1&#95;u64 &lt;&lt; target) == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 248 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 249 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 250 | <code>            if attacks&#91;side&#93; &amp; (1&#95;u64 &lt;&lt; square) != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 251 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 252 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 253 | <code>            let file = col as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 254 | <code>            let adjacent = file&#95;mask(file - 1) &#124; file&#95;mask(file + 1);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 255 | <code>            let support&#95;rows = PASSED&#95;MASKS&#91;1 - side&#93;&#91;square&#93; &#124; (0xff&#95;u64 &lt;&lt; (8 &#42; (square / 8)));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 256 | <code>            // Isolated pawns have their own penalty. Support can come from an</code> | Source explanation: Isolated pawns have their own penalty. Support can come from an |
+| 257 | <code>            // adjacent-file pawn on this rank or behind it.</code> | Source explanation: adjacent-file pawn on this rank or behind it. |
+| 258 | <code>            if pawns&#91;side&#93; &amp; adjacent != 0 &amp;&amp; pawns&#91;side&#93; &amp; adjacent &amp; support&#95;rows == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 259 | <code>                let mut penalty = BACKWARD&#95;PAWN;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 260 | <code>                if pawns&#91;enemy&#93; &amp; file&#95;mask(file) == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 261 | <code>                    penalty += BACKWARD&#95;OPEN&#95;FILE;</code> | Update the named state using the expression and assignment operator shown. |
+| 262 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 263 | <code>                entry.score -= sign &#42; penalty;</code> | Update the named state using the expression and assignment operator shown. |
+| 264 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
 | 265 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 266 | <code>        if counts&#91;(c + 1) as usize&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 267 | <code>            score -= OPEN&#95;KING&#95;FILE;</code> | Update the named state using the expression and assignment operator shown. |
-| 268 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 269 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 270 | <code>    (score &#42; phase).div&#95;euclid(24)</code> | Evaluate or continue this expression in king&#95;safety(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 271 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 272 | <code></code> | Blank line separating related declarations or steps. |
-| 273 | <code>/// Score the pawns, the rooks that use their files, and the pawn shield of each king,</code> | Source explanation: Score the pawns, the rooks that use their files, and the pawn shield of each king, |
-| 274 | <code>/// from White&#x27;s side.</code> | Source explanation: from White&#x27;s side. |
-| 275 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
-| 276 | <code>fn pawn&#95;terms(</code> | Declare pawn&#95;terms(); its parameters and return type define the interface. |
-| 277 | <code>    pawns: &amp;&#91;u64; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 278 | <code>    rooks: &amp;&#91;u64; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 279 | <code>    kings: &amp;&#91;i32; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 280 | <code>    phase: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 281 | <code>    white: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 282 | <code>) -&gt; i32 {</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 283 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 284 | <code>    // Entry col + 1 counts file col, so the a and h files have an empty file on each side</code> | Source explanation: Entry col + 1 counts file col, so the a and h files have an empty file on each side |
-| 285 | <code>    let mut counts = &#91;&#91;0&#95;i32; 10&#93;; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 286 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 287 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 288 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 289 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 290 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 291 | <code>            counts&#91;side&#93;&#91;square % 8 + 1&#93; += 1;</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 292 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 293 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 294 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 295 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 296 | <code>        let enemy = 1 - side;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 297 | <code>        for count in counts&#91;side&#93; {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 298 | <code>            score -= sign &#42; DOUBLED&#95;PAWN &#42; (count - 1).max(0);</code> | Update the named state using the expression and assignment operator shown. |
-| 299 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 300 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 301 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 302 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 303 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 304 | <code>            let row = (square / 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 305 | <code>            let col = square % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 306 | <code>            if counts&#91;side&#93;&#91;col&#93; == 0 &amp;&amp; counts&#91;side&#93;&#91;col + 2&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 307 | <code>                score -= sign &#42; ISOLATED&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
-| 308 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 309 | <code>            if PASSED&#95;MASKS&#91;side&#93;&#91;square&#93; &amp; pawns&#91;enemy&#93; != 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 310 | <code>                continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 311 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 312 | <code>            let steps = if side == 0 { row } else { 7 - row }; // Moves to promotion</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 313 | <code>            score += sign &#42; PASSED&#95;BONUS&#91;steps as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 314 | <code>            // The pawn race: with no pieces left, a pawn whose promotion square the enemy</code> | Source explanation: The pawn race: with no pieces left, a pawn whose promotion square the enemy |
-| 315 | <code>            // king cannot reach (the rule of the square) becomes a queen</code> | Source explanation: king cannot reach (the rule of the square) becomes a queen |
-| 316 | <code>            let king = kings&#91;enemy&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 317 | <code>            let mut king&#95;steps = (king / 8 - 7 &#42; side as i32)</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 318 | <code>                .abs()</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 319 | <code>                .max((king % 8 - col as i32).abs());</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 320 | <code>            if white != (side == 0) {</code> | Test the condition and execute this branch only when it matches. |
-| 321 | <code>                king&#95;steps -= 1; // The enemy king moves first</code> | Update the named state using the expression and assignment operator shown. |
-| 322 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 323 | <code>            if phase == 0 &amp;&amp; king&#95;steps &gt; steps.min(5) {</code> | Test the condition and execute this branch only when it matches. |
-| 324 | <code>                score += sign &#42; UNSTOPPABLE&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
-| 325 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 326 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 327 | <code>        let mut left = rooks&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 328 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 329 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 330 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 331 | <code>            let entry = square % 8 + 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 332 | <code>            if counts&#91;side&#93;&#91;entry&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 333 | <code>                let open&#95;file = counts&#91;enemy&#93;&#91;entry&#93; == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 334 | <code>                score += sign</code> | Update the named state using the expression and assignment operator shown. |
-| 335 | <code>                    &#42; if open&#95;file {</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 336 | <code>                        ROOK&#95;OPEN&#95;FILE</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 337 | <code>                    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 338 | <code>                        ROOK&#95;HALF&#95;OPEN&#95;FILE</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 339 | <code>                    };</code> | Close the preceding block, expression, call, or collection. |
-| 340 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 341 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 342 | <code>        score += sign &#42; king&#95;safety(pawns&#91;side&#93;, &amp;counts&#91;side&#93;, kings&#91;side&#93;, side, phase);</code> | Update the named state using the expression and assignment operator shown. |
-| 343 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 344 | <code>    score</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 345 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 346 | <code></code> | Blank line separating related declarations or steps. |
-| 347 | <code>/// In an endgame where one side is ahead, reward pushing the losing king to the edge and</code> | Source explanation: In an endgame where one side is ahead, reward pushing the losing king to the edge and |
-| 348 | <code>/// bringing the winning king close, from White&#x27;s side.</code> | Source explanation: bringing the winning king close, from White&#x27;s side. |
-| 349 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
-| 350 | <code>fn mating&#95;bonus(material: i32, kings: &amp;&#91;i32; 2&#93;, phase: i32) -&gt; i32 {</code> | Declare mating&#95;bonus(); its parameters and return type define the interface. |
-| 351 | <code>    if phase &gt; 8 &#124;&#124; material.abs() &lt; 400 {</code> | Test the condition and execute this branch only when it matches. |
-| 352 | <code>        return 0;</code> | Leave the current function with the displayed result. |
+| 266 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 267 | <code>    entry</code> | Evaluate or continue this expression in pawn&#95;structure(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 268 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 269 | <code></code> | Blank line separating related declarations or steps. |
+| 270 | <code>/// Return the pawn-structure entry for these pawns, scoring them only on a miss.</code> | Source explanation: Return the pawn-structure entry for these pawns, scoring them only on a miss. |
+| 271 | <code>fn probe&#95;pawns(pawns: &amp;&#91;u64; 2&#93;) -&gt; PawnEntry {</code> | Declare probe&#95;pawns(); its parameters and return type define the interface. |
+| 272 | <code>    let mixed =</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 273 | <code>        pawns&#91;0&#93;.wrapping&#95;mul(0x9E37&#95;79B9&#95;7F4A&#95;7C15) ^ pawns&#91;1&#93;.wrapping&#95;mul(0xC2B2&#95;AE3D&#95;27D4&#95;EB4F);</code> | Evaluate or continue this expression in probe&#95;pawns(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 274 | <code>    let index = (mixed &gt;&gt; (64 - PAWN&#95;CACHE&#95;BITS)) as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 275 | <code>    PAWN&#95;CACHE.with(&#124;table&#124; {</code> | Evaluate or continue this expression in probe&#95;pawns(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 276 | <code>        let mut table = table.borrow&#95;mut();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 277 | <code>        if table&#91;index&#93;.pawns != &#42;pawns {</code> | Test the condition and execute this branch only when it matches. |
+| 278 | <code>            table&#91;index&#93; = pawn&#95;structure(pawns);</code> | Update the named state using the expression and assignment operator shown. |
+| 279 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 280 | <code>        table&#91;index&#93;</code> | Evaluate or continue this expression in probe&#95;pawns(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 281 | <code>    })</code> | Evaluate or continue this expression in probe&#95;pawns(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 282 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 283 | <code></code> | Blank line separating related declarations or steps. |
+| 284 | <code>/// Score central holes and knight outposts from White&#x27;s side.</code> | Source explanation: Score central holes and knight outposts from White&#x27;s side. |
+| 285 | <code>fn positional&#95;terms(position: &amp;Position, pawns: &amp;&#91;u64; 2&#93;, attacks: &amp;&#91;u64; 2&#93;) -&gt; i32 {</code> | Declare positional&#95;terms(); its parameters and return type define the interface. |
+| 286 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 287 | <code>    let knights = position.by&#95;kind&#91;KNIGHT as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 288 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 289 | <code>        let enemy = 1 - side;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 290 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 291 | <code>        if knights &amp; position.by&#95;side&#91;enemy&#93; != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 292 | <code>            // Files c to f of this side&#x27;s third and fourth ranks: rows 5 and 4 for</code> | Source explanation: Files c to f of this side&#x27;s third and fourth ranks: rows 5 and 4 for |
+| 293 | <code>            // White, rows 2 and 3 for Black. One mask keeps the empty squares there</code> | Source explanation: White, rows 2 and 3 for Black. One mask keeps the empty squares there |
+| 294 | <code>            // that an enemy pawn attacks, so the loop visits only those.</code> | Source explanation: that an enemy pawn attacks, so the loop visits only those. |
+| 295 | <code>            let zone: u64 = if side == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 296 | <code>                0x0000&#95;3C3C&#95;0000&#95;0000</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 297 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 298 | <code>                0x0000&#95;0000&#95;3C3C&#95;0000</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 299 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
+| 300 | <code>            let mut holes = zone &amp; !position.occupied() &amp; attacks&#91;enemy&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 301 | <code>            while holes != 0 {</code> | Repeat this block while its condition remains true. |
+| 302 | <code>                let square = holes.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 303 | <code>                holes &amp;= holes - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 304 | <code>                if !pawn&#95;can&#95;challenge(pawns&#91;side&#93;, side, square) {</code> | Test the condition and execute this branch only when it matches. |
+| 305 | <code>                    score -= sign &#42; CENTRAL&#95;HOLE;</code> | Update the named state using the expression and assignment operator shown. |
+| 306 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 307 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 308 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 309 | <code>        let mut left = knights &amp; position.by&#95;side&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 310 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 311 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 312 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 313 | <code>            let view&#95;row = if side == 0 {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 314 | <code>                square / 8</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 315 | <code>            } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 316 | <code>                7 - square / 8</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 317 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
+| 318 | <code>            if (2..=4).contains(&amp;view&#95;row)</code> | Test the condition and execute this branch only when it matches. |
+| 319 | <code>                &amp;&amp; (1..=6).contains(&amp;(square % 8))</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 320 | <code>                &amp;&amp; !pawn&#95;can&#95;challenge(pawns&#91;enemy&#93;, enemy, square)</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 321 | <code>            {</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 322 | <code>                let mut bonus = KNIGHT&#95;OUTPOST;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 323 | <code>                if attacks&#91;side&#93; &amp; (1&#95;u64 &lt;&lt; square) != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 324 | <code>                    bonus += SUPPORTED&#95;OUTPOST;</code> | Update the named state using the expression and assignment operator shown. |
+| 325 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 326 | <code>                score += sign &#42; bonus;</code> | Update the named state using the expression and assignment operator shown. |
+| 327 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 328 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 329 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 330 | <code>    score</code> | Evaluate or continue this expression in positional&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 331 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 332 | <code></code> | Blank line separating related declarations or steps. |
+| 333 | <code>/// Score nearby pawn cover, tapering its value as pieces leave the board.</code> | Source explanation: Score nearby pawn cover, tapering its value as pieces leave the board. |
+| 334 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
+| 335 | <code>fn king&#95;safety(own&#95;pawns: u64, counts: &amp;&#91;i32; 10&#93;, king: i32, side: usize, phase: i32) -&gt; i32 {</code> | Declare king&#95;safety(); its parameters and return type define the interface. |
+| 336 | <code>    let row = king / 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 337 | <code>    let view&#95;row = if side == 0 { row } else { 7 - row };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 338 | <code>    if view&#95;row &lt; 5 {</code> | Test the condition and execute this branch only when it matches. |
+| 339 | <code>        return 0; // An advanced king uses its piece-square table</code> | Leave the current function with the displayed result. |
+| 340 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 341 | <code>    let col = king % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 342 | <code>    let forward = if side == 0 { -8 } else { 8 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 343 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 344 | <code>    for c in (col - 1).max(0)..(col + 2).min(8) {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 345 | <code>        if own&#95;pawns &amp; (1&#95;u64 &lt;&lt; (king + forward + c - col)) != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 346 | <code>            score += SHIELD&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
+| 347 | <code>        } else if own&#95;pawns &amp; (1&#95;u64 &lt;&lt; (king + 2 &#42; forward + c - col)) != 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 348 | <code>            score += SHIELD&#95;PAWN / 2;</code> | Update the named state using the expression and assignment operator shown. |
+| 349 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 350 | <code>        if counts&#91;(c + 1) as usize&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 351 | <code>            score -= OPEN&#95;KING&#95;FILE;</code> | Update the named state using the expression and assignment operator shown. |
+| 352 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
 | 353 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 354 | <code>    let winner = if material &gt; 0 { 0 } else { 1 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 355 | <code>    let loser&#95;row = kings&#91;1 - winner&#93; / 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 356 | <code>    let loser&#95;col = kings&#91;1 - winner&#93; % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 357 | <code>    // 0 in the center, 6 in a corner</code> | Source explanation: 0 in the center, 6 in a corner |
-| 358 | <code>    let edge = (3 - loser&#95;row).max(loser&#95;row - 4) + (3 - loser&#95;col).max(loser&#95;col - 4);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 359 | <code>    let distance = (kings&#91;0&#93; / 8 - kings&#91;1&#93; / 8)</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 360 | <code>        .abs()</code> | Evaluate or continue this expression in mating&#95;bonus(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 361 | <code>        .max((kings&#91;0&#93; % 8 - kings&#91;1&#93; % 8).abs());</code> | Evaluate or continue this expression in mating&#95;bonus(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 362 | <code>    let bonus = 10 &#42; edge + 5 &#42; (7 - distance);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 363 | <code>    if winner == 0 { bonus } else { -bonus }</code> | Test the condition and execute this branch only when it matches. |
-| 364 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 365 | <code></code> | Blank line separating related declarations or steps. |
-| 366 | <code>/// Return the score for the side to move: positive when it is ahead.</code> | Source explanation: Return the score for the side to move: positive when it is ahead. |
-| 367 | <code>pub fn evaluate(position: &amp;Position) -&gt; i32 {</code> | Declare evaluate(); its parameters and return type define the interface. |
-| 368 | <code>    let kinds = &amp;position.by&#95;kind;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 369 | <code>    let occupied = position.occupied();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 370 | <code>    let mut score = 0; // From White&#x27;s side</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 371 | <code>    let mut material = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 372 | <code>    let mut phase = 0; // 24 with every piece on the board, 0 with none left</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 373 | <code>    let mut kings = &#91;0&#95;i32; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 374 | <code>    let pawns = &#91;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 375 | <code>        position.by&#95;side&#91;0&#93; &amp; kinds&#91;PAWN as usize&#93;,</code> | Evaluate or continue this expression in evaluate(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 376 | <code>        position.by&#95;side&#91;1&#93; &amp; kinds&#91;PAWN as usize&#93;,</code> | Evaluate or continue this expression in evaluate(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 377 | <code>    &#93;;</code> | Close the preceding block, expression, call, or collection. |
-| 378 | <code>    let attacks = pawn&#95;attacks(&amp;pawns);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 379 | <code>    let mut rooks = &#91;0&#95;u64; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 380 | <code>    let mut bishop&#95;count = &#91;0&#95;u32; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 381 | <code></code> | Blank line separating related declarations or steps. |
-| 382 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 383 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 384 | <code>        let own = position.by&#95;side&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 385 | <code>        // Flip the row for Black: Black&#x27;s a8 is White&#x27;s a1</code> | Source explanation: Flip the row for Black: Black&#x27;s a8 is White&#x27;s a1 |
-| 386 | <code>        let flip = if side == 0 { 0 } else { 56 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 387 | <code>        let mut side&#95;score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 388 | <code>        let mut reach&#95;count = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 389 | <code></code> | Blank line separating related declarations or steps. |
-| 390 | <code>        rooks&#91;side&#93; = own &amp; kinds&#91;ROOK as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 391 | <code>        kings&#91;side&#93; = (own &amp; kinds&#91;KING as usize&#93;).trailing&#95;zeros() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 392 | <code></code> | Blank line separating related declarations or steps. |
-| 393 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 394 | <code>        material += sign &#42; 100 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 395 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 396 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 397 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 398 | <code>            side&#95;score += PAWN&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 399 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 400 | <code>        let mut left = own &amp; kinds&#91;KNIGHT as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 401 | <code>        phase += left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 402 | <code>        material += sign &#42; 300 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 403 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 404 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 405 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 406 | <code>            side&#95;score += KNIGHT&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 407 | <code>            reach&#95;count += (KNIGHT&#95;ATTACKS&#91;square&#93; &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 408 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 409 | <code>        let mut left = own &amp; kinds&#91;BISHOP as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 410 | <code>        bishop&#95;count&#91;side&#93; = left.count&#95;ones();</code> | Update the named state using the expression and assignment operator shown. |
-| 411 | <code>        phase += left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 412 | <code>        material += sign &#42; 300 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 413 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 414 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 415 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 416 | <code>            side&#95;score += BISHOP&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 417 | <code>            reach&#95;count += (bishop&#95;attacks(square, occupied) &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 418 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 419 | <code>        let mut left = rooks&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 420 | <code>        phase += 2 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 421 | <code>        material += sign &#42; 500 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 422 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 423 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 424 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 425 | <code>            side&#95;score += ROOK&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 426 | <code>            reach&#95;count += (rook&#95;attacks(square, occupied) &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 427 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 428 | <code>        let mut left = own &amp; kinds&#91;QUEEN as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 429 | <code>        phase += 4 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 430 | <code>        material += sign &#42; 900 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 431 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
-| 432 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 433 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 434 | <code>            let reach = rook&#95;attacks(square, occupied) &#124; bishop&#95;attacks(square, occupied);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 435 | <code>            reach&#95;count += (reach &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
-| 436 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 437 | <code>        score += sign &#42; (side&#95;score + MOBILITY&#95;BONUS &#42; reach&#95;count);</code> | Update the named state using the expression and assignment operator shown. |
-| 438 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 439 | <code></code> | Blank line separating related declarations or steps. |
-| 440 | <code>    // Insufficient material: a lone knight or bishop cannot mate</code> | Source explanation: Insufficient material: a lone knight or bishop cannot mate |
-| 441 | <code>    if phase &lt;= 1 &amp;&amp; pawns&#91;0&#93; == 0 &amp;&amp; pawns&#91;1&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
-| 442 | <code>        return 0;</code> | Leave the current function with the displayed result. |
-| 443 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 444 | <code>    let phase = phase.min(24);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 445 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 446 | <code>        let flip = if side == 0 { 0 } else { 56 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 447 | <code>        let view = kings&#91;side&#93; as usize ^ flip;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 448 | <code>        let taper = KING&#95;MIDDLE&#95;TABLE&#91;view&#93; &#42; phase + KING&#95;END&#95;TABLE&#91;view&#93; &#42; (24 - phase);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 449 | <code>        score += (SIGNS&#91;side&#93; &#42; taper).div&#95;euclid(24);</code> | Update the named state using the expression and assignment operator shown. |
-| 450 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 451 | <code>    if bishop&#95;count&#91;0&#93; &gt;= 2 {</code> | Test the condition and execute this branch only when it matches. |
-| 452 | <code>        score += BISHOP&#95;PAIR;</code> | Update the named state using the expression and assignment operator shown. |
-| 453 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 454 | <code>    if bishop&#95;count&#91;1&#93; &gt;= 2 {</code> | Test the condition and execute this branch only when it matches. |
-| 455 | <code>        score -= BISHOP&#95;PAIR;</code> | Update the named state using the expression and assignment operator shown. |
-| 456 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 457 | <code>    score += material + pawn&#95;terms(&amp;pawns, &amp;rooks, &amp;kings, phase, position.white);</code> | Update the named state using the expression and assignment operator shown. |
-| 458 | <code>    score += mating&#95;bonus(material, &amp;kings, phase);</code> | Update the named state using the expression and assignment operator shown. |
-| 459 | <code>    score += positional&#95;terms(position, &amp;pawns, &amp;attacks);</code> | Update the named state using the expression and assignment operator shown. |
-| 460 | <code>    if position.white { score } else { -score }</code> | Test the condition and execute this branch only when it matches. |
-| 461 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 354 | <code>    (score &#42; phase).div&#95;euclid(24)</code> | Evaluate or continue this expression in king&#95;safety(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 355 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 356 | <code></code> | Blank line separating related declarations or steps. |
+| 357 | <code>/// Score the pawn race, the rooks that use the pawns&#x27; files, and the pawn shield of</code> | Source explanation: Score the pawn race, the rooks that use the pawns&#x27; files, and the pawn shield of |
+| 358 | <code>/// each king, from White&#x27;s side. These terms add the kings, rooks, phase, and side to</code> | Source explanation: each king, from White&#x27;s side. These terms add the kings, rooks, phase, and side to |
+| 359 | <code>/// move to the cached pawn structure.</code> | Source explanation: move to the cached pawn structure. |
+| 360 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
+| 361 | <code>fn pawn&#95;terms(</code> | Declare pawn&#95;terms(); its parameters and return type define the interface. |
+| 362 | <code>    entry: &amp;PawnEntry,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 363 | <code>    rooks: &amp;&#91;u64; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 364 | <code>    kings: &amp;&#91;i32; 2&#93;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 365 | <code>    phase: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 366 | <code>    white: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 367 | <code>) -&gt; i32 {</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 368 | <code>    let mut score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 369 | <code>    let counts = &amp;entry.counts;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 370 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 371 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 372 | <code>        let enemy = 1 - side;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 373 | <code>        // The pawn race: with no pieces left, a passed pawn whose promotion square the</code> | Source explanation: The pawn race: with no pieces left, a passed pawn whose promotion square the |
+| 374 | <code>        // enemy king cannot reach (the rule of the square) becomes a queen</code> | Source explanation: enemy king cannot reach (the rule of the square) becomes a queen |
+| 375 | <code>        let mut left = if phase == 0 { entry.passed&#91;side&#93; } else { 0 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 376 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 377 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 378 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 379 | <code>            let row = (square / 8) as i32;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 380 | <code>            let col = square % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 381 | <code>            let steps = if side == 0 { row } else { 7 - row }; // Moves to promotion</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 382 | <code>            let king = kings&#91;enemy&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 383 | <code>            let mut king&#95;steps = (king / 8 - 7 &#42; side as i32)</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 384 | <code>                .abs()</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 385 | <code>                .max((king % 8 - col as i32).abs());</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 386 | <code>            if white != (side == 0) {</code> | Test the condition and execute this branch only when it matches. |
+| 387 | <code>                king&#95;steps -= 1; // The enemy king moves first</code> | Update the named state using the expression and assignment operator shown. |
+| 388 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 389 | <code>            if king&#95;steps &gt; steps.min(5) {</code> | Test the condition and execute this branch only when it matches. |
+| 390 | <code>                score += sign &#42; UNSTOPPABLE&#95;PAWN;</code> | Update the named state using the expression and assignment operator shown. |
+| 391 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 392 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 393 | <code>        let mut left = rooks&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 394 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 395 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 396 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 397 | <code>            let entry&#95;col = square % 8 + 1;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 398 | <code>            if counts&#91;side&#93;&#91;entry&#95;col&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 399 | <code>                let open&#95;file = counts&#91;enemy&#93;&#91;entry&#95;col&#93; == 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 400 | <code>                score += sign</code> | Update the named state using the expression and assignment operator shown. |
+| 401 | <code>                    &#42; if open&#95;file {</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 402 | <code>                        ROOK&#95;OPEN&#95;FILE</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 403 | <code>                    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 404 | <code>                        ROOK&#95;HALF&#95;OPEN&#95;FILE</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 405 | <code>                    };</code> | Close the preceding block, expression, call, or collection. |
+| 406 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 407 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 408 | <code>        score += sign &#42; king&#95;safety(entry.pawns&#91;side&#93;, &amp;counts&#91;side&#93;, kings&#91;side&#93;, side, phase);</code> | Update the named state using the expression and assignment operator shown. |
+| 409 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 410 | <code>    score</code> | Evaluate or continue this expression in pawn&#95;terms(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 411 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 412 | <code></code> | Blank line separating related declarations or steps. |
+| 413 | <code>/// In an endgame where one side is ahead, reward pushing the losing king to the edge and</code> | Source explanation: In an endgame where one side is ahead, reward pushing the losing king to the edge and |
+| 414 | <code>/// bringing the winning king close, from White&#x27;s side.</code> | Source explanation: bringing the winning king close, from White&#x27;s side. |
+| 415 | <code>#&#91;inline&#93;</code> | Compiler attribute controlling the following declaration. |
+| 416 | <code>fn mating&#95;bonus(material: i32, kings: &amp;&#91;i32; 2&#93;, phase: i32) -&gt; i32 {</code> | Declare mating&#95;bonus(); its parameters and return type define the interface. |
+| 417 | <code>    if phase &gt; 8 &#124;&#124; material.abs() &lt; 400 {</code> | Test the condition and execute this branch only when it matches. |
+| 418 | <code>        return 0;</code> | Leave the current function with the displayed result. |
+| 419 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 420 | <code>    let winner = if material &gt; 0 { 0 } else { 1 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 421 | <code>    let loser&#95;row = kings&#91;1 - winner&#93; / 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 422 | <code>    let loser&#95;col = kings&#91;1 - winner&#93; % 8;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 423 | <code>    // 0 in the center, 6 in a corner</code> | Source explanation: 0 in the center, 6 in a corner |
+| 424 | <code>    let edge = (3 - loser&#95;row).max(loser&#95;row - 4) + (3 - loser&#95;col).max(loser&#95;col - 4);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 425 | <code>    let distance = (kings&#91;0&#93; / 8 - kings&#91;1&#93; / 8)</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 426 | <code>        .abs()</code> | Evaluate or continue this expression in mating&#95;bonus(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 427 | <code>        .max((kings&#91;0&#93; % 8 - kings&#91;1&#93; % 8).abs());</code> | Evaluate or continue this expression in mating&#95;bonus(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 428 | <code>    let bonus = 10 &#42; edge + 5 &#42; (7 - distance);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 429 | <code>    if winner == 0 { bonus } else { -bonus }</code> | Test the condition and execute this branch only when it matches. |
+| 430 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 431 | <code></code> | Blank line separating related declarations or steps. |
+| 432 | <code>/// Return the score for the side to move: positive when it is ahead.</code> | Source explanation: Return the score for the side to move: positive when it is ahead. |
+| 433 | <code>pub fn evaluate(position: &amp;Position) -&gt; i32 {</code> | Declare evaluate(); its parameters and return type define the interface. |
+| 434 | <code>    let kinds = &amp;position.by&#95;kind;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 435 | <code>    let occupied = position.occupied();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 436 | <code>    let mut score = 0; // From White&#x27;s side</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 437 | <code>    let mut material = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 438 | <code>    let mut phase = 0; // 24 with every piece on the board, 0 with none left</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 439 | <code>    let mut kings = &#91;0&#95;i32; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 440 | <code>    let pawns = &#91;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 441 | <code>        position.by&#95;side&#91;0&#93; &amp; kinds&#91;PAWN as usize&#93;,</code> | Evaluate or continue this expression in evaluate(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 442 | <code>        position.by&#95;side&#91;1&#93; &amp; kinds&#91;PAWN as usize&#93;,</code> | Evaluate or continue this expression in evaluate(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 443 | <code>    &#93;;</code> | Close the preceding block, expression, call, or collection. |
+| 444 | <code>    let entry = probe&#95;pawns(&amp;pawns);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 445 | <code>    let mut rooks = &#91;0&#95;u64; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 446 | <code>    let mut bishop&#95;count = &#91;0&#95;u32; 2&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 447 | <code></code> | Blank line separating related declarations or steps. |
+| 448 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 449 | <code>        let sign = SIGNS&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 450 | <code>        let own = position.by&#95;side&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 451 | <code>        // Flip the row for Black: Black&#x27;s a8 is White&#x27;s a1</code> | Source explanation: Flip the row for Black: Black&#x27;s a8 is White&#x27;s a1 |
+| 452 | <code>        let flip = if side == 0 { 0 } else { 56 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 453 | <code>        let mut side&#95;score = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 454 | <code>        let mut reach&#95;count = 0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 455 | <code></code> | Blank line separating related declarations or steps. |
+| 456 | <code>        rooks&#91;side&#93; = own &amp; kinds&#91;ROOK as usize&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 457 | <code>        kings&#91;side&#93; = (own &amp; kinds&#91;KING as usize&#93;).trailing&#95;zeros() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 458 | <code></code> | Blank line separating related declarations or steps. |
+| 459 | <code>        let mut left = pawns&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 460 | <code>        material += sign &#42; 100 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 461 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 462 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 463 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 464 | <code>            side&#95;score += PAWN&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 465 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 466 | <code>        let mut left = own &amp; kinds&#91;KNIGHT as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 467 | <code>        phase += left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 468 | <code>        material += sign &#42; 300 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 469 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 470 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 471 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 472 | <code>            side&#95;score += KNIGHT&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 473 | <code>            reach&#95;count += (KNIGHT&#95;ATTACKS&#91;square&#93; &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 474 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 475 | <code>        let mut left = own &amp; kinds&#91;BISHOP as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 476 | <code>        bishop&#95;count&#91;side&#93; = left.count&#95;ones();</code> | Update the named state using the expression and assignment operator shown. |
+| 477 | <code>        phase += left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 478 | <code>        material += sign &#42; 300 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 479 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 480 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 481 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 482 | <code>            side&#95;score += BISHOP&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 483 | <code>            reach&#95;count += (bishop&#95;attacks(square, occupied) &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 484 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 485 | <code>        let mut left = rooks&#91;side&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 486 | <code>        phase += 2 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 487 | <code>        material += sign &#42; 500 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 488 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 489 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 490 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 491 | <code>            side&#95;score += ROOK&#95;TABLE&#91;square ^ flip&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 492 | <code>            reach&#95;count += (rook&#95;attacks(square, occupied) &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 493 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 494 | <code>        let mut left = own &amp; kinds&#91;QUEEN as usize&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 495 | <code>        phase += 4 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 496 | <code>        material += sign &#42; 900 &#42; left.count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 497 | <code>        while left != 0 {</code> | Repeat this block while its condition remains true. |
+| 498 | <code>            let square = left.trailing&#95;zeros() as usize;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 499 | <code>            left &amp;= left - 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 500 | <code>            let reach = rook&#95;attacks(square, occupied) &#124; bishop&#95;attacks(square, occupied);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 501 | <code>            reach&#95;count += (reach &amp; !own).count&#95;ones() as i32;</code> | Update the named state using the expression and assignment operator shown. |
+| 502 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 503 | <code>        score += sign &#42; (side&#95;score + MOBILITY&#95;BONUS &#42; reach&#95;count);</code> | Update the named state using the expression and assignment operator shown. |
+| 504 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 505 | <code></code> | Blank line separating related declarations or steps. |
+| 506 | <code>    // Insufficient material: a lone knight or bishop cannot mate</code> | Source explanation: Insufficient material: a lone knight or bishop cannot mate |
+| 507 | <code>    if phase &lt;= 1 &amp;&amp; pawns&#91;0&#93; == 0 &amp;&amp; pawns&#91;1&#93; == 0 {</code> | Test the condition and execute this branch only when it matches. |
+| 508 | <code>        return 0;</code> | Leave the current function with the displayed result. |
+| 509 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 510 | <code>    let phase = phase.min(24);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 511 | <code>    for side in 0..2 {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 512 | <code>        let flip = if side == 0 { 0 } else { 56 };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 513 | <code>        let view = kings&#91;side&#93; as usize ^ flip;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 514 | <code>        let taper = KING&#95;MIDDLE&#95;TABLE&#91;view&#93; &#42; phase + KING&#95;END&#95;TABLE&#91;view&#93; &#42; (24 - phase);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 515 | <code>        score += (SIGNS&#91;side&#93; &#42; taper).div&#95;euclid(24);</code> | Update the named state using the expression and assignment operator shown. |
+| 516 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 517 | <code>    if bishop&#95;count&#91;0&#93; &gt;= 2 {</code> | Test the condition and execute this branch only when it matches. |
+| 518 | <code>        score += BISHOP&#95;PAIR;</code> | Update the named state using the expression and assignment operator shown. |
+| 519 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 520 | <code>    if bishop&#95;count&#91;1&#93; &gt;= 2 {</code> | Test the condition and execute this branch only when it matches. |
+| 521 | <code>        score -= BISHOP&#95;PAIR;</code> | Update the named state using the expression and assignment operator shown. |
+| 522 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 523 | <code>    score += material + entry.score;</code> | Update the named state using the expression and assignment operator shown. |
+| 524 | <code>    score += pawn&#95;terms(&amp;entry, &amp;rooks, &amp;kings, phase, position.white);</code> | Update the named state using the expression and assignment operator shown. |
+| 525 | <code>    score += mating&#95;bonus(material, &amp;kings, phase);</code> | Update the named state using the expression and assignment operator shown. |
+| 526 | <code>    score += positional&#95;terms(position, &amp;pawns, &amp;entry.attacks);</code> | Update the named state using the expression and assignment operator shown. |
+| 527 | <code>    if position.white { score } else { -score }</code> | Test the condition and execute this branch only when it matches. |
+| 528 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 
 ### exchange.rs
 
@@ -3852,13 +3919,13 @@ Store and retrieve bounded search results using position keys.
 
 ## Source coverage and identity
 
-The reference covers all 14 runtime Rust modules and all 3,720 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
+The reference covers all 14 runtime Rust modules and all 3,787 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
 
 | Source | SHA-256 |
 | --- | --- |
 | [src/attacks.rs](src/attacks.rs) | `a603a0e200d148fe4f24c53173ae0059ec52fc4080f05789fc6714355d287965` |
 | [src/board.rs](src/board.rs) | `f270d32c8b7f79bc95d1487a35d6996936ee6f461f375036a5cbdcee0751f537` |
-| [src/evaluation.rs](src/evaluation.rs) | `a6573df53533f20a4cb59968c196a49d759e5ca61a6e61d3f814bd9ec98311e8` |
+| [src/evaluation.rs](src/evaluation.rs) | `f17631363f0026923bf69659a0d722c3a1d2accda5f30a0894cbd5406ac5905a` |
 | [src/exchange.rs](src/exchange.rs) | `c1b1fe90c897dccafcf28744abb1b2d127397f0c073ea0051bf75cf76b50e892` |
 | [src/main.rs](src/main.rs) | `5c0ee5d1795fe100c1fdcabb020e5ac70f7165fd35ba85363096dc927d029c3f` |
 | [src/make_move.rs](src/make_move.rs) | `0fb0a99aeae26a9e125532a2f888267077766f06906d0a4a501ca11f54d34460` |

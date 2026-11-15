@@ -59,9 +59,9 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
-| [Remus6](../rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,849 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,216 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,825 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus6](../rust_engines/Remus6/remus6.md) | 2737 | Super Grandmaster | Rust | 2,893 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,268 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,877 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
 FIDE ratings. See
@@ -283,7 +283,11 @@ ponder searches bypass the service.
 
 Pondering searches during the opponent's turn. When pondering is enabled in
 Lucas Chess, Remus6 to Remus8 start that search after `go ponder`. If the opponent
-plays the predicted move, a ponder hit starts the engine's move clock. The engine
+plays the predicted move, a ponder hit starts the engine's move clock. Remus6
+ponders on the position before the predicted reply, so its table holds a search of
+every reply the opponent can choose; after a hit it searches the reached position
+from that table. Remus7 and Remus8 ponder on the position after the predicted reply
+and continue that search after a hit. The engine
 checks book moves for legality. Book pondering waits without claiming native
 search credit. See each engine guide for time-budget details and supported options.
 
@@ -328,7 +332,7 @@ not a fresh benchmark of any subsequent engine edits.
 
 ## Speed techniques of the Rust engines 6 through 8
 
-Remus6, Remus7, and Remus8 share six techniques that make each position
+Remus6, Remus7, and Remus8 share seven techniques that make each position
 cheaper to search. They are intended to preserve native search choices. In the fixed-depth
 comparison positions, one-worker searches return the same scores, node counts, and
 principal variations with or without the techniques. Evaluation cross-checks compare
@@ -349,7 +353,7 @@ summed over six fixed-depth searches: the starting position, an Italian opening,
 worker both builds search the same 34 million positions, so the ratio is also the ratio
 of the two run times. With four search threads the threads reach the shared table in a
 different order on every run, the two builds visit different positions, and only the
-rate compares.
+rate compares. The ratios cover T1 to T6; T7 is measured on its own in the table below.
 
 | Step | Technique | Code | What it saves | Gain alone | Version |
 | --- | --- | --- | --- | ---: | --- |
@@ -359,15 +363,18 @@ rate compares.
 | T4 | Central holes from one mask | `positional_terms()` in `evaluation.rs` | Sixteen square-by-square tests in every evaluation | 2% | Remus6 |
 | T5 | Evaluation on demand | `alpha_beta()` in `search.rs` | The evaluation of positions whose pruning never reads the score | 1 to 2% | Remus6 |
 | T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% | Remus6 |
+| T7 | Pawn-structure cache | `probe_pawns()` and `pawn_structure()` in `evaluation.rs` | Rescoring doubled, isolated, passed, and backward pawns, pawn attacks, and file counts when the pawns match a recent position | 5% | Remus6 |
 
-`Version` identifies the first engine with the technique. All six begin in Remus6
+`Version` identifies the first engine with the technique. All seven begin in Remus6
 and are retained in Remus7 and Remus8; Remus1 to Remus5 do not implement these optimizations.
 
 Each gain is that technique alone, in nodes per second with one search thread. T1, T2, and
 T4 are measured in Remus6. T3, T5, and T6 are measured in the move loop of the
 Remus4 search, which the three engines share. The gains overlap, so together they give
-the ratios of the first table, not their sum. The six techniques add 49 code lines to
-Remus6 and 51 to each of Remus7 and Remus8.
+the ratios of the first table, not their sum. T1 to T6 add 49 code lines to Remus6
+and 51 to each of Remus7 and Remus8; T7 adds 52 to each of the three. T7 is measured
+in Remus6 on 17 fixed-depth searches, with identical node counts, scores, and moves:
+7 to 10% in middlegames and almost nothing in pawn and rook endings.
 
 ### T1: Branch-free ray lookup
 
@@ -473,6 +480,22 @@ in check. Quiescence does not use the table, so a prefetch there costs more than
 position the same way, and in Remus8 so does `search_split_move()` when a worker
 takes a move from a split. A prefetch reads no value, so the shared table of the
 parallel engines needs no added synchronization.
+
+### T7: Pawn-structure cache
+
+Most moves leave every pawn where it stands, so thousands of positions in one search
+share the same pawns. The doubled, isolated, passed, and backward pawn scores depend
+on the pawns alone, and so do the pawn attacks and the count of pawns on each file.
+`probe_pawns()` keeps those results in a table of 8,192 entries, about 1 MiB, indexed
+by a mix of the two sides' pawn bitboards. An entry stores both bitboards and answers
+only an exact match, so a lookup never returns another structure's score. On a miss
+`pawn_structure()` scores the pawns and replaces the entry. Each search thread keeps
+its own table, so the parallel engines need no synchronization for it.
+
+The terms that also depend on other pieces are still computed every time from the
+cached parts: the pawn race reads the cached passed pawns with the kings and the side
+to move, rooks read the cached file counts, and king cover reads the pawns and file
+counts with the king's square and the game phase.
 
 ### Checking that the search is the same
 

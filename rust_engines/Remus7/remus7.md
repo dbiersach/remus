@@ -43,18 +43,18 @@ excluded.
 | `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
 | `src/attacks.rs` | 147 | 147 | 0 | Attack detection and king-safety checks |
 | `src/move_generation.rs` | 166 | 166 | 0 | Pseudo-legal moves, castling, promotions, and en passant |
-| `src/evaluation.rs` | 408 | 408 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine |
+| `src/evaluation.rs` | 460 | 460 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine, with a cache of pawn-structure scores |
 | `src/exchange.rs` | 99 | 99 | 0 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 171 | +82 | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 764 | 505 | +259 | Move selection, search, ordering, and evaluation integration |
-| `src/search_control.rs` | 357 | 307 | +50 | Input queue, cancellation, pondering, and deadlines |
+| `src/search_control.rs` | 357 | 325 | +32 | Input queue, cancellation, pondering, and deadlines |
 | `src/search_metrics.rs` | 57 | 0 | +57 | Per-worker timing, nodes, re-search costs, and scheduling counters |
 | `src/table_metrics.rs` | 39 | 34 | +5 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
-| `src/main.rs` | 346 | 319 | +27 | UCI commands, configuration, root selection, and engine orchestration |
+| `src/main.rs` | 346 | 345 | +1 | UCI commands, configuration, root selection, and engine orchestration |
 | `src/diagnostics.rs` | 0 | 61 | -61 | Logging is provided by search_control.rs in this engine |
-| **Total** | **3,216** | **2,797** | **+419** | |
+| **Total** | **3,268** | **2,893** | **+375** | |
 
 ### Supporting files
 

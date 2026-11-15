@@ -28,4 +28,4 @@ Lucas Chess runs the student pair's own engines from the day folders. Run the su
 
 ## Done when
 
-The student pair's Remus2 passes the verifier's reference tests. In Lucas Chess, the student pair has observed the student pair's Remus2 against the student pair's Remus1, and each student has played the student pair's Remus2. A round against Stockfish 1500 follows if time remains.
+The student pair's Remus2 passes the verifier's reference tests. In Lucas Chess, the student pair has observed its Remus2 against the student pair's Remus1, and each student has played the student pair's Remus2. A round against Stockfish 1500 follows if time remains.

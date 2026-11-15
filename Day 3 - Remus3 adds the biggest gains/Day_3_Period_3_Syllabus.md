@@ -8,17 +8,17 @@ Remus3 plays from an opening book and manages its clock.
 
 ## The big picture
 
-The student pair keeps working in `Day 3 - Remus3 adds the biggest gains/Remus3`. This period adds two files, `opening_book.txt` and `opening_book.py`, and edits `search.py` and `uci.py`.
+The student pair keeps working in `Day 3 - Remus3 adds the biggest gains/Remus3`. This period adds `opening_book.py`, uses the supplied `opening_book.txt`, and edits `search.py` and `uci.py`.
 
-An opening book is a list of good opening lines, written as UCI moves such as `e2e4 e7e5 g1f3`. While a game follows a line of the book, Remus3 plays the line's next move at once instead of searching, so it reaches a sound middlegame and saves its clock for later. `opening_book.txt` is data, not code, so the student pair copies it in File Explorer and types none of it. `opening_book.py` reads it, and `uci.py` checks every book move with the engine's own move generator before playing it, so a wrong line in the book can never make Remus3 play an illegal move.
+An opening book is a list of good opening lines, written as UCI moves such as `e2e4 e7e5 g1f3`. While a game follows a line of the book, Remus3 plays the line's next move at once instead of searching, so it reaches a sound middlegame and saves its clock for later. The supplied data files do not have to be typed and don't represent code. Keep `opening_book.txt` in the Remus3 folder. `opening_book.py` reads it, and `uci.py` checks every book move with the engine's own move generator before playing it, so a wrong line in the book can never make Remus3 play an illegal move.
 
-The clock gets smarter in two ways. `uci.py` now gives `think()` two times: the time it aims to use, and the longest it may take, a hard limit that is never more than a fifth of the time left on the clock. `think()` spends more of that time when the best move changes from one depth to the next, a sign that the position is hard. The search also uses an aspiration window: from depth 4 on, it first searches only a 50-centipawn window around the last depth's score, which skips more moves, and searches again with the full window when the score falls outside.
+Two changes control the search time. `uci.py` now gives `think()` two times: the time it aims to use, and the longest it may take, a hard limit that is never more than a fifth of the time left on the clock. `think()` spends more of that time when the best move changes from one depth to the next, a sign that the position is hard. The search also uses an aspiration window: from depth 4 on, it first searches only a 50-centipawn window around the last depth's score, which skips more moves, and searches again with the full window when the score falls outside.
 
 ## The period step by step
 
 | Time | Activity |
 | --- | --- |
-| 1:00 to 1:10 | An opening book is a list of good first moves in UCI text. Copy `opening_book.txt` from `Day 3 - Remus3 adds the biggest gains/Remus3` into `Day 3 - Remus3 adds the biggest gains/Remus3` in File Explorer: it is data, not code, so nobody types it. |
+| 1:00 to 1:10 | An opening book is a list of good first moves in UCI text. In File Explorer, confirm that `opening_book.txt` is already in `Day 3 - Remus3 adds the biggest gains/Remus3`. The supplied data files do not have to be typed and don't represent code. |
 | 1:10 to 1:35 | Type `opening_book.py` (21 code lines): `load_book()` and `book_moves()`. |
 | 1:35 to 2:25 | In `think()`, add the aspiration window and the time that grows when the best move changes; in `uci.py`, add `legal_book_move()`, the game's moves, and the hard time limit (about 30 code lines). |
 | 2:25 to 2:30 | Change the name line in `uci.py` to `id name Remus3`. |
@@ -27,7 +27,7 @@ The clock gets smarter in two ways. `uci.py` now gives `think()` two times: the 
 
 | File | New or edited | What the student pair does | Lines in your file |
 | --- | --- | --- | --- |
-| `opening_book.txt` | New, copied | Copy from `Day 3 - Remus3 adds the biggest gains/Remus3` into `Day 3 - Remus3 adds the biggest gains/Remus3` in File Explorer; type nothing | Data, not code |
+| `opening_book.txt` | Supplied | Keep the existing file in the Remus3 folder; type nothing | Data, not code |
 | `opening_book.py` | New | Type the whole file: `load_book()` and `book_moves()` | 1 to 26 |
 | `search.py` | Edited (begun in Period 1) | Add the aspiration window and the time that grows when the best move changes, in `think()` | 20, 150 to 178 |
 | `uci.py` | Copied from `Day 2 - Remus2 searches ahead/Remus2`, edited | Add `legal_book_move()`, the game's moves, the hard time limit, and the name Remus3 | 3 to 7, 17 to 23, 27, 29, 35, 41 to 42, 47 to 61 |
@@ -39,7 +39,7 @@ Type the code shown in the screenshots. The line numbers refer to your own file 
 
 ### `opening_book.txt`
 
-In File Explorer, copy `Day 3 - Remus3 adds the biggest gains/Remus3/opening_book.txt` into `Day 3 - Remus3 adds the biggest gains/Remus3`. Each line is one opening, such as `e2e4 e7e5 g1f3 b8c6 f1b5`. A line that starts with `White:` or `Black:` is played only by that side: a trap defense, or an opening that leaves the other side too low a score at its end. A line that starts with `#` is a comment.
+In File Explorer, confirm that the supplied `opening_book.txt` is present in `Day 3 - Remus3 adds the biggest gains/Remus3`. Leave it there; no copy is needed. Each line is one opening, such as `e2e4 e7e5 g1f3 b8c6 f1b5`. A line that starts with `White:` or `Black:` is played only by that side: a trap defense, or an opening that leaves the other side too low a score at its end. A line that starts with `#` is a comment.
 
 ### `opening_book.py`
 

@@ -110,7 +110,7 @@ The class runs three of them, one each time a new version is finished:
 | `Remus4 vs Remus3` | Remus4 | Remus3 |
 
 Both engines must be on the list from Part 2. These steps build the first tournament,
-and the other two go in the same way.
+and the same steps apply to the other two.
 
 **Step 1.** Click **Engines**, then **Tournaments between engines** (the last line of
 the menu in the picture from Part 2). Click **New**, type the name `Remus2 vs Remus1`,
@@ -187,12 +187,10 @@ positions are not a controlled speed comparison.
 
 ### A tournament against Stockfish 1500
 
-This tournament comes last in Period 4 of Days 2 and 3, after the round against the
-previous version and the round against the student pair, and a class short of time
-skips it.
+This tournament follows the rounds against the previous version and the student
+pair in Period 4 of Days 2 and 3. Skip it if time is short.
 
-Stockfish is one of the strongest chess engines in the world. Lucas Chess comes with
-a Stockfish with a limited-strength setting labeled 1500 Elo. This is an opponent
+Lucas Chess includes Stockfish with a limited-strength setting labeled 1500 Elo. This is an opponent
 setting, not a measured rating for Remus or a guaranteed result for any game. To use it as an
 opponent, click **Import** in Step 3 and choose **Engines with limited elo**, then
 **1500**, then **Stockfish 19 (1500)**. Click its name in the **Engines** tab, and its
@@ -221,7 +219,7 @@ playing strength.
 
 Lucas Chess is free. To use it on your own computer at home, download the installer
 from the official site, [lucaschess.pythonanywhere.com/downloads](https://lucaschess.pythonanywhere.com/downloads),
-and run it. It installs like any other Windows program, and it comes with Stockfish,
+and run the installer. Lucas Chess includes Stockfish,
 so every tournament in Part 4 works the same way at home. Remus and its `remusN.bat`
 launcher run on Windows only.
 
@@ -250,9 +248,11 @@ your own copy through Lucas Chess for that game.
 ## Supplied Rust engine settings
 
 Remus5 implements the workshop Remus4 algorithms in Rust with a fixed 512 MiB
-transposition table. Remus6 adds stronger native search and evaluation, optional
-root tablebase advice, and UCI pondering. Remus7 uses Lazy SMP parallel search;
-Remus8 uses YBWC. Each executable and its guide live under `rust_engines/RemusN`.
+transposition table. Remus6 adds search and evaluation features, optional
+root tablebase advice from solved endgame positions, and UCI pondering (searching
+during the opponent's turn). Remus7 uses Lazy SMP, symmetric multiprocessing with
+a shared search table. Remus8 uses YBWC, the Young Brothers Wait Concept: search
+the first move before dividing the remaining moves among workers. Each executable and its guide live under `rust_engines/RemusN`.
 Student pairs do not type these engines.
 
 Remus6 to Remus8 advertise `Ponder` and `LichessTablebase`. Ponder defaults to false;

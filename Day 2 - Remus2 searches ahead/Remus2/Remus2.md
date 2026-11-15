@@ -2,11 +2,11 @@
 
 ## Overview
 
-Remus2 is [Remus1](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) , the random mover the student pairs finish on
+Remus2 is [Remus1](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md), the random mover the student pairs finish on
 Day 1, with `evaluation.py` and a real `search.py` in place of Remus1's random one. It
 plays legal chess with an alpha-beta search, a quiescence search that plays out the
 captures at the end of each line, MVV-LVA move ordering (most valuable victim, least
-valuable attacker), a check extension, and iterative deepening. It speaks UCI to Lucas
+valuable attacker), a check extension, and iterative deepening. Remus2 uses UCI (Universal Chess Interface) to communicate with Lucas
 Chess through `remus2.bat` and uses only the standard library.
 
 [Remus3](../../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) adds the biggest gains for the fewest lines, and
@@ -23,7 +23,7 @@ lines of code.
 
 ## Source files and lines of code
 
-Comparison baseline: [Remus1](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md) .
+Comparison baseline: [Remus1](../../Day%201%20-%20Remus1%20plays%20legal%20chess/Remus1/Remus1.md).
 
 Lines of code count nonblank runtime source lines, excluding standalone comments and docstrings. `verify_remus2.py` is supplied, never typed, and excluded from these counts and tables.
 Change is the net difference, not lines edited or typed. A zero means that file is
@@ -63,7 +63,7 @@ This engine advertises no configurable UCI options.
 
 ### Supported commands
 
-`uci` , `isready` , `position startpos moves ...` , timed `go` , and `quit` form the
+`uci`, `isready`, `position startpos moves ...`, timed `go`, and `quit` form the
 normal GUI conversation. The Python UCI adapter does not accept arbitrary FEN positions.
 
 ## Architecture and call diagrams
@@ -75,7 +75,8 @@ not Rust call graphs or a trace of one particular search.
 The diagrams use Mermaid's ELK layout. Each module has a stable box color across Python and Rust: `uci.py` and `main.rs`
 share blue, and both search modules use orange. Colors identify source modules,
 not execution frequency. An arrow
-points from a caller to a callee, and a loop marks recursion. A small bridge at a
+points from the function making a call to the function being called. A loop marks
+recursion, where a function calls itself. A small bridge at a
 crossing means the lines cross without joining. Arrows show possible calls, not
 execution order or call frequency.
 
@@ -147,7 +148,7 @@ score the resulting positions.
   only in UCI move text such as `e7e8q`.
 - **Supplied tables.** `piece_square_tables.json` contains the complete 64-square
   values, rank 8 first and files a to h across each row. The module reads them once
-  and assigns named tuples; search reads the tuples without further file access.
+  and assigns the values to tuple constants; search reads the tuples without further file access.
 - **No legal-move list.** The search makes each pseudo-legal move and skips it if its
   own king is attacked.
 
@@ -341,7 +342,7 @@ A White pawn advancing from e7 to e8 reaches the promotion rank. The generator e
 
 ### Negamax, a cutoff, and quiescence
 
-Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and its parent need not know whether an even better child continuation exists.
+Suppose one legal root move gives the opponent a score of -80. Negating gives +80 for the root player. A second move whose child returns -120 gives +120 and becomes preferred. For a child entered with alpha=-150 and beta=-80, a continuation returning -60 reaches beta: the child is already good enough for that player's cutoff, and the parent search can stop without finding the exact best score for that child.
 
 A capture sequence illustrates why a raw depth-boundary evaluation can mislead. A queen taking a defended pawn momentarily removes 100 enemy centipawns, but a recapture can remove the 900-centipawn queen. Quiescence examines tactical continuations to expose such exchanges. It still has the check-evasion and terminal limitations described above, so extending captures alone does not establish full tactical correctness.
 
@@ -373,7 +374,7 @@ The output is pseudo-legal: piece movement and occupancy are checked, but a pinn
 
 ### evaluation.py
 
-A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The source reference explains every numeric row and every additional positional term, including approximations and rounding.
+A positive result favors the player to move, not always White. Material values and square bonuses are estimates; legality and checkmate are separate search concerns. The table rows are White-oriented and vertically reflected for Black. The supplied table data determines the square bonuses; later versions add positional terms with their own approximations and rounding.
 
 <a id="search-py"></a>
 
@@ -385,7 +386,7 @@ Move ordering changes how quickly bounds are found; it does not replace legality
 
 ### uci.py
 
-The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, trusts incoming tokens, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
+The adapter is synchronous and implements a limited UCI subset. It assumes position startpos with a complete legal move list, uses incoming tokens without comprehensive validation, and does not parse runtime FEN or implement asynchronous stop. It does not advance the live position when emitting bestmove; the GUI supplies the subsequent position command. Unknown commands are ignored by the if/elif chain.
 
 <a id="remus-bat"></a>
 

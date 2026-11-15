@@ -4,13 +4,13 @@
 
 ## Goal
 
-Remus3's evaluation knows pawn structure, the bishop pair, and where rooks belong.
+Remus3 scores pawn structure, the bishop pair, and rook placement.
 
 ## The big picture
 
 Today the student pair turns Remus2 into Remus3, and all of Day 3's typing goes into the folder `Day 3 - Remus3 adds the biggest gains/Remus3`. The period opens in File Explorer: copy only the engine `.py` modules from `Day 2 - Remus2 searches ahead/Remus2` into `Day 3 - Remus3 adds the biggest gains/Remus3`, excluding the verifier. Keep the destination guide, verifier, launcher, and supplied data. From then on, edit only the files in `Day 3 - Remus3 adds the biggest gains/Remus3`. `Day 2 - Remus2 searches ahead/Remus2` stays as it is.
 
-This period teaches the evaluation three ideas a chess player learns early. Two pawns on one file (doubled pawns) and a pawn with no friendly pawn on either neighboring file (an isolated pawn) are weak, and a pawn that no enemy pawn can stop (a passed pawn) grows stronger the closer it gets to promotion. Two bishops together are worth more than a bishop and a knight, because together they cover both colors of square. And a rook belongs on the seventh rank, where it attacks the pawns that have not moved. `evaluation.py` gets all three.
+This period adds three familiar chess ideas to the evaluation. Two pawns on one file (doubled pawns) and a pawn with no friendly pawn on either neighboring file (an isolated pawn) are weak, and a pawn that no enemy pawn can stop (a passed pawn) grows stronger the closer it gets to promotion. Two bishops together are worth more than a bishop and a knight, because together they cover both colors of square. And a rook belongs on the seventh rank, where it attacks the pawns that have not moved. `evaluation.py` gets all three.
 
 The period also moves `MATE_SCORE` from `search.py` to `board.py` and adds two small helpers to `board.py`, `position_key()` and `move_text()`. The transposition table of Period 2 needs `MATE_SCORE` and `position_key()`, and it cannot import them from `search.py`, because `search.py` imports the table. No new file is added this period.
 

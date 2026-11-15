@@ -8,7 +8,7 @@ The student pair scores a set of crystal phases and builds the greedy answer.
 
 ## The big picture
 
-No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `score()` and `greedy_phases()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `score()` is the evaluation of a set of phases, and `greedy_phases()` is a one-move-deep search that keeps adding the best phase. `phase_hunt.py` holds every other line already, so the student pair types only the bodies of these functions, from their docstrings. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
+No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `score()` and `greedy_phases()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `score()` is the evaluation of a set of phases, and `greedy_phases()` is a one-move-deep search that keeps adding the best phase. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
 
 ## The period step by step
 

@@ -4,7 +4,7 @@
 
 ## Goal
 
-Remus4 plays out an exchange before it trusts a capture.
+Remus4 estimates the material gain or loss from an exchange before searching the capture.
 
 ## The big picture
 

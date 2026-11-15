@@ -10,7 +10,7 @@ The student pair completes Remus4's evaluation and tests its code with `verify_r
 
 The student pair finishes Remus4 in `Day 4 - Remus4 adds everything else/Remus4` with the last terms of the evaluation, all in `pawn_terms()` and `evaluate()`, gives the engine its name, and tests it. No file is added.
 
-Three terms join `pawn_terms()`, because each one depends on where the pawns stand. The pawn race uses the rule of the square: in a pawn endgame, a passed pawn whose enemy king is too far away to catch it will promote, so it earns a bonus of 500, more than a rook. A rook on a file with no pawns of its own side is on a half-open file, worth 10, and on a file with no pawns at all it is on an open file, worth 20. King safety rewards a king on its home rank for each pawn in front of it and punishes each file next to it with no pawn of its own, scaled by the phase from Period 3 so it fades as the pieces come off.
+Three terms join `pawn_terms()`, because each one depends on where the pawns stand. The pawn race uses the rule of the square: in a pawn endgame, a passed pawn whose enemy king is too far away to catch it will promote, so it earns a bonus of 500, equal to the material value of a rook. A rook on a file with no pawns of its own side is on a half-open file, worth 10, and on a file with no pawns at all it is on an open file, worth 20. King safety rewards a king on its home rank for each pawn in front of it and punishes each file next to it with no pawn of its own, scaled by the phase from Period 3 so it fades as the pieces come off.
 
 Lucas Chess runs the student pair's own engines from the day folders. Run the supplied verifier first. Record wins, draws, losses, or unfinished games; a short round illustrates play but does not establish a reliable Elo rating or a controlled speed comparison.
 
@@ -70,4 +70,4 @@ The terminal prints actual results beside `(expected ...)` references. A `PROBLE
 
 ## Done when
 
-The terminal reports `Remus4 passes every test` for the student pair's code. The student pair has observed the student pair's Remus4 against the student pair's Remus3 and Remus5 in Lucas Chess and recorded the game results. A round against the student pair follows if time remains.
+The terminal reports `Remus4 passes every test` for the student pair's code. The student pair has observed its Remus4 against the student pair's Remus3 and Remus5 in Lucas Chess and recorded the game results. A round against the student pair follows if time remains.

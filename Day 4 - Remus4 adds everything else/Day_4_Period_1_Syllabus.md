@@ -4,15 +4,15 @@
 
 ## Goal
 
-Remus4 sees draws by repetition and the fifty-move rule, and spends less time on moves that are probably bad.
+Remus4 detects draws by repetition and the fifty-move rule, and spends less time on moves that are probably bad.
 
 ## The big picture
 
 Today the student pair turns Remus3 into Remus4, and all of Day 4's typing goes into the folder `Day 4 - Remus4 adds everything else/Remus4`. The period opens in File Explorer: copy only the engine `.py` modules from `Day 3 - Remus3 adds the biggest gains/Remus3` into `Day 4 - Remus4 adds everything else/Remus4`, excluding the verifier. Keep the destination guide, verifier, launcher, and supplied data. From then on, edit only the files in `Day 4 - Remus4 adds everything else/Remus4`. `Day 3 - Remus3 adds the biggest gains/Remus3` stays as it is.
 
-Remus3 cannot see a draw by repetition or by the fifty-move rule, so it can throw away a won game by repeating moves, or miss a draw that would save a lost one. This period gives the position a fifth part, the halfmove clock: the number of moves since the last pawn move or capture. At 100 halfmoves, fifty moves by each side, the game is drawn. The search also keeps a history, the keys of every position on the way from the start of the game to the position it is searching, and scores a position that is already in the history as a draw.
+Remus3 does not detect a draw by repetition or by the fifty-move rule, so it can throw away a won game by repeating moves, or miss a draw that would save a lost one. This period gives the position a fifth part, the halfmove clock: the number of moves since the last pawn move or capture. At 100 halfmoves, fifty moves by each side, the game is drawn. The search also keeps a history, the keys of every position on the way from the start of the game to the position it is searching, and scores a position that is already in the history as a draw.
 
-The same period makes the search spend less time on moves that are probably bad, in three ways. Futility pruning skips a quiet move one move from the end of the search when the position stands so far below alpha that one quiet move cannot catch up. Late move reductions search the quiet moves that come late in the move order one move less deep, and search again at full depth only when one surprises. Principal variation search assumes the first move is the best, and tests every other move with the narrowest window, which is quicker, before it searches a move that passes the test with the full window.
+The same period makes the search spend less time on moves that are probably bad, in three ways. Futility pruning skips a quiet move one move from the end of the search when the position stands so far below alpha that one quiet move cannot catch up. Late move reductions search the quiet moves that come late in the move order one move less deep, and search again at full depth only when a reduced search improves the score. Principal variation search assumes the first move is the best, and tests every other move with the narrowest window, which is quicker, before it searches a move that passes the test with the full window.
 
 The name line in `uci.py` stays `id name Remus3` until Period 4. No new file is added this period.
 

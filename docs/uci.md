@@ -2,7 +2,7 @@
 
 ## The big picture
 
-Lucas Chess draws the board and runs the clocks. Remus does the thinking. The two
+Lucas Chess draws the board and runs the clocks. Remus chooses the moves. The two
 programs talk by sending lines of text, in a language called UCI, the Universal Chess
 Interface. `uci.py` reads Lucas Chess's commands and sends back Remus's answers.
 Each Python Remus engine has its own `uci.py`, and `remusN.bat` starts it.
@@ -23,7 +23,7 @@ normally loads its imports and definitions and exits without output.
 At the scheduled checkpoints, run `verify_remusN.py` (with your version number in place of N) in the student pair's engine
 folder. Expect actual and expected results, then `RemusN passes every test` and
 elapsed time (Day 4 intermediate checks name their period). `PROBLEM:` or a
-traceback means it has not passed. The verifier checks specific reference positions
+traceback means the verification has not passed. The verifier checks specific reference positions
 and a short UCI exchange; it does not test every position or branch. Its UCI check
 looks for the engine name, `uciok`, `readyok`, and a final `bestmove` line. It checks
 the result against independent references for nine legal histories: `1. e4`,
@@ -31,7 +31,7 @@ castling available and played, en passant available and played, promotion availa
 underpromotion played, checkmate, and stalemate. The last two require `0000`; all
 other cases reject it. It accepts any legal reply, so the engine need not choose
 a special move just because one is available. These cases do not establish
-legality in every position or test every book choice. It starts `uci.py` directly, so it does not check
+legality in every position or test every book choice. The verifier starts `uci.py` directly, so it does not check
 `remusN.bat` or Lucas Chess's configuration. Workshop games in Lucas Chess use the
 registered student engines from the day folders.
 
@@ -47,7 +47,7 @@ registered student engines from the day folders.
 
 A UCI move is only the square a piece leaves and the square it moves to, with no
 piece letter: `e2e4`, `g1f3`, and `e1g1` for White castling on the king's side. A
-promotion adds the new piece in a small letter: `e7e8q`. People write moves in SAN
+promotion adds the new piece in a small letter: `e7e8q`. People write moves in Standard Algebraic Notation (SAN)
 (`e4`, `Nf3`, `O-O`, `e8=Q`), but a program reads UCI more easily, so Remus reads and
 writes only UCI.
 
@@ -72,7 +72,7 @@ Lucas Chess -> quit
    confirms a protocol response; it does not test move generation or search.
 4. `position startpos moves e2e4 e7e5 ...` names the game so far. Remus starts from
    `START_POSITION` and plays every move after the word `moves`. Lucas Chess sends
-   every game from the starting position, so the workshop Python engines need no FEN input.
+   every game from the starting position, so the workshop Python engines need no Forsyth-Edwards Notation (FEN) input, which describes a position as text.
 5. In Remus2, `go` starts the search. `read_time()` reads the clock (`wtime` or `btime`) and the
    increment (`winc` or `binc`) of the side to move. Remus plans to spend a thirtieth
    of its clock plus half its increment, or uses `movetime` as its budget when Lucas sends one. That is a time allowance,
@@ -101,12 +101,12 @@ buffer.
   longest time: three times the plan, but never more than a fifth of the clock. The
   search takes longer than planned when its best move keeps changing.
 - **The game history.** Remus4 keeps the position key of every position of the game
-  in `game_history`, so its search can see a threefold repetition coming.
+  in `game_history`, so its search can detect repeated positions.
 
 ## A whole conversation to read
 
-This section is extra reading, not a task of any period. This illustrative Remus2 conversation shows a first move with two seconds
-to think. Completed depths and timing depend on the computer:
+This optional Remus2 conversation shows a first move with a two-second search
+budget. Completed depths and timing depend on the computer:
 
 ```text
 Lucas Chess -> uci                          Remus -> id name Remus2
@@ -169,11 +169,12 @@ report `info depth` lines. Enabling the option does not guarantee a lookup or a
 successful response. The tablebase message reports accepted advice for that move,
 not a test of every network failure or endgame position.
 
-Only the HTTP boundary serializes the current position as FEN for Lichess. The
+The network adapter converts the current position to FEN text before sending it
+to Lichess. The
 workshop Python UCI adapters accept `position startpos moves ...` and have no
 tablebase service or `position fen` input. Rust supports the analysis commands
 `position fen`, `go depth`,
-`go perft`, and `eval` commands. Fixed-depth and perft requests do not query Lichess.
+`go perft`, and `eval`. Fixed-depth and perft requests do not query Lichess.
 These analysis commands report results; they do not compare them with a reference:
 
 | Rust analysis request | Expected response | Scope |
@@ -424,7 +425,7 @@ The score is from the side to move at the search root, Black here. `cp -15` mean
 0.15 pawns in White's favor. `depth` counts half-moves in the completed iteration;
 `nodes` counts search visits, not distinct positions. `time` is elapsed milliseconds,
 `nps` is nodes per second, and `pv` is the principal variation, the suggested line.
-Not every Remus version emits every field. Remus6/7 node totals include helper
+Not every Remus version emits every field. Remus7 and Remus8 node totals include helper
 search threads, while completed depth describes the main search. Higher NPS alone
 does not prove a stronger choice.
 

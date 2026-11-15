@@ -60,13 +60,14 @@ identical schemas.
 | Per-thread activity and re-search/cancellation costs | No | No | Yes | Yes |
 | Descendant helping and separate result/cancellation waits | No | No | No | Yes |
 
-All search logs include process IDs, monotonic timestamps, and `unix_ms`. Remus5's
-ponder log also includes `unix_ms` and search IDs on final reports; Remus6 and Remus7
-ponder logs use process IDs and monotonic timestamps without that Unix-time prefix.
-Their search logs provide search IDs for correlation. Remus7 also reports
-`hit_min_percent`, its configurable minimum post-hit allowance; Remus5 and Remus6
-use a fixed allowance and omit that field. Remus5 records commands as the
-search thread consumes them; Remus6 and Remus7 record them in the input thread.
+All search logs include process IDs, monotonic timestamps, and `unix_ms`. A monotonic
+timestamp measures elapsed time without following adjustments to the system clock.
+Remus6's ponder log also includes `unix_ms` and search IDs on final reports. Remus7
+and Remus8 ponder logs use process IDs and monotonic timestamps without that Unix-time
+prefix; their search logs provide search IDs for matching records. Remus8 also reports
+`hit_min_percent`, its configurable minimum post-hit allowance. Remus6 and Remus7
+use a fixed allowance and omit that field. Remus6 records commands as the search
+thread consumes them; Remus7 and Remus8 record them in the input thread.
 These timestamps represent different boundaries, not exact GUI send times.
 
 Enable both diagnostic options in each participating engine's Lucas Chess entry to
@@ -112,9 +113,9 @@ their command readers run independently. Use the search IDs to group reports.
 Completed-iteration lines contain depth, `score cp`, cumulative nodes, and a
 principal variation. Scores are from the root side's perspective, with the engine's
 existing mate-range encoding. `completed_depth` describes completed work, not a
-promise that every returned move belongs to that iteration: Remus4 and normal
-Remus6 searches can return a provisional move from an interrupted iteration.
-Remus7 prefers its last completed iteration when available.
+promise that every returned move belongs to that iteration: Remus5 and normal
+Remus6 and Remus7 searches can return a provisional move from an interrupted
+iteration. Remus8 prefers its last completed iteration when available.
 
 | Final summary field | Meaning |
 | --- | --- |
@@ -144,7 +145,8 @@ The atomic shared tables classify replacements using the entries observed while
 choosing a slot. Concurrent writers can change a slot before publication, so these
 are replacement decisions, not an exact global count of distinct lost positions.
 Counts do not measure occupancy or prove which evicted entries would be useful.
-YBWC's `cutoffs` field describes split-group cutoffs and is separate from
+YBWC (Young Brothers Wait Concept) searches the first move before splitting the
+remaining moves among workers. Its `cutoffs` field describes split-group cutoffs and is separate from
 `tt_cutoffs`.
 
 The two multithreaded engines sample 4,096 evenly spaced buckets (16,384 slots)
@@ -163,8 +165,8 @@ replacement preference, not occupancy. Full buckets replace individual entries
 without clearing the entire allocation. Samples can report full occupancy while
 many retained entries are old or irrelevant to the current position.
 
-Counters are local to a search worker. Remus6 combines them after joining workers;
-Remus7 publishes helper batches at task completion and reads the combined totals
+Counters are local to a search worker. Remus7 combines them after joining workers;
+Remus8 publishes helper batches at task completion and reads the combined totals
 after splits drain. No per-probe global atomic increment or file write is required.
 Counters remain active with `SearchDiagnostics=false`; that switch disables log
 output, not instrumentation. The counters and boundary file writes still have a
@@ -201,7 +203,7 @@ score, move, depth, or bound. Age bits are excluded from the key-validation
 checksum, allowing an age update in one atomic word. A changed payload, changed
 key, or already-current age skips the refresh. PV extraction does not refresh age.
 
-The MT summaries add these fields. Each `worker id=N` line carries the same search
+The multithreaded summaries add these fields. Each `worker id=N` line carries the same search
 ID as its final summary; worker zero is the main search worker. Node costs include
 quiescence and interrupted work. Worker counters reset at each native search.
 
@@ -212,11 +214,11 @@ quiescence and interrupted work. Worker counters reset at each native search.
 | `worker_nodes` | Sum of local worker nodes; equals final `nodes` |
 | `worker_active_ms` | Assigned search elapsed time, excluding explicitly measured split-drain waiting |
 | `worker_wait_ms` | Elapsed split-drain synchronization time; zero for Lazy SMP |
-| `worker_result_wait_ms` | Remus7 explicit waits begun while results are needed and the split is not canceled |
-| `worker_cancel_wait_ms` | Remus7 explicit waits begun after ancestor/split cancellation or global stop |
-| `help_tasks` | Remus7 descendant candidates claimed by a waiting worker |
-| `help_nodes` | Remus7 nodes searched during descendant helping; nested helping counts once, included in `worker_nodes` |
-| `help_active_ms` | Remus7 helping elapsed time excluding nested explicit waits; included in `worker_active_ms` |
+| `worker_result_wait_ms` | Remus8 explicit waits begun while results are needed and the split is not canceled |
+| `worker_cancel_wait_ms` | Remus8 explicit waits begun after ancestor/split cancellation or global stop |
+| `help_tasks` | Remus8 descendant candidates claimed by a waiting worker |
+| `help_nodes` | Remus8 nodes searched during descendant helping; nested helping counts once, included in `worker_nodes` |
+| `help_active_ms` | Remus8 helping elapsed time excluding nested explicit waits; included in `worker_active_ms` |
 | `worker_jobs` | Assigned search jobs; Lazy SMP assigns one root search per worker |
 | `worker_active_pct` | Active elapsed time summed across workers divided by `native_ms * workers`, as a percentage |
 | `pvs_researches` | Full-window confirmations after successful unreduced null-window probes |
@@ -237,7 +239,7 @@ A cutoff-discarded task can include work performed before the cutoff, and its
 completed descendants may populate the table. These are discarded-task costs,
 not an exact count of nodes executed after the cancellation instant.
 
-Lazy SMP does not cancel other workers at a local beta cutoff, so its split-cutoff
+Lazy SMP (symmetric multiprocessing with a shared table) does not cancel other workers at a local beta cutoff, so its split-cutoff
 fields are zero. Its interrupted helper root attempts appear in
 `stop_discarded_nodes`. The metrics do not count duplicate positions across workers.
 
@@ -248,7 +250,7 @@ occurs at job and drain boundaries, not on every node. Re-search counters and
 node snapshots avoid recursive clock calls. Instrumentation stays active when
 `SearchDiagnostics` disables output; compare the same builds and settings.
 
-Remus7's result-wait and cancellation-wait fields partition `worker_wait_ms`, apart
+Remus8's result-wait and cancellation-wait fields partition `worker_wait_ms`, apart
 from rounding. Classification uses cancellation state at the start of each bounded
 wait, rather than an exact timestamp of a cutoff arriving during that wait. The
 requested wait timeout is one millisecond; operating-system scheduling may delay

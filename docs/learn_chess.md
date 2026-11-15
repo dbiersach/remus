@@ -1,7 +1,6 @@
 # Learn chess: the rules that trip people up, and how moves are written
 
-You know how the pieces move. This page holds the rest: the rules that catch nearly
-everyone, the value of each piece, and the way people and programs write a move down.
+You know how the pieces move. This page explains the less familiar rules, the value of each piece, and the way people and programs write a move down.
 Each rule names the engine whose code needs it, so you can read the rule right before
 you type that code.
 
@@ -30,7 +29,7 @@ square beside it. Castling is allowed only when all of these hold:
 1. The king and that rook have never moved.
 2. The squares between them are empty.
 3. The king is not in check.
-4. The king does not pass through, or land on, a square that an enemy piece attacks.
+4. The king does not pass through, or finish on, a square that an enemy piece attacks.
 
 The rook may cross an attacked square: on the queen's side, an attack on b1 does not
 stop White from castling. A rook that moves loses its castling right for good, even
@@ -61,8 +60,8 @@ leaves the board.*
 
 A pawn that reaches the last rank becomes a queen, a rook, a bishop, or a knight,
 the player's choice. Choosing anything but a queen is an **underpromotion**. It is
-rare, but sometimes it is the only move that wins: a knight can promote with check
-and a fork, and a new queen can give stalemate by mistake. One side may end up with
+rare, but sometimes it is the only move that wins: promoting a pawn to a knight can give check
+and attack another piece, and a new queen can give stalemate by mistake. One side may end up with
 two queens, so Remus never assumes one queen per side.
 
 ![White king c6, bishop b6, and pawn b7 against the Black king on a6](../images/chess_tutor/promotion_puzzle.svg)
@@ -193,7 +192,7 @@ to is attacked or blocked.
 
 ### The notation chess programs use
 
-Lucas Chess and Remus talk to each other in **UCI** notation instead. A UCI move is
+Lucas Chess and Remus exchange moves through **UCI**, the Universal Chess Interface. A UCI move is
 only the square a piece leaves and the square it moves to, with no piece letter:
 `e2e4`, `g1f3`, and `e1g1` for White castling on the king's side. A promotion adds
 the new piece in a small letter: `e7e8q`. UCI is easy for a program to read but
