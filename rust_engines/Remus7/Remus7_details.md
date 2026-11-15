@@ -100,7 +100,8 @@ main() -> run() -> root selection and SearchControl setup
 ```
 
 Each worker's recursive search retains Remus6's ordering, check-aware quiescence,
-selective search, and evaluation. The helpers' root searches are independent;
+selective search, evaluation, and speed techniques. Its move loops copy the parent
+position once and play the move on that copy with `play_move()`. The helpers' root searches are independent;
 shared table writes are the main mechanism by which one search helps another.
 Only the main worker reports its completed principal iterations as the chosen
 analysis, rather than merging unrelated lines into a fabricated principal variation.

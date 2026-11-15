@@ -21,7 +21,7 @@ the operational settings and measurements.
 | --- | --- | --- | --- |
 | 1. Revisit tactical stopping | Contrast an ordinary quiet leaf, checkmate, stalemate, and a leaf where the king is checked. Trace en passant as a real capture. | Terminal and legality semantics must precede shortcuts that omit work. | Why is standing pat invalid as a way to escape check? |
 | 2. Improve ordering and evaluation | Explain quiet-move history, backward pawns, central holes, knight outposts, and king cover. | These are deliberate chess-model changes, distinct from faster implementation. | How does search history differ from the list used for repetition? |
-| 3. Avoid repeated work | Introduce pawn caching, conditional evaluation, early move selection, ray lookups, legal-move existence, and prefetch. | Students can identify the result that each optimization must preserve. | Which terms can be reused when only a king moves? |
+| 3. Avoid repeated work | Introduce pawn caching, conditional evaluation, early move selection, ray lookups, legal-move existence, and prefetch. Then show the single position copy, checkmate found by the evasion loop, and the exchange shortcut. | Students can identify the result that each optimization must preserve. | Which terms can be reused when only a king moves? Why can a knight that takes a rook never lose material? |
 | 4. Explain bounded storage | Compare multiply-shift indexing and Windows-backed table allocation with Remus5's table. | Fixed capacity and allocation ownership are concrete before concurrency appears. | Does zero-filled allocation mean the whole table has been physically touched? |
 | 5. Keep input responsive | Follow the input channel, command queue, `SearchControl`, deadlines, and cancellation. | Input can arrive while a recursive search is active without letting two threads mutate chess state. | Which thread may change the current position? |
 | 6. Add root services | Explain tablebase eligibility and fallback, then normal, infinite, and ponder modes. | External advice and time control are understandable once the native search is independent. | What happens when the network fails or a predicted reply is wrong? |
@@ -34,7 +34,7 @@ the check that its result remains acceptable.
 
 | Structure | Representation and ownership | Rationale and invariant |
 | --- | --- | --- |
-| `Position` and `Move` | Remus5's value struct and packed `u16`; row 0 is rank 8 and column 0 is file a. | The square array, kind/side masks, and incremental key must remain synchronized. |
+| `Position` and `Move` | Remus5's value struct (152 bytes) and packed `u16`; row 0 is rank 8 and column 0 is file a. | The square array, kind/side masks, and incremental key must remain synchronized. A move loop copies the parent once and plays the move on that copy with `play_move()`; the parent is never changed. |
 | `Search` | Owns history, killers, quiet history, table, counters, and `SearchControl`. | There is one native search worker; input and network helper threads do not search chess trees. |
 | Quiet history | `[[[i32; 64]; 64]; 2]`, indexed by side, start, and target. | A bounded ordering hint for quiet cutoffs, separate from repetition history and from evaluation. Scores remain below killer priorities. |
 | Pawn cache | Thread-local `RefCell<Vec<PawnEntry>>`, with 8,192 entries. | Each entry stores exact White/Black pawn masks, structure score, passed masks, attacks, and file counts. A matching hash index alone is insufficient. |
@@ -92,11 +92,13 @@ main() -> run()
     if no selected move -> Search::think()
       alpha_beta() -> table probe, conditional evaluation, move loop
         place_next() -> next ordered candidate
-        make_move(), in_check(), recursive search
+        copy the position, play_move(), in_check(), recursive search
         depth boundary -> quiescence()
-          has_legal_move(), draw check, evaluate()
-          all evasions when checked; selected captures otherwise
-          exchange_score(), recursive quiescence()
+          has_legal_move() when not checked, draw check, evaluate()
+          all evasions when checked, and checkmate when none is legal
+          selected captures otherwise
+          exchange_score() when the capturing piece is worth more than its victim
+          recursive quiescence()
         Table::store()
       count_node() -> SearchControl::poll()
   legal_choice(); wait if needed; emit bestmove and optional predicted reply
@@ -121,6 +123,9 @@ See [time management](remus6.md#time-management-and-pondering) for the timing ru
 | Choice | What it saves or makes clear | Cost or boundary to explain |
 | --- | --- | --- |
 | Check-aware quiescence and legal-move existence | Prevents standing pat or pruning from replacing a required check response or hiding a terminal result. | Terminal checks add work; the fast existence path must satisfy its non-check and pawn-line conditions. |
+| Checkmate from the evasion loop | A checked quiescence position generates and makes its moves once. The loop that searches the evasions also records whether one was legal. | The draw return and the 128-ply return come before the loop, so each asks `has_legal_move()` first to keep checkmate ahead of a draw or static score. |
+| One position copy per move | `play_move()` plays a move on a copy the move loop has just made, where `make_move()` copies, plays, and returns, which costs a second 152-byte copy. | `play_move()` changes the position it receives. Passing it the parent would break copy-make, so every caller copies first. |
+| Exchange evaluation only when the capturing piece is worth more | Skips the capture-by-capture exchange for a capture that cannot lose material, such as a pawn that takes a knight. | The shortcut relies on the king-safety test running first: a legal king capture lands on an unattacked square. |
 | Explicit en passant victim detection | Gives capture ordering and material accounting the actual captured pawn. | An empty destination cannot be used as the sole capture test. |
 | Lazy ordering of the first three entries | Avoids sorting the remaining candidates when an early cutoff ends the node. | If search continues, the remainder is sorted. The intended order matches the complete entry sort. |
 | Evaluate only where a pruning test needs it | Skips unused static evaluations in internal nodes. | Quiescence and applicable null/futility tests still need their values. This does not remove evaluation from search. |
@@ -138,10 +143,16 @@ falls back to native selection.
 ## Worked example to teach at the board
 
 Consider a checked king at the nominal depth boundary. Ask whether a favorable
-material score permits "do nothing." It does not. `quiescence()` first checks
-for a legal move, scores mate or stalemate when appropriate, and searches legal
-evasions while in check. Its ordinary standing-pat and capture-pruning shortcuts
-apply only outside check.
+material score permits "do nothing." It does not. In check, `quiescence()`
+searches every legal evasion and returns the mate score when none exists. Out of
+check, it first asks `has_legal_move()` and scores stalemate as zero. Its ordinary
+standing-pat and capture-pruning shortcuts apply only outside check.
+
+Then ask how many times the engine must generate the checked side's moves. Once
+is enough: the loop that searches the evasions sets `has_evasion` when a move
+leaves the king safe. Follow one move through that loop to show the single copy:
+`let mut child = *position;` copies the parent, and `play_move(&mut child, mv)`
+plays the move on the copy.
 
 Next leave both pawn masks fixed and move a rook from a closed file to an open
 file. The pawn cache can return the same counts and structure score; the rook's
@@ -158,7 +169,9 @@ its own FEN. It is never applied blindly to the next position.
 
 Compare legal move counts first, then boundary cases: checked leaves, mate before
 draw scoring, stalemate, en passant, and timeout behavior. For speed-only changes,
-compare fixed-depth results with external root services disabled. New evaluation
+compare fixed-depth results with external root services disabled: every `info` line
+and best move must match. The exchange shortcut, the evasion loop, and the single
+copy each pass that comparison. New evaluation
 terms need their own expected scores; they are not expected to preserve Remus5's
 scores. The [verification guide](remus6.md#verification-and-limitations) separates
 native checks from optional network checks.

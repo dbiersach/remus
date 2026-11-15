@@ -15,7 +15,7 @@ use crate::board::{
 };
 use crate::evaluation::{PIECE_VALUES, evaluate};
 use crate::exchange::exchange_score;
-use crate::make_move::{make_move, make_null_move};
+use crate::make_move::{make_move, make_null_move, play_move};
 use crate::move_generation::{MoveList, StackList, generate_captures, generate_moves};
 use crate::search_control::SearchControl;
 use crate::search_metrics::{Research, SearchMetrics};
@@ -487,14 +487,24 @@ impl Worker {
         self.count_node()?;
         let white = position.white;
         let check = in_check(position, white);
-        if !has_legal_move(position, check) {
-            return Ok(if check { -(MATE_SCORE - ply as i32) } else { 0 });
+        let mated = -(MATE_SCORE - ply as i32);
+        // Out of check, a position with no legal move is stalemate. In check the loop
+        // below tries every evasion, so it finds checkmate itself; only the two early
+        // returns ask first, because checkmate comes before a draw or a stand pat.
+        if !check && !has_legal_move(position, false) {
+            return Ok(0);
         }
         if self.is_draw(position) {
+            if check && !has_legal_move(position, true) {
+                return Ok(mated);
+            }
             return Ok(0);
         }
         let stand_pat = evaluate(position);
         if ply >= MAX_PLY {
+            if check && !has_legal_move(position, true) {
+                return Ok(mated);
+            }
             return Ok(stand_pat); // Bound the stack during long checking sequences
         }
         if !check {
@@ -525,20 +535,28 @@ impl Worker {
             }
             entries.as_mut_slice().sort_unstable_by(|a, b| b.cmp(a));
         }
+        let mut has_evasion = false;
         for &mut entry in entries.as_mut_slice() {
             let mv = entry_move(entry);
-            let child = make_move(position, mv);
+            let mut child = *position;
+            play_move(&mut child, mv);
             if in_check(&child, white) {
                 continue;
             }
+            has_evasion = true;
             if !check && move_promotion(mv) == 0 {
                 let victim = PIECE_VALUES[captured_kind(position, mv) as usize];
                 if stand_pat + victim + DELTA_MARGIN < alpha {
                     continue;
                 }
-                let exchange =
-                    exchange_score(&position.board, &position.by_kind, &position.by_side, mv);
-                if exchange < 0 {
+                // A piece that takes one worth at least as much cannot lose material,
+                // so only the other captures play out the exchange. A king, worth 0
+                // in PIECE_VALUES, never plays it out: its legal captures land on
+                // squares that no enemy piece attacks.
+                let attacker = position.board[move_start(mv)] & 7;
+                if PIECE_VALUES[attacker as usize] > victim
+                    && exchange_score(&position.board, &position.by_kind, &position.by_side, mv) < 0
+                {
                     continue;
                 }
             }
@@ -551,6 +569,9 @@ impl Worker {
                 return Ok(score);
             }
             alpha = alpha.max(score);
+        }
+        if check && !has_evasion {
+            return Ok(mated); // Checkmate: no evasion is legal
         }
         Ok(alpha)
     }
@@ -656,7 +677,8 @@ impl Worker {
         for index in 0..moves.len() {
             place_next(moves, index);
             let mv = entry_move(moves[index]);
-            let child = make_move(position, mv);
+            let mut child = *position;
+            play_move(&mut child, mv);
             if depth > 1 {
                 // The child looks itself up in the table; at depth 1 it goes straight
                 // to quiescence, which does not

@@ -103,7 +103,8 @@ main() -> root services and Search::think()
       send Job::Search to reserved helper channels
       owner and helpers -> search_split()
         Split::claim() gives candidate and alpha snapshot
-        search_split_move() -> native probe and required re-search
+        search_split_move() -> copy the split position, play_move(),
+          native probe and required re-search
         Split::publish() updates result or signals cutoff
       owner -> drain_split()
         help_descendant() when permitted, otherwise wait for change

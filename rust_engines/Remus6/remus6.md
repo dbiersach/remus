@@ -30,7 +30,7 @@ deteriorating, or unstable native hits can reinvest more of the saved clock time
 [Time management and pondering](#time-management-and-pondering) for the thresholds,
 safeguards, and examples.
 
-The Rust implementation also uses the six speed techniques described below. The chess
+The Rust implementation also uses the ten speed techniques described below. The chess
 search is single-threaded; an input reader handles incoming commands.
 
 ## Source files and lines of code
@@ -45,20 +45,20 @@ excluded.
 | File | Remus6 lines of code | Remus5 lines of code | Change | Responsibility |
 | --- | ---: | ---: | ---: | --- |
 | `src/board.rs` | 204 | 204 | 0 | Native position, bitboards, keys, and UCI move text |
-| `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves and halfmove counter |
+| `src/make_move.rs` | 78 | 75 | +3 | Copy-make moves and halfmove counter |
 | `src/attacks.rs` | 147 | 140 | +7 | Attacks and king safety |
 | `src/move_generation.rs` | 166 | 162 | +4 | Pseudo-legal moves and special moves |
 | `src/evaluation.rs` | 460 | 311 | +149 | Material, positional weaknesses, outposts, and king cover, with a cache of pawn-structure scores |
 | `src/exchange.rs` | 99 | 95 | +4 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Embedded opening lines |
 | `src/transposition_table.rs` | 171 | 130 | +41 | Fixed 512 MiB search table, multiply-shift indexing, and Windows allocation |
-| `src/search.rs` | 505 | 387 | +118 | Alpha-beta search, cancellation, and ponder timing |
+| `src/search.rs` | 520 | 387 | +133 | Alpha-beta search, cancellation, and ponder timing |
 | `src/search_control.rs` | 325 | 0 | +325 | Input queue, cancellation, and the ponder clock |
 | `src/table_metrics.rs` | 34 | 34 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/diagnostics.rs` | 61 | 72 | -11 | Independent persistent search and ponder log writers |
 | `src/tablebase.rs` | 253 | 0 | +253 | FEN, HTTPS, JSON validation, cache, cooldown, and bounded wait |
 | `src/main.rs` | 345 | 191 | +154 | UCI options, legal predictions, root lookup, pondering before the reply, and search control |
-| **Total** | **2,893** | **1,849** | **+1,044** | |
+| **Total** | **2,911** | **1,849** | **+1,062** | |
 
 ### Supporting files
 
@@ -167,8 +167,8 @@ Open SVGs in a browser to zoom without losing text clarity. Matching `.mmd` file
 
 ## Search and evaluation
 
-The native position combines a square array with bitboards. Copy-make returns a new
-position, move lists use stack storage, and incremental keys support the table. The
+The native position combines a square array with bitboards. Copy-make gives every move
+a new position, move lists use stack storage, and incremental keys support the table. The
 following tactical and positional features define the engine's search behavior.
 
 ### 1. Check-aware quiescence
@@ -182,7 +182,9 @@ it examines the resulting position.
 check, it considers all legal evasions: king moves, blocking moves, captures, and
 promotions. It does not accept the static evaluation as a stand-pat score, and it
 disables delta pruning and static exchange pruning for those evasions. Ordinary
-alpha-beta cutoffs still apply.
+alpha-beta cutoffs still apply. When no evasion is legal, the position is checkmate:
+the loop over the evasions records whether any move left the king safe, and returns
+the mate score when none did.
 
 Standing pat means accepting the position's static score without searching another move.
 That option is useful in a quiet position, but cannot represent a legal response to
@@ -203,10 +205,13 @@ With White's king on h1, Black's king on f2, and Black's queen on g3, White has 
 move and is not in check. The score must be zero, regardless of Black's material
 advantage or the alpha-beta window.
 
-`has_legal_move()` stops at the first move that leaves the moving king safe. Quiescence
-calls it before accepting a static score or pruning moves. If there is no legal move,
-quiescence returns a mate score when the king is checked, or zero for stalemate. Finding
-no captures alone does not establish stalemate: quiet legal moves also count.
+`has_legal_move()` stops at the first move that leaves the moving king safe. Out of
+check, quiescence calls it before accepting a static score or pruning moves, and
+returns zero for stalemate when there is no legal move. Finding no captures alone does
+not establish stalemate: quiet legal moves also count. In check, the evasion loop
+detects checkmate, so quiescence calls `has_legal_move()` there only before it returns
+a draw score or the static score at the 128-ply limit, where checkmate takes
+precedence.
 
 The null-move pruning condition also requires at least one legal move. This keeps a
 hypothetical pass from supplying a cutoff in a stalemated position.
@@ -231,6 +236,11 @@ recaptures on one square. For en passant, `exchange_score()` credits the capture
 and removes it from the copied board before finding recaptures. With a Black rook on d4,
 removing the pawn on d5 opens the rook's path to d6, where it can recapture White's
 pawn. The exchange therefore scores zero rather than a free pawn.
+
+Quiescence plays out the exchange only for a capture by a piece worth more than the
+piece it takes, such as a queen that takes a defended pawn. A capture by a piece worth
+no more than its victim, which includes every en passant capture, cannot lose material
+and skips the evaluation.
 
 The usual king-safety check applies after making the move. An en passant capture that
 opens a rook or bishop attack on the moving side's king is rejected.
@@ -316,12 +326,15 @@ gain.
 
 ### Rust search-speed techniques
 
-Six implementation techniques reduce cost per position: branch-free sliding-ray lookups,
+Ten implementation techniques reduce cost per position: branch-free sliding-ray lookups,
 an unpinned-pawn shortcut for legal-move existence, lazy ordering of the first three
 moves, bitmask selection of central holes, static evaluation only when pruning needs it,
-and transposition-table prefetching. These preserve native scores and the sequential
-search order. Parallel scheduling can still change visited nodes and results. The
-[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t7)
+transposition-table prefetching, a pawn-structure cache, one position copy per move,
+checkmate detection inside the evasion loop of quiescence, and an exchange evaluation
+only for captures by a piece worth more than its victim. These preserve native scores
+and the sequential search order. Parallel scheduling can still change visited nodes and
+results. The
+[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t10)
 explains the implementations; the [speed measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
 give the conditions and limits of the reported speedups.
 

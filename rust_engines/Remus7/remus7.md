@@ -40,21 +40,21 @@ excluded.
 | File | Remus7 lines of code | Remus6 lines of code | Change | Responsibility |
 | --- | ---: | ---: | ---: | --- |
 | `src/board.rs` | 204 | 204 | 0 | Piece constants, position representation, position keys, and UCI move text |
-| `src/make_move.rs` | 75 | 75 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
+| `src/make_move.rs` | 78 | 78 | 0 | Copy-make moves, castling rights, en passant, and the halfmove counter where supported |
 | `src/attacks.rs` | 147 | 147 | 0 | Attack detection and king-safety checks |
 | `src/move_generation.rs` | 166 | 166 | 0 | Pseudo-legal moves, castling, promotions, and en passant |
 | `src/evaluation.rs` | 460 | 460 | 0 | Material, piece-square tables, and the positional and endgame terms supported by this engine, with a cache of pawn-structure scores |
 | `src/exchange.rs` | 99 | 99 | 0 | Static exchange evaluation |
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 171 | +82 | Search depths, scores, bounds, and best moves |
-| `src/search.rs` | 764 | 505 | +259 | Move selection, search, ordering, and evaluation integration |
+| `src/search.rs` | 779 | 520 | +259 | Move selection, search, ordering, and evaluation integration |
 | `src/search_control.rs` | 375 | 325 | +50 | Input queue, cancellation, pondering, and deadlines |
 | `src/search_metrics.rs` | 57 | 0 | +57 | Per-worker timing, nodes, re-search costs, and scheduling counters |
 | `src/table_metrics.rs` | 39 | 34 | +5 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
 | `src/main.rs` | 372 | 345 | +27 | UCI commands, configuration, root selection, and engine orchestration |
 | `src/diagnostics.rs` | 0 | 61 | -61 | Logging is provided by search_control.rs in this engine |
-| **Total** | **3,312** | **2,893** | **+419** | |
+| **Total** | **3,330** | **2,911** | **+419** | |
 
 ### Supporting files
 
@@ -171,12 +171,15 @@ pawns, central holes, knight outposts, and king cover.
 
 ### Rust search-speed techniques
 
-Six implementation techniques reduce cost per position: branch-free sliding-ray lookups,
+Ten implementation techniques reduce cost per position: branch-free sliding-ray lookups,
 an unpinned-pawn shortcut for legal-move existence, lazy ordering of the first three
 moves, bitmask selection of central holes, static evaluation only when pruning needs it,
-and transposition-table prefetching. These preserve native scores and the sequential
-search order. Parallel scheduling can still change visited nodes and results. The
-[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t7)
+transposition-table prefetching, a pawn-structure cache, one position copy per move,
+checkmate detection inside the evasion loop of quiescence, and an exchange evaluation
+only for captures by a piece worth more than its victim. These preserve native scores
+and the sequential search order. Parallel scheduling can still change visited nodes and
+results. The
+[technique reference](../../docs/remus_versions.md#rust-speed-techniques-t1-to-t10)
 explains the implementations; the [speed measurements](../../docs/remus_versions.md#speed-techniques-of-the-rust-engines-6-through-8)
 give the conditions and limits of the reported speedups.
 

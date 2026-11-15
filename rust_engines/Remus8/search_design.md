@@ -83,6 +83,8 @@ continues to count from the actual root; restarting it at zero would corrupt mat
 distances and the table's mate-score conversion.
 
 Copy-make positions keep a parent's board intact while a worker searches a child.
+A worker that takes a move from a split copies the split's position and plays the
+move on its own copy with `play_move()`; the shared split position is never changed.
 Copy history at task transfer, not at every ordinary recursive call. Descendant
 helping saves and restores each suspended path explicitly, along with its branch,
 verification context, and root move. Killers and quiet history remain worker-local

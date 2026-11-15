@@ -44,9 +44,9 @@ explains saved GUI overrides and resource use.
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus5](../rust_engines/Remus5/remus5.md) | 2738 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
-| [Remus6](../rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,893 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,312 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,921 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus6](../rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,911 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,330 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,941 | 4 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 See [benchmark conditions and confidence intervals](#about-the-remus-elo-estimates)
 for the scope of the rating estimates. Remus1's figure is a rough estimate.
@@ -214,15 +214,16 @@ accounting, quiet-move history, backward-pawn and central-hole penalties, knight
 outposts, and nearby king cover. These additions are shared by Remus7 and Remus8.
 Their presence alone does not establish an Elo gain.
 
-Remus6 also introduces the seven speed techniques retained in Remus7 and Remus8.
-They reduce repeated calculations, avoid unnecessary move generation and sorting,
-and overlap memory access with useful work. Their purpose is to make the same
+Remus6 also introduces the ten speed techniques retained in Remus7 and Remus8.
+They reduce repeated calculations, avoid unnecessary copying, move generation, and
+sorting, and overlap memory access with useful work. Their purpose is to make the same
 native search cheaper, rather than change its chess choices. Remus5 uses the
 plain forms so its modules remain close to their Python counterparts.
 
-The [T1 to T7 reference](#rust-speed-techniques-t1-to-t7) explains each technique.
+The [T1 to T10 reference](#rust-speed-techniques-t1-to-t10) explains each technique.
 The [measurement section](#speed-techniques-of-the-rust-engines-6-through-8)
-separates the combined T1 to T6 results from the later T7 measurements.
+separates the combined T1 to T6 results from the later measurements of T7 and of
+T8 to T10.
 
 ### Remus7 and Remus8: sharing search across cores
 
@@ -288,6 +289,10 @@ The recorded checks cover:
 - A second set of 22 positions covering checks, en passant, promotions, stalemates,
   the fifty-move clock, and repeated positions. The plain form and the T1 to T6
   implementations return the same `info` lines in all three engines.
+- A third set of 37 fixed-depth searches covering checks, checkmates, stalemate,
+  en passant, promotions, the fifty-move clock, and a repeated position. Each of the
+  three engines returns the same `info` lines and best moves with and without T8 to
+  T10, using one worker.
 - Remus8 parallel search: legal moves and lines of play, split work, cancellation,
   and worker accounting.
 - Remus6 positional evaluation, transposition tables, UCI cache behavior,
@@ -380,7 +385,25 @@ Kiwipete test position, a quiet middlegame, a rook ending, and a pawn race. With
 worker both builds search the same 34 million positions, so the ratio is also the ratio
 of the two run times. With four search threads the threads reach the shared table in a
 different order on every run, the two builds visit different positions, and only the
-rate compares. The ratios cover T1 to T6; T7 is measured separately in the [technique reference](#rust-speed-techniques-t1-to-t7).
+rate compares. The ratios cover T1 to T6; T7 is measured separately in the [technique reference](#rust-speed-techniques-t1-to-t10).
+
+T8 to T10 are measured in Remus6, one added to the next, on builds that already hold
+T1 to T7:
+
+| Build of Remus6 | Millions of nodes per second | Ratio |
+| --- | ---: | ---: |
+| T1 to T7 | 6.14 | 1.00 |
+| With T8 | 6.50 | 1.06 |
+| With T8 and T9 | 6.57 | 1.07 |
+| With T8, T9, and T10 | 6.67 | 1.09 |
+
+These rates come from a second suite on the workshop designer's computer: eight
+fixed-depth searches from the starting position, four middlegames, and three endings,
+85.7 million positions in all, each timed seven times with the shortest time kept. Every
+build searches the same positions and prints the same `info` lines. `build_rust.py`
+trains each build on timed searches, so two builds of the same source differ by up to
+0.7% in this suite; a gain below 1% cannot be told from that difference. The rates of
+this suite and of the six-position suite above do not compare with each other.
 
 ### About the Remus ELO Estimates
 
@@ -643,9 +666,9 @@ repetition that would save a lost game.
 | N3 | Opening book | Play a stored opening line while the game follows one. The book holds UCI moves (`e2e4 e7e5 g1f3`), not SAN, so it needs no notation code | **New file** `opening_book.py`, plus `uci.py`, plus the supplied `opening_book.txt` data | 28 | +58 | Remus3 |
 | N4 | Static exchange evaluation | Play out every capture on one square, cheapest attacker first, to see if a capture wins material; quiescence then skips the losing captures | **New file** `exchange.py`, plus `search.py` | 45 | +15 | Remus4 |
 
-### Rust speed techniques: T1 to T7
+### Rust speed techniques: T1 to T10
 
-Remus6, Remus7, and Remus8 share these seven techniques. The `Code` column points
+Remus6, Remus7, and Remus8 share these ten techniques. The `Code` column points
 to their implementations; the detailed explanations follow the table.
 
 | Step | Technique | Code | What it saves | Gain alone | Version |
@@ -657,8 +680,11 @@ to their implementations; the detailed explanations follow the table.
 | T5 | Evaluation on demand | `alpha_beta()` in `search.rs` | The evaluation of positions whose pruning never reads the score | 1 to 2% | Remus6 |
 | T6 | Table prefetch | `Table::prefetch()` in `transposition_table.rs`, called from `alpha_beta()` | Part of the wait for a table bucket to arrive from memory | 1% | Remus6 |
 | T7 | Pawn-structure cache | `probe_pawns()` and `pawn_structure()` in `evaluation.rs` | Rescoring doubled, isolated, passed, and backward pawns, pawn attacks, and file counts when the pawns match a recent position | 5% | Remus6 |
+| T8 | Single position copy | `play_move()` in `make_move.rs`, called from the move loops in `search.rs` | A second copy of the 152-byte position for every move the search tries | 6% | Remus6 |
+| T9 | Checkmate from the evasion loop | `quiescence()` in `search.rs` | A legal-move test ahead of the evasions at every checked quiescence position | 1 to 2% | Remus6 |
+| T10 | Exchange shortcut | `quiescence()` in `search.rs` | The exchange evaluation of a capture by a piece worth no more than its victim | 1 to 2% | Remus6 |
 
-`Version` identifies the first engine with the technique. All seven begin in Remus6
+`Version` identifies the first engine with the technique. All ten begin in Remus6
 and are retained in Remus7 and Remus8; Remus1 to Remus5 do not implement these optimizations.
 
 Each gain is that technique alone, in nodes per second with one search thread. T1, T2, and
@@ -667,7 +693,10 @@ Remus4 search, which the three engines share. The gains overlap, so together the
 the [combined speed ratios](#speed-techniques-of-the-rust-engines-6-through-8), not their sum. T1 to T6 add 49 code lines to Remus6
 and 51 to each of Remus7 and Remus8; T7 adds 52 to each of the three. T7 is measured
 in Remus6 on 17 fixed-depth searches, with identical node counts, scores, and moves:
-7 to 10% in middlegames and almost nothing in pawn and rook endings.
+7 to 10% in middlegames and almost nothing in pawn and rook endings. T8 to T10 add 18
+code lines to each of Remus6 and Remus7 and 20 to Remus8. They are measured in Remus6
+on the [eight-search suite](#speed-techniques-of-the-rust-engines-6-through-8): T8
+alone, T9 added to T8, and T10 added to both.
 
 #### T1: Branch-free ray lookup
 
@@ -693,10 +722,10 @@ result is the same set of squares in every case.
 
 #### T2: Legal-move shortcut
 
-The quiescence search of Remus6 asks at every position whether the side to move has a
-legal move, so that it scores checkmate and stalemate before it stands pat. The plain
-form generates every pseudo-legal move, about 35 in a middlegame, and makes them one at
-a time until one leaves the king safe.
+The quiescence search of Remus6 scores checkmate and stalemate before it stands pat, so
+it asks whether the side to move has a legal move. The plain form of that test generates
+every pseudo-legal move, about 35 in a middlegame, and makes them one at a time until
+one leaves the king safe.
 
 `has_legal_move()` takes a second argument, whether the side to move is in check, which
 `quiescence()` and `alpha_beta()` have already worked out. Out of check, a move can
@@ -762,10 +791,10 @@ it also skips the evaluation at the root and immediately after a null move.
 The transposition table holds 512 MiB, far more than the processor's cache, so reading
 the bucket of a position takes roughly 100 nanoseconds, about half of the time the
 engine spends on an average position. The search can locate the next position's bucket
-as soon as `make_move()` returns that position's key.
+as soon as `play_move()` has updated that position's key.
 
 `Table::prefetch(key)` asks the processor to start loading the bucket and returns at
-once. `alpha_beta()` calls it right after `make_move()`, so the legality test and the
+once. `alpha_beta()` calls it right after `play_move()`, so the legality test and the
 check test of the move run while the bucket travels from memory, and the child's
 `probe()` spends less time waiting for memory. `alpha_beta()` calls prefetch only
 at depth 2 and up. A child of a depth-1 position goes to quiescence unless it is
@@ -790,6 +819,56 @@ cached parts: the pawn race reads the cached passed pawns with the kings and the
 to move, rooks read the cached file counts, and king cover reads the pawns and file
 counts with the king's square and the game phase.
 
+#### T8: Single position copy
+
+The search tries about 35 moves in a middlegame position, and copy-make gives each move
+its own position. A `Position` holds 152 bytes: the 64 squares, nine bitboards, the
+key, and the game state. In the plain form `make_move()` copies the parent into a
+local variable, plays the move there, and returns that variable, and the compiled
+program copies the returned position once more into the caller's variable. Every move
+therefore costs two copies.
+
+`play_move()` holds the steps that play a move, and it plays them on the position it is
+given. The move loops of `alpha_beta()` and `quiescence()` copy the parent with
+`let mut child = *position;` and call `play_move(&mut child, mv)`, so each move costs one
+copy. The loop never passes the parent itself to `play_move()`: the parent stays
+unchanged, and the search still takes no move back. `make_move()` remains as a copy
+followed by `play_move()` for the callers outside the move loops, such as
+`has_legal_move()` and the UCI code in `main.rs`. In Remus8, `split_remaining()` and
+`search_split_move()` copy and play their moves the same way.
+
+#### T9: Checkmate from the evasion loop
+
+With White's king on h1, Black's king on f3, and Black's rook on h8, White is in check
+and `h1g1` is the only legal move. The plain form of `quiescence()` first calls
+`has_legal_move()`, which generates White's moves and makes them one at a time until
+`h1g1` leaves the king safe. The evasion loop then generates and makes the same moves
+again to search them. T2's shortcut does not help, because it applies only out of check.
+
+In check, the loop tries every legal evasion, so the loop can report checkmate.
+`has_evasion` records whether any move passed the king-safety test, and a checked
+position whose loop finishes without one returns the mate score. A cutoff inside the
+loop needs no test, because the move that caused it is a legal evasion.
+`has_legal_move()` runs ahead of the loop in two cases only. Out of check it detects
+stalemate, with T2's shortcut. In check it runs before the two early returns, the draw
+score of a repeated or fifty-move position and the static score at the 128-ply limit,
+because checkmate takes precedence over both.
+
+#### T10: Exchange shortcut
+
+Out of check, quiescence drops a capture that loses material: `exchange_score()` plays
+out every capture and recapture on the target square. When a knight takes a rook, the
+worst outcome is that the knight is taken back, and a rook for a knight still wins 200.
+A capture by a piece worth no more than its victim (a pawn takes anything, a bishop
+takes a knight, a rook takes a rook) can never score below zero, so its exchange need
+not be played out.
+
+`quiescence()` calls `exchange_score()` only when the capturing piece is worth more
+than the piece it takes, such as a queen that takes a defended pawn. `PIECE_VALUES`
+gives the king 0, so a capture by the king never plays out the exchange either. That is
+safe because the king-safety test comes first: a king capture that passes it lands on a
+square that no enemy piece attacks, and nothing can take the king back.
+
 ### Techniques that measure too little to keep
 
 Each of these also leaves the search unchanged. The engines 6 through 8 leave them out
@@ -798,10 +877,10 @@ because the gain does not pay for the code.
 | Technique | Measured | Why it stays out |
 | --- | --- | --- |
 | Magic bitboards for bishop, rook, and queen lookups | 14% alone, 2 to 3% beyond T1 | An 860 KB table, `unsafe` statics, and 128 constants to find or store |
-| A cache of evaluations by position key | Under 1% at 256 KB to 1 MB, 5% slower at 4 MB | No gain at any size |
-| Skipping the exchange evaluation when the victim is worth at least the attacker | Under 1% | The exchange evaluation takes about 3% of the search time in all |
+| A cache of evaluations by position key | Under 1% at 128 KB to 1 MB, 5% slower at 4 MB | No gain at any size |
 | Skipping the legality test of a move by a piece off its king's lines | Under 1% | Within the error of the timing |
 | Passing the parent's "gives check" test to the child | 3% alone, under 1% with T1 to T6 | One more argument through every call of `alpha_beta()` |
+| Both king-line tests above, plus a test for check only after a move that lands on or leaves a line through the enemy king | About 1% slower beside T8 to T10 | The three tests cost more time than the attack tests they skip |
 | Generating the moves in sorted order | No better than T3 with quiet-move history | Rewrites `generate_moves()` around one loop over the pieces |
 | Testing the pawn moves before generating the piece moves in the plain legal-move test | Under 1% beyond T2 | Two more functions in `move_generation.rs` |
 | Delta pruning and the exchange test before `make_move()` in quiescence | Under 1% | Within the error of the timing |

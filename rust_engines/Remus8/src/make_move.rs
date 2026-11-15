@@ -1,5 +1,7 @@
 //! Play a move. As in Remus5, make_move() copies the position, plays the move on the
-//! copy, and returns the new position, so the search never takes a move back.
+//! copy, and returns the new position. The move loops of the search make the copy
+//! themselves and call play_move() on it, which saves a second copy. Either way the
+//! parent position stays as it was, so the search never takes a move back.
 
 use crate::board::{EMPTY, KEYS, KING, Move, PAWN, Position, WHITE};
 use crate::board::{move_promotion, move_start, move_target};
@@ -19,9 +21,16 @@ const fn build_rights() -> [u8; 64] {
 static RIGHTS_OF_SQUARE: [u8; 64] = build_rights();
 
 /// Return the position after the move, including the special moves.
-#[inline]
+#[inline(always)]
 pub fn make_move(position: &Position, mv: Move) -> Position {
     let mut next = *position;
+    play_move(&mut next, mv);
+    next
+}
+
+/// Play the move, including the special moves, on the position itself. The caller
+/// passes a fresh copy of the parent position, never the parent.
+pub fn play_move(next: &mut Position, mv: Move) {
     let start = move_start(mv);
     let target = move_target(mv);
     let promotion = move_promotion(mv);
@@ -73,7 +82,6 @@ pub fn make_move(position: &Position, mv: Move) -> Position {
     }
     next.white = !next.white;
     next.key ^= KEYS.black;
-    next
 }
 
 /// Return the position with the other side to move and no en passant square.

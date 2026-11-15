@@ -130,7 +130,9 @@ and wait for permission before starting it.
    cross-check in `verify_engines.py`, never as the engine's hidden implementation.
 5. **Copy-make.** `make_move()` copies the board and returns a new position; no code
    changes a board in place, so the search never takes a move back and the live
-   position stays unchanged even when the search stops early.
+   position stays unchanged even when the search stops early. The Rust move loops of
+   Remus6 through Remus8 make that copy themselves and call `play_move()` on the
+   copy, which saves a second copy; `play_move()` never receives a parent position.
 6. **Each version is the one before plus its enhancements.** Remus3 is Remus2 plus the
    steps that `remus_versions.md` gives Remus3, and Remus4 is Remus3 plus every other
    step. Keep the shared code identical from version to version, so a student pair
