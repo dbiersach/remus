@@ -1,11 +1,11 @@
 """hidden_peak.py
 
-Science AI: aim the engine's loop of "list the candidates, score each one, choose
+Science SI: aim the engine's loop of "list the candidates, score each one, choose
 the best" at a measurement problem.
 
 A 10x10 sample hides a hot spot. Each measurement reads the value at one square,
 from 0 far away up to 100 at the peak. The goal is to find the peak in as few
-measurements as possible, the same choice an AI agent makes at a beamline at
+measurements as possible, the same choice an SI agent makes at a beamline at
 Brookhaven's NSLS-II: where to measure next.
 
 | Chess engine | Hidden peak |
@@ -155,7 +155,7 @@ def choose_next_measurement(
 
 
 def random_strategy(readings: dict[tuple[int, int], int]) -> tuple[int, int]:
-    """Measure a random unmeasured square, the baseline every AI must beat."""
+    """Measure a random unmeasured square, the baseline every SI must beat."""
     return random.choice(candidate_squares(readings))
 
 
@@ -172,7 +172,7 @@ def expectimax_choice(
     not an opponent, so this search averages. Averages give no cutoffs, which is
     why alpha-beta has nothing to prune.
 
-    The benchmark shows this lookahead doing worse than the greedy AI: looking
+    The benchmark shows this lookahead doing worse than the greedy SI: looking
     ahead only helps when the predictions are good, and a "plus or minus 20" guess
     is not. The NSLS-II agent uses a statistical model (a Gaussian process) that
     knows how uncertain each prediction is.
@@ -269,7 +269,7 @@ def show_sample_graph(seed: int) -> None:
     random.seed(0)  # The random strategy makes the same choices every run
     strategies = (
         ("Random guessing", random_strategy),
-        ("The AI", choose_next_measurement),
+        ("The SI", choose_next_measurement),
     )
     figure, axes = plt.subplots(1, 2, figsize=(12, 6.5))
     for ax, (name, strategy) in zip(axes, strategies, strict=True):
@@ -314,16 +314,16 @@ def main():
     print(f"Random guessing: {average:5.1f} measurements on average")
     for weight in (0, EXPLORE_WEIGHT, 40):
         average = benchmark(choose_next_measurement, explore_weight=weight)
-        results.append((f"Greedy AI, weight {weight}", average))
+        results.append((f"Greedy SI, weight {weight}", average))
         print(
-            f"Greedy AI, explore weight {weight:2}: {average:5.1f} measurements on average"
+            f"Greedy SI, explore weight {weight:2}: {average:5.1f} measurements on average"
         )
     print(
-        "  (expected: every greedy AI well below random guessing, best near weight 8)"
+        "  (expected: every greedy SI well below random guessing, best near weight 8)"
     )
     average = benchmark(expectimax_choice, trials=10)
     results.append(("Expectimax (10 samples)", average))
-    print(f"Expectimax AI (10 samples): {average:5.1f} measurements on average")
+    print(f"Expectimax SI (10 samples): {average:5.1f} measurements on average")
     print(
         "  (expected: better than random, worse than greedy: a crude model limits lookahead)"
     )

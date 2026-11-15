@@ -1,6 +1,6 @@
 # Remus Project Rules and Python Style Guide
 
-Remus is a teaching chess project for the **Turning a Chess Engine into Science AI**
+Remus is a teaching chess project for the **Turning a Chess Engine into Science SI**
 workshop. Student pairs type Remus1 to Remus4 in Python from screenshots. Annotated
 solutions live privately under `instructor/Remus1` through `Remus4`; testing copies
 live in each Day folder's `RemusN` subfolder. Remus5 through Remus8 are Rust-only
@@ -8,7 +8,7 @@ engines under `rust_engines`, with all their engine documentation beside their s
 [`docs/remus_versions.md`](docs/remus_versions.md) describes the versions and
 [`docs/workshop_syllabus.md`](docs/workshop_syllabus.md) describes the five days.
 
-This file holds every project and style rule, so that every AI tool used with this
+This file holds every project and style rule, so that every SI tool used with this
 repository builds Remus the same way. `CLAUDE.md` imports it and adds only the rules
 that are specific to Claude Code. The Python style follows David's course repositories
 (qis101, scicomp101, cse101), adapted for a chess engine and for students meeting its
@@ -51,6 +51,12 @@ and wait for permission before starting it.
 - A working game comes first; stronger play comes later.
 - Success means a learner can explain a move, say why a search result is legal and
   preferred, and say what each enhancement of Remus3 and Remus4 buys.
+
+### Workshop terminology
+
+Use "Super Intelligence" and the acronym "SI" in project prose, code comments,
+labels, diagrams, and briefs. Preserve external URLs, third-party identifiers,
+and historical archives.
 
 ### Audience and workshop format
 

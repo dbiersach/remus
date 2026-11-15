@@ -8,7 +8,7 @@ The student pair searches every set of up to three phases and compares the print
 
 ## The big picture
 
-No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `search()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `search()` scores every set of up to three phases, just as the chess search compares possible continuations. Unlike this exhaustive set search, `alpha_beta()` can skip branches that cannot change the result. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
+No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `search()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `search()` scores every set of up to three phases, just as the chess search compares possible continuations. Unlike this exhaustive set search, `alpha_beta()` can skip branches that cannot change the result. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess SI/phase_hunt.py`.
 
 ## The period step by step
 
@@ -16,7 +16,7 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 | --- | --- |
 | 1:00 to 1:15 | The tree of phase sets beside Remus's game tree: a set is a position and adding a phase is a move. Quartz then rutile is the same set as rutile then quartz, the same idea as the transposition table. |
 | 1:15 to 1:50 | Write `search()` (12 code lines), which scores every set of up to three phases and keeps every set that ties for the best score. |
-| 1:50 to 2:15 | Press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
+| 1:50 to 2:15 | Press Run Python File in `Day 5 - Solve a science problem with chess SI/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
 | 2:15 to 2:30 | The programs that search the same tree on real synchrotron data, and the agent that steers measurements at a beamline. |
 
 ## The files
@@ -27,7 +27,7 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 
 ### `phase_hunt.py`
 
-Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess AI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
+Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess SI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
 
 ![search(), lines 214 to 225](../utils/images/Day5/period3_phase_hunt_lines_214_to_225.png)
 

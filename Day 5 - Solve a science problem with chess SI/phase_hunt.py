@@ -1,6 +1,6 @@
 """phase_hunt.py
 
-Science AI: name the crystals in a powder from its X-ray pattern, with the same
+Science SI: name the crystals in a powder from its X-ray pattern, with the same
 tree search that chooses a chess move.
 
 A beamline such as the PDF beamline at Brookhaven's NSLS-II shines X-rays through a

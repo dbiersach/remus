@@ -5,8 +5,9 @@ positions, and searches ahead with alpha-beta, which skips branches that cannot
 change the best move. An opening book supplies stored opening lines. Playing
 strength depends on the position, time control, and hardware.
 
-The "Turning a Chess Engine into Science AI" workshop builds Remus one lesson
-at a time in plain Python. The supplied Rust versions extend the same ideas.
+The "Turning a Chess Engine into Science SI" workshop builds Remus one lesson
+at a time in plain Python. SI stands for Super Intelligence. The supplied Rust
+versions extend the same ideas.
 
 <table>
   <tr>
@@ -95,7 +96,7 @@ On Day 5 they apply the same search ideas to science problems.
 | --- | --- |
 | `Day 1 - ...` through `Day 4 - ...` | Day and period syllabuses, with one `RemusN` subfolder for that day's Python engine |
 | Each `Day N - .../RemusN` | Python engine source, `RemusN.md`, `remusN.bat`, `verify_remusN.py`, and supplied data |
-| `Day 5 - Solve a science problem with chess AI` | Day and period syllabuses and the two science starter programs |
+| `Day 5 - Solve a science problem with chess SI` | Day and period syllabuses and the two science starter programs |
 | `rust_engines/Remus5` through `Remus8` | Rust source, ready-to-run Windows executables, and engine documentation |
 | `docs` | Shared guides and briefs, containing only Markdown and PDF files |
 | `utils` | VS Code extension installation, Lucas Chess engine registration, and other setup utilities |

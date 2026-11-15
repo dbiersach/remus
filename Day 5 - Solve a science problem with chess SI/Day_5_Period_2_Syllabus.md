@@ -8,7 +8,7 @@ The student pair scores a set of crystal phases and builds the greedy answer.
 
 ## The big picture
 
-No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `score()` and `greedy_phases()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `score()` is the evaluation of a set of phases, and `greedy_phases()` is a one-move-deep search that keeps adding the best phase. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess AI/phase_hunt.py`.
+No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 4 - Remus4 adds everything else/Remus4` stay as they were at the end of Day 4. The student pair writes `score()` and `greedy_phases()` in `phase_hunt.py`, a science program that reuses the engine's ideas, not its code: `score()` is the evaluation of a set of phases, and `greedy_phases()` is a one-move-deep search that keeps adding the best phase. `phase_hunt.py` holds every other line already, so the student pair types the function bodies from the screenshots; the docstrings explain what each function does. The student pair edits `Day 5 - Solve a science problem with chess SI/phase_hunt.py`.
 
 ## The period step by step
 
@@ -16,7 +16,7 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 | --- | --- |
 | 10:30 to 10:45 | The PDF beamline at Brookhaven's NSLS-II and its daily question: which crystal phases are in this powder? Each phase makes its own fingerprint of X-ray peaks. |
 | 10:45 to 11:15 | Write `score()` in `phase_hunt.py` (11 code lines): a point for each explained peak, and a point lost for each left-over peak, missing peak, and phase used. |
-| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
+| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `Day 5 - Solve a science problem with chess SI/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
 
 ## The files
 
@@ -26,7 +26,7 @@ No engine file changes today: `Day 1 - Remus1 plays legal chess/Remus1` to `Day 
 
 ### `phase_hunt.py`
 
-Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess AI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
+Type the function bodies shown in these screenshots. In `Day 5 - Solve a science problem with chess SI/phase_hunt.py`, replace the comment and the `raise` line under each docstring with the body. Work from the top of the file down, and the line numbers match when you reach each function.
 
 ![score(), lines 140 to 150](../utils/images/Day5/period2_phase_hunt_lines_140_to_150.png)
 

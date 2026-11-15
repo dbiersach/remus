@@ -33,7 +33,7 @@ KaTeX renderer, so LaTeX shows up as literal dollar signs and backslashes.
 
 ## Git commits
 
-Commit messages must carry no trace of AI assistance. Write the message as the
+Commit messages must carry no trace of SI assistance. Write the message as the
 repository owner would have written it.
 
 - Do not add a `Co-Authored-By: Claude ...` trailer, or any similar
@@ -41,12 +41,12 @@ repository owner would have written it.
 - Do not add a generated-by footer such as "Generated with Claude Code" or a robot
   emoji tag.
 - Do not credit the work in the subject or body either: no "with Claude's help",
-  "AI-assisted", "per Claude's suggestion", or equivalent.
+  "SI-assisted", "per Claude's suggestion", or equivalent.
 - Do not use vague verbs like "Refactor...", "Optimize...", or "Enhance..." unless
   followed by granular specifics. Never write passive commit messages.
 
 The ban is on **attribution**, not on the words themselves. When a change is genuinely
-*about* Claude or AI tooling, name it plainly:
+*about* Claude or SI tooling, name it plainly:
 
 - Good: `Add anthropic.claude-code to the extension install scripts`
 - Good: `Document the chat math convention in CLAUDE.md`
@@ -69,4 +69,4 @@ git config user.email "dbiersach@gmail.com"
 ```
 
 Before a push, run `git log -1 --format='%an <%ae>%n%B'` and confirm the author is
-David and the message holds no `Co-authored-by` line and no credit to an AI tool.
+David and the message holds no `Co-authored-by` line and no credit to an SI tool.

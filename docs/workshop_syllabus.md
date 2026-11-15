@@ -226,7 +226,7 @@ Play stops at 4:30, the end of the period, even in the middle of a game.
 ## Day 5: The science project
 
 **Goal for the day:** the student pairs aim the engine's ideas at two problems from a
-synchrotron beamline, report what their science AI found, and take their code home.
+synchrotron beamline, report what their science SI found, and take their code home.
 
 The project uses two programs, `hidden_peak.py` and `phase_hunt.py`. The student pair
 works in the Day 5 folder. Each program supplies the graphing and measurement code; student pairs type the function bodies shown in the period screenshots. Both use common Python modules. Neither imports the engine:
@@ -248,8 +248,8 @@ The science programs call the student pair's functions and print benchmark resul
 | Time | Activity |
 | --- | --- |
 | 8:30 to 8:45 | A 10 by 10 sample hides a hot spot, and every measurement costs beam time. Choosing the next square is choosing a move: list the candidates, score each one, keep the best. |
-| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Press Run Python File in `Day 5 - Solve a science problem with chess AI/hidden_peak.py`. With `EXPLORE_WEIGHT = 8`, compare the printed averages: random 54.3; greedy weights 0, 8, and 40: 17.5, 9.4, and 19.4. Close each of the two graph windows to finish. |
-| 9:30 to 10:00 | After matching the default results, change `EXPLORE_WEIGHT`, save, and rerun `Day 5 - Solve a science problem with chess AI/hidden_peak.py`. The program compares weights 0, the chosen value, and 40 over 100 generated samples. It also prints expectimax's 24.7 average over only 10 samples: a separate lookahead demonstration, not the same 100-sample comparison. Record the chosen weight and measured averages; the printed expectation text is a fixed reference. |
+| 8:45 to 9:30 | Write `candidate_squares()`, `score_candidate()`, and `choose_next_measurement()` in `hidden_peak.py` (19 code lines). Press Run Python File in `Day 5 - Solve a science problem with chess SI/hidden_peak.py`. With `EXPLORE_WEIGHT = 8`, compare the printed averages: random 54.3; greedy weights 0, 8, and 40: 17.5, 9.4, and 19.4. Close each of the two graph windows to finish. |
+| 9:30 to 10:00 | After matching the default results, change `EXPLORE_WEIGHT`, save, and rerun `Day 5 - Solve a science problem with chess SI/hidden_peak.py`. The program compares weights 0, the chosen value, and 40 over 100 generated samples. It also prints expectimax's 24.7 average over only 10 samples: a separate lookahead demonstration, not the same 100-sample comparison. Record the chosen weight and measured averages; the printed expectation text is a fixed reference. |
 
 ### P2, 10:30 to 12:00: Name the crystals, the greedy way
 
@@ -257,7 +257,7 @@ The science programs call the student pair's functions and print benchmark resul
 | --- | --- |
 | 10:30 to 10:45 | The PDF beamline at Brookhaven's NSLS-II and its daily question: which crystal phases are in this powder? Each phase makes its own fingerprint of X-ray peaks. |
 | 10:45 to 11:15 | Write `score()` in `phase_hunt.py` (11 code lines): a point for each explained peak, and a point lost for each left-over peak, missing peak, and phase used. |
-| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
+| 11:15 to 12:00 | Write `greedy_phases()` (15 code lines), then press Run Python File in `Day 5 - Solve a science problem with chess SI/phase_hunt.py`. With the supplied settings, compare the printed counts: 166 right, 0 "can't tell", and 34 wrong over 200 generated powders. Powder 12 is reported as anatase and gold instead of anatase and silver. Close its graph; `NotImplementedError: Write search()` is expected until Period 3. |
 
 ### P3, 1:00 to 2:30: Search every set, and verify
 
@@ -265,7 +265,7 @@ The science programs call the student pair's functions and print benchmark resul
 | --- | --- |
 | 1:00 to 1:15 | The tree of phase sets beside Remus's game tree: a set is a position and adding a phase is a move. Quartz then rutile is the same set as rutile then quartz, the same idea as the transposition table. |
 | 1:15 to 1:50 | Write `search()` (12 code lines), which scores every set of up to three phases and keeps every set that ties for the best score. |
-| 1:50 to 2:15 | Press Run Python File in `Day 5 - Solve a science problem with chess AI/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
+| 1:50 to 2:15 | Press Run Python File in `Day 5 - Solve a science problem with chess SI/phase_hunt.py` with the supplied settings (`PHASE_COST = 1`, `MISSING = 1`). Close the first graph to reach the search results. Manually compare 139 right, 52 "can't tell", and 9 wrong with greedy's 166 right and 34 wrong; expect 176 sets in library order and 821 in every order. Close the second graph to finish. Then change `PHASE_COST` and `MISSING`, save, and rerun; record the new counts rather than expecting the default counts. |
 | 2:15 to 2:30 | The programs that search the same tree on real synchrotron data, and the agent that steers measurements at a beamline. |
 
 ### P4, 3:00 to 4:30: Science results and take-home
@@ -273,9 +273,9 @@ The science programs call the student pair's functions and print benchmark resul
 | Time | Activity |
 | --- | --- |
 | 3:00 to 3:10 | Each student copies the Remus folder to a USB drive in File Explorer, leaving out `.venv`, then opens the copied folder in VS Code and opens an engine file and both science files. This checks that those files are present and readable; it does not test execution on another computer. The destination computer needs the setup in `README.md`. |
-| 3:10 to 3:30 | Reopen `Remus.code-workspace` in the original folder on the class laptop, where `.venv` is installed. Each student pair uses Run Python File on `Day 5 - Solve a science problem with chess AI/hidden_peak.py` and `Day 5 - Solve a science problem with chess AI/phase_hunt.py`, closing each graph window to continue. Record the measured averages and right, wrong, and "can't tell" counts, together with `EXPLORE_WEIGHT`, `PHASE_COST`, and `MISSING`. Changed settings can produce different results from the printed references. The class collects the settings and results on the board. |
+| 3:10 to 3:30 | Reopen `Remus.code-workspace` in the original folder on the class laptop, where `.venv` is installed. Each student pair uses Run Python File on `Day 5 - Solve a science problem with chess SI/hidden_peak.py` and `Day 5 - Solve a science problem with chess SI/phase_hunt.py`, closing each graph window to continue. Record the measured averages and right, wrong, and "can't tell" counts, together with `EXPLORE_WEIGHT`, `PHASE_COST`, and `MISSING`. Changed settings can produce different results from the printed references. The class collects the settings and results on the board. |
 | 3:30 to 3:45 | Compare these supplied examples for the default settings: powder 0 is correctly identified as silicon and zincite; powder 12 ties between anatase with gold and anatase with silver. The normal program run displays powder 12, not powder 0. At the default settings, 50 of the 52 "can't tell" answers involve this gold/silver tie. Their library peaks differ by less than `TOLERANCE = 0.3`; discuss what additional measurement could distinguish them. Results with tuned settings can differ. |
 | 3:45 to 4:20 | Each student pair presents its results, its parameter values, and its answer for powder 12 in three minutes. |
-| 4:20 to 4:30 | What comes next: AI agents that steer real experiments at light sources such as NSLS-II. |
+| 4:20 to 4:30 | What comes next: SI agents that steer real experiments at light sources such as NSLS-II. |
 
 **Checkpoint:** every student pair has compared its default benchmark results with the references, recorded the effects of its chosen parameters, and presented its findings. Every student leaves with a readable copy of the code on a USB drive.

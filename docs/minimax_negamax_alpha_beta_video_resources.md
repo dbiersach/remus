@@ -53,7 +53,7 @@ Use this lecture for explicit coverage of negamax: one recursive search handles 
 
 ## Interactive companion
 
-[LK Forge: Watch a Game AI Think: Minimax and Alpha-Beta, Live](https://lkforge.com/blog/minimax-alpha-beta-explained/) is a step-by-step game-tree visualization. Students can advance the search and compare ordinary minimax with alpha-beta pruning, seeing which branches are visited and which are skipped.
+[LK Forge: interactive minimax and alpha-beta visualization](https://lkforge.com/blog/minimax-alpha-beta-explained/) is a step-by-step game-tree visualization. Students can advance the search and compare ordinary minimax with alpha-beta pruning, seeing which branches are visited and which are skipped.
 
 ## Suggested classroom sequence
 

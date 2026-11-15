@@ -200,7 +200,7 @@ code Remus.code-workspace
 
 VS Code should open the full workspace with its `.venv` interpreter. Confirm
 that Python, Pylance, Ruff, Markdown preview, and PDF viewing are available.
-The extension list also includes optional AI tooling; no AI account or sign-in
+The extension list also includes optional SI tooling; no SI account or sign-in
 is required for the workshop. Student pairs type the displayed lessons themselves.
 
 Check the following files and folders in Explorer:
