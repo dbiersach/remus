@@ -1,5 +1,9 @@
 # Day 4: Remus4
 
+**Workshop prerequisites:** Students must be ages 10+, have some coding
+experience, and know how to play chess. See the
+[prerequisites for the week](../docs/workshop_syllabus.md#prerequisites).
+
 **Goal for the day:** the student pair types the 146 new lines of Remus4 and runs the verifier at the end of each period.
 
 ## The day at a glance

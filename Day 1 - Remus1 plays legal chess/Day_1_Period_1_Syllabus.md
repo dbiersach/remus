@@ -2,6 +2,12 @@
 
 8:30 to 10:00. Part of [Day 1: Remus1, legal chess at random](Day_1_Syllabus.md).
 
+## Before the workshop
+
+Students must be ages 10+, have some coding experience, and know how to play
+chess. Review the [workshop prerequisites](../docs/workshop_syllabus.md#prerequisites)
+before attending.
+
 ## Goal
 
 Every laptop is set up, the class has seen the finished Remus2 play, and the student pair has typed the first engine file.

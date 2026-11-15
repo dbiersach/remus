@@ -1,5 +1,9 @@
 # Day 5: The science project
 
+**Workshop prerequisites:** Students must be ages 10+, have some coding
+experience, and know how to play chess. See the
+[prerequisites for the week](../docs/workshop_syllabus.md#prerequisites).
+
 **Goal for the day:** the student pairs aim the engine's ideas at two problems from a synchrotron beamline, report what their science AI found, and take their code home.
 
 The project uses two programs, `hidden_peak.py` and `phase_hunt.py`. The student pair

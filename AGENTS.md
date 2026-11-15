@@ -54,8 +54,13 @@ and wait for permission before starting it.
 
 ### Audience and workshop format
 
-- The workshop is open to students of all ages who know some coding and chess.
-  Use the plain word "students", with no school or age classification.
+- The workshop is for students ages 10+ who have some coding experience and know
+  how to play chess. These are prerequisites, not skills taught from scratch.
+  Students should understand functions, loops, and lists in a language such as
+  Java or Scratch, and recognize chess notation such as e4 and Nf3. Use "students"
+  without assigning a school grade. Keep workshop audience statements consistent
+  with [the prerequisites](docs/workshop_syllabus.md#prerequisites). The workshop
+  age requirement does not restrict public use of the repository or engines.
 - Students work in student pairs, switching driver and navigator every period.
   Four 90-minute periods run 8:30 to 10:00, 10:30 to 12:00, 1:00 to 2:30, and 3:00 to 4:30.
 - Windows 11, VS Code, and Lucas Chess are the workshop platform. No GUI is built.

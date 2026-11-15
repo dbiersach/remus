@@ -1,5 +1,9 @@
 # Day 1: Remus1, legal chess at random
 
+**Workshop prerequisites:** Students must be ages 10+, have some coding
+experience, and know how to play chess. See the
+[prerequisites for the week](../docs/workshop_syllabus.md#prerequisites).
+
 **Goal for the day:** `Day 1 - Remus1 plays legal chess/Remus1` holds an engine that generates legal moves and chooses one at random. The student pair tests its code with `verify_remus1.py`, then the student pair plays together as a team against its Remus1 in Lucas Chess.
 
 ## The day at a glance

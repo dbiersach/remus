@@ -1,6 +1,11 @@
 # Learn chess: the rules that trip people up, and how moves are written
 
-You know how the pieces move. This page explains the less familiar rules, the value of each piece, and the way people and programs write a move down.
+Workshop participants must be ages 10+, have some coding experience, and already
+know how to play chess. The [workshop prerequisites](workshop_syllabus.md#prerequisites)
+describe the expected starting skills.
+
+This page reviews the less familiar rules, the value of each piece, and the way
+people and programs write a move down.
 Each rule names the engine whose code needs it, so you can read the rule right before
 you type that code.
 

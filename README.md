@@ -79,6 +79,11 @@ confidence intervals. Follow an engine link above to see how that version works.
 
 ## The workshop
 
+The workshop is for students ages 10+ who have some coding experience and know
+how to play chess. Students should understand functions, loops, and lists in a
+language such as Java or Scratch, and recognize chess notation such as e4 and Nf3.
+See the [workshop prerequisites](docs/workshop_syllabus.md#prerequisites).
+
 Students work in ten student pairs over five days. Each day has four
 90-minute periods. Students type Python from the period screenshots, check their
 own code with the supplied verifier, and play their own engine in Lucas Chess.

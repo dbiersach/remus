@@ -3,11 +3,20 @@
 Each day also has its own top folder, such as `Day 1 - Remus1 plays legal
 chess`, with a page for the day and a page for each period.
 
+## Prerequisites
+
+The workshop is for students ages 10+ who have some coding experience and know
+how to play chess. Before attending, students should understand functions, loops,
+and lists in a language such as Java or Scratch. They should know the rules of
+chess and recognize notation such as e4 and Nf3.
+
+The workshop builds on these skills to develop chess engines and apply their
+ideas to science.
+
 ## The week at a glance
 
-The students already know some coding and know how to play chess, including notation,
-so the workshop focuses on building engines and applying their ideas to science. Each day has four 90-minute periods: P1 8:30 to
-10:00, P2 10:30 to 12:00, P3 1:00 to 2:30, and P4 3:00 to 4:30.
+Each day has four 90-minute periods: P1 8:30 to 10:00, P2 10:30 to 12:00,
+P3 1:00 to 2:30, and P4 3:00 to 4:30.
 
 | Day | What the student pairs build | Code lines typed | Ends with |
 | --- | --- | ---: | --- |

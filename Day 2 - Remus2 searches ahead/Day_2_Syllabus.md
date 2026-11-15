@@ -1,5 +1,9 @@
 # Day 2: Remus2 searches ahead
 
+**Workshop prerequisites:** Students must be ages 10+, have some coding
+experience, and know how to play chess. See the
+[prerequisites for the week](../docs/workshop_syllabus.md#prerequisites).
+
 **Goal for the day:** the student pair builds and verifies its Remus2, then observes and plays its own engines in Lucas Chess.
 
 ## The day at a glance

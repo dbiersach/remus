@@ -1,5 +1,9 @@
 # Day 3: Remus3
 
+**Workshop prerequisites:** Students must be ages 10+, have some coding
+experience, and know how to play chess. See the
+[prerequisites for the week](../docs/workshop_syllabus.md#prerequisites).
+
 **Goal for the day:** the student pair turns its Remus2 into Remus3 by typing the 184 new lines, then tests it in P4. The code at each checkpoint includes the functions needed to start the engine. Successful startup alone does not test chess behavior.
 
 ## The day at a glance
