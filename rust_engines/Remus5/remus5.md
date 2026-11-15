@@ -3,6 +3,7 @@
 [Overview](#overview) |
 [Enhancements over the previous version](#enhancements-over-the-previous-version) |
 [Source files and lines of code](#source-files-and-lines-of-code) |
+[Python versus Rust code size](#python-remus4-versus-rust-remus5-code-size) |
 [Running and configuring](#running-and-configuring) |
 [Architecture and call diagrams](#architecture-and-call-diagrams) |
 [Search and evaluation](#search-and-evaluation) |
@@ -65,6 +66,83 @@ excluded.
 | `rust-toolchain.toml`, `.cargo/config.toml` | Compiler selection and CPU target |
 | `remus5.exe` | Executable selected by the GUI |
 | `opening_book.txt` | Opening lines in UCI move notation |
+
+## Python Remus4 versus Rust Remus5 code size
+
+Remus5 has 1,849 Total Lines of Code (TLOC), compared with 630 for
+[Python Remus4](../../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md).
+It is nearly three times as long because it makes performance-related machinery
+explicit, adds diagnostic features, and uses more verbose syntax. It preserves
+Remus4's core search and evaluation design; the additional 1,219 lines do not
+represent three times as much chess knowledge.
+
+The module comparison shows where those lines go. These totals exclude supplied
+verifiers and external checking tools.
+
+| Responsibility | Remus4 Python TLOC | Remus5 Rust TLOC | Increase |
+| --- | ---: | ---: | ---: |
+| Board representation | 23 | 204 | 181 |
+| Applying moves, attacks, move generation | 119 | 377 | 258 |
+| Evaluation | 135 | 311 | 176 |
+| Search | 212 | 387 | 175 |
+| Transposition table | 22 | 130 | 108 |
+| Exchange evaluation and opening book | 57 | 143 | 86 |
+| UCI interface | 62 | 191 | 129 |
+| Diagnostic logging and table metrics | 0 | 106 | 106 |
+| **Total** | **630** | **1,849** | **1,219** |
+
+### Python supplies machinery in very little code
+
+Remus4 stores searched positions in a dictionary. Python handles allocation,
+hashing, lookup, and resizing. Remus5 implements a specialized transposition
+table with fixed-size buckets, entry replacement, memory allocation, and
+allocation-failure handling. That accounts for much of the increase from 22 to
+130 lines. A Python dictionary is backed by substantial runtime code, but that
+implementation is not part of the student's engine source. Rust also uses a
+standard library; the distinction here is the specialized storage Remus5 chooses
+to implement itself.
+
+### Rust maintains additional representations for speed
+
+Remus4 principally stores a board list. Remus5 also maintains bitboards and an
+incremental position key, packs moves into integers, and uses fixed-capacity
+move buffers. A bitboard can answer where all the White knights are without
+scanning every board square. An incremental key updates the position's
+fingerprint from the pieces and rule fields that change during a move.
+
+These choices need construction and maintenance code. Every capture, promotion,
+and special move must keep the board, bitboards, and key synchronized. They
+make frequent search operations cheaper, at the cost of more source code.
+
+### The totals include different amounts of supplied data
+
+Python's piece-square values live in the supplied `piece_square_tables.json`,
+outside its 630-line count. Rust declares the corresponding values inside
+`evaluation.rs`, so those source lines count toward 1,849. Students type neither
+set of values. This difference makes the totals an imperfect measure of the
+relative amount of engine logic.
+
+### Remus5 includes additional supporting features
+
+Persistent diagnostic logging and table metrics occupy 106 lines in their own
+modules, plus integration elsewhere. Rust's UCI interface also supports designer
+checks, including FEN positions, move-count checks, and direct evaluation. These
+features help inspect and measure the engine but do not add evaluation terms or
+new search strategies.
+
+### The counting convention magnifies Rust's verbosity
+
+The count excludes blank lines and standalone comments, but includes 330 Rust
+lines containing only punctuation, such as closing braces, and 48 attribute
+lines, such as compiler inlining annotations. Explicit types, struct definitions,
+initialization, and error handling also occupy source lines. These are already
+included in the module totals above, not additional lines to add to them.
+
+Python minimizes the code needed to express this teaching engine. This Rust
+implementation spends more code on controlling execution and storage. A more
+literal Rust translation could be shorter than Remus5, but retaining its speed
+would require measurement. The larger source does not establish that equivalent
+chess reasoning inherently requires three times as much code.
 
 ## Running and configuring
 
