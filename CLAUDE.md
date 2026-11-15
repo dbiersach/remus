@@ -12,6 +12,16 @@ Keep shared project, style, and formatting rules in `AGENTS.md`; add rules here 
 when they are specific to Claude Code. Both instruction files belong to the author
 checkout and are removed from prepared student copies by `utils/setup_student.ps1`.
 
+## Terminal commands and screen access
+
+Use terminal commands only for Remus work. Never use screen capture or computer
+control unless David explicitly requests that action or grants permission first.
+This includes screenshot tools, desktop or browser UI automation, simulated mouse
+or keyboard input, and capture or control helpers launched from the terminal.
+A general request to inspect, test, or fix something does not authorize screen
+capture or computer control. If either is needed, explain the proposed action
+and wait for permission before starting it.
+
 ## Chat responses
 
 Responses are read in the Claude Code panel inside VS Code, which has no MathJax or

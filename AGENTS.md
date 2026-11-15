@@ -14,6 +14,16 @@ that are specific to Claude Code. The Python style follows David's course reposi
 (qis101, scicomp101, cse101), adapted for a chess engine and for students meeting its
 ideas for the first time.
 
+## Terminal commands and screen access
+
+Use terminal commands only for Remus work. Never use screen capture or computer
+control unless David explicitly requests that action or grants permission first.
+This includes screenshot tools, desktop or browser UI automation, simulated mouse
+or keyboard input, and capture or control helpers launched from the terminal.
+A general request to inspect, test, or fix something does not authorize screen
+capture or computer control. If either is needed, explain the proposed action
+and wait for permission before starting it.
+
 ## Part 1: The project
 
 ### Why the name "Remus"
