@@ -596,6 +596,47 @@ short round against a limited-strength Stockfish setting does not measure a rati
 Passing `verify_remusN.py` (with your version number in place of N) checks its reference cases, not Elo, and games using the
 registered student engines exercise the typed code only for the positions reached.
 
+### Round robin of Remus1 to Remus8
+
+Every version played every other version twice, once with each color: 56 games at
+15 minutes per side with no increment. Each engine kept its default settings, except
+that Remus6, Remus7, and Remus8 pondered on their opponent's time; Remus7 and Remus8
+used their default four search threads and 512 MiB tables. Four games ran at once,
+each on two fast processor cores shared by both engines. A full-strength Stockfish
+judge ended 38 decided games early, as in the rating runs, and no game was lost on
+time. Each engine played 14 games, so 14 points is a perfect score. Equal points are
+ranked by the result between the two engines.
+
+| Rank | Engine | Points | Wins | Draws | Losses |
+| ---: | --- | ---: | ---: | ---: | ---: |
+| 1 | Remus8 | 11.5 | 10 | 3 | 1 |
+| 2 | Remus7 | 11.5 | 10 | 3 | 1 |
+| 3 | Remus6 | 10.5 | 9 | 3 | 2 |
+| 4 | Remus5 | 10.5 | 9 | 3 | 2 |
+| 5 | Remus4 | 5.5 | 5 | 1 | 8 |
+| 6 | Remus3 | 4.5 | 4 | 1 | 9 |
+| 7 | Remus2 | 2 | 2 | 0 | 12 |
+| 8 | Remus1 | 0 | 0 | 0 | 14 |
+
+Each row gives the points that engine scored in its two games against the engine
+named at the top of the column.
+
+| Engine | Remus8 | Remus7 | Remus6 | Remus5 | Remus4 | Remus3 | Remus2 | Remus1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Remus8 | | 1.5 | 1 | 1 | 2 | 2 | 2 | 2 |
+| Remus7 | 0.5 | | 2 | 1 | 2 | 2 | 2 | 2 |
+| Remus6 | 1 | 0 | | 1.5 | 2 | 2 | 2 | 2 |
+| Remus5 | 1 | 1 | 0.5 | | 2 | 2 | 2 | 2 |
+| Remus4 | 0 | 0 | 0 | 0 | | 1.5 | 2 | 2 |
+| Remus3 | 0 | 0 | 0 | 0 | 0.5 | | 2 | 2 |
+| Remus2 | 0 | 0 | 0 | 0 | 0 | 0 | | 2 |
+| Remus1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | |
+
+The table separates the Python engines from the Rust engines: every Rust engine
+won all eight of its games against Remus1 to Remus4, and each Python version beat
+every Python version below it. Among the four Rust engines, two games per pairing
+cannot rank them reliably; the top four finished within one point of each other.
+
 ### Why Remus5 stays close to Remus8
 
 Remus5 is the Rust implementation of workshop Remus4: one search thread and the
