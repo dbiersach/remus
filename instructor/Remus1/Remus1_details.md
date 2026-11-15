@@ -32,6 +32,11 @@ Do not explain the entire program by walking down `uci.py` first. Give the GUI's
 request in one sentence, then build the helpers from the bottom up. At the end,
 trace the request from the top down so students can connect the pieces.
 
+Before introducing [Remus2](../Remus2/Remus2_details.md), ask the student to trace
+one candidate through copying and king-safety filtering without changing the
+parent board. Then ask how to choose between two legal moves. Remus2 answers
+that new question with evaluation and search; it retains the movement rules.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
@@ -40,7 +45,7 @@ trace the request from the top down so students can connect the pieces.
 | Piece | Kind 1 through 6, plus 8 for White; 0 means empty. | `piece & 7` selects the kind and `piece & WHITE` selects the color bit. These are small piece codes, not a bitboard representing 64 squares. `is_own()` excludes the empty square. |
 | Position | `(board, white, castling, en_passant)`; `white` is a Boolean. | The side to move and historical rights travel with the board. A tuple fixes the order and number of fields; it does not freeze the list inside it. |
 | Castling rights | Integer mask: 1 and 2 for White; 4 and 8 for Black. | Moving a king or rook away and back must not restore a right. `RIGHTS_OF_SQUARE` maps the six home squares to the rights lost when a move touches them. Checking both endpoints also handles a rook captured at home. |
-| En passant | The skipped square, or -1 when absent. | This records a one-turn opportunity that cannot be inferred from the current arrangement of pieces alone. Every ordinary subsequent move clears it. |
+| En passant | The skipped square, or -1 when absent. | This records a one-turn opportunity that cannot be inferred from the current arrangement of pieces alone. The next move clears the old opportunity; another two-square pawn move can record a new skipped square. |
 | Move | `(start, target, promotion)`; promotion is 0 or a piece kind. | One fixed shape represents ordinary moves and all four promotion choices. Castling and en passant effects are inferred from the position and move. |
 | Movement tables | Tuples of direction pairs, plus `PIECE_STEPS[kind] = (steps, slides)`. | Rooks and bishops differ by directions; queens combine them; kings and knights do not slide. Pawns keep a separate generator because moving and capturing obey different rules. |
 | Candidate and legal moves | Fresh lists of move tuples within each call. | Helpers append to the caller's output list. `think()` builds a distinct list after checking king safety. |

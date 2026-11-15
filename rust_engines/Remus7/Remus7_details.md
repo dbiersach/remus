@@ -33,6 +33,12 @@ individual shared operations, then explain why a table entry spans more than
 one such operation. Do not start by assigning every CPU a move; that teaches a
 different algorithm.
 
+Before introducing [Remus8](../Remus8/Remus8_details.md), ask the student to draw
+two independent root searches and identify their duplicated work. Then draw one
+alpha-beta node whose first child improves the bound. This motivates assigning
+remaining branches to helpers, with explicit task ownership and completion,
+rather than simply adding more independent root searches.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
@@ -101,10 +107,18 @@ main() -> run() -> root selection and SearchControl setup
 
 Each worker's recursive search retains Remus6's ordering, check-aware quiescence,
 selective search, evaluation, and speed techniques. Its move loops copy the parent
-position once and play the move on that copy with `play_move()`. The helpers' root searches are independent;
+position into child storage and apply `play_move()` to that child. The helpers'
+root searches are independent;
 shared table writes are the main mechanism by which one search helps another.
 Only the main worker reports its completed principal iterations as the chosen
 analysis, rather than merging unrelated lines into a fabricated principal variation.
+
+The inherited [Remus6 recursive path](../Remus6/Remus6_details.md#control-flow-and-function-call-tree)
+includes T8 through T10: copy a child before `play_move()`, detect mate through
+the checked evasion loop except before its early returns, and call SEE only for
+eligible captures whose attacker value exceeds the victim value. These are
+per-worker operations; parallel scheduling does not relax their legality or
+ownership conditions.
 
 Hash or thread-count changes occur between searches. Hash replacement drops
 worker references to the old allocation before installing the new one, after
@@ -166,6 +180,11 @@ truths. Score bounds, collision checks, depth requirements, draw-history limits,
 and legal move validation still matter. Changing ownership does not remove the
 inherited heuristic limits. The next version changes how work is assigned,
 not what `Arc` means or how the pieces move.
+
+The exact source listing preserves comments verbatim. References there to
+`evaluation.py` in Remus5 use the retired Python version label; the active
+Remus5 is Rust. The version progression above describes the current engines,
+including the evaluation terms shared by Remus6 through Remus8.
 
 ## Line-by-line source reference
 

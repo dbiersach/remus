@@ -31,12 +31,18 @@ in the syllabus. At the end of Period 2, `think()` is absent from the partially
 rewritten search file, so `uci.py` is not yet a valid startup check. The period
 correctly calls for loading `search.py` instead.
 
+Before introducing [Remus3](../Remus3/Remus3_details.md), require a paper trace
+that identifies the side to move, the sign of each returned score, and a cutoff
+that supplies only a bound. Then reach the same position by two move orders.
+The next lesson can ask what information is safe to remember, rather than
+introducing a cache before students understand its contents.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
 | --- | --- | --- |
 | Board, position, and move | The same 64-integer board, four-field position tuple, and three-field move tuple as Remus1. | Row 0 is rank 8 and column 0 is file a. Candidate children still receive independent board lists; no recursive caller changes its parent's board. |
-| Material values | `PIECE_VALUES`, indexed by piece kind: pawn 100, minor 300, rook 500, queen 900. | Values are centipawns. The king's material value is 0 because terminal mate scores, not a material trade, represent losing the king. |
+| Material values | `PIECE_VALUES`, indexed by piece kind: pawn 100, minor 300, rook 500, queen 900. | Values are centipawns. The king's material value is 0 because terminal mate scores represent checkmate; legal chess never captures the king. |
 | Piece-square tables | Supplied JSON lists converted into module-level tuples; `TABLES[kind][square]`. | One lookup shape covers all kinds. `ZERO_TABLE` fills unused entries for empty squares, rooks, and queens. Black uses a rank reflection, not a rotation that exchanges files. |
 | Ordered candidates | A list of `(priority, move)` tuples, sorted in descending order. | Python compares tuple fields in order. Equal priorities fall back to the move tuple's square numbers and promotion code, providing a deterministic tie order without a custom comparison function. |
 | Recursive frame | Local `position`, `depth`, `ply`, `alpha`, `beta`, and temporary child scores. | Each call has its own bindings. `depth` is work remaining; `ply` is distance from the root. Check extensions mean they are not interchangeable. |

@@ -30,6 +30,12 @@ then draw a single table entry, and only then discuss a dictionary holding many
 entries. Before null-move pruning, revisit a pawn ending where being forced to
 move is a disadvantage. That example gives meaning to the material guard.
 
+Before introducing [Remus4](../Remus4/Remus4_details.md), ask what the table does
+not remember: the current game's full history and the tactical consequences of
+every ordered capture. Use a repeated knight maneuver and a defended pawn to
+motivate draw history and exchange analysis. Only then introduce decisions to
+reduce or omit search work.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |

@@ -35,6 +35,12 @@ can trace one claim, one published result, and one cancellation. Keep native
 chess rules and evaluation off the scheduling diagram unless they are needed to
 explain the result being communicated.
 
+Finish with a comparison against [Remus7](../Remus7/Remus7_details.md): mark what
+both designs share (native chess rules and a table) and what changes (assignment,
+lifetime, and completion of worker tasks). Ask which measurement would justify
+the added coordination. This closes the progression from correct moves to
+search quality, cheaper execution, and useful parallel work.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
@@ -127,6 +133,13 @@ returning. Cancellation is scoped: canceling one split is not permission to
 abandon unrelated work elsewhere. Global stop remains available for the whole
 search through the main controller and shared flag.
 
+The inherited [Remus6 recursive path](../Remus6/Remus6_details.md#control-flow-and-function-call-tree)
+includes T8 through T10: copy a child before `play_move()`, detect mate through
+the checked evasion loop except before its early returns, and call SEE only for
+eligible captures whose attacker value exceeds the victim value. These are
+per-worker operations; parallel scheduling does not relax their legality or
+ownership conditions.
+
 Pondering and tablebase eligibility follow the Remus6/7 model. The scheduler
 changes native branch execution, not the network boundary. Remus8 also exposes
 `PonderHitMinPercent`, default 25, to configure the ordinary own-clock reserve
@@ -154,7 +167,7 @@ on the intended hardware.
 ## Worked example to teach at the board
 
 Use invented scores with alpha initially -100 and beta +50. The first child
-returns +20. The owner raises alpha to +20, then offers remaining moves B and C
+produces +20 after negating its score into the parent's viewpoint. The owner raises alpha to +20, then offers remaining moves B and C
 at an eligible split. A helper claims B with alpha +20 while the owner claims C.
 Both use their own child position and private recursive history.
 
@@ -192,6 +205,11 @@ linear scaling or superiority on every position. The default is four search
 threads and a 512 MiB shared table; recorded Elo tests with 16 threads and 2 GiB
 must retain those conditions in any comparison. Neither concurrency design
 removes the inherited search heuristics or history-dependent cache limitations.
+
+The exact source listing preserves comments verbatim. References there to
+`evaluation.py` in Remus5 use the retired Python version label; the active
+Remus5 is Rust. The version progression above describes the current engines,
+including the evaluation terms shared by Remus6 through Remus8.
 
 ## Line-by-line source reference
 

@@ -38,6 +38,12 @@ then futility as permission to omit some remaining work. This conceptual order
 prevents three separate conditions from looking like arbitrary ways to skip code.
 Do not add extra student typing or change the scheduled checkpoint order.
 
+Before introducing [Remus5](../../rust_engines/Remus5/Remus5_details.md), have the
+student separate a legal-move rule, an evaluation term, and a pruning heuristic
+in one search trace. The Rust extension first changes their representation and
+execution cost, not the purpose of those three layers. Finish the Python
+workshop checkpoints before using that optional extension.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
@@ -110,13 +116,13 @@ uci.main()
     otherwise: search.think(position, game_history, seconds, longest)
       copy game_history before each depth/window attempt
       alpha_beta()
-        count_node(), position_key(), is_draw() at non-root nodes
+        count_node(), position_key(); is_draw() only at non-root nodes
         in_check(); check extension; depth boundary -> quiescence()
         tt.probe(), evaluate(), optional null-move recursion
         append current key; ordered_moves() -> generate_moves()
         make_move(), in_check(), classify legal and calm moves
         first legal move: full-window alpha_beta()
-        later moves: futility decision, PVS probe, optional depth reduction
+        later moves: futility decision, then PVS probe at normal or reduced depth
         re-search an improving probe when required
         pop history; classify result; tt.store()
       principal_variation(); completed-iteration info; time decisions
@@ -216,8 +222,10 @@ a loading check, not a substitute for any of these checkpoints.
 Draw detection runs at non-root alpha-beta nodes before the ordinary terminal
 logic. It scores a 100-halfmove position or a matching ancestor as 0. The current
 quiescence recursion does not independently maintain this history or run the
-same draw test. The table key excludes both the halfmove clock and the preceding
-path; draw checks before a table probe do not make all cached results independent
+same draw test. If the supplied history is shorter than the halfmove count,
+the slice uses Python's negative-index rules rather than simply selecting all available
+history. The table key excludes both the halfmove clock and the preceding path;
+draw checks before a table probe do not make all cached results independent
 of that context. Raw en passant state is also included without canonicalizing
 whether an en passant capture is actually available. These are limits of the
 compact model, not a complete implementation of every competition draw rule.

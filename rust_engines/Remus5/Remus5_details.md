@@ -4,7 +4,7 @@
 
 Teach Remus5 as a change in how the computer carries out familiar chess work.
 Begin with the position, copy-make, legality filter, evaluation, and negamax
-already learned in Remus4. Then show how fixed-size values, compiled loops, and
+already learned in [Remus4](../../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md). Then show how fixed-size values, compiled loops, and
 bit operations reduce the cost of those operations. Do not introduce Rust as a
 new collection of chess rules.
 
@@ -15,7 +15,8 @@ Remus4, without assigning extra work to its four periods. The
 explains the representation and dependencies before the exact source reference.
 
 The core search ideas follow Remus4, but the representation, hashing, and table
-replacement differ. A fixed-depth comparison must account for those differences;
+replacement differ. Rust also caps alpha-beta at 128 plies with a static return;
+this guard does not turn its separate quiescence into a complete terminal test. A fixed-depth comparison must account for those differences;
 compilation alone is not evidence that every visited node remains identical.
 
 ## Recommended teaching sequence
@@ -33,6 +34,12 @@ Teach one square mask before a whole attack table and one table bucket before
 512 MiB of storage. Return to the full request path only after students can trace
 the small examples. Rust keywords should answer a concrete ownership or storage
 question rather than become a separate vocabulary lesson.
+
+Before introducing [Remus6](../Remus6/Remus6_details.md), require a trace showing
+that the board, masks, and key agree after a capture and that the parent is
+unchanged. Then revisit a checked quiescence leaf and a stop command arriving
+during search. These motivate semantic and control changes beyond compilation;
+they are distinct from reducing the cost of an unchanged operation.
 
 ## Data structures and invariants
 
@@ -99,8 +106,10 @@ main() -> run() on a thread with an explicit stack size
     otherwise Search::think()
       iterative deepening and aspiration retries
       Search::alpha_beta()
-        count_node(), draw/check tests, Table::probe()
-        depth boundary -> quiescence()
+        count_node(), non-root draw test
+        maximum-ply guard -> static evaluation
+        in_check(); check extension; depth boundary -> quiescence()
+        otherwise Table::probe()
         evaluate(), optional make_null_move() and reduced recursion
         ordered_moves() -> generate_moves()
         make_move() -> Position::remove_piece()/put_piece()

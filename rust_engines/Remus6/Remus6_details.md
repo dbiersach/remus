@@ -21,7 +21,7 @@ the operational settings and measurements.
 | --- | --- | --- | --- |
 | 1. Revisit tactical stopping | Contrast an ordinary quiet leaf, checkmate, stalemate, and a leaf where the king is checked. Trace en passant as a real capture. | Terminal and legality semantics must precede shortcuts that omit work. | Why is standing pat invalid as a way to escape check? |
 | 2. Improve ordering and evaluation | Explain quiet-move history, backward pawns, central holes, knight outposts, and king cover. | These are deliberate chess-model changes, distinct from faster implementation. | How does search history differ from the list used for repetition? |
-| 3. Avoid repeated work | Introduce pawn caching, conditional evaluation, early move selection, ray lookups, legal-move existence, and prefetch. Then show the single position copy, checkmate found by the evasion loop, and the exchange shortcut. | Students can identify the result that each optimization must preserve. | Which terms can be reused when only a king moves? Why can a knight that takes a rook never lose material? |
+| 3. Avoid repeated work | Introduce pawn caching, conditional evaluation, early move selection, ray lookups, legal-move existence, and prefetch. Then show the single position copy, checkmate found by the evasion loop, and the exchange shortcut. | Students can identify the result that each optimization must preserve. | Which terms can be reused when only a king moves? Why can knight-takes-rook skip the single-square exchange calculation, yet still be a bad chess move? |
 | 4. Explain bounded storage | Compare multiply-shift indexing and Windows-backed table allocation with Remus5's table. | Fixed capacity and allocation ownership are concrete before concurrency appears. | Does zero-filled allocation mean the whole table has been physically touched? |
 | 5. Keep input responsive | Follow the input channel, command queue, `SearchControl`, deadlines, and cancellation. | Input can arrive while a recursive search is active without letting two threads mutate chess state. | Which thread may change the current position? |
 | 6. Add root services | Explain tablebase eligibility and fallback, then normal, infinite, and ponder modes. | External advice and time control are understandable once the native search is independent. | What happens when the network fails or a predicted reply is wrong? |
@@ -30,11 +30,17 @@ Do not teach all the speed techniques as one unexplained block. For each, first
 show the repeated operation, then the condition permitting less work, and finally
 the check that its result remains acceptable.
 
+Before introducing [Remus7](../Remus7/Remus7_details.md), separate the input thread
+from the single chess-search worker. Have the student label the board, path
+history, heuristics, cache, and controller by owner. Only then choose which
+objects independent search workers may share. Extra input or network threads
+alone do not constitute parallel chess search.
+
 ## Data structures and invariants
 
 | Structure | Representation and ownership | Rationale and invariant |
 | --- | --- | --- |
-| `Position` and `Move` | Remus5's value struct (152 bytes) and packed `u16`; row 0 is rank 8 and column 0 is file a. | The square array, kind/side masks, and incremental key must remain synchronized. A move loop copies the parent once and plays the move on that copy with `play_move()`; the parent is never changed. |
+| `Position` and `Move` | Remus5's value struct (152 bytes in the current Windows build) and packed `u16`; row 0 is rank 8 and column 0 is file a. | The square array, kind/side masks, and incremental key must remain synchronized. A move loop copies the parent once and plays the move on that copy with `play_move()`; the parent is never changed. |
 | `Search` | Owns history, killers, quiet history, table, counters, and `SearchControl`. | There is one native search worker; input and network helper threads do not search chess trees. |
 | Quiet history | `[[[i32; 64]; 64]; 2]`, indexed by side, start, and target. | A bounded ordering hint for quiet cutoffs, separate from repetition history and from evaluation. Scores remain below killer priorities. |
 | Pawn cache | Thread-local `RefCell<Vec<PawnEntry>>`, with 8,192 entries. | Each entry stores exact White/Black pawn masks, structure score, passed masks, attacks, and file counts. A matching hash index alone is insufficient. |
@@ -49,6 +55,14 @@ that cached structure unchanged, but the king's exposure and a passed pawn's
 race against it must be recalculated.
 
 ## State ownership, classes, and Rust scope
+
+The hot move loops use `let mut child = *position` followed by
+`play_move(&mut child, mv)`. Rust permits mutation of the exclusively borrowed
+child; the caller's contract is that it copied the parent first. The type
+`&mut Position` alone cannot distinguish a speculative child from the live game.
+`make_move()` remains a convenience wrapper that copies, calls `play_move()`,
+and returns the child. Both interfaces preserve copy-make when used as intended;
+this is not a change to make-and-unmake search.
 
 The `Search` struct still owns mutable chess-search state. `SearchControl::new()`
 starts an input thread that sends command strings over a channel; it does not
@@ -90,15 +104,18 @@ main() -> run()
       response_move() -> native legal-move validation
     if no tablebase move -> legal_book_move() when eligible
     if no selected move -> Search::think()
-      alpha_beta() -> table probe, conditional evaluation, move loop
-        place_next() -> next ordered candidate
-        copy the position, play_move(), in_check(), recursive search
-        depth boundary -> quiescence()
-          has_legal_move() when not checked, draw check, evaluate()
-          all evasions when checked, and checkmate when none is legal
-          selected captures otherwise
-          exchange_score() when the capturing piece is worth more than its victim
-          recursive quiescence()
+      alpha_beta()
+        count_node(), check and non-root draw handling
+        maximum-ply or depth boundary -> quiescence()
+          outside check: has_legal_move() detects stalemate
+          draw or maximum-ply return: check for mate first if checked
+          otherwise: legal evasions when checked; selected captures otherwise
+          copy child, play_move(), king-safety filter
+          outside check, non-promotions: delta test
+            exchange_score() only if attacker value exceeds victim value
+          recursive quiescence(); checked node with no legal evasion -> mate
+        otherwise: table probe, conditional evaluation, optional null search
+        place_next() -> copy child, play_move(), king-safety filter, recursion
         Table::store()
       count_node() -> SearchControl::poll()
   legal_choice(); wait if needed; emit bestmove and optional predicted reply
@@ -124,8 +141,8 @@ See [time management](remus6.md#time-management-and-pondering) for the timing ru
 | --- | --- | --- |
 | Check-aware quiescence and legal-move existence | Prevents standing pat or pruning from replacing a required check response or hiding a terminal result. | Terminal checks add work; the fast existence path must satisfy its non-check and pawn-line conditions. |
 | Checkmate from the evasion loop | A checked quiescence position generates and makes its moves once. The loop that searches the evasions also records whether one was legal. | The draw return and the 128-ply return come before the loop, so each asks `has_legal_move()` first to keep checkmate ahead of a draw or static score. |
-| One position copy per move | `play_move()` plays a move on a copy the move loop has just made, where `make_move()` copies, plays, and returns, which costs a second 152-byte copy. | `play_move()` changes the position it receives. Passing it the parent would break copy-make, so every caller copies first. |
-| Exchange evaluation only when the capturing piece is worth more | Skips the capture-by-capture exchange for a capture that cannot lose material, such as a pawn that takes a knight. | The shortcut relies on the king-safety test running first: a legal king capture lands on an unattacked square. |
+| Explicit child storage in move loops | The caller copies into its child slot and `play_move()` mutates that child. This avoids the return-value transfer observed with `make_move()` in the measured build. | The source does not guarantee a fixed machine-level copy count across compilers. `make_move()` remains available elsewhere; passing a parent directly to `play_move()` would break the ownership contract. |
+| Exchange evaluation only when the capturing piece is worth more | Outside check, after legality and delta tests, a non-promotion capture with attacker value no greater than victim value skips SEE. Even an immediate recapture cannot make that isolated exchange negative. | This is a statement about the single-square exchange model, not every tactic or the whole position. King value is 0 in `PIECE_VALUES`; prior king-safety filtering makes legal king captures safe to skip. |
 | Explicit en passant victim detection | Gives capture ordering and material accounting the actual captured pawn. | An empty destination cannot be used as the sole capture test. |
 | Lazy ordering of the first three entries | Avoids sorting the remaining candidates when an early cutoff ends the node. | If search continues, the remainder is sorted. The intended order matches the complete entry sort. |
 | Evaluate only where a pruning test needs it | Skips unused static evaluations in internal nodes. | Quiescence and applicable null/futility tests still need their values. This does not remove evaluation from search. |
@@ -144,13 +161,15 @@ falls back to native selection.
 
 Consider a checked king at the nominal depth boundary. Ask whether a favorable
 material score permits "do nothing." It does not. In check, `quiescence()`
-searches every legal evasion and returns the mate score when none exists. Out of
-check, it first asks `has_legal_move()` and scores stalemate as zero. Its ordinary
+generates evasion candidates, filters king safety, and searches legal ones until
+a cutoff or interruption, returning mate if none is legal. Before an early draw
+or 128-ply return, it still checks for mate explicitly. Out of check, it first
+asks `has_legal_move()` and scores stalemate as zero. Its ordinary
 standing-pat and capture-pruning shortcuts apply only outside check.
 
-Then ask how many times the engine must generate the checked side's moves. Once
-is enough: the loop that searches the evasions sets `has_evasion` when a move
-leaves the king safe. Follow one move through that loop to show the single copy:
+On the ordinary checked path that reaches the move loop, one evasion-generation
+pass is enough: the loop sets `has_evasion` when a move leaves the king safe.
+The early-return paths above need their separate legal-move query. Follow one move through that loop to show the single copy:
 `let mut child = *position;` copies the parent, and `play_move(&mut child, mv)`
 plays the move on the copy.
 
@@ -159,6 +178,13 @@ file. The pawn cache can return the same counts and structure score; the rook's
 file bonus must use its new square. Move a king and ask which additional terms
 must change. This is the same dependency reasoning students use when deciding
 whether a function can safely reuse a prior result.
+
+For the exchange shortcut, use knight-takes-rook: the victim is worth 500 and
+the attacker 300. If the knight is immediately recaptured, the isolated material
+balance is still +200, so a negative SEE result need not be computed. Contrast
+queen-takes-pawn: 100 gained and 900 exposed can produce -800, so the exchange
+calculation is relevant. Neither example rules out mate threats or losses
+elsewhere on the board.
 
 Finally give a normal root a two-second maximum budget. The tablebase wait cap
 is `min(1 second, 2 seconds / 4) = 0.5 seconds`. If no valid answer arrives, native
@@ -169,12 +195,14 @@ its own FEN. It is never applied blindly to the next position.
 
 Compare legal move counts first, then boundary cases: checked leaves, mate before
 draw scoring, stalemate, en passant, and timeout behavior. For speed-only changes,
-compare fixed-depth results with external root services disabled: every `info` line
-and best move must match. The exchange shortcut, the evasion loop, and the single
-copy each pass that comparison. New evaluation
-terms need their own expected scores; they are not expected to preserve Remus5's
-scores. The [verification guide](remus6.md#verification-and-limitations) separates
-native checks from optional network checks.
+compare deterministic fixed-depth results using one worker, matched cache state,
+and external root services disabled. Expected moves, scores, and node counts
+should match the chosen baseline; timing fields are measurements, not equality
+targets. The [recorded 37-search comparison](../../docs/remus_versions.md#checking-that-the-search-is-the-same)
+covers T8 through T10 with one worker, not all possible positions or parallel
+schedules. New evaluation terms need their own expected scores; they are not
+expected to preserve Remus5's scores. The
+[verification guide](remus6.md#verification-and-limitations) separates native checks from optional network checks.
 
 A successful fallback is evidence of offline operation, not evidence that the
 remote tablebase was queried successfully. A legal returned move alone does not
@@ -186,6 +214,11 @@ adjudication, and the table key does not encode all history context. Quiescence
 still selects its tactical candidates rather than exploring every legal
 continuation outside check. Pondering, extra evaluation, and caching can change
 work and timing; none guarantees a fixed Elo gain on every machine.
+
+The exact source listing preserves comments verbatim. References there to
+`evaluation.py` in Remus5 use the retired Python version label; the active
+Remus5 is Rust. The version progression above describes the current engines,
+including the evaluation terms shared by Remus6 through Remus8.
 
 ## Line-by-line source reference
 
