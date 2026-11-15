@@ -1259,268 +1259,302 @@ Read UCI commands, maintain game state, choose legal root moves, and report resu
 | 125 | <code>    let mut played: Vec&lt;String&gt; = Vec::new(); // The moves of a game from the start</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
 | 126 | <code>    let mut use&#95;book = true;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
 | 127 | <code>    let mut game&#95;history: Vec&lt;u64&gt; = Vec::new(); // The keys of the positions before this one</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 128 | <code>    let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 129 | <code>    let mut pondered: Option&lt;Pondered&gt; = None;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 130 | <code>    let mut position&#95;words = vec!&#91;&quot;position&quot;.to&#95;string(), &quot;startpos&quot;.to&#95;string()&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 131 | <code></code> | Blank line separating related declarations or steps. |
-| 132 | <code>    loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
-| 133 | <code>        let line = search.control().next&#95;command();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 134 | <code>        let words: Vec&lt;&amp;str&gt; = line.split&#95;whitespace().collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 135 | <code>        if words.is&#95;empty() {</code> | Test the condition and execute this branch only when it matches. |
-| 136 | <code>            continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 137 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 138 | <code>        match words&#91;0&#93; {</code> | Select an arm by matching the expression against the listed patterns. |
-| 139 | <code>            &quot;uci&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 140 | <code>                let &#95; = writeln!(out, &quot;id name Remus8&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 141 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 142 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 143 | <code>                    &quot;option name Hash type combo default 512 var 512 var 1024 var 2048&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 144 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 145 | <code>                let &#95; = writeln!(out, &quot;option name LichessTablebase type check default true&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 146 | <code>                let &#95; = writeln!(out, &quot;option name Ponder type check default false&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 147 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 148 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 149 | <code>                    &quot;option name PonderHitMinPercent type spin default 25 min 0 max 100&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 150 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 151 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 152 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 153 | <code>                    &quot;option name SearchDiagnostics type check default false&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 154 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 155 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 156 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 157 | <code>                    &quot;option name Threads type spin default {DEFAULT&#95;THREADS} min 1 max {MAX&#95;THREADS}&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 158 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 159 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 160 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 161 | <code>                    &quot;option name PonderDiagnostics type check default false&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 162 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 163 | <code>                let &#95; = writeln!(out, &quot;uciok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 164 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 165 | <code>            &quot;setoption&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 166 | <code>                pondered = None;</code> | Update the named state using the expression and assignment operator shown. |
-| 167 | <code>                if words.len() == 5 &amp;&amp; words&#91;1&#93; == &quot;name&quot; &amp;&amp; words&#91;3&#93; == &quot;value&quot; {</code> | Test the condition and execute this branch only when it matches. |
-| 168 | <code>                    let enabled = words&#91;4&#93;.eq&#95;ignore&#95;ascii&#95;case(&quot;true&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 169 | <code>                    match words&#91;2&#93;.to&#95;ascii&#95;lowercase().as&#95;str() {</code> | Select an arm by matching the expression against the listed patterns. |
-| 170 | <code>                        &quot;lichesstablebase&quot; =&gt; use&#95;tablebase = enabled,</code> | Handle this matching pattern with the expression or block on its right. |
-| 171 | <code>                        &quot;ponder&quot; =&gt; use&#95;ponder = enabled,</code> | Handle this matching pattern with the expression or block on its right. |
-| 172 | <code>                        &quot;hash&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 173 | <code>                            if let Ok(mib @ (512 &#124; 1024 &#124; 2048)) = words&#91;4&#93;.parse::&lt;usize&gt;() {</code> | Test the condition and execute this branch only when it matches. |
-| 174 | <code>                                search.set&#95;hash(mib);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 175 | <code>                            }</code> | Close the preceding block, expression, call, or collection. |
-| 176 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 177 | <code>                        &quot;ponderhitminpercent&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 178 | <code>                            search.control().hit&#95;min&#95;percent =</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 179 | <code>                                words&#91;4&#93;.parse::&lt;u32&gt;().unwrap&#95;or(25).min(100);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 180 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 181 | <code>                        &quot;searchdiagnostics&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 182 | <code>                            search.diagnostics = enabled;</code> | Update the named state using the expression and assignment operator shown. |
-| 183 | <code>                            SEARCH&#95;LOG&#95;ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 184 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 185 | <code>                        &quot;ponderdiagnostics&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 186 | <code>                            ponder&#95;diagnostics = enabled;</code> | Update the named state using the expression and assignment operator shown. |
-| 187 | <code>                            LOG&#95;ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 188 | <code>                            log(&quot;PonderDiagnostics on&quot;);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 189 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 190 | <code>                        &quot;threads&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 191 | <code>                            search.set&#95;threads(words&#91;4&#93;.parse().unwrap&#95;or(DEFAULT&#95;THREADS))</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 128 | <code>    // The position before the last move, its history, and the last move: a ponder</code> | Source explanation: The position before the last move, its history, and the last move: a ponder |
+| 129 | <code>    // request searches there, so every reply the opponent can choose is prepared</code> | Source explanation: request searches there, so every reply the opponent can choose is prepared |
+| 130 | <code>    let mut before&#95;reply: Option&lt;(Position, Vec&lt;u64&gt;, Move)&gt; = None;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 131 | <code>    let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 132 | <code>    let mut pondered: Option&lt;Pondered&gt; = None;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 133 | <code>    let mut position&#95;words = vec!&#91;&quot;position&quot;.to&#95;string(), &quot;startpos&quot;.to&#95;string()&#93;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 134 | <code></code> | Blank line separating related declarations or steps. |
+| 135 | <code>    loop {</code> | Repeat until an explicit break, return, or other control transfer ends the loop. |
+| 136 | <code>        let line = search.control().next&#95;command();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 137 | <code>        let words: Vec&lt;&amp;str&gt; = line.split&#95;whitespace().collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 138 | <code>        if words.is&#95;empty() {</code> | Test the condition and execute this branch only when it matches. |
+| 139 | <code>            continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 140 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 141 | <code>        match words&#91;0&#93; {</code> | Select an arm by matching the expression against the listed patterns. |
+| 142 | <code>            &quot;uci&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 143 | <code>                let &#95; = writeln!(out, &quot;id name Remus8&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 144 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 145 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 146 | <code>                    &quot;option name Hash type combo default 512 var 512 var 1024 var 2048&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 147 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 148 | <code>                let &#95; = writeln!(out, &quot;option name LichessTablebase type check default true&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 149 | <code>                let &#95; = writeln!(out, &quot;option name Ponder type check default false&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 150 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 151 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 152 | <code>                    &quot;option name PonderHitMinPercent type spin default 25 min 0 max 100&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 153 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 154 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 155 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 156 | <code>                    &quot;option name SearchDiagnostics type check default false&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 157 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 158 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 159 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 160 | <code>                    &quot;option name Threads type spin default {DEFAULT&#95;THREADS} min 1 max {MAX&#95;THREADS}&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 161 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 162 | <code>                let &#95; = writeln!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 163 | <code>                    out,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 164 | <code>                    &quot;option name PonderDiagnostics type check default false&quot;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 165 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 166 | <code>                let &#95; = writeln!(out, &quot;uciok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 167 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 168 | <code>            &quot;setoption&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 169 | <code>                pondered = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 170 | <code>                if words.len() == 5 &amp;&amp; words&#91;1&#93; == &quot;name&quot; &amp;&amp; words&#91;3&#93; == &quot;value&quot; {</code> | Test the condition and execute this branch only when it matches. |
+| 171 | <code>                    let enabled = words&#91;4&#93;.eq&#95;ignore&#95;ascii&#95;case(&quot;true&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 172 | <code>                    match words&#91;2&#93;.to&#95;ascii&#95;lowercase().as&#95;str() {</code> | Select an arm by matching the expression against the listed patterns. |
+| 173 | <code>                        &quot;lichesstablebase&quot; =&gt; use&#95;tablebase = enabled,</code> | Handle this matching pattern with the expression or block on its right. |
+| 174 | <code>                        &quot;ponder&quot; =&gt; use&#95;ponder = enabled,</code> | Handle this matching pattern with the expression or block on its right. |
+| 175 | <code>                        &quot;hash&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 176 | <code>                            if let Ok(mib @ (512 &#124; 1024 &#124; 2048)) = words&#91;4&#93;.parse::&lt;usize&gt;() {</code> | Test the condition and execute this branch only when it matches. |
+| 177 | <code>                                search.set&#95;hash(mib);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 178 | <code>                            }</code> | Close the preceding block, expression, call, or collection. |
+| 179 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
+| 180 | <code>                        &quot;ponderhitminpercent&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 181 | <code>                            search.control().hit&#95;min&#95;percent =</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 182 | <code>                                words&#91;4&#93;.parse::&lt;u32&gt;().unwrap&#95;or(25).min(100);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 183 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
+| 184 | <code>                        &quot;searchdiagnostics&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 185 | <code>                            search.diagnostics = enabled;</code> | Update the named state using the expression and assignment operator shown. |
+| 186 | <code>                            SEARCH&#95;LOG&#95;ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 187 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
+| 188 | <code>                        &quot;ponderdiagnostics&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 189 | <code>                            ponder&#95;diagnostics = enabled;</code> | Update the named state using the expression and assignment operator shown. |
+| 190 | <code>                            LOG&#95;ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 191 | <code>                            log(&quot;PonderDiagnostics on&quot;);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 192 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
-| 193 | <code>                        &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
-| 194 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 195 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 196 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 197 | <code>            &quot;ucinewgame&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 198 | <code>                pondered = None;</code> | Update the named state using the expression and assignment operator shown. |
-| 199 | <code>                position&#95;words = vec!&#91;&quot;position&quot;.to&#95;string(), &quot;startpos&quot;.to&#95;string()&#93;;</code> | Update the named state using the expression and assignment operator shown. |
-| 200 | <code>                position = Position::start();</code> | Update the named state using the expression and assignment operator shown. |
-| 201 | <code>                played.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 202 | <code>                game&#95;history.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 203 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 204 | <code>            &quot;isready&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 205 | <code>                let &#95; = writeln!(out, &quot;readyok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 193 | <code>                        &quot;threads&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 194 | <code>                            search.set&#95;threads(words&#91;4&#93;.parse().unwrap&#95;or(DEFAULT&#95;THREADS))</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 195 | <code>                        }</code> | Close the preceding block, expression, call, or collection. |
+| 196 | <code>                        &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 197 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 198 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 199 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 200 | <code>            &quot;ucinewgame&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 201 | <code>                pondered = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 202 | <code>                position&#95;words = vec!&#91;&quot;position&quot;.to&#95;string(), &quot;startpos&quot;.to&#95;string()&#93;;</code> | Update the named state using the expression and assignment operator shown. |
+| 203 | <code>                position = Position::start();</code> | Update the named state using the expression and assignment operator shown. |
+| 204 | <code>                played.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 205 | <code>                game&#95;history.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
 | 206 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 207 | <code>            &quot;position&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 208 | <code>                position&#95;words = words.iter().map(&#124;word&#124; (&#42;word).to&#95;string()).collect();</code> | Update the named state using the expression and assignment operator shown. |
-| 209 | <code>                // &quot;position startpos moves e2e4 e7e5&quot; or &quot;position fen ... moves e2e4&quot;</code> | Source explanation: &quot;position startpos moves e2e4 e7e5&quot; or &quot;position fen ... moves e2e4&quot; |
-| 210 | <code>                let moves&#95;at = words.iter().position(&#124;word&#124; &#42;word == &quot;moves&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 211 | <code>                use&#95;book = words.get(1) == Some(&amp;&quot;startpos&quot;);</code> | Update the named state using the expression and assignment operator shown. |
-| 212 | <code>                position = if use&#95;book {</code> | Update the named state using the expression and assignment operator shown. |
-| 213 | <code>                    Position::start()</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 214 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 215 | <code>                    Position::from&#95;fen(&amp;words&#91;2..moves&#95;at.unwrap&#95;or(words.len())&#93;)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 216 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
-| 217 | <code>                played.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 218 | <code>                game&#95;history.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 219 | <code>                if let Some(at) = moves&#95;at {</code> | Test the condition and execute this branch only when it matches. |
-| 220 | <code>                    for text in &amp;words&#91;at + 1..&#93; {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 221 | <code>                        game&#95;history.push(position.key);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 222 | <code>                        played.push((&#42;text).to&#95;string());</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 223 | <code>                        position = make&#95;move(&amp;position, parse&#95;move(text));</code> | Update the named state using the expression and assignment operator shown. |
-| 224 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 225 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 226 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 227 | <code>            &quot;go&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 228 | <code>                let previous&#95;ponder = pondered.take();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 229 | <code>                if words.contains(&amp;&quot;perft&quot;) {</code> | Test the condition and execute this branch only when it matches. |
-| 230 | <code>                    let count = perft(&amp;position, read&#95;number(&amp;words, &quot;perft&quot;) as u32);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 231 | <code>                    let &#95; = writeln!(out, &quot;perft {count}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 232 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
-| 233 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 234 | <code>                let depth&#95;limit = if words.contains(&amp;&quot;depth&quot;) {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 235 | <code>                    Some(read&#95;number(&amp;words, &quot;depth&quot;) as i32)</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 236 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 237 | <code>                    None</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 238 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
-| 239 | <code>                let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 240 | <code>                let clock&#95;left = read&#95;number(&amp;words, if white { &quot;wtime&quot; } else { &quot;btime&quot; }) as f64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 241 | <code>                let increment = read&#95;number(&amp;words, if white { &quot;winc&quot; } else { &quot;binc&quot; }) as f64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 242 | <code>                // Plan a thirtieth of the clock plus half the increment, and never more</code> | Source explanation: Plan a thirtieth of the clock plus half the increment, and never more |
-| 243 | <code>                // than three times that or a fifth of the clock</code> | Source explanation: than three times that or a fifth of the clock |
-| 244 | <code>                let mut seconds = 2.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 245 | <code>                let mut longest = 2.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 246 | <code>                if clock&#95;left &gt; 0.0 {</code> | Test the condition and execute this branch only when it matches. |
-| 247 | <code>                    seconds = (clock&#95;left / 30.0 + increment / 2.0) / 1000.0;</code> | Update the named state using the expression and assignment operator shown. |
-| 248 | <code>                    longest = (3.0 &#42; seconds).min(clock&#95;left / 5000.0);</code> | Update the named state using the expression and assignment operator shown. |
-| 249 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 250 | <code>                if words.contains(&amp;&quot;movetime&quot;) {</code> | Test the condition and execute this branch only when it matches. |
-| 251 | <code>                    seconds = read&#95;number(&amp;words, &quot;movetime&quot;) as f64 / 1000.0;</code> | Update the named state using the expression and assignment operator shown. |
-| 252 | <code>                    longest = seconds;</code> | Update the named state using the expression and assignment operator shown. |
-| 253 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 254 | <code>                let mode = if words.contains(&amp;&quot;ponder&quot;) {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 255 | <code>                    Mode::Ponder</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 256 | <code>                } else if words.contains(&amp;&quot;infinite&quot;) {</code> | Test the condition and execute this branch only when it matches. |
-| 257 | <code>                    Mode::Infinite</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 258 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 259 | <code>                    Mode::Normal</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 260 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
-| 261 | <code>                // A go on the position just pondered, right after its stop, is a hit</code> | Source explanation: A go on the position just pondered, right after its stop, is a hit |
-| 262 | <code>                let mut credit = None;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 263 | <code>                if let Some(last) = previous&#95;ponder</code> | Test the condition and execute this branch only when it matches. |
-| 264 | <code>                    &amp;&amp; mode == Mode::Normal</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 265 | <code>                    &amp;&amp; depth&#95;limit.is&#95;none()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 266 | <code>                    &amp;&amp; last.position&#95;words == position&#95;words</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 267 | <code>                    &amp;&amp; last.ended.elapsed().as&#95;secs&#95;f64() &lt; HIT&#95;GAP</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 268 | <code>                {</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 269 | <code>                    credit = Some(last.credit);</code> | Update the named state using the expression and assignment operator shown. |
-| 270 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 271 | <code>                search.control().begin(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 272 | <code>                    mode,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 273 | <code>                    if depth&#95;limit.is&#95;some() {</code> | Test the condition and execute this branch only when it matches. |
-| 274 | <code>                        f64::INFINITY</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 275 | <code>                    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 276 | <code>                        longest</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 277 | <code>                    },</code> | Close the preceding block, expression, call, or collection. |
-| 278 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
-| 279 | <code>                // A hit may spend extra time only from a clock with a minute in hand</code> | Source explanation: A hit may spend extra time only from a clock with a minute in hand |
-| 280 | <code>                search.control().can&#95;reinvest =</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 281 | <code>                    clock&#95;left &gt;= 60&#95;000.0 &amp;&amp; !words.contains(&amp;&quot;movetime&quot;);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 282 | <code>                if let Some(credit) = credit {</code> | Test the condition and execute this branch only when it matches. |
-| 283 | <code>                    search.control().credit&#95;ponder(credit);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 284 | <code>                    log(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 285 | <code>                        &quot;stop and go on the pondered position: hit after {:.1} s of pondering to depth {}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 286 | <code>                        credit.seconds.as&#95;secs&#95;f64(),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 287 | <code>                        credit.depth</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 288 | <code>                    ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 289 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 290 | <code>                let started = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 291 | <code>                search.control().log&#95;search(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 292 | <code>                    &quot;begin root&#95;key={:016x} white={} halfmove={} history&#95;plies={} plan&#95;s={seconds:.3} hard&#95;s={longest:.3} command={line}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 293 | <code>                    position.key, position.white, position.halfmove, game&#95;history.len()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 294 | <code>                ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 295 | <code>                log(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 296 | <code>                    &quot;plan seconds={seconds:.2} longest={longest:.2} ponder={}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 297 | <code>                    mode == Mode::Ponder</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 298 | <code>                ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 299 | <code>                let mut mv = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 300 | <code>                let mut source = &quot;native&quot;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 301 | <code>                if use&#95;tablebase</code> | Test the condition and execute this branch only when it matches. |
-| 302 | <code>                    &amp;&amp; depth&#95;limit.is&#95;none()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 303 | <code>                    &amp;&amp; mode == Mode::Normal</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 304 | <code>                    &amp;&amp; !search.control().was&#95;ponder</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 305 | <code>                {</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 306 | <code>                    mv = tablebase.lookup(&amp;position, &amp;game&#95;history, longest);</code> | Update the named state using the expression and assignment operator shown. |
-| 307 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 308 | <code>                if mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 309 | <code>                    source = &quot;tablebase&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 310 | <code>                    let &#95; = writeln!(out, &quot;info string Lichess tablebase&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 311 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 312 | <code>                // A book move also answers a ponder request and a hit: the engine</code> | Source explanation: A book move also answers a ponder request and a hit: the engine |
-| 313 | <code>                // then waits for the hit or stop without searching</code> | Source explanation: then waits for the hit or stop without searching |
-| 314 | <code>                if mv == NO&#95;MOVE &amp;&amp; use&#95;book &amp;&amp; depth&#95;limit.is&#95;none() &amp;&amp; mode != Mode::Infinite {</code> | Test the condition and execute this branch only when it matches. |
-| 315 | <code>                    let texts: Vec&lt;&amp;str&gt; = played.iter().map(String::as&#95;str).collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 316 | <code>                    mv = legal&#95;book&#95;move(&amp;book, &amp;position, &amp;texts);</code> | Update the named state using the expression and assignment operator shown. |
-| 317 | <code>                    if mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 318 | <code>                        source = &quot;book&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 319 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 320 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 321 | <code>                search.control().source = source;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 322 | <code>                if mv == NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 323 | <code>                    let elapsed = started.elapsed().as&#95;secs&#95;f64();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 324 | <code>                    mv = search.think(</code> | Update the named state using the expression and assignment operator shown. |
-| 325 | <code>                        &amp;position,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 326 | <code>                        &amp;game&#95;history,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 327 | <code>                        (seconds - elapsed).max(0.0),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 328 | <code>                        (longest - elapsed).max(0.0),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 329 | <code>                        depth&#95;limit,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 330 | <code>                    );</code> | Close the preceding block, expression, call, or collection. |
-| 331 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 332 | <code>                mv = legal&#95;choice(&amp;position, mv);</code> | Update the named state using the expression and assignment operator shown. |
-| 333 | <code>                search.control().wait();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 334 | <code>                if let Some(credit) = search.control().ponder&#95;credit() {</code> | Test the condition and execute this branch only when it matches. |
-| 335 | <code>                    pondered = Some(Pondered {</code> | Update the named state using the expression and assignment operator shown. |
-| 336 | <code>                        position&#95;words: position&#95;words.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 337 | <code>                        credit,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 338 | <code>                        ended: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 339 | <code>                    });</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 340 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 341 | <code>                if ponder&#95;diagnostics {</code> | Test the condition and execute this branch only when it matches. |
-| 342 | <code>                    search.control().report();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 343 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 344 | <code>                // With no legal move (checkmate or stalemate) UCI says &quot;0000&quot;</code> | Source explanation: With no legal move (checkmate or stalemate) UCI says &quot;0000&quot; |
-| 345 | <code>                let mut text = if mv == NO&#95;MOVE {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 346 | <code>                    &quot;0000&quot;.to&#95;string()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 347 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 348 | <code>                    move&#95;text(mv)</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 349 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
-| 350 | <code>                if use&#95;ponder &amp;&amp; mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 351 | <code>                    let mut reply = search.ponder&#95;reply(&amp;position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 352 | <code>                    let child = make&#95;move(&amp;position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 353 | <code>                    if reply == NO&#95;MOVE &amp;&amp; use&#95;book {</code> | Test the condition and execute this branch only when it matches. |
-| 354 | <code>                        let mut continuation = played.clone();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 355 | <code>                        continuation.push(move&#95;text(mv));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 356 | <code>                        let texts: Vec&lt;&amp;str&gt; = continuation.iter().map(String::as&#95;str).collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 357 | <code>                        reply = legal&#95;book&#95;move(&amp;book, &amp;child, &amp;texts);</code> | Update the named state using the expression and assignment operator shown. |
-| 358 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 359 | <code>                    reply = legal&#95;choice(&amp;child, reply);</code> | Update the named state using the expression and assignment operator shown. |
-| 360 | <code>                    if reply != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
-| 361 | <code>                        text.push&#95;str(&amp;format!(&quot; ponder {}&quot;, move&#95;text(reply)));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 362 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
-| 363 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 364 | <code>                let &#95; = writeln!(out, &quot;bestmove {text}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 365 | <code>                let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 366 | <code>                log(&amp;format!(&quot;&gt; bestmove {text}&quot;));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 367 | <code>                search</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 368 | <code>                    .control()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 369 | <code>                    .log&#95;search(&amp;format!(&quot;result source={source} bestmove {text}&quot;));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 370 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 371 | <code>            &quot;eval&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 372 | <code>                let &#95; = writeln!(out, &quot;eval {}&quot;, evaluate(&amp;position));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 373 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 374 | <code>            &quot;quit&quot; =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
-| 375 | <code>            &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
-| 376 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 377 | <code>        let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 378 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 379 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 380 | <code></code> | Blank line separating related declarations or steps. |
-| 381 | <code>fn main() {</code> | Declare main(); its parameters and return type define the interface. |
-| 382 | <code>    // The search calls itself once per ply, so it runs on a thread with a large stack</code> | Source explanation: The search calls itself once per ply, so it runs on a thread with a large stack |
-| 383 | <code>    let worker = std::thread::Builder::new()</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 384 | <code>        .stack&#95;size(STACK&#95;BYTES)</code> | Evaluate or continue this expression in main(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 385 | <code>        .spawn(run);</code> | Evaluate or continue this expression in main(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 386 | <code>    if let Ok(handle) = worker {</code> | Test the condition and execute this branch only when it matches. |
-| 387 | <code>        let &#95; = handle.join();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 388 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 389 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 207 | <code>            &quot;isready&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 208 | <code>                let &#95; = writeln!(out, &quot;readyok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 209 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 210 | <code>            &quot;position&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 211 | <code>                position&#95;words = words.iter().map(&#124;word&#124; (&#42;word).to&#95;string()).collect();</code> | Update the named state using the expression and assignment operator shown. |
+| 212 | <code>                // &quot;position startpos moves e2e4 e7e5&quot; or &quot;position fen ... moves e2e4&quot;</code> | Source explanation: &quot;position startpos moves e2e4 e7e5&quot; or &quot;position fen ... moves e2e4&quot; |
+| 213 | <code>                let moves&#95;at = words.iter().position(&#124;word&#124; &#42;word == &quot;moves&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 214 | <code>                use&#95;book = words.get(1) == Some(&amp;&quot;startpos&quot;);</code> | Update the named state using the expression and assignment operator shown. |
+| 215 | <code>                position = if use&#95;book {</code> | Update the named state using the expression and assignment operator shown. |
+| 216 | <code>                    Position::start()</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 217 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 218 | <code>                    Position::from&#95;fen(&amp;words&#91;2..moves&#95;at.unwrap&#95;or(words.len())&#93;)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 219 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
+| 220 | <code>                played.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 221 | <code>                game&#95;history.clear();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 222 | <code>                before&#95;reply = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 223 | <code>                if let Some(at) = moves&#95;at {</code> | Test the condition and execute this branch only when it matches. |
+| 224 | <code>                    for text in &amp;words&#91;at + 1..&#93; {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 225 | <code>                        before&#95;reply = Some((position, game&#95;history.clone(), parse&#95;move(text)));</code> | Update the named state using the expression and assignment operator shown. |
+| 226 | <code>                        game&#95;history.push(position.key);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 227 | <code>                        played.push((&#42;text).to&#95;string());</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 228 | <code>                        position = make&#95;move(&amp;position, parse&#95;move(text));</code> | Update the named state using the expression and assignment operator shown. |
+| 229 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 230 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 231 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 232 | <code>            &quot;go&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 233 | <code>                let previous&#95;ponder = pondered.take();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 234 | <code>                if words.contains(&amp;&quot;perft&quot;) {</code> | Test the condition and execute this branch only when it matches. |
+| 235 | <code>                    let count = perft(&amp;position, read&#95;number(&amp;words, &quot;perft&quot;) as u32);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 236 | <code>                    let &#95; = writeln!(out, &quot;perft {count}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 237 | <code>                    continue;</code> | Skip the rest of this iteration and advance the loop. |
+| 238 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 239 | <code>                let depth&#95;limit = if words.contains(&amp;&quot;depth&quot;) {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 240 | <code>                    Some(read&#95;number(&amp;words, &quot;depth&quot;) as i32)</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 241 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 242 | <code>                    None</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 243 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
+| 244 | <code>                let white = position.white;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 245 | <code>                let clock&#95;left = read&#95;number(&amp;words, if white { &quot;wtime&quot; } else { &quot;btime&quot; }) as f64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 246 | <code>                let increment = read&#95;number(&amp;words, if white { &quot;winc&quot; } else { &quot;binc&quot; }) as f64;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 247 | <code>                // Plan a thirtieth of the clock plus half the increment, and never more</code> | Source explanation: Plan a thirtieth of the clock plus half the increment, and never more |
+| 248 | <code>                // than three times that or a fifth of the clock</code> | Source explanation: than three times that or a fifth of the clock |
+| 249 | <code>                let mut seconds = 2.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 250 | <code>                let mut longest = 2.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 251 | <code>                if clock&#95;left &gt; 0.0 {</code> | Test the condition and execute this branch only when it matches. |
+| 252 | <code>                    seconds = (clock&#95;left / 30.0 + increment / 2.0) / 1000.0;</code> | Update the named state using the expression and assignment operator shown. |
+| 253 | <code>                    longest = (3.0 &#42; seconds).min(clock&#95;left / 5000.0);</code> | Update the named state using the expression and assignment operator shown. |
+| 254 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 255 | <code>                if words.contains(&amp;&quot;movetime&quot;) {</code> | Test the condition and execute this branch only when it matches. |
+| 256 | <code>                    seconds = read&#95;number(&amp;words, &quot;movetime&quot;) as f64 / 1000.0;</code> | Update the named state using the expression and assignment operator shown. |
+| 257 | <code>                    longest = seconds;</code> | Update the named state using the expression and assignment operator shown. |
+| 258 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 259 | <code>                let mode = if words.contains(&amp;&quot;ponder&quot;) {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 260 | <code>                    Mode::Ponder</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 261 | <code>                } else if words.contains(&amp;&quot;infinite&quot;) {</code> | Test the condition and execute this branch only when it matches. |
+| 262 | <code>                    Mode::Infinite</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 263 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 264 | <code>                    Mode::Normal</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 265 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
+| 266 | <code>                // A go on the position just pondered, right after its stop, is a hit</code> | Source explanation: A go on the position just pondered, right after its stop, is a hit |
+| 267 | <code>                let mut credit = None;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 268 | <code>                if let Some(last) = previous&#95;ponder</code> | Test the condition and execute this branch only when it matches. |
+| 269 | <code>                    &amp;&amp; mode == Mode::Normal</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 270 | <code>                    &amp;&amp; depth&#95;limit.is&#95;none()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 271 | <code>                    &amp;&amp; last.position&#95;words == position&#95;words</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 272 | <code>                    &amp;&amp; last.ended.elapsed().as&#95;secs&#95;f64() &lt; HIT&#95;GAP</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 273 | <code>                {</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 274 | <code>                    credit = Some(last.credit);</code> | Update the named state using the expression and assignment operator shown. |
+| 275 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 276 | <code>                search.control().begin(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 277 | <code>                    mode,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 278 | <code>                    if depth&#95;limit.is&#95;some() {</code> | Test the condition and execute this branch only when it matches. |
+| 279 | <code>                        f64::INFINITY</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 280 | <code>                    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 281 | <code>                        longest</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 282 | <code>                    },</code> | Close the preceding block, expression, call, or collection. |
+| 283 | <code>                );</code> | Close the preceding block, expression, call, or collection. |
+| 284 | <code>                // A hit may spend extra time only from a clock with a minute in hand</code> | Source explanation: A hit may spend extra time only from a clock with a minute in hand |
+| 285 | <code>                search.control().can&#95;reinvest =</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 286 | <code>                    clock&#95;left &gt;= 60&#95;000.0 &amp;&amp; !words.contains(&amp;&quot;movetime&quot;);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 287 | <code>                if let Some(credit) = credit {</code> | Test the condition and execute this branch only when it matches. |
+| 288 | <code>                    search.control().credit&#95;ponder(credit);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 289 | <code>                    log(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 290 | <code>                        &quot;stop and go on the pondered position: hit after {:.1} s of pondering to depth {}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 291 | <code>                        credit.seconds.as&#95;secs&#95;f64(),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 292 | <code>                        credit.depth</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 293 | <code>                    ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 294 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 295 | <code>                let started = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 296 | <code>                search.control().log&#95;search(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 297 | <code>                    &quot;begin root&#95;key={:016x} white={} halfmove={} history&#95;plies={} plan&#95;s={seconds:.3} hard&#95;s={longest:.3} command={line}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 298 | <code>                    position.key, position.white, position.halfmove, game&#95;history.len()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 299 | <code>                ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 300 | <code>                log(&amp;format!(</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 301 | <code>                    &quot;plan seconds={seconds:.2} longest={longest:.2} ponder={}&quot;,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 302 | <code>                    mode == Mode::Ponder</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 303 | <code>                ));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 304 | <code>                let mut mv = NO&#95;MOVE;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 305 | <code>                let mut source = &quot;native&quot;;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 306 | <code>                if use&#95;tablebase</code> | Test the condition and execute this branch only when it matches. |
+| 307 | <code>                    &amp;&amp; depth&#95;limit.is&#95;none()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 308 | <code>                    &amp;&amp; mode == Mode::Normal</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 309 | <code>                    &amp;&amp; !search.control().was&#95;ponder</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 310 | <code>                {</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 311 | <code>                    mv = tablebase.lookup(&amp;position, &amp;game&#95;history, longest);</code> | Update the named state using the expression and assignment operator shown. |
+| 312 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 313 | <code>                if mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 314 | <code>                    source = &quot;tablebase&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 315 | <code>                    let &#95; = writeln!(out, &quot;info string Lichess tablebase&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 316 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 317 | <code>                // A book move also answers a ponder request and a hit: the engine</code> | Source explanation: A book move also answers a ponder request and a hit: the engine |
+| 318 | <code>                // then waits for the hit or stop without searching</code> | Source explanation: then waits for the hit or stop without searching |
+| 319 | <code>                if mv == NO&#95;MOVE &amp;&amp; use&#95;book &amp;&amp; depth&#95;limit.is&#95;none() &amp;&amp; mode != Mode::Infinite {</code> | Test the condition and execute this branch only when it matches. |
+| 320 | <code>                    let texts: Vec&lt;&amp;str&gt; = played.iter().map(String::as&#95;str).collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 321 | <code>                    mv = legal&#95;book&#95;move(&amp;book, &amp;position, &amp;texts);</code> | Update the named state using the expression and assignment operator shown. |
+| 322 | <code>                    if mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 323 | <code>                        source = &quot;book&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 324 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 325 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 326 | <code>                search.control().source = source;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 327 | <code>                let mut premove = false;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 328 | <code>                if mv == NO&#95;MOVE</code> | Test the condition and execute this branch only when it matches. |
+| 329 | <code>                    &amp;&amp; mode == Mode::Ponder</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 330 | <code>                    &amp;&amp; depth&#95;limit.is&#95;none()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 331 | <code>                    &amp;&amp; let Some((before, before&#95;history, reply)) = &amp;before&#95;reply</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 332 | <code>                {</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 333 | <code>                    // Ponder on the position before the predicted reply. The table</code> | Source explanation: Ponder on the position before the predicted reply. The table |
+| 334 | <code>                    // then holds a search of every reply, not just the predicted one.</code> | Source explanation: then holds a search of every reply, not just the predicted one. |
+| 335 | <code>                    premove = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 336 | <code>                    search.control().stop&#95;on&#95;hit = true;</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 337 | <code>                    search.think(before, before&#95;history, seconds, longest, None);</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 338 | <code>                    search.control().wait();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 339 | <code>                    if search.control().mode == Mode::Normal {</code> | Test the condition and execute this branch only when it matches. |
+| 340 | <code>                        // A hit: search the position the reply reached on our own</code> | Source explanation: A hit: search the position the reply reached on our own |
+| 341 | <code>                        // clock, starting from the prepared table</code> | Source explanation: clock, starting from the prepared table |
+| 342 | <code>                        search.control().continue&#95;after&#95;hit();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 343 | <code>                        mv = search.think(&amp;position, &amp;game&#95;history, seconds, longest, None);</code> | Update the named state using the expression and assignment operator shown. |
+| 344 | <code>                    } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 345 | <code>                        mv = search.ponder&#95;reply(before, &#42;reply);</code> | Update the named state using the expression and assignment operator shown. |
+| 346 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 347 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 348 | <code>                if mv == NO&#95;MOVE &amp;&amp; !premove {</code> | Test the condition and execute this branch only when it matches. |
+| 349 | <code>                    let elapsed = started.elapsed().as&#95;secs&#95;f64();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 350 | <code>                    mv = search.think(</code> | Update the named state using the expression and assignment operator shown. |
+| 351 | <code>                        &amp;position,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 352 | <code>                        &amp;game&#95;history,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 353 | <code>                        (seconds - elapsed).max(0.0),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 354 | <code>                        (longest - elapsed).max(0.0),</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 355 | <code>                        depth&#95;limit,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 356 | <code>                    );</code> | Close the preceding block, expression, call, or collection. |
+| 357 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 358 | <code>                mv = legal&#95;choice(&amp;position, mv);</code> | Update the named state using the expression and assignment operator shown. |
+| 359 | <code>                search.control().wait();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 360 | <code>                if let Some(mut credit) = search.control().ponder&#95;credit() {</code> | Test the condition and execute this branch only when it matches. |
+| 361 | <code>                    // The position before the reply searched one ply more than its</code> | Source explanation: The position before the reply searched one ply more than its |
+| 362 | <code>                    // children, so a matching go recovers one depth less</code> | Source explanation: children, so a matching go recovers one depth less |
+| 363 | <code>                    if premove {</code> | Test the condition and execute this branch only when it matches. |
+| 364 | <code>                        credit.depth = (credit.depth - 1).max(1);</code> | Update the named state using the expression and assignment operator shown. |
+| 365 | <code>                        credit.score = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 366 | <code>                        credit.deteriorating = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 367 | <code>                        credit.unstable = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 368 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 369 | <code>                    pondered = Some(Pondered {</code> | Update the named state using the expression and assignment operator shown. |
+| 370 | <code>                        position&#95;words: position&#95;words.clone(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 371 | <code>                        credit,</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 372 | <code>                        ended: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 373 | <code>                    });</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 374 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 375 | <code>                if ponder&#95;diagnostics {</code> | Test the condition and execute this branch only when it matches. |
+| 376 | <code>                    search.control().report();</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 377 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 378 | <code>                // With no legal move (checkmate or stalemate) UCI says &quot;0000&quot;</code> | Source explanation: With no legal move (checkmate or stalemate) UCI says &quot;0000&quot; |
+| 379 | <code>                let mut text = if mv == NO&#95;MOVE {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 380 | <code>                    &quot;0000&quot;.to&#95;string()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 381 | <code>                } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 382 | <code>                    move&#95;text(mv)</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 383 | <code>                };</code> | Close the preceding block, expression, call, or collection. |
+| 384 | <code>                if use&#95;ponder &amp;&amp; mv != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 385 | <code>                    let mut reply = search.ponder&#95;reply(&amp;position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 386 | <code>                    let child = make&#95;move(&amp;position, mv);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 387 | <code>                    if reply == NO&#95;MOVE &amp;&amp; use&#95;book {</code> | Test the condition and execute this branch only when it matches. |
+| 388 | <code>                        let mut continuation = played.clone();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 389 | <code>                        continuation.push(move&#95;text(mv));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 390 | <code>                        let texts: Vec&lt;&amp;str&gt; = continuation.iter().map(String::as&#95;str).collect();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 391 | <code>                        reply = legal&#95;book&#95;move(&amp;book, &amp;child, &amp;texts);</code> | Update the named state using the expression and assignment operator shown. |
+| 392 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 393 | <code>                    reply = legal&#95;choice(&amp;child, reply);</code> | Update the named state using the expression and assignment operator shown. |
+| 394 | <code>                    if reply != NO&#95;MOVE {</code> | Test the condition and execute this branch only when it matches. |
+| 395 | <code>                        text.push&#95;str(&amp;format!(&quot; ponder {}&quot;, move&#95;text(reply)));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 396 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 397 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 398 | <code>                let &#95; = writeln!(out, &quot;bestmove {text}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 399 | <code>                let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 400 | <code>                log(&amp;format!(&quot;&gt; bestmove {text}&quot;));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 401 | <code>                search</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 402 | <code>                    .control()</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 403 | <code>                    .log&#95;search(&amp;format!(&quot;result source={source} bestmove {text}&quot;));</code> | Evaluate or continue this expression in run(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 404 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 405 | <code>            &quot;eval&quot; =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 406 | <code>                let &#95; = writeln!(out, &quot;eval {}&quot;, evaluate(&amp;position));</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 407 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 408 | <code>            &quot;quit&quot; =&gt; break,</code> | Handle this matching pattern with the expression or block on its right. |
+| 409 | <code>            &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 410 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 411 | <code>        let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 412 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 413 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 414 | <code></code> | Blank line separating related declarations or steps. |
+| 415 | <code>fn main() {</code> | Declare main(); its parameters and return type define the interface. |
+| 416 | <code>    // The search calls itself once per ply, so it runs on a thread with a large stack</code> | Source explanation: The search calls itself once per ply, so it runs on a thread with a large stack |
+| 417 | <code>    let worker = std::thread::Builder::new()</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 418 | <code>        .stack&#95;size(STACK&#95;BYTES)</code> | Evaluate or continue this expression in main(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 419 | <code>        .spawn(run);</code> | Evaluate or continue this expression in main(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 420 | <code>    if let Ok(handle) = worker {</code> | Test the condition and execute this branch only when it matches. |
+| 421 | <code>        let &#95; = handle.join();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 422 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 423 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 
 ### make_move.rs
 
@@ -3523,322 +3557,348 @@ Search cancellation, time budgets, ponder handoffs, and command coordination.
 | 101 | <code>    longest: f64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
 | 102 | <code>    search&#95;started: Instant,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
 | 103 | <code>    pub was&#95;ponder: bool,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 104 | <code>    hit&#95;time: Option&lt;Instant&gt;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 105 | <code>    pub nodes: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 106 | <code>    completed&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 107 | <code>    hit&#95;nodes: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 108 | <code>    hit&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 109 | <code>    soft&#95;limit: f64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 110 | <code>    pub can&#95;reinvest: bool, // The clock holds a reserve for extra time after a hit</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 111 | <code>    pub source: &amp;&#x27;static str, // &quot;native&quot;, &quot;book&quot;, or &quot;tablebase&quot;</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 112 | <code>    score: Option&lt;i32&gt;,     // The score of the deepest mature iteration</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 113 | <code>    score&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 114 | <code>    deteriorating: bool, // The score fell by SCORE&#95;DROP between mature iterations</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 115 | <code>    unstable: bool,      // The best move changed in the latest mature iteration</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 116 | <code>    uncertain&#95;hit: bool, // The hit came on a shallow, falling, or changing result</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 117 | <code>    pub hit&#95;min&#95;percent: u32, // Minimum share of the plan spent after a ponder hit</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 118 | <code>    credit&#95;depth: i32,   // The soft target applies once this depth is complete</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 119 | <code>    search&#95;id: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 120 | <code>    diagnostics&#95;started: Instant, // This invocation, excluding credited earlier ponder work</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 121 | <code>}</code> | Close the preceding block, expression, call, or collection. |
-| 122 | <code></code> | Blank line separating related declarations or steps. |
-| 123 | <code>impl SearchControl {</code> | Begin the implementation of methods or a trait for the named type. |
-| 124 | <code>    pub fn new() -&gt; Self {</code> | Declare new(); its parameters and return type define the interface. |
-| 125 | <code>        LOG&#95;START.get&#95;or&#95;init(Instant::now);</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 126 | <code>        let (sender, commands) = mpsc::channel();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 127 | <code>        std::thread::spawn(move &#124;&#124; {</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 128 | <code>            for line in std::io::stdin().lock().lines() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
-| 129 | <code>                let Ok(line) = line else { break };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 130 | <code>                log(&amp;format!(&quot;&lt; {line}&quot;));</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 131 | <code>                search&#95;log(&amp;format!(&quot;&lt; {line}&quot;));</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 132 | <code>                if sender.send(line).is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
-| 133 | <code>                    return;</code> | Leave the current function with the displayed result. |
-| 134 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 135 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 136 | <code>            let &#95; = sender.send(&quot;quit&quot;.to&#95;string());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 137 | <code>        });</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 138 | <code>        Self {</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 139 | <code>            commands,</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 140 | <code>            pending: VecDeque::new(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 141 | <code>            mode: Mode::Normal,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 142 | <code>            stopped: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 143 | <code>            stop&#95;received: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 144 | <code>            hit&#95;kind: &quot;none&quot;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 145 | <code>            started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 146 | <code>            longest: f64::INFINITY,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 147 | <code>            search&#95;started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 148 | <code>            was&#95;ponder: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 149 | <code>            hit&#95;time: None,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 150 | <code>            nodes: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 151 | <code>            completed&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 152 | <code>            hit&#95;nodes: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 153 | <code>            hit&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 154 | <code>            soft&#95;limit: f64::INFINITY,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 155 | <code>            can&#95;reinvest: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 156 | <code>            source: &quot;native&quot;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 157 | <code>            score: None,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 158 | <code>            score&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 159 | <code>            deteriorating: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 160 | <code>            unstable: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 161 | <code>            uncertain&#95;hit: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 162 | <code>            hit&#95;min&#95;percent: 25,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 163 | <code>            credit&#95;depth: 1,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 164 | <code>            search&#95;id: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 165 | <code>            diagnostics&#95;started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 166 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 167 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 168 | <code></code> | Blank line separating related declarations or steps. |
-| 169 | <code>    pub fn next&#95;command(&amp;mut self) -&gt; String {</code> | Declare next&#95;command(); its parameters and return type define the interface. |
-| 170 | <code>        self.pending</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 171 | <code>            .pop&#95;front()</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 172 | <code>            .unwrap&#95;or&#95;else(&#124;&#124; self.commands.recv().unwrap&#95;or&#95;else(&#124;&#95;&#124; &quot;quit&quot;.to&#95;string()))</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 173 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 174 | <code></code> | Blank line separating related declarations or steps. |
-| 175 | <code>    pub fn begin(&amp;mut self, mode: Mode, longest: f64) {</code> | Declare begin(); its parameters and return type define the interface. |
-| 176 | <code>        self.mode = mode;</code> | Update the named state using the expression and assignment operator shown. |
-| 177 | <code>        self.stopped = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 178 | <code>        self.stop&#95;received = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 179 | <code>        self.hit&#95;kind = &quot;none&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 180 | <code>        self.started = Instant::now();</code> | Update the named state using the expression and assignment operator shown. |
-| 181 | <code>        self.search&#95;id += 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 182 | <code>        self.diagnostics&#95;started = self.started;</code> | Update the named state using the expression and assignment operator shown. |
-| 183 | <code>        self.longest = longest;</code> | Update the named state using the expression and assignment operator shown. |
-| 184 | <code>        self.search&#95;started = self.started;</code> | Update the named state using the expression and assignment operator shown. |
-| 185 | <code>        self.was&#95;ponder = mode == Mode::Ponder;</code> | Update the named state using the expression and assignment operator shown. |
-| 186 | <code>        self.hit&#95;time = None;</code> | Update the named state using the expression and assignment operator shown. |
-| 187 | <code>        self.nodes = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 188 | <code>        self.completed&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 189 | <code>        self.hit&#95;nodes = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 190 | <code>        self.hit&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 191 | <code>        self.soft&#95;limit = f64::INFINITY;</code> | Update the named state using the expression and assignment operator shown. |
-| 192 | <code>        self.can&#95;reinvest = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 193 | <code>        self.source = &quot;native&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 194 | <code>        self.score = None;</code> | Update the named state using the expression and assignment operator shown. |
-| 195 | <code>        self.score&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
-| 196 | <code>        self.deteriorating = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 197 | <code>        self.unstable = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 198 | <code>        self.uncertain&#95;hit = false;</code> | Update the named state using the expression and assignment operator shown. |
-| 199 | <code>        self.credit&#95;depth = 1;</code> | Update the named state using the expression and assignment operator shown. |
-| 200 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 201 | <code></code> | Blank line separating related declarations or steps. |
-| 202 | <code>    /// Tag reports with their search and separate wall time from own-clock time.</code> | Source explanation: Tag reports with their search and separate wall time from own-clock time. |
-| 203 | <code>    pub fn log&#95;search(&amp;self, text: &amp;str) {</code> | Declare log&#95;search(); its parameters and return type define the interface. |
-| 204 | <code>        if SEARCH&#95;LOG&#95;ENABLED.load(Relaxed) {</code> | Test the condition and execute this branch only when it matches. |
-| 205 | <code>            search&#95;log(&amp;format!(</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 206 | <code>                &quot;search={} wall&#95;ms={:.1} own&#95;ms={:.1} completed&#95;depth={} hit&#95;kind={} {text}&quot;,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 207 | <code>                self.search&#95;id,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 208 | <code>                self.diagnostics&#95;started.elapsed().as&#95;secs&#95;f64() &#42; 1000.0,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 209 | <code>                self.elapsed() &#42; 1000.0,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 210 | <code>                self.completed&#95;depth,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 211 | <code>                self.hit&#95;kind</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 212 | <code>            ));</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 213 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 214 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 215 | <code></code> | Blank line separating related declarations or steps. |
-| 216 | <code>    fn handle(&amp;mut self, line: String) {</code> | Declare handle(); its parameters and return type define the interface. |
-| 217 | <code>        match line.split&#95;whitespace().next() {</code> | Select an arm by matching the expression against the listed patterns. |
-| 218 | <code>            Some(&quot;isready&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 219 | <code>                let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 220 | <code>                let &#95; = writeln!(out, &quot;readyok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 221 | <code>                let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 222 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 223 | <code>            Some(&quot;ponderhit&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 224 | <code>                if self.mode == Mode::Ponder {</code> | Test the condition and execute this branch only when it matches. |
-| 225 | <code>                    self.mode = Mode::Normal;</code> | Update the named state using the expression and assignment operator shown. |
-| 226 | <code>                    self.started = Instant::now();</code> | Update the named state using the expression and assignment operator shown. |
-| 227 | <code>                    self.hit&#95;time = Some(self.started);</code> | Update the named state using the expression and assignment operator shown. |
-| 228 | <code>                    self.hit&#95;kind = &quot;uci&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 229 | <code>                    self.hit&#95;nodes = self.nodes;</code> | Update the named state using the expression and assignment operator shown. |
-| 230 | <code>                    self.hit&#95;depth = self.completed&#95;depth;</code> | Update the named state using the expression and assignment operator shown. |
-| 231 | <code>                    self.uncertain&#95;hit =</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 232 | <code>                        self.hit&#95;depth &lt; SHALLOW&#95;DEPTH &#124;&#124; self.deteriorating &#124;&#124; self.unstable;</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 233 | <code>                    self.log&#95;search(&amp;format!(&quot;ponderhit hit&#95;nodes={}&quot;, self.hit&#95;nodes));</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 234 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
-| 235 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 236 | <code>            Some(&quot;stop&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 237 | <code>                self.stopped = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 238 | <code>                self.stop&#95;received = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 239 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 240 | <code>            Some(&quot;position&quot; &#124; &quot;go&quot; &#124; &quot;setoption&quot; &#124; &quot;ucinewgame&quot; &#124; &quot;quit&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
-| 241 | <code>                self.pending.push&#95;back(line);</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 242 | <code>                self.stopped = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 104 | <code>    pub stop&#95;on&#95;hit: bool, // The ponder search has the wrong root for a hit</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 105 | <code>    hit&#95;time: Option&lt;Instant&gt;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 106 | <code>    pub nodes: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 107 | <code>    completed&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 108 | <code>    hit&#95;nodes: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 109 | <code>    hit&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 110 | <code>    soft&#95;limit: f64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 111 | <code>    pub can&#95;reinvest: bool, // The clock holds a reserve for extra time after a hit</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 112 | <code>    pub source: &amp;&#x27;static str, // &quot;native&quot;, &quot;book&quot;, or &quot;tablebase&quot;</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 113 | <code>    score: Option&lt;i32&gt;,     // The score of the deepest mature iteration</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 114 | <code>    score&#95;depth: i32,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 115 | <code>    deteriorating: bool, // The score fell by SCORE&#95;DROP between mature iterations</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 116 | <code>    unstable: bool,      // The best move changed in the latest mature iteration</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 117 | <code>    uncertain&#95;hit: bool, // The hit came on a shallow, falling, or changing result</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 118 | <code>    pub hit&#95;min&#95;percent: u32, // Minimum share of the plan spent after a ponder hit</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 119 | <code>    credit&#95;depth: i32,   // The soft target applies once this depth is complete</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 120 | <code>    search&#95;id: u64,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 121 | <code>    diagnostics&#95;started: Instant, // This invocation, excluding credited earlier ponder work</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 122 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 123 | <code></code> | Blank line separating related declarations or steps. |
+| 124 | <code>impl SearchControl {</code> | Begin the implementation of methods or a trait for the named type. |
+| 125 | <code>    pub fn new() -&gt; Self {</code> | Declare new(); its parameters and return type define the interface. |
+| 126 | <code>        LOG&#95;START.get&#95;or&#95;init(Instant::now);</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 127 | <code>        let (sender, commands) = mpsc::channel();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 128 | <code>        std::thread::spawn(move &#124;&#124; {</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 129 | <code>            for line in std::io::stdin().lock().lines() {</code> | Visit the items in the displayed iterator, binding each item for this block. |
+| 130 | <code>                let Ok(line) = line else { break };</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 131 | <code>                log(&amp;format!(&quot;&lt; {line}&quot;));</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 132 | <code>                search&#95;log(&amp;format!(&quot;&lt; {line}&quot;));</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 133 | <code>                if sender.send(line).is&#95;err() {</code> | Test the condition and execute this branch only when it matches. |
+| 134 | <code>                    return;</code> | Leave the current function with the displayed result. |
+| 135 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
+| 136 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 137 | <code>            let &#95; = sender.send(&quot;quit&quot;.to&#95;string());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 138 | <code>        });</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 139 | <code>        Self {</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 140 | <code>            commands,</code> | Evaluate or continue this expression in new(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 141 | <code>            pending: VecDeque::new(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 142 | <code>            mode: Mode::Normal,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 143 | <code>            stopped: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 144 | <code>            stop&#95;received: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 145 | <code>            hit&#95;kind: &quot;none&quot;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 146 | <code>            started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 147 | <code>            longest: f64::INFINITY,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 148 | <code>            search&#95;started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 149 | <code>            was&#95;ponder: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 150 | <code>            stop&#95;on&#95;hit: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 151 | <code>            hit&#95;time: None,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 152 | <code>            nodes: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 153 | <code>            completed&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 154 | <code>            hit&#95;nodes: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 155 | <code>            hit&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 156 | <code>            soft&#95;limit: f64::INFINITY,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 157 | <code>            can&#95;reinvest: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 158 | <code>            source: &quot;native&quot;,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 159 | <code>            score: None,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 160 | <code>            score&#95;depth: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 161 | <code>            deteriorating: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 162 | <code>            unstable: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 163 | <code>            uncertain&#95;hit: false,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 164 | <code>            hit&#95;min&#95;percent: 25,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 165 | <code>            credit&#95;depth: 1,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 166 | <code>            search&#95;id: 0,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 167 | <code>            diagnostics&#95;started: Instant::now(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 168 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 169 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 170 | <code></code> | Blank line separating related declarations or steps. |
+| 171 | <code>    pub fn next&#95;command(&amp;mut self) -&gt; String {</code> | Declare next&#95;command(); its parameters and return type define the interface. |
+| 172 | <code>        self.pending</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 173 | <code>            .pop&#95;front()</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 174 | <code>            .unwrap&#95;or&#95;else(&#124;&#124; self.commands.recv().unwrap&#95;or&#95;else(&#124;&#95;&#124; &quot;quit&quot;.to&#95;string()))</code> | Evaluate or continue this expression in next&#95;command(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 175 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 176 | <code></code> | Blank line separating related declarations or steps. |
+| 177 | <code>    pub fn begin(&amp;mut self, mode: Mode, longest: f64) {</code> | Declare begin(); its parameters and return type define the interface. |
+| 178 | <code>        self.mode = mode;</code> | Update the named state using the expression and assignment operator shown. |
+| 179 | <code>        self.stopped = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 180 | <code>        self.stop&#95;received = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 181 | <code>        self.hit&#95;kind = &quot;none&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 182 | <code>        self.started = Instant::now();</code> | Update the named state using the expression and assignment operator shown. |
+| 183 | <code>        self.search&#95;id += 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 184 | <code>        self.diagnostics&#95;started = self.started;</code> | Update the named state using the expression and assignment operator shown. |
+| 185 | <code>        self.longest = longest;</code> | Update the named state using the expression and assignment operator shown. |
+| 186 | <code>        self.search&#95;started = self.started;</code> | Update the named state using the expression and assignment operator shown. |
+| 187 | <code>        self.was&#95;ponder = mode == Mode::Ponder;</code> | Update the named state using the expression and assignment operator shown. |
+| 188 | <code>        self.stop&#95;on&#95;hit = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 189 | <code>        self.hit&#95;time = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 190 | <code>        self.nodes = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 191 | <code>        self.completed&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 192 | <code>        self.hit&#95;nodes = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 193 | <code>        self.hit&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 194 | <code>        self.soft&#95;limit = f64::INFINITY;</code> | Update the named state using the expression and assignment operator shown. |
+| 195 | <code>        self.can&#95;reinvest = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 196 | <code>        self.source = &quot;native&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 197 | <code>        self.score = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 198 | <code>        self.score&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 199 | <code>        self.deteriorating = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 200 | <code>        self.unstable = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 201 | <code>        self.uncertain&#95;hit = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 202 | <code>        self.credit&#95;depth = 1;</code> | Update the named state using the expression and assignment operator shown. |
+| 203 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 204 | <code></code> | Blank line separating related declarations or steps. |
+| 205 | <code>    /// Tag reports with their search and separate wall time from own-clock time.</code> | Source explanation: Tag reports with their search and separate wall time from own-clock time. |
+| 206 | <code>    pub fn log&#95;search(&amp;self, text: &amp;str) {</code> | Declare log&#95;search(); its parameters and return type define the interface. |
+| 207 | <code>        if SEARCH&#95;LOG&#95;ENABLED.load(Relaxed) {</code> | Test the condition and execute this branch only when it matches. |
+| 208 | <code>            search&#95;log(&amp;format!(</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 209 | <code>                &quot;search={} wall&#95;ms={:.1} own&#95;ms={:.1} completed&#95;depth={} hit&#95;kind={} {text}&quot;,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 210 | <code>                self.search&#95;id,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 211 | <code>                self.diagnostics&#95;started.elapsed().as&#95;secs&#95;f64() &#42; 1000.0,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 212 | <code>                self.elapsed() &#42; 1000.0,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 213 | <code>                self.completed&#95;depth,</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 214 | <code>                self.hit&#95;kind</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 215 | <code>            ));</code> | Evaluate or continue this expression in log&#95;search(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 216 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 217 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 218 | <code></code> | Blank line separating related declarations or steps. |
+| 219 | <code>    fn handle(&amp;mut self, line: String) {</code> | Declare handle(); its parameters and return type define the interface. |
+| 220 | <code>        match line.split&#95;whitespace().next() {</code> | Select an arm by matching the expression against the listed patterns. |
+| 221 | <code>            Some(&quot;isready&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 222 | <code>                let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 223 | <code>                let &#95; = writeln!(out, &quot;readyok&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 224 | <code>                let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 225 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 226 | <code>            Some(&quot;ponderhit&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 227 | <code>                if self.mode == Mode::Ponder {</code> | Test the condition and execute this branch only when it matches. |
+| 228 | <code>                    self.mode = Mode::Normal;</code> | Update the named state using the expression and assignment operator shown. |
+| 229 | <code>                    self.started = Instant::now();</code> | Update the named state using the expression and assignment operator shown. |
+| 230 | <code>                    self.hit&#95;time = Some(self.started);</code> | Update the named state using the expression and assignment operator shown. |
+| 231 | <code>                    self.hit&#95;kind = &quot;uci&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 232 | <code>                    self.hit&#95;nodes = self.nodes;</code> | Update the named state using the expression and assignment operator shown. |
+| 233 | <code>                    self.hit&#95;depth = self.completed&#95;depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 234 | <code>                    self.uncertain&#95;hit =</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 235 | <code>                        self.hit&#95;depth &lt; SHALLOW&#95;DEPTH &#124;&#124; self.deteriorating &#124;&#124; self.unstable;</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 236 | <code>                    self.log&#95;search(&amp;format!(&quot;ponderhit hit&#95;nodes={}&quot;, self.hit&#95;nodes));</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 237 | <code>                    // A search of the position before the reply ends at the hit, and</code> | Source explanation: A search of the position before the reply ends at the hit, and |
+| 238 | <code>                    // the engine then searches the position the reply reached</code> | Source explanation: the engine then searches the position the reply reached |
+| 239 | <code>                    if self.stop&#95;on&#95;hit {</code> | Test the condition and execute this branch only when it matches. |
+| 240 | <code>                        self.stopped = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 241 | <code>                    }</code> | Close the preceding block, expression, call, or collection. |
+| 242 | <code>                }</code> | Close the preceding block, expression, call, or collection. |
 | 243 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 244 | <code>            &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
-| 245 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 246 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 247 | <code></code> | Blank line separating related declarations or steps. |
-| 248 | <code>    pub fn poll(&amp;mut self, nodes: u64) -&gt; bool {</code> | Declare poll(); its parameters and return type define the interface. |
-| 249 | <code>        self.nodes = nodes;</code> | Update the named state using the expression and assignment operator shown. |
-| 250 | <code>        while !self.stopped {</code> | Repeat this block while its condition remains true. |
-| 251 | <code>            let Ok(line) = self.commands.try&#95;recv() else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 252 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
-| 253 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
-| 254 | <code>            self.handle(line);</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 255 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 256 | <code>        self.stopped</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 257 | <code>            &#124;&#124; (self.mode == Mode::Normal</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 258 | <code>                &amp;&amp; (self.elapsed() &gt;= self.longest</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 259 | <code>                    &#124;&#124; (self.was&#95;ponder</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 260 | <code>                        &amp;&amp; self.completed&#95;depth &gt;= self.credit&#95;depth</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 261 | <code>                        &amp;&amp; self.search&#95;started.elapsed().as&#95;secs&#95;f64() &gt;= self.soft&#95;limit</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 262 | <code>                        &amp;&amp; self.hit&#95;finished())))</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 263 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 264 | <code></code> | Blank line separating related declarations or steps. |
-| 265 | <code>    /// The soft target is half the move plan. Reserve a fraction of that full plan</code> | Source explanation: The soft target is half the move plan. Reserve a fraction of that full plan |
-| 266 | <code>    /// on our clock, while the independent hard deadline always takes precedence.</code> | Source explanation: on our clock, while the independent hard deadline always takes precedence. |
-| 267 | <code>    fn hit&#95;minimum(&amp;self) -&gt; f64 {</code> | Declare hit&#95;minimum(); its parameters and return type define the interface. |
-| 268 | <code>        let fraction = f64::from(self.hit&#95;min&#95;percent) / 100.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 269 | <code>        if fraction == 0.0 {</code> | Test the condition and execute this branch only when it matches. |
-| 270 | <code>            return 0.0;</code> | Leave the current function with the displayed result. |
-| 271 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 272 | <code>        (2.0 &#42; self.soft&#95;limit &#42; fraction).min(self.longest &#42; fraction)</code> | Evaluate or continue this expression in hit&#95;minimum(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 273 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 274 | <code></code> | Blank line separating related declarations or steps. |
-| 275 | <code>    /// Return true when a hit earns extra time: the clock holds a reserve and the</code> | Source explanation: Return true when a hit earns extra time: the clock holds a reserve and the |
-| 276 | <code>    /// result is shallow, falling, or changing.</code> | Source explanation: result is shallow, falling, or changing. |
-| 277 | <code>    fn reinvest(&amp;self) -&gt; bool {</code> | Declare reinvest(); its parameters and return type define the interface. |
-| 278 | <code>        self.can&#95;reinvest &amp;&amp; (self.uncertain&#95;hit &#124;&#124; self.deteriorating &#124;&#124; self.unstable)</code> | Evaluate or continue this expression in reinvest(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 279 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 280 | <code></code> | Blank line separating related declarations or steps. |
-| 281 | <code>    /// Return true when the search has spent enough of its own clock after a hit. A</code> | Source explanation: Return true when the search has spent enough of its own clock after a hit. A |
-| 282 | <code>    /// stable hit needs the ordinary reserve. An uncertain hit reserves half the plan</code> | Source explanation: stable hit needs the ordinary reserve. An uncertain hit reserves half the plan |
-| 283 | <code>    /// and aims for one more completed depth, within one full plan and half the hard</code> | Source explanation: and aims for one more completed depth, within one full plan and half the hard |
-| 284 | <code>    /// budget.</code> | Source explanation: budget. |
-| 285 | <code>    fn hit&#95;finished(&amp;self) -&gt; bool {</code> | Declare hit&#95;finished(); its parameters and return type define the interface. |
-| 286 | <code>        if !self.reinvest() {</code> | Test the condition and execute this branch only when it matches. |
-| 287 | <code>            return self.elapsed() &gt;= self.hit&#95;minimum();</code> | Leave the current function with the displayed result. |
-| 288 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 289 | <code>        let minimum = self</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 290 | <code>            .soft&#95;limit</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 291 | <code>            .min(self.longest / 2.0)</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 292 | <code>            .max(self.hit&#95;minimum());</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 293 | <code>        let limit = (2.0 &#42; self.soft&#95;limit).min(self.longest / 2.0);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 294 | <code>        self.elapsed() &gt;= minimum</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 295 | <code>            &amp;&amp; (self.completed&#95;depth &gt; self.hit&#95;depth &#124;&#124; self.elapsed() &gt;= limit)</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 296 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 297 | <code></code> | Blank line separating related declarations or steps. |
-| 298 | <code>    /// Apply the soft limit without bypassing the thinking time a hit reserves.</code> | Source explanation: Apply the soft limit without bypassing the thinking time a hit reserves. |
-| 299 | <code>    pub fn soft&#95;finished(&amp;self, target: f64) -&gt; bool {</code> | Declare soft&#95;finished(); its parameters and return type define the interface. |
-| 300 | <code>        self.elapsed() &gt; target</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 301 | <code>            &amp;&amp; (!self.was&#95;ponder</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 302 | <code>                &#124;&#124; (self.completed&#95;depth &gt;= self.credit&#95;depth &amp;&amp; self.hit&#95;finished()))</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 303 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 304 | <code></code> | Blank line separating related declarations or steps. |
-| 305 | <code>    pub fn wait(&amp;mut self) {</code> | Declare wait(); its parameters and return type define the interface. |
-| 306 | <code>        while self.mode != Mode::Normal &amp;&amp; !self.stopped {</code> | Repeat this block while its condition remains true. |
-| 307 | <code>            let line = self.commands.recv().unwrap&#95;or&#95;else(&#124;&#95;&#124; &quot;quit&quot;.to&#95;string());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 308 | <code>            self.handle(line);</code> | Evaluate or continue this expression in wait(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 309 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 310 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 311 | <code></code> | Blank line separating related declarations or steps. |
-| 312 | <code>    pub fn elapsed(&amp;self) -&gt; f64 {</code> | Declare elapsed(); its parameters and return type define the interface. |
-| 313 | <code>        if self.mode == Mode::Normal {</code> | Test the condition and execute this branch only when it matches. |
-| 314 | <code>            self.started.elapsed().as&#95;secs&#95;f64()</code> | Evaluate or continue this expression in elapsed(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 315 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 316 | <code>            0.0</code> | Evaluate or continue this expression in elapsed(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 317 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 318 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 319 | <code></code> | Blank line separating related declarations or steps. |
-| 320 | <code>    /// Remember native ponder work only after an explicit stop without a hit.</code> | Source explanation: Remember native ponder work only after an explicit stop without a hit. |
-| 321 | <code>    /// Book waiting and cancellation by replacement commands earn no credit.</code> | Source explanation: Book waiting and cancellation by replacement commands earn no credit. |
-| 322 | <code>    pub fn ponder&#95;credit(&amp;self) -&gt; Option&lt;PonderCredit&gt; {</code> | Declare ponder&#95;credit(); its parameters and return type define the interface. |
-| 323 | <code>        if self.was&#95;ponder</code> | Test the condition and execute this branch only when it matches. |
-| 324 | <code>            &amp;&amp; self.hit&#95;time.is&#95;none()</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 325 | <code>            &amp;&amp; self.stop&#95;received</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 326 | <code>            &amp;&amp; self.source == &quot;native&quot;</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 327 | <code>        {</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 328 | <code>            Some(PonderCredit {</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 329 | <code>                seconds: self.search&#95;started.elapsed(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 330 | <code>                depth: self.completed&#95;depth,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 331 | <code>                score: self.score,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 332 | <code>                deteriorating: self.deteriorating,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 333 | <code>                unstable: self.unstable,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 334 | <code>            })</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 335 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 336 | <code>            None</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 337 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 338 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 339 | <code></code> | Blank line separating related declarations or steps. |
-| 340 | <code>    /// Treat this search as a ponder hit: some GUIs, Lucas Chess among them, answer a</code> | Source explanation: Treat this search as a ponder hit: some GUIs, Lucas Chess among them, answer a |
-| 341 | <code>    /// correct prediction with stop and a new go instead of ponderhit. The time spent</code> | Source explanation: correct prediction with stop and a new go instead of ponderhit. The time spent |
-| 342 | <code>    /// pondering excludes the inter-command gap and counts toward the soft target once the new</code> | Source explanation: pondering excludes the inter-command gap and counts toward the soft target once the new |
-| 343 | <code>    /// search, helped by the table, completes the depth the ponder search reached.</code> | Source explanation: search, helped by the table, completes the depth the ponder search reached. |
-| 344 | <code>    /// The score and the signs of doubt of that search carry over.</code> | Source explanation: The score and the signs of doubt of that search carry over. |
-| 345 | <code>    pub fn credit&#95;ponder(&amp;mut self, credit: PonderCredit) {</code> | Declare credit&#95;ponder(); its parameters and return type define the interface. |
-| 346 | <code>        self.was&#95;ponder = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 347 | <code>        self.credit&#95;depth = credit.depth.max(1);</code> | Update the named state using the expression and assignment operator shown. |
-| 348 | <code>        self.search&#95;started = self.started - credit.seconds;</code> | Update the named state using the expression and assignment operator shown. |
-| 349 | <code>        self.hit&#95;time = Some(self.started);</code> | Update the named state using the expression and assignment operator shown. |
-| 350 | <code>        self.hit&#95;depth = credit.depth;</code> | Update the named state using the expression and assignment operator shown. |
-| 351 | <code>        self.hit&#95;kind = &quot;stop&#95;go&quot;;</code> | Update the named state using the expression and assignment operator shown. |
-| 352 | <code>        self.score = credit.score;</code> | Update the named state using the expression and assignment operator shown. |
-| 353 | <code>        self.score&#95;depth = credit.depth;</code> | Update the named state using the expression and assignment operator shown. |
-| 354 | <code>        self.deteriorating = credit.deteriorating;</code> | Update the named state using the expression and assignment operator shown. |
-| 355 | <code>        self.unstable = credit.unstable;</code> | Update the named state using the expression and assignment operator shown. |
-| 356 | <code>        self.uncertain&#95;hit =</code> | Evaluate or continue this expression in credit&#95;ponder(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 357 | <code>            credit.depth &lt; SHALLOW&#95;DEPTH &#124;&#124; credit.deteriorating &#124;&#124; credit.unstable;</code> | Evaluate or continue this expression in credit&#95;ponder(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 358 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 359 | <code></code> | Blank line separating related declarations or steps. |
-| 360 | <code>    /// Record a completed depth, the soft target (half the planned seconds), the</code> | Source explanation: Record a completed depth, the soft target (half the planned seconds), the |
-| 361 | <code>    /// score, and whether the best move changed in this iteration.</code> | Source explanation: score, and whether the best move changed in this iteration. |
-| 362 | <code>    pub fn completed(&amp;mut self, depth: i32, soft&#95;limit: f64, score: i32, changed: bool) {</code> | Declare completed(); its parameters and return type define the interface. |
-| 363 | <code>        self.completed&#95;depth = depth;</code> | Update the named state using the expression and assignment operator shown. |
-| 364 | <code>        self.soft&#95;limit = soft&#95;limit;</code> | Update the named state using the expression and assignment operator shown. |
-| 365 | <code>        // The shallow iterations a Lucas restart replays keep the deeper score</code> | Source explanation: The shallow iterations a Lucas restart replays keep the deeper score |
-| 366 | <code>        if depth &gt;= MATURE&#95;DEPTH.max(self.score&#95;depth) {</code> | Test the condition and execute this branch only when it matches. |
-| 367 | <code>            if let Some(last) = self.score</code> | Test the condition and execute this branch only when it matches. |
-| 368 | <code>                &amp;&amp; last - score &gt;= SCORE&#95;DROP</code> | Evaluate or continue this expression in completed(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 369 | <code>            {</code> | Evaluate or continue this expression in completed(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 370 | <code>                self.deteriorating = true;</code> | Update the named state using the expression and assignment operator shown. |
-| 371 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
-| 372 | <code>            self.unstable = changed;</code> | Update the named state using the expression and assignment operator shown. |
-| 373 | <code>            self.score = Some(score);</code> | Update the named state using the expression and assignment operator shown. |
-| 374 | <code>            self.score&#95;depth = depth;</code> | Update the named state using the expression and assignment operator shown. |
-| 375 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 376 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 377 | <code></code> | Blank line separating related declarations or steps. |
-| 378 | <code>    /// Report ponder work separately from time spent on our own clock.</code> | Source explanation: Report ponder work separately from time spent on our own clock. |
-| 379 | <code>    pub fn report(&amp;self) {</code> | Declare report(); its parameters and return type define the interface. |
-| 380 | <code>        if !self.was&#95;ponder {</code> | Test the condition and execute this branch only when it matches. |
-| 381 | <code>            return;</code> | Leave the current function with the displayed result. |
-| 382 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
-| 383 | <code>        let end = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 384 | <code>        let ponder&#95;end = self.hit&#95;time.unwrap&#95;or(end);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 385 | <code>        let outcome = if self.hit&#95;time.is&#95;some() {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 386 | <code>            &quot;hit&quot;</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 387 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 388 | <code>            &quot;stopped&quot;</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 389 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 390 | <code>        let own&#95;seconds = self.hit&#95;time.map&#95;or(0.0, &#124;hit&#124; (end - hit).as&#95;secs&#95;f64());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 391 | <code>        let ponder&#95;ms = (ponder&#95;end - self.search&#95;started).as&#95;secs&#95;f64() &#42; 1000.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 392 | <code>        let text = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 393 | <code>            &quot;ponder outcome={outcome} ponder&#95;ms={ponder&#95;ms:.1} hit&#95;depth={} hit&#95;nodes={} final&#95;depth={} final&#95;nodes={} own&#95;ms={:.1} hit&#95;min&#95;percent={}&quot;,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 394 | <code>            self.hit&#95;depth,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 395 | <code>            self.hit&#95;nodes,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 396 | <code>            self.completed&#95;depth,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 397 | <code>            self.nodes,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 398 | <code>            own&#95;seconds &#42; 1000.0,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 399 | <code>            self.hit&#95;min&#95;percent</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 400 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
-| 401 | <code>        let hit&#95;cap&#95;ms = if self.soft&#95;limit.is&#95;finite() {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 402 | <code>            (2.0 &#42; self.soft&#95;limit).min(self.longest / 2.0) &#42; 1000.0</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 403 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
-| 404 | <code>            0.0</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 405 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
-| 406 | <code>        let text = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 407 | <code>            &quot;{text} hit&#95;kind={} reinvest={} shallow&#95;hit={} deteriorating={} unstable={} hit&#95;cap&#95;ms={hit&#95;cap&#95;ms:.1}&quot;,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 408 | <code>            self.hit&#95;kind,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 409 | <code>            u8::from(self.source == &quot;native&quot; &amp;&amp; self.reinvest()),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 410 | <code>            u8::from(self.hit&#95;depth &lt; SHALLOW&#95;DEPTH),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 411 | <code>            u8::from(self.deteriorating),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 412 | <code>            u8::from(self.unstable)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
-| 413 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
-| 414 | <code>        log(&amp;text);</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
-| 415 | <code>        let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 416 | <code>        let &#95; = writeln!(out, &quot;info string {text}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 417 | <code>        let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
-| 418 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
-| 419 | <code>}</code> | Close the preceding block, expression, call, or collection. |
+| 244 | <code>            Some(&quot;stop&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 245 | <code>                self.stopped = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 246 | <code>                self.stop&#95;received = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 247 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 248 | <code>            Some(&quot;position&quot; &#124; &quot;go&quot; &#124; &quot;setoption&quot; &#124; &quot;ucinewgame&quot; &#124; &quot;quit&quot;) =&gt; {</code> | Handle this matching pattern with the expression or block on its right. |
+| 249 | <code>                self.pending.push&#95;back(line);</code> | Evaluate or continue this expression in handle(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 250 | <code>                self.stopped = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 251 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 252 | <code>            &#95; =&gt; {}</code> | Handle this matching pattern with the expression or block on its right. |
+| 253 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 254 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 255 | <code></code> | Blank line separating related declarations or steps. |
+| 256 | <code>    pub fn poll(&amp;mut self, nodes: u64) -&gt; bool {</code> | Declare poll(); its parameters and return type define the interface. |
+| 257 | <code>        self.nodes = nodes;</code> | Update the named state using the expression and assignment operator shown. |
+| 258 | <code>        while !self.stopped {</code> | Repeat this block while its condition remains true. |
+| 259 | <code>            let Ok(line) = self.commands.try&#95;recv() else {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 260 | <code>                break;</code> | Leave the selected loop, with a value where the expression supplies one. |
+| 261 | <code>            };</code> | Close the preceding block, expression, call, or collection. |
+| 262 | <code>            self.handle(line);</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 263 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 264 | <code>        self.stopped</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 265 | <code>            &#124;&#124; (self.mode == Mode::Normal</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 266 | <code>                &amp;&amp; (self.elapsed() &gt;= self.longest</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 267 | <code>                    &#124;&#124; (self.was&#95;ponder</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 268 | <code>                        &amp;&amp; self.completed&#95;depth &gt;= self.credit&#95;depth</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 269 | <code>                        &amp;&amp; self.search&#95;started.elapsed().as&#95;secs&#95;f64() &gt;= self.soft&#95;limit</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 270 | <code>                        &amp;&amp; self.hit&#95;finished())))</code> | Evaluate or continue this expression in poll(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 271 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 272 | <code></code> | Blank line separating related declarations or steps. |
+| 273 | <code>    /// The soft target is half the move plan. Reserve a fraction of that full plan</code> | Source explanation: The soft target is half the move plan. Reserve a fraction of that full plan |
+| 274 | <code>    /// on our clock, while the independent hard deadline always takes precedence.</code> | Source explanation: on our clock, while the independent hard deadline always takes precedence. |
+| 275 | <code>    fn hit&#95;minimum(&amp;self) -&gt; f64 {</code> | Declare hit&#95;minimum(); its parameters and return type define the interface. |
+| 276 | <code>        let fraction = f64::from(self.hit&#95;min&#95;percent) / 100.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 277 | <code>        if fraction == 0.0 {</code> | Test the condition and execute this branch only when it matches. |
+| 278 | <code>            return 0.0;</code> | Leave the current function with the displayed result. |
+| 279 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 280 | <code>        (2.0 &#42; self.soft&#95;limit &#42; fraction).min(self.longest &#42; fraction)</code> | Evaluate or continue this expression in hit&#95;minimum(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 281 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 282 | <code></code> | Blank line separating related declarations or steps. |
+| 283 | <code>    /// Return true when a hit earns extra time: the clock holds a reserve and the</code> | Source explanation: Return true when a hit earns extra time: the clock holds a reserve and the |
+| 284 | <code>    /// result is shallow, falling, or changing.</code> | Source explanation: result is shallow, falling, or changing. |
+| 285 | <code>    fn reinvest(&amp;self) -&gt; bool {</code> | Declare reinvest(); its parameters and return type define the interface. |
+| 286 | <code>        self.can&#95;reinvest &amp;&amp; (self.uncertain&#95;hit &#124;&#124; self.deteriorating &#124;&#124; self.unstable)</code> | Evaluate or continue this expression in reinvest(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 287 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 288 | <code></code> | Blank line separating related declarations or steps. |
+| 289 | <code>    /// Return true when the search has spent enough of its own clock after a hit. A</code> | Source explanation: Return true when the search has spent enough of its own clock after a hit. A |
+| 290 | <code>    /// stable hit needs the ordinary reserve. An uncertain hit reserves half the plan</code> | Source explanation: stable hit needs the ordinary reserve. An uncertain hit reserves half the plan |
+| 291 | <code>    /// and aims for one more completed depth, within one full plan and half the hard</code> | Source explanation: and aims for one more completed depth, within one full plan and half the hard |
+| 292 | <code>    /// budget.</code> | Source explanation: budget. |
+| 293 | <code>    fn hit&#95;finished(&amp;self) -&gt; bool {</code> | Declare hit&#95;finished(); its parameters and return type define the interface. |
+| 294 | <code>        if !self.reinvest() {</code> | Test the condition and execute this branch only when it matches. |
+| 295 | <code>            return self.elapsed() &gt;= self.hit&#95;minimum();</code> | Leave the current function with the displayed result. |
+| 296 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 297 | <code>        let minimum = self</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 298 | <code>            .soft&#95;limit</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 299 | <code>            .min(self.longest / 2.0)</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 300 | <code>            .max(self.hit&#95;minimum());</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 301 | <code>        let limit = (2.0 &#42; self.soft&#95;limit).min(self.longest / 2.0);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 302 | <code>        self.elapsed() &gt;= minimum</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 303 | <code>            &amp;&amp; (self.completed&#95;depth &gt; self.hit&#95;depth &#124;&#124; self.elapsed() &gt;= limit)</code> | Evaluate or continue this expression in hit&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 304 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 305 | <code></code> | Blank line separating related declarations or steps. |
+| 306 | <code>    /// Apply the soft limit without bypassing the thinking time a hit reserves.</code> | Source explanation: Apply the soft limit without bypassing the thinking time a hit reserves. |
+| 307 | <code>    pub fn soft&#95;finished(&amp;self, target: f64) -&gt; bool {</code> | Declare soft&#95;finished(); its parameters and return type define the interface. |
+| 308 | <code>        self.elapsed() &gt; target</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 309 | <code>            &amp;&amp; (!self.was&#95;ponder</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 310 | <code>                &#124;&#124; (self.completed&#95;depth &gt;= self.credit&#95;depth &amp;&amp; self.hit&#95;finished()))</code> | Evaluate or continue this expression in soft&#95;finished(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 311 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 312 | <code></code> | Blank line separating related declarations or steps. |
+| 313 | <code>    /// Search the position a predicted reply reached, after a hit ended the ponder</code> | Source explanation: Search the position a predicted reply reached, after a hit ended the ponder |
+| 314 | <code>    /// search of the position before it. The new search first recovers one depth less</code> | Source explanation: search of the position before it. The new search first recovers one depth less |
+| 315 | <code>    /// than the ponder search completed, and the ponder time still counts toward the</code> | Source explanation: than the ponder search completed, and the ponder time still counts toward the |
+| 316 | <code>    /// soft target. Scores of the earlier root belong to the other side, so the</code> | Source explanation: soft target. Scores of the earlier root belong to the other side, so the |
+| 317 | <code>    /// signs of doubt start fresh.</code> | Source explanation: signs of doubt start fresh. |
+| 318 | <code>    pub fn continue&#95;after&#95;hit(&amp;mut self) {</code> | Declare continue&#95;after&#95;hit(); its parameters and return type define the interface. |
+| 319 | <code>        self.stopped = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 320 | <code>        self.stop&#95;on&#95;hit = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 321 | <code>        self.credit&#95;depth = (self.hit&#95;depth - 1).max(1);</code> | Update the named state using the expression and assignment operator shown. |
+| 322 | <code>        self.hit&#95;depth = self.credit&#95;depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 323 | <code>        self.completed&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 324 | <code>        self.score = None;</code> | Update the named state using the expression and assignment operator shown. |
+| 325 | <code>        self.score&#95;depth = 0;</code> | Update the named state using the expression and assignment operator shown. |
+| 326 | <code>        self.deteriorating = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 327 | <code>        self.unstable = false;</code> | Update the named state using the expression and assignment operator shown. |
+| 328 | <code>        self.uncertain&#95;hit = self.hit&#95;depth &lt; SHALLOW&#95;DEPTH;</code> | Update the named state using the expression and assignment operator shown. |
+| 329 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 330 | <code></code> | Blank line separating related declarations or steps. |
+| 331 | <code>    pub fn wait(&amp;mut self) {</code> | Declare wait(); its parameters and return type define the interface. |
+| 332 | <code>        while self.mode != Mode::Normal &amp;&amp; !self.stopped {</code> | Repeat this block while its condition remains true. |
+| 333 | <code>            let line = self.commands.recv().unwrap&#95;or&#95;else(&#124;&#95;&#124; &quot;quit&quot;.to&#95;string());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 334 | <code>            self.handle(line);</code> | Evaluate or continue this expression in wait(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 335 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 336 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 337 | <code></code> | Blank line separating related declarations or steps. |
+| 338 | <code>    pub fn elapsed(&amp;self) -&gt; f64 {</code> | Declare elapsed(); its parameters and return type define the interface. |
+| 339 | <code>        if self.mode == Mode::Normal {</code> | Test the condition and execute this branch only when it matches. |
+| 340 | <code>            self.started.elapsed().as&#95;secs&#95;f64()</code> | Evaluate or continue this expression in elapsed(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 341 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 342 | <code>            0.0</code> | Evaluate or continue this expression in elapsed(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 343 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 344 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 345 | <code></code> | Blank line separating related declarations or steps. |
+| 346 | <code>    /// Remember native ponder work only after an explicit stop without a hit.</code> | Source explanation: Remember native ponder work only after an explicit stop without a hit. |
+| 347 | <code>    /// Book waiting and cancellation by replacement commands earn no credit.</code> | Source explanation: Book waiting and cancellation by replacement commands earn no credit. |
+| 348 | <code>    pub fn ponder&#95;credit(&amp;self) -&gt; Option&lt;PonderCredit&gt; {</code> | Declare ponder&#95;credit(); its parameters and return type define the interface. |
+| 349 | <code>        if self.was&#95;ponder</code> | Test the condition and execute this branch only when it matches. |
+| 350 | <code>            &amp;&amp; self.hit&#95;time.is&#95;none()</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 351 | <code>            &amp;&amp; self.stop&#95;received</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 352 | <code>            &amp;&amp; self.source == &quot;native&quot;</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 353 | <code>        {</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 354 | <code>            Some(PonderCredit {</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 355 | <code>                seconds: self.search&#95;started.elapsed(),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 356 | <code>                depth: self.completed&#95;depth,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 357 | <code>                score: self.score,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 358 | <code>                deteriorating: self.deteriorating,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 359 | <code>                unstable: self.unstable,</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 360 | <code>            })</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 361 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 362 | <code>            None</code> | Evaluate or continue this expression in ponder&#95;credit(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 363 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 364 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 365 | <code></code> | Blank line separating related declarations or steps. |
+| 366 | <code>    /// Treat this search as a ponder hit: some GUIs, Lucas Chess among them, answer a</code> | Source explanation: Treat this search as a ponder hit: some GUIs, Lucas Chess among them, answer a |
+| 367 | <code>    /// correct prediction with stop and a new go instead of ponderhit. The time spent</code> | Source explanation: correct prediction with stop and a new go instead of ponderhit. The time spent |
+| 368 | <code>    /// pondering excludes the inter-command gap and counts toward the soft target once the new</code> | Source explanation: pondering excludes the inter-command gap and counts toward the soft target once the new |
+| 369 | <code>    /// search, helped by the table, completes the depth the ponder search reached.</code> | Source explanation: search, helped by the table, completes the depth the ponder search reached. |
+| 370 | <code>    /// The score and the signs of doubt of that search carry over.</code> | Source explanation: The score and the signs of doubt of that search carry over. |
+| 371 | <code>    pub fn credit&#95;ponder(&amp;mut self, credit: PonderCredit) {</code> | Declare credit&#95;ponder(); its parameters and return type define the interface. |
+| 372 | <code>        self.was&#95;ponder = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 373 | <code>        self.credit&#95;depth = credit.depth.max(1);</code> | Update the named state using the expression and assignment operator shown. |
+| 374 | <code>        self.search&#95;started = self.started - credit.seconds;</code> | Update the named state using the expression and assignment operator shown. |
+| 375 | <code>        self.hit&#95;time = Some(self.started);</code> | Update the named state using the expression and assignment operator shown. |
+| 376 | <code>        self.hit&#95;depth = credit.depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 377 | <code>        self.hit&#95;kind = &quot;stop&#95;go&quot;;</code> | Update the named state using the expression and assignment operator shown. |
+| 378 | <code>        self.score = credit.score;</code> | Update the named state using the expression and assignment operator shown. |
+| 379 | <code>        self.score&#95;depth = credit.depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 380 | <code>        self.deteriorating = credit.deteriorating;</code> | Update the named state using the expression and assignment operator shown. |
+| 381 | <code>        self.unstable = credit.unstable;</code> | Update the named state using the expression and assignment operator shown. |
+| 382 | <code>        self.uncertain&#95;hit =</code> | Evaluate or continue this expression in credit&#95;ponder(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 383 | <code>            credit.depth &lt; SHALLOW&#95;DEPTH &#124;&#124; credit.deteriorating &#124;&#124; credit.unstable;</code> | Evaluate or continue this expression in credit&#95;ponder(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 384 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 385 | <code></code> | Blank line separating related declarations or steps. |
+| 386 | <code>    /// Record a completed depth, the soft target (half the planned seconds), the</code> | Source explanation: Record a completed depth, the soft target (half the planned seconds), the |
+| 387 | <code>    /// score, and whether the best move changed in this iteration.</code> | Source explanation: score, and whether the best move changed in this iteration. |
+| 388 | <code>    pub fn completed(&amp;mut self, depth: i32, soft&#95;limit: f64, score: i32, changed: bool) {</code> | Declare completed(); its parameters and return type define the interface. |
+| 389 | <code>        self.completed&#95;depth = depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 390 | <code>        self.soft&#95;limit = soft&#95;limit;</code> | Update the named state using the expression and assignment operator shown. |
+| 391 | <code>        // The shallow iterations a Lucas restart replays keep the deeper score</code> | Source explanation: The shallow iterations a Lucas restart replays keep the deeper score |
+| 392 | <code>        if depth &gt;= MATURE&#95;DEPTH.max(self.score&#95;depth) {</code> | Test the condition and execute this branch only when it matches. |
+| 393 | <code>            if let Some(last) = self.score</code> | Test the condition and execute this branch only when it matches. |
+| 394 | <code>                &amp;&amp; last - score &gt;= SCORE&#95;DROP</code> | Evaluate or continue this expression in completed(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 395 | <code>            {</code> | Evaluate or continue this expression in completed(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 396 | <code>                self.deteriorating = true;</code> | Update the named state using the expression and assignment operator shown. |
+| 397 | <code>            }</code> | Close the preceding block, expression, call, or collection. |
+| 398 | <code>            self.unstable = changed;</code> | Update the named state using the expression and assignment operator shown. |
+| 399 | <code>            self.score = Some(score);</code> | Update the named state using the expression and assignment operator shown. |
+| 400 | <code>            self.score&#95;depth = depth;</code> | Update the named state using the expression and assignment operator shown. |
+| 401 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 402 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 403 | <code></code> | Blank line separating related declarations or steps. |
+| 404 | <code>    /// Report ponder work separately from time spent on our own clock.</code> | Source explanation: Report ponder work separately from time spent on our own clock. |
+| 405 | <code>    pub fn report(&amp;self) {</code> | Declare report(); its parameters and return type define the interface. |
+| 406 | <code>        if !self.was&#95;ponder {</code> | Test the condition and execute this branch only when it matches. |
+| 407 | <code>            return;</code> | Leave the current function with the displayed result. |
+| 408 | <code>        }</code> | Close the preceding block, expression, call, or collection. |
+| 409 | <code>        let end = Instant::now();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 410 | <code>        let ponder&#95;end = self.hit&#95;time.unwrap&#95;or(end);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 411 | <code>        let outcome = if self.hit&#95;time.is&#95;some() {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 412 | <code>            &quot;hit&quot;</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 413 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 414 | <code>            &quot;stopped&quot;</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 415 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 416 | <code>        let own&#95;seconds = self.hit&#95;time.map&#95;or(0.0, &#124;hit&#124; (end - hit).as&#95;secs&#95;f64());</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 417 | <code>        let ponder&#95;ms = (ponder&#95;end - self.search&#95;started).as&#95;secs&#95;f64() &#42; 1000.0;</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 418 | <code>        let text = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 419 | <code>            &quot;ponder outcome={outcome} ponder&#95;ms={ponder&#95;ms:.1} hit&#95;depth={} hit&#95;nodes={} final&#95;depth={} final&#95;nodes={} own&#95;ms={:.1} hit&#95;min&#95;percent={}&quot;,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 420 | <code>            self.hit&#95;depth,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 421 | <code>            self.hit&#95;nodes,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 422 | <code>            self.completed&#95;depth,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 423 | <code>            self.nodes,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 424 | <code>            own&#95;seconds &#42; 1000.0,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 425 | <code>            self.hit&#95;min&#95;percent</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 426 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
+| 427 | <code>        let hit&#95;cap&#95;ms = if self.soft&#95;limit.is&#95;finite() {</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 428 | <code>            (2.0 &#42; self.soft&#95;limit).min(self.longest / 2.0) &#42; 1000.0</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 429 | <code>        } else {</code> | Begin the alternative branch when the preceding condition did not match. |
+| 430 | <code>            0.0</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 431 | <code>        };</code> | Close the preceding block, expression, call, or collection. |
+| 432 | <code>        let text = format!(</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 433 | <code>            &quot;{text} hit&#95;kind={} reinvest={} shallow&#95;hit={} deteriorating={} unstable={} hit&#95;cap&#95;ms={hit&#95;cap&#95;ms:.1}&quot;,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 434 | <code>            self.hit&#95;kind,</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 435 | <code>            u8::from(self.source == &quot;native&quot; &amp;&amp; self.reinvest()),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 436 | <code>            u8::from(self.hit&#95;depth &lt; SHALLOW&#95;DEPTH),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 437 | <code>            u8::from(self.deteriorating),</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 438 | <code>            u8::from(self.unstable)</code> | Specify this field, argument, or element&#x27;s type or value in the enclosing declaration. |
+| 439 | <code>        );</code> | Close the preceding block, expression, call, or collection. |
+| 440 | <code>        log(&amp;text);</code> | Evaluate or continue this expression in report(); a final expression without a semicolon supplies its block&#x27;s value. |
+| 441 | <code>        let mut out = std::io::stdout();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 442 | <code>        let &#95; = writeln!(out, &quot;info string {text}&quot;);</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 443 | <code>        let &#95; = out.flush();</code> | Bind the local name or destructured fields to the expression; mut permits later reassignment. |
+| 444 | <code>    }</code> | Close the preceding block, expression, call, or collection. |
+| 445 | <code>}</code> | Close the preceding block, expression, call, or collection. |
 
 ### search_metrics.rs
 
@@ -4588,7 +4648,7 @@ Store and retrieve bounded search results using position keys.
 
 ## Source coverage and identity
 
-The reference covers all 15 runtime Rust modules and all 4,447 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
+The reference covers all 15 runtime Rust modules and all 4,507 physical source lines. These are source-reference line numbers, not student typing totals. The overview's Lines of code count excludes blank and comment lines. SHA-256 identifies exact source bytes, including line endings.
 
 | Source | SHA-256 |
 | --- | --- |
@@ -4596,13 +4656,13 @@ The reference covers all 15 runtime Rust modules and all 4,447 physical source l
 | [src/board.rs](src/board.rs) | `f270d32c8b7f79bc95d1487a35d6996936ee6f461f375036a5cbdcee0751f537` |
 | [src/evaluation.rs](src/evaluation.rs) | `f17631363f0026923bf69659a0d722c3a1d2accda5f30a0894cbd5406ac5905a` |
 | [src/exchange.rs](src/exchange.rs) | `c1b1fe90c897dccafcf28744abb1b2d127397f0c073ea0051bf75cf76b50e892` |
-| [src/main.rs](src/main.rs) | `b128d212c51eeb2fccbd381ee000991a42ec26c5732436fe76f03b9c0a9b860a` |
+| [src/main.rs](src/main.rs) | `b7b4ed8e268f6a2bf699ca3609cd3113e51b4f8ee60c76f1af1b583471725148` |
 | [src/make_move.rs](src/make_move.rs) | `0fb0a99aeae26a9e125532a2f888267077766f06906d0a4a501ca11f54d34460` |
 | [src/move_generation.rs](src/move_generation.rs) | `f66d5bf0e3e2ad3bd248df7c47aad3f6f4c9d84f7cc569dc5a8376f5f33e7db3` |
 | [src/opening_book.rs](src/opening_book.rs) | `37dbe9750c830b6a4132d199555ffe06fd63d834303ceb874866dd821e69f865` |
 | [src/parallel_search.rs](src/parallel_search.rs) | `214b7e3c54283c96ed8eff42426a1abb03ab2279c1399a81e442a9acb7ef8ba5` |
 | [src/search.rs](src/search.rs) | `5de2ed80cb0d81825ee0d42529c0813148e78489d372cd00de58b374efb81427` |
-| [src/search_control.rs](src/search_control.rs) | `eda35cbcabd670c935e837af68c65dacf8492f50b9287e63d6864ad74b8475dc` |
+| [src/search_control.rs](src/search_control.rs) | `28d749ef579b690c0bcf6f7b1b25ae35abf5ea4ced3825fda50fc2d6255d98f5` |
 | [src/search_metrics.rs](src/search_metrics.rs) | `2f18a00dfec15ef59890102ca8e916252321ea12eb6c5ca66379a2278bdec31b` |
 | [src/table_metrics.rs](src/table_metrics.rs) | `17a22b54527c25bd5d24e3a3e615b36d7f96732ce3a0dbf93af30b73ddd8f9e9` |
 | [src/tablebase.rs](src/tablebase.rs) | `084f32ecf0d76c8de4a529b433976ae337548b98eb47921c998da81ae7d31c33` |

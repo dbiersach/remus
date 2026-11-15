@@ -54,10 +54,10 @@ The supplied data files do not have to be typed and don't represent code.
 | [Remus2](Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | 1840 | Class A player | Python | 300 | Evaluation and alpha-beta search turn rules into decisions |
 | [Remus3](Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | Remember positions, order moves, and use an opening book |
 | [Remus4](Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | Refine search, recognize draws, and improve endgame play |
-| [Remus5](rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | Run Remus4's core algorithms as compiled code with a larger table |
+| [Remus5](rust_engines/Remus5/remus5.md) | 2738 | Super Grandmaster | Rust | 1,849 | Run Remus4's core algorithms as compiled code with a larger table |
 | [Remus6](rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,893 | Add positional terms, speed techniques, pondering, and tablebase advice |
-| [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,268 | Use Lazy SMP (symmetric multiprocessing): search threads share a table |
-| [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,877 | Use Young Brothers Wait Concept (YBWC): search the first move before splitting work |
+| [Remus7](rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,312 | Use Lazy SMP (symmetric multiprocessing): search threads share a table |
+| [Remus8](rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,921 | Use Young Brothers Wait Concept (YBWC): search the first move before splitting work |
 
 ELO values estimate playing strength from benchmarks; Remus1 is a rough estimate.
 Rank compares those numbers with human rating bands. These labels are not FIDE

@@ -53,13 +53,13 @@ excluded.
 | `src/opening_book.rs` | 48 | 48 | 0 | Opening-line loading and candidate book moves |
 | `src/transposition_table.rs` | 253 | 253 | 0 | Search depths, scores, bounds, and best moves |
 | `src/search.rs` | 1,108 | 764 | +344 | Move selection, search, ordering, and evaluation integration |
-| `src/search_control.rs` | 364 | 357 | +7 | Input queue, cancellation, pondering, and deadlines |
+| `src/search_control.rs` | 382 | 375 | +7 | Input queue, cancellation, pondering, and deadlines |
 | `src/parallel_search.rs` | 233 | 0 | +233 | Persistent worker pool, split state, cancellation, and descendant work claims |
 | `src/search_metrics.rs` | 72 | 57 | +15 | Per-worker timing, nodes, re-search costs, and scheduling counters |
 | `src/table_metrics.rs` | 39 | 39 | 0 | Transposition-table probes, hits, cutoffs, stores, and replacements |
 | `src/tablebase.rs` | 253 | 253 | 0 | Bounded root advice, native legality validation, response cache, and network fallback |
-| `src/main.rs` | 356 | 346 | +10 | UCI commands, configuration, root selection, and engine orchestration |
-| **Total** | **3,877** | **3,268** | **+609** | |
+| `src/main.rs` | 382 | 372 | +10 | UCI commands, configuration, root selection, and engine orchestration |
+| **Total** | **3,921** | **3,312** | **+609** | |
 
 ### Supporting files
 
@@ -366,9 +366,16 @@ and options.
 
 For example, after Remus8 chooses `e2e4` , it can report
 `bestmove e2e4 ponder e7e5` . The GUI sends the position including both moves, followed
-by `go ponder` . Remus8 searches its response to `e7e5` while the opponent thinks.
+by `go ponder` . Remus8 then searches the position before `e7e5` , with the opponent
+to move, so its shared table holds a search of every reply the opponent can choose,
+not only the predicted one. A missed prediction then starts its search from a table
+that already covers the reply actually played.
 
-A standard `ponderhit` continues that search and starts the hard move clock. Lucas Chess
+A standard `ponderhit` ends that search, starts the hard move clock, and searches the
+position after `e7e5` from the prepared table. That search first recovers one depth
+less than the ponder search completed, because the position before the reply was
+searched one ply deeper than its children, and completed ponder time counts toward
+the soft target. Lucas Chess
 R6 also uses `stop` , the actual `position` , and a fresh `go` when the prediction
 matches. Remus8 recognizes an explicit stop-and-go handoff when the complete
 position-command tokens match and the new timed search begins within two seconds of
@@ -384,7 +391,9 @@ history before its FEN.
 
 The credited stop-and-go form skips tablebase advice and starts a native search with
 retained cache and heuristic information. Completed ponder time counts toward the soft
-target once the new search recovers the pondered depth. Saved credit holds the ponder
+target once the new search recovers one depth less than the pondered depth. The
+scores of the pondered position belong to the opponent, so the score and best-move
+signs of doubt start fresh after either hit form. Saved credit holds the ponder
 duration; the idle gap between searches adds no credited time. At the default settings, stable hits reserve 25% of the
 adjusted move plan on the engine's own clock, capped at 25% of the hard budget. With at
 least 60 seconds left on its clock, Remus8 reinvests time when the hit depth is

@@ -124,6 +124,9 @@ fn run() {
     let mut played: Vec<String> = Vec::new(); // The moves of a game from the start
     let mut use_book = true;
     let mut game_history: Vec<u64> = Vec::new(); // The keys of the positions before this one
+    // The position before the last move, its history, and the last move: a ponder
+    // request searches there, so every reply the opponent can choose is prepared
+    let mut before_reply: Option<(Position, Vec<u64>, Move)> = None;
     let mut out = std::io::stdout();
     let mut pondered: Option<Pondered> = None;
     let mut position_words = vec!["position".to_string(), "startpos".to_string()];
@@ -206,8 +209,10 @@ fn run() {
                 };
                 played.clear();
                 game_history.clear();
+                before_reply = None;
                 if let Some(at) = moves_at {
                     for text in &words[at + 1..] {
+                        before_reply = Some((position, game_history.clone(), parse_move(text)));
                         game_history.push(position.key);
                         played.push((*text).to_string());
                         position = make_move(&position, parse_move(text));
@@ -309,7 +314,28 @@ fn run() {
                     }
                 }
                 search.control().source = source;
-                if mv == NO_MOVE {
+                let mut premove = false;
+                if mv == NO_MOVE
+                    && mode == Mode::Ponder
+                    && depth_limit.is_none()
+                    && let Some((before, before_history, reply)) = &before_reply
+                {
+                    // Ponder on the position before the predicted reply. The table
+                    // then holds a search of every reply, not just the predicted one.
+                    premove = true;
+                    search.control().stop_on_hit = true;
+                    search.think(before, before_history, seconds, longest, None);
+                    search.control().wait();
+                    if search.control().mode == Mode::Normal {
+                        // A hit: search the position the reply reached on our own
+                        // clock, starting from the prepared table
+                        search.control().continue_after_hit();
+                        mv = search.think(&position, &game_history, seconds, longest, None);
+                    } else {
+                        mv = search.ponder_reply(before, *reply);
+                    }
+                }
+                if mv == NO_MOVE && !premove {
                     let elapsed = started.elapsed().as_secs_f64();
                     mv = search.think(
                         &position,
@@ -321,7 +347,15 @@ fn run() {
                 }
                 mv = legal_choice(&position, mv);
                 search.control().wait();
-                if let Some(credit) = search.control().ponder_credit() {
+                if let Some(mut credit) = search.control().ponder_credit() {
+                    // The position before the reply searched one ply more than its
+                    // children, so a matching go recovers one depth less
+                    if premove {
+                        credit.depth = (credit.depth - 1).max(1);
+                        credit.score = None;
+                        credit.deteriorating = false;
+                        credit.unstable = false;
+                    }
                     pondered = Some(Pondered {
                         position_words: position_words.clone(),
                         credit,

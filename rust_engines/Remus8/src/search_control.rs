@@ -101,6 +101,7 @@ pub struct SearchControl {
     longest: f64,
     search_started: Instant,
     pub was_ponder: bool,
+    pub stop_on_hit: bool, // The ponder search has the wrong root for a hit
     hit_time: Option<Instant>,
     pub nodes: u64,
     completed_depth: i32,
@@ -146,6 +147,7 @@ impl SearchControl {
             longest: f64::INFINITY,
             search_started: Instant::now(),
             was_ponder: false,
+            stop_on_hit: false,
             hit_time: None,
             nodes: 0,
             completed_depth: 0,
@@ -183,6 +185,7 @@ impl SearchControl {
         self.longest = longest;
         self.search_started = self.started;
         self.was_ponder = mode == Mode::Ponder;
+        self.stop_on_hit = false;
         self.hit_time = None;
         self.nodes = 0;
         self.completed_depth = 0;
@@ -231,6 +234,11 @@ impl SearchControl {
                     self.uncertain_hit =
                         self.hit_depth < SHALLOW_DEPTH || self.deteriorating || self.unstable;
                     self.log_search(&format!("ponderhit hit_nodes={}", self.hit_nodes));
+                    // A search of the position before the reply ends at the hit, and
+                    // the engine then searches the position the reply reached
+                    if self.stop_on_hit {
+                        self.stopped = true;
+                    }
                 }
             }
             Some("stop") => {
@@ -300,6 +308,24 @@ impl SearchControl {
         self.elapsed() > target
             && (!self.was_ponder
                 || (self.completed_depth >= self.credit_depth && self.hit_finished()))
+    }
+
+    /// Search the position a predicted reply reached, after a hit ended the ponder
+    /// search of the position before it. The new search first recovers one depth less
+    /// than the ponder search completed, and the ponder time still counts toward the
+    /// soft target. Scores of the earlier root belong to the other side, so the
+    /// signs of doubt start fresh.
+    pub fn continue_after_hit(&mut self) {
+        self.stopped = false;
+        self.stop_on_hit = false;
+        self.credit_depth = (self.hit_depth - 1).max(1);
+        self.hit_depth = self.credit_depth;
+        self.completed_depth = 0;
+        self.score = None;
+        self.score_depth = 0;
+        self.deteriorating = false;
+        self.unstable = false;
+        self.uncertain_hit = self.hit_depth < SHALLOW_DEPTH;
     }
 
     pub fn wait(&mut self) {

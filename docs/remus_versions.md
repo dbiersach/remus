@@ -58,10 +58,10 @@ three engines is true. Remus1 to Remus5 do not support pondering.
 | [Remus2](../Day%202%20-%20Remus2%20searches%20ahead/Remus2/Remus2.md) | 1840 | Class A player | Python | 300 | 1 | None | Not supported | No persistent logs |
 | [Remus3](../Day%203%20-%20Remus3%20adds%20the%20biggest%20gains/Remus3/Remus3.md) | 2086 | Expert | Python | 484 | 1 | 500 MiB | Not supported | No persistent logs |
 | [Remus4](../Day%204%20-%20Remus4%20adds%20everything%20else/Remus4/Remus4.md) | 2195 | Expert | Python | 630 | 1 | 500 MiB | Not supported | No persistent logs |
-| [Remus5](../rust_engines/Remus5/remus5.md) | 2897 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
+| [Remus5](../rust_engines/Remus5/remus5.md) | 2738 | Super Grandmaster | Rust | 1,849 | 1 | 512 MiB | Not supported | Set `SearchDiagnostics` = True |
 | [Remus6](../rust_engines/Remus6/remus6.md) | 2809 | Super Grandmaster | Rust | 2,893 | 1 | 512 MiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,268 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
-| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,877 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus7](../rust_engines/Remus7/remus7.md) | 3026 | Super Grandmaster | Rust | 3,312 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
+| [Remus8](../rust_engines/Remus8/remus8.md) | 3099 | Super Grandmaster | Rust | 3,921 | 16 | 2 GiB | Set `Ponder` = True | Set `SearchDiagnostics` or `PonderDiagnostics` = True |
 
 Estimated Elo and human-level labels summarize the recorded benchmarks, not human
 FIDE ratings. See
@@ -283,11 +283,10 @@ ponder searches bypass the service.
 
 Pondering searches during the opponent's turn. When pondering is enabled in
 Lucas Chess, Remus6 to Remus8 start that search after `go ponder`. If the opponent
-plays the predicted move, a ponder hit starts the engine's move clock. Remus6
-ponders on the position before the predicted reply, so its table holds a search of
-every reply the opponent can choose; after a hit it searches the reached position
-from that table. Remus7 and Remus8 ponder on the position after the predicted reply
-and continue that search after a hit. The engine
+plays the predicted move, a ponder hit starts the engine's move clock. All three
+ponder on the position before the predicted reply, so the table holds a search of
+every reply the opponent can choose; after a hit the engine searches the reached
+position from that table. The engine
 checks book moves for legality. Book pondering waits without claiming native
 search credit. See each engine guide for time-budget details and supported options.
 
@@ -538,7 +537,7 @@ FIDE gives titles only to people, so no engine can earn one. The ratings in the
 [engine table](#engine-defaults-and-total-lines-of-code-tloc) summarize the benchmark described
 here; they are not human FIDE ratings or expected results for a workshop test. The class labels are numerical comparisons only;
 sharing a number does not establish equivalent strength against people. Remus2, Remus3,
-Remus4, and Remus5 each played 200 games against Stockfish held to a set
+and Remus4 each played 200 games against Stockfish held to a set
 strength (its UCI_Elo setting), at 15 minutes per side with no increment, half with
 White and half with Black, on one fast processor core per game. Each engine met
 Stockfish at six levels between 1320 and 2950, and its rating is the one that best
@@ -546,7 +545,7 @@ explains its score against those levels. The 27 games that Stockfish lost on tim
 are left out, because Stockfish ran out of time in long endgames whatever the
 position on the board.
 
-Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2831 to 2963; Remus6: 2697 to 2921; Remus7: 2815 to 3236; Remus8: 2900 to 3297.
+Reported 95% confidence intervals are Remus2: 1785 to 1895; Remus3: 2029 to 2143; Remus4: 2133 to 2257; Remus5: 2591 to 2885; Remus6: 2697 to 2921; Remus7: 2815 to 3236; Remus8: 2900 to 3297.
 
 Remus1's 300 figure is a rough estimate, not a fitted benchmark result. Random
 move choice does not guarantee a loss in every game.
@@ -563,15 +562,16 @@ and a larger table. Equal-time searches can choose different moves. The rating g
 in this benchmark does not isolate speed, table capacity, or any one enhancement,
 and does not establish a strength difference against human players.
 
-Remus6 played 50 games against limited-strength Stockfish at 15 minutes per side
-with no increment: 10 at each of 2500, 2650, 2800, 2950, and 3100, half with each
-color. It searches on one thread, so it played eight games at once, each on its own
+Remus5 and Remus6 played against limited-strength Stockfish at 15 minutes per side
+with no increment at 2500, 2650, 2800, 2950, and 3100, half with each color:
+Remus6 played 50 games, 10 at each level, and Remus5 played 29, five to seven at
+each level. Each searches on one thread, so each played eight games at once, each on its own
 fast core shared with that game's Stockfish, as in the 200-game runs. A full-strength
 Stockfish judge on the slow cores ended a game when one side stayed ten pawns ahead
 for three looks in a row or the score stayed level late in the game, and it scored
 the final position of any time forfeit; the limited Stockfish players used a 200 ms
 Move Overhead, and none lost on time. Remus6 pondered on Stockfish's time and used
-its default root tablebase lookups.
+its default root tablebase lookups; Remus5 offers neither.
 
 Remus7 and Remus8 each played 20 games under the same time control, with pondering
 and tablebase lookups. They used a 2048 MiB table and 16
@@ -593,8 +593,8 @@ registered student engines exercise the typed code only for the positions reache
 
 Remus5 is the Rust implementation of workshop Remus4: one search thread and the
 Remus4 evaluation. Remus8 adds 16 search threads, a 2048 MiB table, pondering,
-tablebase lookups, and positional evaluation, yet it measures only about 200 Elo
-higher, 3099 against 2897. Three effects keep the gap that small.
+tablebase lookups, and positional evaluation, yet it measures only about 360 Elo
+higher, 3099 against 2738. Three effects keep the gap that small.
 
 The first is the diminishing return from deeper search. Each doubling of search
 speed buys roughly 50 to 70 Elo at these depths, and less as the search gets deeper.
@@ -602,7 +602,7 @@ Sixteen threads do not search 16 times faster, because parallel alpha-beta spend
 work on positions that a single thread would cut off. A speedup of 5 to 8 times is
 typical, about three doublings, or roughly 150 to 200 Elo. The step from Python
 Remus4 to Rust Remus5 is more than 100 times faster, about seven doublings from a
-much shallower search, and it gains about 700 Elo.
+much shallower search, and it gains about 540 Elo, from 2195 to 2738.
 
 The second is that each extra feature adds only a little. Stockfish played the
 reply that Remus predicted for about 41% of Remus's moves, so pondering pays off
@@ -610,12 +610,14 @@ less than half the time. A larger table helps only until it holds the positions 
 search reaches: fixed-depth searches find nearly the same node counts with 512 MiB, 1 GiB,
 and 2 GiB tables. The evaluation sets the ceiling, because a deeper search finds
 the best move according to the engine's evaluation. The positional terms of Remus6
-to Remus8 are modest. Remus6 shows how close these effects run: it adds pondering,
-tablebase lookups, and the positional terms to a single thread, and its 2809 sits
-below Remus5's 2897, inside the 95% intervals of both engines.
+to Remus8 are modest. Remus6 shows how small these steps are: it adds pondering,
+tablebase lookups, the positional terms, and the speed techniques to a single
+thread, and its 2809 sits about 70 points above Remus5's 2738, inside the 95%
+intervals of both engines.
 
 The third is the measurement itself. Stockfish's UCI_Elo setting stops at 3190, and
-Remus8 scores 6 of 11 points at 2990 and above, so the ladder has
-little room above it. Twenty games give an interval of about 200 points on each
-side, against about 66 for 200 games. The intervals of Remus5, Remus7, and Remus8
-overlap, so the true gap between them could be near zero or near 400.
+Remus8 scores 6 of 11 points at 2990 and above, so the ladder has little room above
+it. Remus5's 29 judged games give an interval of about 150 points on each side and
+Remus8's 20 games about 200, against about 60 for 200 games. Combining the two
+intervals, the true gap between Remus5 and Remus8 lies anywhere from about 110 to
+610 points.

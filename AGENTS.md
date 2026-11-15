@@ -168,13 +168,12 @@ and wait for permission before starting it.
 11. Remus6, Remus7, and Remus8 support standard UCI pondering with a `Ponder` check
     option, default false. Return a legal predicted reply with `bestmove` when
     enabled, but search on the opponent's time only after `go ponder`. Keep
-    reading commands during search. In Remus7 and Remus8, `ponderhit` starts the
-    move clock without restarting the search. Remus6 ponders on the position
-    before the predicted reply, so its table covers every reply; `ponderhit` ends
-    that search, starts the move clock, and searches the reached position, which
-    must first recover one depth less than the pondered depth. Its credit after a
-    matching stop-and-go also counts one depth less and starts with no score or
-    signs of doubt. Completed ponder work counts toward the soft search target. A hit reserves a quarter of the adjusted plan on the engine clock,
+    reading commands during search. All three ponder on the position before the
+    predicted reply, so the table covers every reply; `ponderhit` ends that
+    search, starts the move clock, and searches the reached position, which must
+    first recover one depth less than the pondered depth. Credit after a matching
+    stop-and-go also counts one depth less and starts with no score or signs of
+    doubt. Completed ponder work counts toward the soft search target. A hit reserves a quarter of the adjusted plan on the engine clock,
     capped at a quarter of the hard budget; hard deadlines and cancellation take
     precedence. A matching explicit stop-and-go within two seconds earns credit
     after recovering the prior completed depth. Match complete position-command
@@ -594,6 +593,34 @@ palette entry; do not silently fall back to the Mermaid theme. Regenerate the
 `.mmd` sources and SVGs after palette or diagram changes, including SVG copies of
 inline diagrams, and verify node assignments and rendered fills. Preserve the
 archival snapshot in `.archive/` and third-party diagrams.
+
+### PDF typography and backgrounds
+
+- Keep an editable source and a shared style definition for every generated PDF.
+  Define the exact font files and weights, font sizes, baseline spacing (leading),
+  and paragraph spacing for each role: title, heading, body, caption, and table.
+  Text with the same role uses the same style throughout the document. Different
+  styles must serve a deliberate hierarchy, not compensate for a crowded box.
+- Embed the specified fonts and verify the exported font inventory. Never silently
+  substitute Arial or another family when editing text. If the original font is
+  unavailable, obtain it or agree on a consistent document-wide replacement first.
+- Reflow the layout or revise wording without losing meaning when text does not
+  fit. Never shrink one paragraph's font or tighten its leading just to fit a box.
+  Set and check baseline distances explicitly; a library's line-height setting
+  may include font metrics and differ from the requested spacing.
+- Prefer regenerating from the editable source over patching an exported PDF.
+  If only the PDF exists, preserve its artwork and replace text transparently.
+  Never hide old text with white rectangles or a single sampled background color
+  over a shadow, gradient, photograph, or textured background. Restore the actual
+  background if an earlier patch covered it; feathering a flat patch is not a repair.
+- Before delivery, reopen the final PDF and check embedded fonts, font sizes,
+  baseline spacing, text completeness, clipping, and overlap. Render every page
+  and inspect the whole page plus enlarged views of changed areas, especially
+  background transitions and neighboring text with the same role. Successful
+  export or text extraction alone does not establish visual correctness.
+- Rendering a PDF file for inspection is permitted terminal work. These checks
+  do not authorize desktop capture or computer control; the screen-access rule
+  still requires David's explicit request or permission.
 
 ### Dashes
 
