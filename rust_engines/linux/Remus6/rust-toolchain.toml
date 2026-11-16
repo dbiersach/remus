@@ -1,0 +1,4 @@
+# Native Linux builds use the stable Rust compiler.
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt"]

@@ -34,6 +34,7 @@
 
 # The one compiled engine, Remus4-Rust, is stored as it is.
 *.exe binary
+/rust_engines/linux/Remus*/remus[5-8] binary
 
 # Preserve PDF bytes; never apply text line-ending conversion.
 *.pdf binary

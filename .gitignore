@@ -32,6 +32,9 @@ dist/
 /rust_engines/Remus*/logs/
 /rust_engines/Remus*/search_log.txt
 /rust_engines/Remus*/ponder_log.txt
+/rust_engines/linux/target/
+/rust_engines/linux/Remus*/target/
+/rust_engines/linux/Remus*/logs/
 
 # Designer tools, private generated code, hooks, and workflows stay local.
 /admin/
