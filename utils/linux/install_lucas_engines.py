@@ -1,8 +1,10 @@
 """install_lucas_engines.py
 
 Register the day-local Python engines and supplied Rust executables in Lucas Chess.
-Run directly with --lucas-dir or let the Linux student setup script call this
-helper. The supplied shell launchers are ready before student setup runs.
+Run directly or let the Linux student setup script call this helper. The default
+installation is ~/LucasChessR; a missing folder prompts for another location.
+Use --lucas-dir to select a location explicitly. The supplied shell launchers
+are ready before student setup runs.
 Registration does not install dependencies or remove student files.
 Run with Lucas Chess closed. Expect registration messages, then reopen External
 engines to see Remus1 to Remus8. Registration checks paths, not chess behavior.
@@ -199,15 +201,44 @@ def register_engine(
     return True
 
 
+def find_lucas_folder(requested: Path | None) -> Path:
+    """Use an explicit folder, try ~/LucasChessR, or ask for a missing location."""
+    if requested is not None:
+        folder = requested.expanduser().resolve()
+        if not folder.is_dir():
+            sys.exit(f"Lucas Chess folder does not exist: {folder}")
+        return folder
+
+    folder = Path.home() / "LucasChessR"
+    if folder.is_dir():
+        return folder.resolve()
+    print(f"Lucas Chess was not found at {folder}")
+    while True:
+        try:
+            answer = input(
+                "Lucas Chess installation folder (blank to cancel): "
+            ).strip()
+        except EOFError, KeyboardInterrupt:
+            sys.exit("No folder selected. Run with --lucas-dir PATH to specify it.")
+        if not answer:
+            sys.exit("Canceled. No engine settings were changed.")
+        folder = Path(answer).expanduser().resolve()
+        if folder.is_dir():
+            return folder
+        print(f"Folder does not exist: {folder}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--lucas-dir", type=Path, required=True, help="Lucas installation folder"
+        "--lucas-dir",
+        type=Path,
+        help="Lucas installation folder (default: ~/LucasChessR)",
     )
     parser.add_argument("--config-dir", type=Path, help="Initialized __Config__ folder")
     arguments = parser.parse_args()
     remus_folder = Path(__file__).resolve().parents[2]
-    lucas_folder = arguments.lucas_dir.expanduser().resolve()
+    lucas_folder = find_lucas_folder(arguments.lucas_dir)
     if arguments.config_dir:
         config_folder = arguments.config_dir.expanduser().resolve()
     else:
