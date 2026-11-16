@@ -93,7 +93,7 @@ for number in 1 2 3 4; do
     relative=${days[0]#"$workshop_root/"}/Remus$number
     check_child "$relative"
     folder=$workshop_root/$relative
-    for name in "Remus$number.md" "remus$number.bat" "verify_remus$number.py"; do
+    for name in "Remus$number.md" "remus$number.bat" "remus$number.sh" "verify_remus$number.py"; do
         [[ -f $folder/$name ]] || fail "Missing supplied file: $folder/$name"
     done
     if ((number >= 2)); then
@@ -118,7 +118,7 @@ for path in "${cleanup_paths[@]}"; do
 done
 
 if $dry_run; then
-    printf '%s\n' 'Preview: require initialized, closed Lucas Chess; install extensions; run uv sync; build missing native Rust engines; create Linux launchers; register all eight engines; clean up this clone; delete this setup script.'
+    printf '%s\n' 'Preview: require initialized, closed Lucas Chess; install extensions; run uv sync; build missing native Rust engines; check supplied Linux launchers; register all eight engines; clean up this clone; delete this setup script.'
     for folder in "${engine_folders[@]}"; do
         printf 'Keep the guide, verifier, launchers, and supplied data in %s\n' "$folder"
     done
@@ -162,13 +162,6 @@ bash "$script_dir/build_linux_engines.sh" --missing-only
 for number in 1 2 3 4; do
     folder=${engine_folders[number-1]}
     check_child "${folder#"$workshop_root/"}/remus$number.sh"
-    cat > "$folder/remus$number.sh" <<'LAUNCHER'
-#!/usr/bin/env bash
-set -euo pipefail
-engine_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
-cd -- "$engine_dir"
-exec "$engine_dir/../../.venv/bin/python" "$engine_dir/uci.py" "$@"
-LAUNCHER
     chmod +x -- "$folder/remus$number.sh"
 done
 assert_lucas_closed

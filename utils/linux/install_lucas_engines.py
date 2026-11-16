@@ -1,6 +1,9 @@
 """install_lucas_engines.py
 
 Register the day-local Python engines and supplied Rust executables in Lucas Chess.
+Run directly with --lucas-dir or let the Linux student setup script call this
+helper. The supplied shell launchers are ready before student setup runs.
+Registration does not install dependencies or remove student files.
 Run with Lucas Chess closed. Expect registration messages, then reopen External
 engines to see Remus1 to Remus8. Registration checks paths, not chess behavior.
 Student pairs run their version's verifier before playing their Python engine.
